@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8">
-        <title>一个废柴的博客</title>
+        <title>关于 | 一个废柴的博客</title>
         <meta name="author" content="IceOfSummer">
         <meta name="description" content="">
         <meta name="keywords" content="">
@@ -98,35 +98,11 @@
     </div>
 </nav>
 
-                <div id="home-head">
-    <div id="home-background"></div>
-    
-    <div id="home-info" @click="homeclick">
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="info">
-            <div class="wrap">
-                <h1>一个废柴的博客</h1>
-                <h3>一时起兴搭建的博客</h3>
-                <h5></h5>
-            </div>
-        </span>
+                <div class="article">
+    <div>
+        <h1>关于 </h1>
     </div>
-    
-</div>
-<div id="home-posts-wrap" class="">
-    <div id="home-posts">
-        <div id="posts">
-            
-
-<div class="post">
-    <a href="/2023/03/04/SpringCloud/">
-        <h2 class="post-title">SpringCloud</h2>
-    </a>
-    <div class="category-and-date">
-        
+    <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
@@ -136,72 +112,27 @@
         
         
     </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <p><img src="https://xds.asia/public/SpringCloud/2023-2-6-5325609d-795f-4dce-8fe3-7fbc68d3cbd3.png" alt="avatar"></p>
-<p><a href="/SpringCloud/registry">注册中心</a></p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/2023/03/04/SpringCloud/" class="go-post">阅读全文</a>
-</div>
-
-
-            <div class="page-current">
-    <div class="prev">
-        
-    </div>
-    <div class="page-index">
-        
-        <span class="current">1</span>
-        
-    </div>
-    <div class="next">
-        
-    </div>
-</div>
-
-        </div>
-    </div>
     
-    <div id="home-card">
-        <div id="card-div">
-    <div class="card-style" style="width: 300px">
-        <div class="avatar">
-            <img src="/null" alt="avatar">
-        </div>
-        <div class="name">IceOfSummer</div>
-        <div class="description">
-            <p>Description<br>…</p>
-
-        </div>
-        
-        
-    </div>
-</div>
+    <div class="content" v-pre>
+        <p>我的旧博客：<a target="_blank" rel="noopener" href="https://www.notion.so/Study-2d5affb01e144dd380fa3a0e9c23430f">Study (notion.so)</a></p>
+<p>因为是老外的笔记软件，平常访问比较慢，甚至我家里的垃圾网还得挂梯子，所以打算自己搭建一个博客。</p>
+<p><strong>不过还是强力安利这款笔记软件(Notion)的，确实非常好用！</strong></p>
+<p>这里有我自己写的一些小工具&#x2F;项目：</p>
+<ul>
+<li><p>对象存储上传工具：<a target="_blank" rel="noopener" href="https://github.com/IceOfSummer/cos-client">IceOfSummer&#x2F;cos-client: 各大厂商对象存储服务访问工具 (github.com)</a> </p>
+<p>博客上传图片必备(除非你用的是Github啥的当图床)</p>
+</li>
+</ul>
 
     </div>
     
+    
+    
+    
+    
+    
+    
 </div>
-<script>
-  (() => {
-    const imageConfig = 'https://xds.asia/public/2023-2-6-8d14e464-2200-4e54-af81-0d9f25f55b3e.jpg,https://xds.asia/public/2023-2-0-017e03b0-992c-4844-b28f-869799d32b96.png,https://xds.asia/public/2023-2-0-66a241f4-eca3-45f3-b590-05aeed688f60.png'
-    if (!imageConfig) {
-      return
-    }
-    const images = imageConfig.split(',')
-    const bgElement = document.getElementById('home-background')
-    const val = `background-image: url("${images[Math.floor((Math.random() * images.length))]}")`
-    bgElement.setAttribute('style', val)
-  })();
-
-</script>
 
                 <footer id="footer">
     <div class="footer-wrap">
@@ -226,6 +157,11 @@
         </div>
         <script src="/js/functions.js"></script>
 <script src="/js/particlex.js"></script>
+
+
+
+
+
 
 
     </body>
