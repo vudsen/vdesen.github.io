@@ -3,12 +3,11 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8">
-        <title>一个废柴的博客</title>
+        <title>IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer">
-        <meta name="description" content="">
+        <meta name="description" content="用来用去还是自己搭的博客靠谱">
         <meta name="keywords" content="">
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-        <link rel="icon" href="/null">
         <script src="https://cdn.staticfile.org/vue/3.2.45/vue.global.prod.min.js"></script>
         <script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
         <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css">
@@ -38,7 +37,7 @@
                 <nav id="menu">
     <div class="desktop-menu">
         <a class="title" href="/">
-            <span>一个废柴的博客</span>
+            <span>ICEOFSUMMERの博客</span>
         </a>
         
         <a href="/">
@@ -61,7 +60,7 @@
         <div class="curtain" @click="menushow = !menushow" v-show="menushow"></div>
         <div class="title" @click="menushow = !menushow">
             <i class="fa-solid fa-bars fa-fw"></i>
-            <span>&emsp;一个废柴的博客</span>
+            <span>&emsp;ICEOFSUMMERの博客</span>
         </div>
         <transition name="slide">
         <div class="items" v-show="menushow">
@@ -108,9 +107,9 @@
         <span class="loop"></span>
         <span class="info">
             <div class="wrap">
-                <h1>一个废柴的博客</h1>
+                <h1>IceOfSummerの博客</h1>
                 <h3>一时起兴搭建的博客</h3>
-                <h5></h5>
+                <h5>用来用去还是自己搭的博客靠谱</h5>
             </div>
         </span>
     </div>
@@ -127,6 +126,15 @@
     </a>
     <div class="category-and-date">
         
+        <span class="category">
+            <a href="/categories/SpringCloud/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                SpringCloud
+            </a>
+        </span>
+        
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
@@ -139,8 +147,9 @@
     <div class="description">
         <div class="content" v-pre>
             
-            <p><img src="https://xds.asia/public/SpringCloud/2023-2-6-5325609d-795f-4dce-8fe3-7fbc68d3cbd3.png" alt="avatar"></p>
+            <p><img src="https://xds.asia/public/SpringCloud/2023-2-6-5325609d-795f-4dce-8fe3-7fbc68d3cbd3.png" alt="banner"></p>
 <p><a href="/SpringCloud/registry">注册中心</a></p>
+<p><a href="/SpringCloud/loadbalance">负载均衡</a></p>
 
             
         </div>
@@ -174,11 +183,11 @@
         <div id="card-div">
     <div class="card-style" style="width: 300px">
         <div class="avatar">
-            <img src="/null" alt="avatar">
+            <img src="https://xds.asia/avatar/1.webp" alt="avatar">
         </div>
         <div class="name">IceOfSummer</div>
         <div class="description">
-            <p>Description<br>…</p>
+            <p>这个人很懒，没有个人简介</p>
 
         </div>
         
@@ -191,7 +200,7 @@
 </div>
 <script>
   (() => {
-    const imageConfig = 'https://xds.asia/public/2023-2-6-8d14e464-2200-4e54-af81-0d9f25f55b3e.jpg,https://xds.asia/public/2023-2-0-017e03b0-992c-4844-b28f-869799d32b96.png,https://xds.asia/public/2023-2-0-66a241f4-eca3-45f3-b590-05aeed688f60.png'
+    const imageConfig = 'https://xds.asia/public/2023-2-6-8d14e464-2200-4e54-af81-0d9f25f55b3e.webp,https://xds.asia/public/2023-2-0-017e03b0-992c-4844-b28f-869799d32b96.webp,https://xds.asia/public/2023-2-0-66a241f4-eca3-45f3-b590-05aeed688f60.webp,https://xds.asia/public/2023-2-0-481f472f-e980-4cee-8ab8-ca66f5fd370a.webp'
     if (!imageConfig) {
       return
     }
@@ -207,7 +216,7 @@
     <div class="footer-wrap">
         <div>
             &copy;
-            2022 - 2023 一个废柴的博客
+            2022 - 2023 IceOfSummerの博客
             <span class="footer-icon">
                 <i class="fa-solid fa-font-awesome fa-fw"></i>
             </span>

@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8">
-        <title>SpringCloud | IceOfSummerの博客</title>
+        <title>Electron体积压缩 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer">
         <meta name="description" content="用来用去还是自己搭的博客靠谱">
         <meta name="keywords" content="">
@@ -99,32 +99,52 @@
 
                 <div class="article">
     <div>
-        <h1>SpringCloud </h1>
+        <h1>Electron体积压缩 </h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2023/3/4
-        </span>
-        
-        <span class="category">
-            <a href="/categories/SpringCloud/">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                SpringCloud
-            </a>
+            2023/3/5
         </span>
         
         
     </div>
     
     <div class="content" v-pre>
-        <p><img src="https://xds.asia/public/SpringCloud/2023-2-6-5325609d-795f-4dce-8fe3-7fbc68d3cbd3.png" alt="banner"></p>
-<p><a href="/SpringCloud/registry">注册中心</a></p>
-<p><a href="/SpringCloud/loadbalance">负载均衡</a></p>
+        <p>打包前的体积有148MB。</p>
+<h2 id="删除多余的语言文件"><a href="#删除多余的语言文件" class="headerlink" title="删除多余的语言文件"></a>删除多余的语言文件</h2><p>在程序安装后，目录下有一个<code>locales</code>文件夹，可以发现里面有很多<code>.pak</code>语言文件，总体积达到了20多MB，很明显我们只需要中文的语言，即<code>zh-CN.pak</code>。</p>
+<p>在网上查了一下，可以通过添加一个hook函数<a target="_blank" rel="noopener" href="https://www.electron.build/configuration/configuration#afterpack">afterpack</a>来删除打包后的文件，具体配置如下：</p>
+<pre><code class="json">&#123;
+  &quot;productName&quot;: &quot;xxx&quot;,
+    ...
+  &quot;afterPack&quot;: &quot;./build/hooks/afterPack.js&quot;
+&#125;
+</code></pre>
+<p>如果你不知道配置文件里可以写什么，你可以打开<code>node_modules/app-builder-lib/out/configuration.d.ts</code>，里面的<code>Configuration</code>接口就是可以填的东西。</p>
+<p><code>afterPack.js</code>的内容为：</p>
+<pre><code class="js">//build/hooks/afterPack.js
+//参考 https://www.electron.build/configuration/configuration#afterpack
+exports.default = async function(context) &#123;
+  //console.log(context)
+  const fs = require(&#39;fs&#39;)
+  const localeDir = context.appOutDir + &#39;/locales/&#39;
+
+  fs.readdir(localeDir, function(err, files) &#123;
+    if (!(files &amp;&amp; files.length)) return
+    for (let i = 0, len = files.length; i &lt; len; i++) &#123;
+      const match = files[i].match(/zh-CN\.pak/) //只保留中文
+      if (match === null) &#123;
+        fs.unlinkSync(localeDir + files[i])
+      &#125;
+    &#125;
+  &#125;)
+&#125;
+</code></pre>
+<p>重新打包，体积减少了5MB左右。</p>
+<hr>
+<p>目前就只找到这些方法，Electron的体积还是有点坑的。。。</p>
 
     </div>
     
