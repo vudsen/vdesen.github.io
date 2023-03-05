@@ -2,7 +2,9 @@
 
 title: Eureka
 date: 2023-03-04 22:17:12
-tags:
+categories:
+  data:
+    - { name: "SpringCloud", path: "/2023/03/04/SpringCloud/" }
 
 ---
 
@@ -43,9 +45,5 @@ private DiscoveryClient discoveryClinet;
 
 可以使用 DiscoveryClient 来查看已经注册的服务信息，在使用前还需要给主类添加 `@EnableDiscoveryClient`注解
 
-```c++
-int a = 3;
 
-b = a;
-```
 

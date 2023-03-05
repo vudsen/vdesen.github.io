@@ -2,8 +2,9 @@
 
 title: Eureka
 date: 2023-03-04 22:17:12
-tags: 
-
+categories:
+  data:
+    - { name: "SpringCloud", path: "/2023/03/04/SpringCloud/" }
 ---
 
 [Consul by HashiCorp](https://www.consul.io/)

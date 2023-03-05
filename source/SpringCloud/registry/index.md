@@ -2,7 +2,9 @@
 layout: 注册中心
 title: 注册中心
 date: 2023-03-02 11:59:20
-tags:
+categories:
+  data:
+    - { name: "SpringCloud", path: "/2023/03/04/SpringCloud/" }
 ---
 
 - [Eureka](/SpringCloud/registry/eureka)

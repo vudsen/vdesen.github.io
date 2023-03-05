@@ -2,7 +2,9 @@
 
 title: Zookeeper
 date: 2023-03-04 22:17:12
-tags:
+categories:
+  data:
+    - { name: "SpringCloud", path: "/2023/03/04/SpringCloud/" }
 
 ---
 
@@ -39,7 +41,8 @@ spring:
 public class ApplicationContextConfig {
 
     @Bean
-    @LoadBalanced
+    // 这里是ribbon提供的负载均衡
+    @LoadBanalce
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
@@ -47,4 +50,4 @@ public class ApplicationContextConfig {
 }
 ```
 
-直接用服务名代替域名即可
+直接用服务名代替域名即可，大致流程和Eureka一样，只不过注册中心变为了Zookeeper了。
