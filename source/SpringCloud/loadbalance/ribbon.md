@@ -4,6 +4,9 @@ date: 2023-03-05 15:40
 categories:
   data:
     - { name: "SpringCloud", path: "/2023/03/04/SpringCloud/" }
+tags:
+  data:
+    - { name: "负载均衡", path: "/SpringCloud/loadbalance"}
 ---
 
 Spring Cloud Ribbon是基于Netflix Ribbon实现的一套<font color="red">客户端负载均衡的工具</font>。
@@ -11,6 +14,8 @@ Spring Cloud Ribbon是基于Netflix Ribbon实现的一套<font color="red">客�
 简单的说，Ribbon是Netflix发布的开源项目，主要功能是提供<font color="red">客户端的软件负载均衡算法和服务调用</font>。Ribbon客户端组件提供一系列完善的配置项如连接超时重试等。简单的说，就是在配置文件中列出Load Balancer(简称LB)后面所有的机器，Ribbon会自动的基于某种规则(如简单轮询，随机连接等)去连接这些机器。
 
 <font color="red">Ribbon目前已经进入维护模式(即只修Bug，不出新东西): [Netflix/ribbon(github.com)](https://github.com/Netflix/ribbon)</font>
+
+- [SpringCloudLoadbalancer](/SpringCloud/loadbalance/spring-cloud-loadbalancer.md)
 
 **负载均衡:**
 
@@ -103,4 +108,3 @@ public class OrderMain80 {
     }
 }
 ```
-

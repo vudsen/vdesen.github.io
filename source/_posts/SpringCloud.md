@@ -10,3 +10,5 @@ categories: SpringCloud
 [注册中心](/SpringCloud/registry)
 
 [负载均衡](/SpringCloud/loadbalance)
+
+[服务调用](/SpringCloud/service-invoke)

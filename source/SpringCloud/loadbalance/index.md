@@ -7,5 +7,7 @@ categories:
   
 ---
 
-[Spring Cloud Ribbon](/SpringCloud/loadbalance/ribbon)
+[Spring Cloud Ribbon](/SpringCloud/loadbalance/ribbon)<font color="red">(不常用，可能会有兼容性问题)</font>
+
+[Spring Cloud Loadbalancer](./spring-cloud-loadbalancer)
 
