@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8">
-        <title>SpringBoot | IceOfSummerの博客</title>
+        <title>Hystrix | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer">
         <meta name="description" content="用来用去还是自己搭的博客靠谱">
         <meta name="keywords" content="">
@@ -99,32 +99,49 @@
 
                 <div class="article">
     <div>
-        <h1>SpringBoot </h1>
+        <h1>Hystrix </h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2023/3/5
+            2023/3/7
         </span>
         
         <span class="category">
-            <a href="/2023/03/05/JavaInterview">
+            <a href="/2023/03/04/SpringCloud/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
-                Java面试
+                SpringCloud
             </a>
         </span>
         
         
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/SpringCloud/service-degradation" style="color: #ff7d73">服务降级</a>
+            </span>
+            
+        </span>
+        
     </div>
     
     <div class="content" v-pre>
-        <ul>
-<li><a href="/JavaInterview/SpringBoot/conditional">@Conditional接口</a></li>
-</ul>
+        <p><font color="red">Hystrix目前已经进入维护模式</font></p>
+<h1 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h1><p>导入依赖：</p>
+<pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-netflix-hystrix&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>配置文件和基础的服务提供者一样。</p>
 
     </div>
     

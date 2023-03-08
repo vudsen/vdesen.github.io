@@ -1,0 +1,450 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <title>HashMap源码 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer">
+        <meta name="description" content="用来用去还是自己搭的博客靠谱">
+        <meta name="keywords" content="">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+        <script src="https://cdn.staticfile.org/vue/3.2.45/vue.global.prod.min.js"></script>
+        <script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css">
+        <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.2.1/css/all.min.css">
+        
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+        
+        
+        
+        <link rel="stylesheet" href="/css/fonts.min.css">
+        <link rel="stylesheet" href="/css/particlex.css">
+    <meta name="generator" content="Hexo 6.3.0"></head>
+    <body>
+        <div id="loading" style="height: 100vh; width: 100vw; left: 0; top: 0; position: fixed; display: flex; z-index: 2147483647; background: #fff; transition: opacity 0.3s ease-out; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; pointer-events: none">
+    <div style="width: 50vmin; height: 50vmin; margin: auto; padding: 50px; border-radius: 50%; display: flex; border: solid 10px #a3ddfb">
+        <div style="margin: auto; text-align: center">
+            <h2>LOADING</h2>
+            <p>加载过慢请开启缓存，浏览器默认开启</p>
+            <img src="/images/loading.gif" style="height: 50px; border-radius: 0">
+        </div>
+    </div>
+</div>
+
+        <div id="layout">
+            <transition name="into">
+            <div id="main" v-show="showpage" style="display: -not-none">
+                <nav id="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+    </div>
+    <div :class="&quot;phone-menu &quot; + menushow" id="phone-menu">
+        <div class="curtain" @click="menushow = !menushow" v-show="menushow"></div>
+        <div class="title" @click="menushow = !menushow">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="menushow">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>HashMap源码 </h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/3/7
+        </span>
+        
+        <span class="category">
+            <a href="/2023/03/05/java-source/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                Java源码
+            </a>
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/2023/03/05/java-source#Java" style="color: #ff7d73">Java</a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <p>HashMap在jdk8前是由数组+链表实现的，也就是数据结构上非常经典的实现操作：</p>
+<p>假如元素的的哈希值为<code>hash</code>，数组长度为<code>len</code>，那么该元素应该放在<code>hash % len</code>处</p>
+<ul>
+<li>若该位置没有元素，则直接放进去</li>
+<li>若该位置有元素，则直接将该元素放到链表后(如果该元素不是链表则要新建一个链表)</li>
+</ul>
+<p>在jdk8中，若链表过长，则会将链表转换为红黑树(本篇不讲红黑树原理，因为我也不会2333，只需要知道是一个平衡树即可，搜索效率一般为<code>log(n)</code>。</p>
+<p>接下来我将根据自己的理解，一步一步阅读HashMap源码(我使用的是jdk11，与java8应该不会有太大差距)。</p>
+<h1 id="1-构造器"><a href="#1-构造器" class="headerlink" title="1. 构造器"></a>1. 构造器</h1><p>HashMap有四个构造器：</p>
+<pre><code class="java">public HashMap(int initialCapacity, float loadFactor) &#123;
+    if (initialCapacity &lt; 0)
+        throw new IllegalArgumentException(&quot;Illegal initial capacity: &quot; +
+                                           initialCapacity);
+    if (initialCapacity &gt; MAXIMUM_CAPACITY)
+        initialCapacity = MAXIMUM_CAPACITY;
+    if (loadFactor &lt;= 0 || Float.isNaN(loadFactor))
+        throw new IllegalArgumentException(&quot;Illegal load factor: &quot; +
+                                           loadFactor);
+    this.loadFactor = loadFactor;
+    this.threshold = tableSizeFor(initialCapacity);
+&#125;
+
+public HashMap(int initialCapacity) &#123;
+    this(initialCapacity, DEFAULT_LOAD_FACTOR);
+&#125;
+
+public HashMap() &#123;
+    this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
+&#125;
+
+public HashMap(Map&lt;? extends K, ? extends V&gt; m) &#123;
+    this.loadFactor = DEFAULT_LOAD_FACTOR;
+    putMapEntries(m, false);
+&#125;
+</code></pre>
+<p>可以发现其中出现了两个属性：<code>loadFactor(负载因子)</code>和<code>threshold(扩容阈值)</code></p>
+<p>首先需要知道这样一个关系：<code>threshold = loadFactor * capacity</code></p>
+<p>其中<code>capacity</code>为整个Hash表数组长度，当<code>size(插入到HashMap中元素的个数) &gt; threshold</code>时，就会对HashMap进行扩容。</p>
+<p>可以发现，除了第四个构造器，其它3个其实都没有对Hash表数组进行初始化，只是设置了扩容阈值和负载因子而已。</p>
+<h2 id="1-1-tableSizeFor"><a href="#1-1-tableSizeFor" class="headerlink" title="1.1 tableSizeFor"></a>1.1 tableSizeFor</h2><p>第一个构造器中，在给threshold赋值前，还调用了tableSizeFor方法：</p>
+<pre><code class="java">// java11
+static final int tableSizeFor(int cap) &#123;
+    int n = -1 &gt;&gt;&gt; Integer.numberOfLeadingZeros(cap - 1);
+    return (n &lt; 0) ? 1 : (n &gt;= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+&#125;
+
+// java8
+static final int tableSizeFor(int cap) &#123;
+    int n = cap - 1;
+    //移位运算
+    n |= n &gt;&gt;&gt; 1;
+    n |= n &gt;&gt;&gt; 2;
+    n |= n &gt;&gt;&gt; 4;
+    n |= n &gt;&gt;&gt; 8;
+    n |= n &gt;&gt;&gt; 16;
+    return (n &lt; 0) ? 1 : (n &gt;= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+&#125;
+</code></pre>
+<p>具体可以看这篇文章：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/xiyixiaodao/p/14483876.html">HashMap之tableSizeFor方法图解 - 希夷小道 - 博客园 (cnblogs.com)</a></p>
+<p>这个方法的主要目的是返回一个最小的，并且大于等于<code>cap</code>的2次幂。</p>
+<p>为什么要二次幂呢？这里需要了解一个小知识：</p>
+<p>假设<code>k</code>为2的幂，那么对于任意一个数(非负)<code>m</code>，有：<code>m &amp; (k - 1) = m % k</code></p>
+<p>其实也不难理解，比如<code>10101(21)</code>对<code>1000(8)</code>取余，结果为5，很明显，对于<code>1000</code>左边(包括)所有的位，它都能够整除，因为都是2的幂，而对于右边不难整除，所以就一定是余数了，减一个1变成<code>0111</code>，再取并，就可以得到右边的余数了。</p>
+<p>在Java11中，主要通过<code>Integer.numberOfLeadingZeros</code>获取最高位1的左边有几个0，然后再对<code>-1</code>进行无符号位移得到结果：</p>
+<pre><code class="java">public static int numberOfLeadingZeros(int i) &#123;
+    // HD, Count leading 0&#39;s
+    if (i &lt;= 0)
+        return i == 0 ? 32 : 0;
+    int n = 31;
+        // 这里类似二分搜索
+    if (i &gt;= 1 &lt;&lt; 16) &#123; n -= 16; i &gt;&gt;&gt;= 16; &#125;
+    if (i &gt;= 1 &lt;&lt;  8) &#123; n -=  8; i &gt;&gt;&gt;=  8; &#125;
+    if (i &gt;= 1 &lt;&lt;  4) &#123; n -=  4; i &gt;&gt;&gt;=  4; &#125;
+    if (i &gt;= 1 &lt;&lt;  2) &#123; n -=  2; i &gt;&gt;&gt;=  2; &#125;
+    return n - (i &gt;&gt;&gt; 1);
+&#125;
+</code></pre>
+<h2 id="2-put"><a href="#2-put" class="headerlink" title="2. put"></a>2. put</h2><p><code>put</code>其实是调用了内部的<code>putVal</code>方法：</p>
+<pre><code class="java">public V put(K key, V value) &#123;
+    return putVal(hash(key), key, value, false, true);
+&#125;
+
+/**
+ * Implements Map.put and related methods.
+ *
+ * @param hash hash for key
+ * @param key the key
+ * @param value the value to put. 
+ * @param onlyIfAbsent if true, don&#39;t change existing value(如果为ture，当插入相同的key时不会进行替换)
+ * @param evict if false, the table is in creation mode(如果为false，表示哈希表为创建模式)
+ * @return previous value, or null if none
+ */
+final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+               boolean evict) &#123;
+        Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; int n, i;
+        // 在这里将哈希表赋值给tab
+        if ((tab = table) == null || (n = tab.length) == 0)
+            // 到这里表示hash表没有初始化，在这里进行扩容
+            n = (tab = resize()).length;
+        if ((p = tab[i = (n - 1) &amp; hash]) == null)
+            // 当前位置没有节点，直接插入
+            tab[i] = newNode(hash, key, value, null);
+        else &#123;
+            // 到这里说明当前位置有节点，p就是那个节点
+            // 这里的e代表：若有相同的key，则用变量e暂时保存下来，再根据onlyIfAbsent参数考虑是否替换
+            Node&lt;K,V&gt; e; K k;
+            if (p.hash == hash &amp;&amp;
+                ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))
+                // 相同的key，考虑是否替换
+                e = p;
+            else if (p instanceof TreeNode)
+                // p是一个树的根节点，把新节点插入到树里，该方法会返回之前的旧值，如果没有则返回null
+                e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(this, tab, hash, key, value);
+            else &#123;
+                // p链表头部，遍历到尾部后进行插入
+                for (int binCount = 0; ; ++binCount) &#123;
+                    if ((e = p.next) == null) &#123;
+                        p.next = newNode(hash, key, value, null);
+                        // **如果链表节点数量超过TREEIFY_THRESHOLD，则将链表进行树化，默认值为8**
+                        if (binCount &gt;= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                            treeifyBin(tab, hash);
+                        break;
+                    &#125;
+                    if (e.hash == hash &amp;&amp;
+                        ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))
+                        break;
+                    // 同理，出现相同的key，考虑进行替换
+                    p = e;
+                &#125;
+            &#125;
+            // 判断是否有旧值
+            if (e != null) &#123; // existing mapping for key
+                V oldValue = e.value;
+                if (!onlyIfAbsent || oldValue == null)
+                    // 进行替换
+                    e.value = value;
+                afterNodeAccess(e);
+                return oldValue;
+            &#125;
+        &#125;
+        ++modCount;
+        // 在这里判断总节点数是否超过阈值，若超过则进行扩容
+        if (++size &gt; threshold)
+            resize();
+        afterNodeInsertion(evict);
+        return null;
+&#125;
+</code></pre>
+<h1 id="3-resize"><a href="#3-resize" class="headerlink" title="3. resize"></a>3. resize</h1><pre><code class="java">final Node&lt;K,V&gt;[] resize() &#123;
+    // 首先保存好旧哈希表
+    Node&lt;K,V&gt;[] oldTab = table;
+    // 旧的容量
+    int oldCap = (oldTab == null) ? 0 : oldTab.length;
+    // 旧的阈值
+    int oldThr = threshold;
+    // 新的容量和阈值
+    int newCap, newThr = 0;
+    // 如果旧容量大于0，说明已经初始化过了
+    if (oldCap &gt; 0) &#123;
+        // 如果超过容量最大值，则不再进行扩容，即将扩容阈值设置为Int最大值
+        if (oldCap &gt;= MAXIMUM_CAPACITY) &#123;
+            threshold = Integer.MAX_VALUE;
+            return oldTab;
+        &#125;
+        // 这里将容量乘2，至于后面那个判断意义不是很明确，因为后面也有关于newThr的判断
+        else if ((newCap = oldCap &lt;&lt; 1) &lt; MAXIMUM_CAPACITY &amp;&amp;
+                 oldCap &gt;= DEFAULT_INITIAL_CAPACITY)
+            newThr = oldThr &lt;&lt; 1; // double threshold
+    &#125;
+    // 因为之前判断过oldCap是否大于0，所以到这里oldCap一定等于0，因此后面的判断都是去初始化哈希表的
+    else if (oldThr &gt; 0) // initial capacity was placed in threshold
+        newCap = oldThr;
+    else &#123;               // zero initial threshold signifies using defaults
+        // 旧阈值为0，标示使用了空参构造器，并且还没有初始化
+        newCap = DEFAULT_INITIAL_CAPACITY;
+        newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
+    &#125;
+    if (newThr == 0) &#123;
+        // 设置扩容阈值
+        float ft = (float)newCap * loadFactor;
+        // 防止超出上限
+        newThr = (newCap &lt; MAXIMUM_CAPACITY &amp;&amp; ft &lt; (float)MAXIMUM_CAPACITY ?
+                  (int)ft : Integer.MAX_VALUE);
+    &#125;
+    threshold = newThr;
+    @SuppressWarnings(&#123;&quot;rawtypes&quot;,&quot;unchecked&quot;&#125;)
+    Node&lt;K,V&gt;[] newTab = (Node&lt;K,V&gt;[])new Node[newCap];
+    table = newTab;
+    if (oldTab != null) &#123;
+        // 在这里重新计算hash，并将节点放到新的哈希表中
+        for (int j = 0; j &lt; oldCap; ++j) &#123;
+            Node&lt;K,V&gt; e;
+            if ((e = oldTab[j]) != null) &#123;
+                oldTab[j] = null;
+                // 如果当前节点只有一个，则直接将其移动
+                if (e.next == null)
+                    newTab[e.hash &amp; (newCap - 1)] = e;
+                // 如果当前节点为树节点，则重新建树
+                else if (e instanceof TreeNode)
+                    ((TreeNode&lt;K,V&gt;)e).split(this, newTab, j, oldCap);
+                else &#123; // preserve order
+                    // 到这里说明当前节点是有多个节点的链表
+                    // 这里lo代表低位，hi代表高位
+                    // 因为扩容只是将capacity左移了一位，因此对于一个节点及其子节点，它们最多分散到两个位置
+                    Node&lt;K,V&gt; loHead = null, loTail = null;
+                    Node&lt;K,V&gt; hiHead = null, hiTail = null;
+                    Node&lt;K,V&gt; next;
+                    do &#123;
+                        next = e.next;
+                        if ((e.hash &amp; oldCap) == 0) &#123;
+                            // 到这里说明这个节点在哈希表的位置没有变，这里为什么是用哈希值和旧容量相并判断的呢？
+                            // 因为在前面说过了，造成位置变化的唯一原因是capacity左移了一位，而我们取索引是通过hash &amp; (capacity - 1)来获得的
+                            // 所以只要在旧hash的最高位1的位置，oldCap这一位也是1，说明扩容后索引一定发生了变化
+                            // 例如旧长度为10000(16)，最高位1在第五个，对于1011010(hex)，由于它的第五位也是1，说明新hash肯定会发生变化
+                            // 新长度为100000(32)，减一后为011111(31)，后4位我们不用管，只用管第五位，和hash取并后会产生新索引。
+                            if (loTail == null)
+                                loHead = e;
+                            else
+                                loTail.next = e;
+                            loTail = e;
+                        &#125;
+                        else &#123;
+                            if (hiTail == null)
+                                hiHead = e;
+                            else
+                                hiTail.next = e;
+                            hiTail = e;
+                        &#125;
+                    &#125; while ((e = next) != null);
+                    // 插入链表
+                    if (loTail != null) &#123;
+                        loTail.next = null;
+                        newTab[j] = loHead;
+                    &#125;
+                    if (hiTail != null) &#123;
+                        hiTail.next = null;
+                        newTab[j + oldCap] = hiHead;
+                    &#125;
+                &#125;
+            &#125;
+        &#125;
+    &#125;
+    return newTab;
+&#125;
+</code></pre>
+<p>扩容大致流程如下：</p>
+<p>​	- 首先判断数是否初始化(即判断oldCap是否大于0)，如果大于0并且没有超出扩容限制，则进行扩容</p>
+<p>​	- 若oldCap为0，并且oldThr大于0，此时进行初始化，直接将哈希表容量设置为oldThr</p>
+<p>​	- 若上面两条都不满足，即oldCap为0，oldThr小于等于0，此时哈希表将会以默认容量初始化(16)</p>
+<p>之后则是重新hash了。</p>
+<p>在树的重hash中，也有一个重要参数*<code>UNTREEIFY_THRESHOLD</code>，*如果新树的节点数量小于等于该值，则会调用<code>TreeNode#untreeify</code>来链表化，这个阈值默认为6。<font color="red">这么设置主要是为了避免频繁的树化和链表化造成性能问题</font>。</p>
+<p>在java7中，链表的插入采用的是头插法，在多线程环境下会产生死链，在java8后，采用了尾插法，有效的解决了死链的问题。</p>
+<p>下面是java7的实现：</p>
+<pre><code class="java">void transfer(Entry[] newTable) &#123;
+    Entry[] src = table;
+    int newCapacity = newTable.length;
+    for (int j = 0; j &lt; src.length; j++) &#123;
+        Entry&lt;K,V&gt; e = src[j];
+        if (e != null) &#123;
+            src[j] = null;
+            do &#123;
+                Entry&lt;K,V&gt; next = e.next;
+                int i = indexFor(e.hash, newCapacity);
+                e.next = newTable[i];
+                newTable[i] = e;
+                e = next;
+            &#125; while (e != null);
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div class="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2023 IceOfSummerの博客
+            <span class="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;IceOfSummer
+        </div>
+        <div>Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp; <a target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a></div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            <div id="showimg">
+                <img id="showimg-content">
+            </div>
+        </div>
+        <script src="/js/functions.js"></script>
+<script src="/js/particlex.js"></script>
+
+
+
+
+
+
+
+    </body>
+</html>

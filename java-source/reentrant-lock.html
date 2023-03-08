@@ -1,0 +1,547 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <title>ReentrantLock源码 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer">
+        <meta name="description" content="用来用去还是自己搭的博客靠谱">
+        <meta name="keywords" content="">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+        <script src="https://cdn.staticfile.org/vue/3.2.45/vue.global.prod.min.js"></script>
+        <script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css">
+        <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.2.1/css/all.min.css">
+        
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+        
+        
+        
+        <link rel="stylesheet" href="/css/fonts.min.css">
+        <link rel="stylesheet" href="/css/particlex.css">
+    <meta name="generator" content="Hexo 6.3.0"></head>
+    <body>
+        <div id="loading" style="height: 100vh; width: 100vw; left: 0; top: 0; position: fixed; display: flex; z-index: 2147483647; background: #fff; transition: opacity 0.3s ease-out; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; pointer-events: none">
+    <div style="width: 50vmin; height: 50vmin; margin: auto; padding: 50px; border-radius: 50%; display: flex; border: solid 10px #a3ddfb">
+        <div style="margin: auto; text-align: center">
+            <h2>LOADING</h2>
+            <p>加载过慢请开启缓存，浏览器默认开启</p>
+            <img src="/images/loading.gif" style="height: 50px; border-radius: 0">
+        </div>
+    </div>
+</div>
+
+        <div id="layout">
+            <transition name="into">
+            <div id="main" v-show="showpage" style="display: -not-none">
+                <nav id="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+    </div>
+    <div :class="&quot;phone-menu &quot; + menushow" id="phone-menu">
+        <div class="curtain" @click="menushow = !menushow" v-show="menushow"></div>
+        <div class="title" @click="menushow = !menushow">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="menushow">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>ReentrantLock源码 </h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/3/8
+        </span>
+        
+        <span class="category">
+            <a href="/2023/03/05/java-source/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                Java源码
+            </a>
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/2023/03/05/java-source#Java" style="color: #00bcd4">Java</a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <p>关于<code>ReentrantLock</code>这里打算分两部分讲，第一部分则是<code>lock</code>和<code>unlock</code>的实现，第二部分则是<code>Condition</code>的实现。</p>
+<h1 id="1-基本内容"><a href="#1-基本内容" class="headerlink" title="1. 基本内容"></a>1. 基本内容</h1><p><img src="https://xds.asia/public/java-source/2023-2-3-12046ac9-cd7f-4b31-9c43-6f398f6a86a3.webp" alt="类继承图"></p>
+<p>对于<code>ReentrantLock</code>，你需要知道它里面有一个<font color="red">等待队列，也就是AQS</font>(<code>AbstractQueuedSynchronizer</code>)，<font color="red">这个队列只有“头部的节点”才有资格抢到锁！但这并不代表其它节点对应的线程不会被唤醒，这些线程只是没有抢锁的资格，在获取资格前抢锁永远失败。在这里需要注意：<strong>没有资格抢锁 !&#x3D; 没有机会被唤醒</strong>。</font></p>
+<p>上面对<font color="skyblue">头部的节点</font>打了引号，是因为在AQS中，头部的节点对应的线程并不是资格抢锁的线程线程，而是头结点的下一个节点对应的线程才具有抢锁的资格。至于为什么，相信把源码看完你也就能理解了。</p>
+<p>另外线程在入队之前也会尝试抢锁，如果抢到了就不会入队了，这就是公平锁和非公平锁的相关实现了，即只有非公平锁才能这么干，公平锁永远只能先入队，再抢锁。</p>
+<h2 id="1-1-构造器"><a href="#1-1-构造器" class="headerlink" title="1.1 构造器"></a>1.1 构造器</h2><pre><code class="java">/**
+ * Creates an instance of &#123;@code ReentrantLock&#125;.
+ * This is equivalent to using &#123;@code ReentrantLock(false)&#125;.
+ */
+public ReentrantLock() &#123;
+    sync = new NonfairSync();
+&#125;
+
+/**
+ * Creates an instance of &#123;@code ReentrantLock&#125; with the
+ * given fairness policy.
+ *
+ * @param fair &#123;@code true&#125; if this lock should use a fair ordering policy
+ */
+public ReentrantLock(boolean fair) &#123;
+    sync = fair ? new FairSync() : new NonfairSync();
+&#125;
+</code></pre>
+<p>可以通过构造器来设置锁是否为公平锁，默认为非公平锁</p>
+<p>公平锁和非公平锁的唯一区别就是公平锁多了一个判断条件：<code>hasQueuedPredecessors</code>。该方法主要用于判断公平锁加锁时等待队列中是否存在有效节点。</p>
+<pre><code class="java">// 公平锁
+@ReservedStackAccess
+protected final boolean tryAcquire(int acquires) &#123;
+    final Thread current = Thread.currentThread();
+    int c = getState();
+    if (c == 0) &#123;
+        // 公平只比非公平锁多了下面一个条件，其余和非公平锁一样。
+        if (!hasQueuedPredecessors() &amp;&amp;
+            compareAndSetState(0, acquires)) &#123;
+            setExclusiveOwnerThread(current);
+            return true;
+        &#125;
+    &#125;
+    else if (current == getExclusiveOwnerThread()) &#123;
+        int nextc = c + acquires;
+        if (nextc &lt; 0)
+            throw new Error(&quot;Maximum lock count exceeded&quot;);
+        setState(nextc);
+        return true;
+    &#125;
+    return false;
+&#125;
+</code></pre>
+<p>这里以非公平锁为例演示(两种就上面的区别，不用在意会差很多)</p>
+<h2 id="1-2-lock"><a href="#1-2-lock" class="headerlink" title="1.2 lock"></a>1.2 lock</h2><p><code>lock</code>方法主要调用了AQS中的<code>acquire</code>方法</p>
+<pre><code class="java">// 该方法是RentrantLock里的
+public void lock() &#123;
+    sync.acquire(1);
+&#125;
+
+// 该方法是AQS类里的
+public final void acquire(int arg) &#123;
+    if (!tryAcquire(arg) &amp;&amp;
+        acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+        selfInterrupt();
+&#125;
+</code></pre>
+<h3 id="1-2-1-tryAcquire"><a href="#1-2-1-tryAcquire" class="headerlink" title="1.2.1 tryAcquire"></a>1.2.1 tryAcquire</h3><p>调用子类的<code>tryAcquire</code>方法，该方法先尝试抢占锁(尝试将status从0设置为1)，若失败则继续判断</p>
+<pre><code class="java">static final class NonfairSync extends Sync &#123;
+    private static final long serialVersionUID = 7316153563782823691L;
+    protected final boolean tryAcquire(int acquires) &#123;
+        return nonfairTryAcquire(acquires);
+    &#125;
+&#125;
+
+final boolean nonfairTryAcquire(int acquires) &#123;
+    final Thread current = Thread.currentThread();
+    int c = getState();
+    // 判断当前锁状态是否为0(即没有线程占用)
+    if (c == 0) &#123;
+        // 尝试CAS获取锁
+        if (compareAndSetState(0, acquires)) &#123;
+            // 设置当前线程独占
+            setExclusiveOwnerThread(current);
+            return true;
+        &#125;
+    &#125;
+    // 判断当前线程是否早已持有锁
+    else if (current == getExclusiveOwnerThread()) &#123;
+        // 该值用来配合锁的重入，同一个线程每lock一次，该值加一
+        int nextc = c + acquires;
+        if (nextc &lt; 0) // overflow
+            throw new Error(&quot;Maximum lock count exceeded&quot;);
+        setState(nextc);
+        return true;
+    &#125;
+    return false;
+&#125;
+</code></pre>
+<h3 id="1-2-2-acquireQueued"><a href="#1-2-2-acquireQueued" class="headerlink" title="1.2.2 acquireQueued"></a>1.2.2 acquireQueued</h3><p>如果<code>tryAcquire</code>没有拿到锁，则会进入这一步，在此之前会调用<code>addWaiter</code>，将当前线程添加到等待队列的末尾。</p>
+<pre><code class="java">private Node addWaiter(Node mode) &#123;
+    Node node = new Node(mode);
+
+    for (;;) &#123;
+        // 尝试在队列尾部追加元素
+        Node oldTail = tail;
+        if (oldTail != null) &#123;
+            node.setPrevRelaxed(oldTail);
+            if (compareAndSetTail(oldTail, node)) &#123;
+                oldTail.next = node;
+                return node;
+            &#125;
+        &#125; else &#123;
+            // 队列为空，在头部初始化一个节点
+            initializeSyncQueue();
+        &#125;
+    &#125;
+&#125;
+
+private final void initializeSyncQueue() &#123;
+    Node h;
+    // 在这里把头部插入一个**虚拟**节点！
+    if (HEAD.compareAndSet(this, null, (h = new Node())))
+        tail = h;
+&#125;
+</code></pre>
+<p>然后调用<code>acquireQueued</code></p>
+<pre><code class="java">final boolean acquireQueued(final Node node, int arg) &#123;
+    boolean interrupted = false;
+    try &#123;
+        for (;;) &#123;
+            // 获取当前节点的前置节点
+            final Node p = node.predecessor();
+            // 如果前置节点为头节点，然后再尝试获取锁
+            if (p == head &amp;&amp; tryAcquire(arg)) &#123;
+                // **修改头部为当前节点**
+                setHead(node);
+                p.next = null; // help GC
+                return interrupted;
+            &#125;
+            if (shouldParkAfterFailedAcquire(p, node))
+                // 在这里将线程挂起(lock方法会忽略中断方法！如果需要响应中断，请调用lockInterruptly)
+                interrupted |= parkAndCheckInterrupt();
+        &#125;
+    &#125; catch (Throwable t) &#123;
+        // 若在加锁过程中发生错误，则需要调用该方法将当前节点删除
+        cancelAcquire(node);
+        if (interrupted)
+            selfInterrupt();
+        throw t;
+    &#125;
+&#125;
+
+// 在获取锁失败后是否应该挂起线程
+private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) &#123;
+    // 获取前一个节点的等待状态
+    int ws = pred.waitStatus;
+    if (ws == Node.SIGNAL)
+        /*
+         * This node has already set status asking a release
+         * to signal it, so it can safely park.
+         */
+        return true;
+    if (ws &gt; 0) &#123;
+        /*
+         * Predecessor was cancelled. Skip over predecessors and
+         * indicate retry.
+         */
+        do &#123;
+            node.prev = pred = pred.prev;
+        &#125; while (pred.waitStatus &gt; 0);
+        pred.next = node;
+    &#125; else &#123;
+        /*
+         * waitStatus must be 0 or PROPAGATE.  Indicate that we
+         * need a signal, but don&#39;t park yet.  Caller will need to
+         * retry to make sure it cannot acquire before parking.
+         */
+        pred.compareAndSetWaitStatus(ws, Node.SIGNAL);
+    &#125;
+    return false;
+&#125;
+</code></pre>
+<p>首先我们来介绍一下节点的<code>waitStatus</code>：</p>
+<pre><code class="java"> static final class Node &#123;
+     // ...
+
+     /** 表示当前节点已经被取消了，即放弃抢锁 */
+     static final int CANCELLED =  1;
+     /** 表示当前节点需要被挂起 */
+     static final int SIGNAL    = -1;
+     /** 表示当前节点已经被挂起，正在等待唤醒信号 */
+     static final int CONDITION = -2;
+     /**
+       * 指示下一次被获取的waitStatus值应无条件传播(机翻)
+       * waitStatus value to indicate the next acquireShared should
+       * unconditionally propagate.
+       */
+     static final int PROPAGATE = -3;
+
+     // ...
+ &#125;
+</code></pre>
+<p>当<code>waitStatus</code>为0时，表示当前节点正处于刚创建状态或初始化状态。</p>
+<p>那么关于<code>shouldParkAfterFailedAcquire</code>，节点第一次进来时，<code>waitStatus</code>一定是0，之后会在最后一个else被替换为<code>Node.SIGNAL</code>，之后如果还是抢锁失败，再调用该方法时会返回true，当前线程会被挂起。</p>
+<p>如果前一个节点的waitStatus大于0，说明当之前节点对应的线程被取消了，在这里需要将前面的节点删除掉。</p>
+<h2 id="1-3-unlock"><a href="#1-3-unlock" class="headerlink" title="1.3 unlock"></a>1.3 unlock</h2><pre><code class="java">public void unlock() &#123;
+    sync.release(1);
+&#125;
+
+// AQS的方法
+public final boolean release(int arg) &#123;
+    if (tryRelease(arg)) &#123;
+        // 这里获取了锁的Node一定是头节点！
+        // 锁释放成功了
+        Node h = head;
+        // 判断头结点非空，并且不是初始状态
+        if (h != null &amp;&amp; h.waitStatus != 0)
+            // 唤醒对应线程
+            unparkSuccessor(h);
+        return true;
+    &#125;
+    return false;
+&#125;
+
+// Sync类的方法
+protected final boolean tryRelease(int releases) &#123;
+    int c = getState() - releases;
+    // 如果锁不是当前线程持有，则抛出异常
+    if (Thread.currentThread() != getExclusiveOwnerThread())
+        throw new IllegalMonitorStateException();
+    boolean free = false;
+    // 如果c为0，则释放锁
+    if (c == 0) &#123;
+        free = true;
+        setExclusiveOwnerThread(null);
+    &#125;
+    setState(c);
+    return free;
+&#125;
+
+// AQS类的方法
+private void unparkSuccessor(Node node) &#123;
+    /*
+     * If status is negative (i.e., possibly needing signal) try
+     * to clear in anticipation of signalling.  It is OK if this
+     * fails or if status is changed by waiting thread.
+     */
+    int ws = node.waitStatus;
+    // 将waitStatus设置为0(该值大于0一般表示线程被中断了)
+    if (ws &lt; 0)
+        node.compareAndSetWaitStatus(ws, 0);
+
+    /*
+     * Thread to unpark is held in successor, which is normally
+     * just the next node.  But if cancelled or apparently null,
+     * traverse backwards from tail to find the actual
+     * non-cancelled successor.
+     */
+    Node s = node.next;
+    // 判断当前节点是否为空，或是是否已经被取消
+    if (s == null || s.waitStatus &gt; 0) &#123;
+        s = null;
+        // 从尾部遍历，获取可用被唤醒的线程
+        for (Node p = tail; p != node &amp;&amp; p != null; p = p.prev)
+            if (p.waitStatus &lt;= 0)
+                s = p;
+    &#125;
+    if (s != null)
+        // 唤醒线程
+        LockSupport.unpark(s.thread);
+&#125;
+</code></pre>
+<p>可以发现在释放锁后，<font color=red>头结点<strong>并没有被删除</strong>，而是将其状态重置为0了，即初始化状态</font>，此时可以将头结点理解为一个全新的虚拟节点。</p>
+<h2 id="1-4-cancelAcquire"><a href="#1-4-cancelAcquire" class="headerlink" title="1.4 cancelAcquire"></a>1.4 cancelAcquire</h2><p><code>cancelAcquire</code>将会在<code>acquireQueued</code>方法中出现异常时调用，如果在加锁时调用的时<code>lockInterruptibly</code>，那么在锁被中断时也会调用。</p>
+<p>内容很简单，就是一个简单的链表删除</p>
+<pre><code class="java">private void cancelAcquire(Node node) &#123;
+    // Ignore if node doesn&#39;t exist
+    if (node == null)
+        return;
+
+    node.thread = null;
+
+    // Skip cancelled predecessors.
+    Node pred = node.prev;
+    while (pred.waitStatus &gt; 0)
+        node.prev = pred = pred.prev;
+
+    // predNext is the apparent node to unsplice. CASes below will
+    // fail if not, in which case, we lost race vs another cancel
+    // or signal, so no further action is necessary, although with
+    // a possibility that a cancelled node may transiently remain
+    // reachable.
+    Node predNext = pred.next;
+
+    // Can use unconditional write instead of CAS here.
+    // After this atomic step, other Nodes can skip past us.
+    // Before, we are free of interference from other threads.
+    // 标记当前节点的状态为CANCELLED，即1
+    node.waitStatus = Node.CANCELLED;
+
+    // If we are the tail, remove ourselves.
+    // 如果是尾结点，则用CAS尝试删除
+    if (node == tail &amp;&amp; compareAndSetTail(node, pred)) &#123;
+        pred.compareAndSetNext(predNext, null);
+    &#125; else &#123;
+        // If successor needs signal, try to set pred&#39;s next-link
+        // so it will get one. Otherwise wake it up to propagate.
+        int ws;
+        // 尝试删除处于链表中间的节点
+        if (pred != head &amp;&amp;
+            ((ws = pred.waitStatus) == Node.SIGNAL ||
+             (ws &lt;= 0 &amp;&amp; pred.compareAndSetWaitStatus(ws, Node.SIGNAL))) &amp;&amp;
+            pred.thread != null) &#123;
+            Node next = node.next;
+            if (next != null &amp;&amp; next.waitStatus &lt;= 0)
+                pred.compareAndSetNext(predNext, next);
+        &#125; else &#123;
+            // 如果删除失败，则唤醒当前节点的后一个没有被取消的节点
+            unparkSuccessor(node);
+        &#125;
+
+        node.next = node; // help GC
+    &#125;
+&#125;
+</code></pre>
+<p>再来看一下<code>unparkSuccessor</code>，这个方法也在上面说了，主要用于唤起当前节点下一个waitStatus大于0的节点。</p>
+<pre><code class="java">private void unparkSuccessor(Node node) &#123;
+    /*
+         * If status is negative (i.e., possibly needing signal) try
+         * to clear in anticipation of signalling.  It is OK if this
+         * fails or if status is changed by waiting thread.
+         */
+    int ws = node.waitStatus;
+    if (ws &lt; 0)
+        node.compareAndSetWaitStatus(ws, 0);
+
+    /*
+         * Thread to unpark is held in successor, which is normally
+         * just the next node.  But if cancelled or apparently null,
+         * traverse backwards from tail to find the actual
+         * non-cancelled successor.
+         */
+    Node s = node.next;
+    // 找到下一个waitStatus小于等于0的节点并唤醒
+    if (s == null || s.waitStatus &gt; 0) &#123;
+        s = null;
+        for (Node p = tail; p != node &amp;&amp; p != null; p = p.prev)
+            if (p.waitStatus &lt;= 0)
+                s = p;
+    &#125;
+    if (s != null)
+        LockSupport.unpark(s.thread);
+&#125;
+</code></pre>
+<p>到这里你可能有个疑问，在<code>cancelAcquire</code>里有这样一串代码：</p>
+<pre><code class="java">int ws;
+if (pred != head &amp;&amp;
+    ((ws = pred.waitStatus) == Node.SIGNAL ||
+     (ws &lt;= 0 &amp;&amp; pred.compareAndSetWaitStatus(ws, Node.SIGNAL))) &amp;&amp;
+    pred.thread != null) &#123;
+    Node next = node.next;
+    if (next != null &amp;&amp; next.waitStatus &lt;= 0)
+        // 如果这里执行失败？
+        pred.compareAndSetNext(predNext, next);
+&#125; else &#123;
+    unparkSuccessor(node);
+&#125;
+</code></pre>
+<p>如果这一行if执行失败，那么我们的链表节点不就是没删掉吗？</p>
+<p>其实这里是想多了，还记得我们之前的<code>shouldParkAfterFailedAcquire</code>方法吗，这个方法就会去检查某个节点前面的节点是否被取消，如果被取消了，它就会负责去删除，我们在这里CAS失败，说明节点早就已经被删掉了。</p>
+<h2 id="1-5-总结"><a href="#1-5-总结" class="headerlink" title="1.5 总结"></a>1.5 总结</h2><p>最后用一张图总结一下吧：</p>
+<p><img src="https://xds.asia/public/java-source/2023-2-3-aa7d1ca2-677d-4c91-b6b4-411036b452c2.webp" alt="总结"></p>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div class="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2023 IceOfSummerの博客
+            <span class="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;IceOfSummer
+        </div>
+        <div>Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp; <a target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a></div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            <div id="showimg">
+                <img id="showimg-content">
+            </div>
+        </div>
+        <script src="/js/functions.js"></script>
+<script src="/js/particlex.js"></script>
+
+
+
+
+
+
+
+    </body>
+</html>

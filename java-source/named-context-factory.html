@@ -1,0 +1,366 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <title>NamedContextFactory使用与源码解读 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer">
+        <meta name="description" content="用来用去还是自己搭的博客靠谱">
+        <meta name="keywords" content="">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+        <script src="https://cdn.staticfile.org/vue/3.2.45/vue.global.prod.min.js"></script>
+        <script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css">
+        <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.2.1/css/all.min.css">
+        
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+        
+        
+        
+        <link rel="stylesheet" href="/css/fonts.min.css">
+        <link rel="stylesheet" href="/css/particlex.css">
+    <meta name="generator" content="Hexo 6.3.0"></head>
+    <body>
+        <div id="loading" style="height: 100vh; width: 100vw; left: 0; top: 0; position: fixed; display: flex; z-index: 2147483647; background: #fff; transition: opacity 0.3s ease-out; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; pointer-events: none">
+    <div style="width: 50vmin; height: 50vmin; margin: auto; padding: 50px; border-radius: 50%; display: flex; border: solid 10px #a3ddfb">
+        <div style="margin: auto; text-align: center">
+            <h2>LOADING</h2>
+            <p>加载过慢请开启缓存，浏览器默认开启</p>
+            <img src="/images/loading.gif" style="height: 50px; border-radius: 0">
+        </div>
+    </div>
+</div>
+
+        <div id="layout">
+            <transition name="into">
+            <div id="main" v-show="showpage" style="display: -not-none">
+                <nav id="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+    </div>
+    <div :class="&quot;phone-menu &quot; + menushow" id="phone-menu">
+        <div class="curtain" @click="menushow = !menushow" v-show="menushow"></div>
+        <div class="title" @click="menushow = !menushow">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="menushow">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>NamedContextFactory使用与源码解读 </h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/3/7
+        </span>
+        
+        <span class="category">
+            <a href="/2023/03/05/java-source/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                Java源码
+            </a>
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/2023/03/05/java-source#Spring-Cloud" style="color: #00bcd4">SpringCloud</a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <p>在OpenFeign中，我们可能用过如下配置:</p>
+<pre><code class="yaml">feign:
+  client:
+    config:
+      # 为每个服务单独配置超时时间
+      CLOUD-PAYMENT-SERVICE:
+        connect-timeout: 1
+        read-timeout: 1
+      CLOUD-QUERY-SERVICE:
+        connect-timeout: 5
+        read-timeout: 5
+</code></pre>
+<p>我们为了给每个服务单独配置超时时间等设置，需要在配置文件里这样配置。</p>
+<p>而这个东西的实现，和<code>NamedContextFactory</code>有脱不开的关系</p>
+<p>这个东西你可以先暂时这样理解：</p>
+<p>​	根据提供的服务名选择一个IOC容器，在这里就是每个服务都提供一个了IOC容器，然后我们在就可在各个容器里注册功能相同，但具体实现不同的类了。</p>
+<p>这么做的好处：</p>
+<ul>
+<li>子容器之间数据隔离。比如feign中每个Loadbalancer只管理自己的服务实例</li>
+<li>子容器之间配置隔离。比如我们上面分别配置了超时时间</li>
+</ul>
+<h1 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h1><p>下面的代码中，我们就实现了<code>service1</code>和<code>service2</code>两个容器：</p>
+<pre><code class="java">import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.context.named.NamedContextFactory;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.util.List;
+
+@Component
+@Slf4j
+public class NamedContextTest &#123;
+
+    @PostConstruct
+    public void init() &#123;
+        // 创建根context
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        // 注册一个基础配置，后面每个容器都能访问到
+        context.register(BaseConfig.class);
+        // 可以看做初始化的方法
+        context.refresh();
+        
+        // 这里我们自己实现的NamedContextFactory
+        MyNamedContextFactory client = new MyNamedContextFactory(ClientCommonConfig.class);
+
+        // 创建两个子容器, 第二个参数可以为子容器添加单独的配置
+        MySpecification service1 = new MySpecification(&quot;service1&quot;, new Class[0]);
+        MySpecification service2 = new MySpecification(&quot;service2&quot;, new Class[0]);
+        
+        // 设置根context
+        client.setApplicationContext(context);
+        // 把子容器加进去
+        client.setConfigurations(List.of(service1, service2));
+
+        BaseBean baseBean1 = client.getInstance(&quot;service1&quot;, BaseBean.class);
+        BaseBean baseBean2 = client.getInstance(&quot;service2&quot;, BaseBean.class);
+        log.info((baseBean1 == baseBean2) + &quot;\t&quot; + baseBean1 + &quot;\t&quot; + baseBean2);
+
+        ClientCommonBean commonBean1 = client.getInstance(&quot;service1&quot;, ClientCommonBean.class);
+        ClientCommonBean commonBean2 = client.getInstance(&quot;service2&quot;, ClientCommonBean.class);
+        log.info((commonBean1 == commonBean2) + &quot;\t&quot; + commonBean1 + &quot;\t&quot; + commonBean2);
+    &#125;
+
+    static class BaseConfig &#123;
+
+        @Bean
+        BaseBean baseBean() &#123;
+            return new BaseBean();
+        &#125;
+
+    &#125;
+
+    static class ClientCommonConfig &#123;
+
+        @Bean
+        ClientCommonBean clientCommonBean(Environment environment, BaseBean baseBean) &#123;
+            return new ClientCommonBean(environment.getProperty(MyNamedContextFactory.PROPERTY_NAME), baseBean);
+        &#125;
+
+    &#125;
+
+    public static class ClientCommonBean &#123;
+        private final String name;
+        private final BaseBean baseBean;
+
+        ClientCommonBean(String name, BaseBean baseBean) &#123;
+            this.name = name;
+            this.baseBean = baseBean;
+        &#125;
+
+        @Override
+        public String toString() &#123;
+            return &quot;ClientCommonBean&#123;&quot; +
+                    &quot;name=&#39;&quot; + name + &#39;\&#39;&#39; +
+                    &quot;, baseBean=&quot; + baseBean +
+                    &#39;&#125;&#39;;
+        &#125;
+    &#125;
+
+    static class BaseBean &#123;&#125;
+
+    static class MySpecification implements NamedContextFactory.Specification &#123;
+
+        private final String name;
+
+        private final Class&lt;?&gt;[] configurations;
+
+        public MySpecification(String name, Class&lt;?&gt;[] configurations) &#123;
+            this.name = name;
+            this.configurations = configurations;
+        &#125;
+
+        @Override
+        public String getName() &#123;
+            return name;
+        &#125;
+
+        @Override
+        public Class&lt;?&gt;[] getConfiguration() &#123;
+            return configurations;
+        &#125;
+    &#125;
+
+
+    static class MyNamedContextFactory extends NamedContextFactory&lt;MySpecification&gt; &#123;
+        private static final String PROPERTY_NAME = &quot;test.context.name&quot;;
+
+        public MyNamedContextFactory(Class defaultConfigType) &#123;
+            // 第一个参数也是为每个子容器提供相同的配置类，第二个就是一个名称
+            // 第三个代表每个容器的名字应该从哪个属性找
+            super(defaultConfigType, &quot;myNamedContextFactory&quot;, PROPERTY_NAME);
+        &#125;
+    &#125;
+
+&#125;
+</code></pre>
+<p>运行后输出：</p>
+<pre><code class="plainText">2023-03-07 20:08:18.238  INFO 20596 --- [           main] p.xds.springcloud.test.NamedContextTest  : true	pers.xds.springcloud.test.NamedContextTest$BaseBean@2571066a	pers.xds.springcloud.test.NamedContextTest$BaseBean@2571066a
+2023-03-07 20:08:18.242  INFO 20596 --- [           main] p.xds.springcloud.test.NamedContextTest  : false	ClientCommonBean&#123;name=&#39;service1&#39;, baseBean=pers.xds.springcloud.test.NamedContextTest$BaseBean@2571066a&#125;	ClientCommonBean&#123;name=&#39;service2&#39;, baseBean=pers.xds.springcloud.test.NamedContextTest$BaseBean@2571066a&#125;
+</code></pre>
+<p>可以发现给<code>context</code>注册的配置每个子容器都是一样的，给<code>client</code>声明的配置则是每个子容器独享的。</p>
+<p>可以发现我们的配置类是<font color="red">不需要</font>被注册进IOC容器里的，比如<code>BaseConfig</code>我们就没有注册(没有加<code>@Component</code>什么的)，正常情况下里面的bean是拿不到的。</p>
+<p>那么关于怎么去实现配置隔离呢？其实就可以直接在我们的<code>ClientCommonConfig</code>下手，可以发现我们能够在<code>Environment</code>拿到当前容器的名字，我们也可以根据名字拿到对应的配置(自动注入配置类)，然后单独设置对应的<code>ClientCommonConfig</code>！</p>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h2 id="1-getInstance"><a href="#1-getInstance" class="headerlink" title="1. getInstance"></a>1. getInstance</h2><p>其中一个比较重要的就是<code>getInstance</code>方法了:</p>
+<pre><code class="java">public &lt;T&gt; T getInstance(String name, Class&lt;T&gt; type) &#123;
+    AnnotationConfigApplicationContext context = this.getContext(name);
+
+    try &#123;
+        return context.getBean(type);
+    &#125; catch (NoSuchBeanDefinitionException var5) &#123;
+        return null;
+    &#125;
+&#125;
+
+protected AnnotationConfigApplicationContext getContext(String name) &#123;
+    if (!this.contexts.containsKey(name)) &#123;
+        synchronized(this.contexts) &#123;
+            if (!this.contexts.containsKey(name)) &#123;
+                this.contexts.put(name, this.createContext(name));
+            &#125;
+        &#125;
+    &#125;
+    // this.context是一个ConcurrentHashMap
+    return (AnnotationConfigApplicationContext)this.contexts.get(name);
+&#125;
+</code></pre>
+<p>这个很简单，就是根据<code>name</code>到Map中尝试获取对应的<code>Context</code>，然后再尝试获取对应的bean</p>
+<h2 id="2-配置类是怎么被注入的"><a href="#2-配置类是怎么被注入的" class="headerlink" title="2. 配置类是怎么被注入的"></a>2. 配置类是怎么被注入的</h2><p>我们在前面，会给容器注册一个<code>BaseConfig</code>，以及后面我们给<code>client</code>，以及每个子容器添加配置类时，都会发现这些类上并没有被加上<code>@Compnoent</code>或<code>@Configuration</code>这些类，但最后这些类还是被注入了，这里来研究一下是怎么实现的。</p>
+<p>先来看<code>AnnotationConfigApplicationContext#register</code>方法：</p>
+<pre><code class="java">@Override
+public void register(Class&lt;?&gt;... componentClasses) &#123;
+    Assert.notEmpty(componentClasses, &quot;At least one component class must be specified&quot;);
+    StartupStep registerComponentClass = this.getApplicationStartup().start(&quot;spring.context.component-classes.register&quot;)
+    .tag(&quot;classes&quot;, () -&gt; Arrays.toString(componentClasses));
+    this.reader.register(componentClasses);
+    registerComponentClass.end();
+&#125;
+</code></pre>
+<p>可以发现比较重要的一句是<code>this.reader.register(componentClasses)</code>，而这个render则是<code>AnnotatedBeanDefinitionReader</code>类，打开文档说明：</p>
+<blockquote>
+<p>Convenient adapter for programmatic registration of bean classes.<br>This is an alternative to ClassPathBeanDefinitionScanner, applying the same resolution of annotations but for explicitly registered classes only.</p>
+</blockquote>
+<p>大致意思就是方便我们用编程的方式注册bean。</p>
+<p>同样，后面的配置类也都是靠这个类来注册的，至于这个类怎么用：<a href="/">待补坑</a></p>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div class="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2023 IceOfSummerの博客
+            <span class="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;IceOfSummer
+        </div>
+        <div>Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp; <a target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a></div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            <div id="showimg">
+                <img id="showimg-content">
+            </div>
+        </div>
+        <script src="/js/functions.js"></script>
+<script src="/js/particlex.js"></script>
+
+
+
+
+
+
+
+    </body>
+</html>
