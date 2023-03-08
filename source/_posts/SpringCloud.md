@@ -12,3 +12,5 @@ categories: SpringCloud
 [负载均衡](/SpringCloud/loadbalance)
 
 [服务调用](/SpringCloud/service-invoke)
+
+[服务降级](/SpringCloud/service-degradation)

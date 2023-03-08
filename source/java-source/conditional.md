@@ -3,10 +3,10 @@ title: "@Conditional注解"
 date: 2023-03-05 23:27:12
 categories:
   data:
-    - { name: "Java面试", path: "/2023/03/05/JavaInterview" }
-tags:
+    - { name: "Java源码", path: "/2023/03/05/java-source/" }
+tags:	
   data:
-    - { name: "SpringBoot", path: "/JavaInterview/SpringBoot"}
+    - { name: 'SpringBoot', path: "/2023/03/05/java-source#Spring-Boot"}
 ---
 
 `@Conditional`的作用可以理解为满足一定条件就进行注入。

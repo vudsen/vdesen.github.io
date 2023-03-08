@@ -143,6 +143,7 @@ public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
     return getInstance(serviceId, ReactorServiceInstanceLoadBalancer.class);
 }
 
+// NamendContextFactory
 // getInstance：根据名称和类型获取bean
 public <T> T getInstance(String name, Class<T> type) {
     AnnotationConfigApplicationContext context = this.getContext(name);
@@ -155,8 +156,8 @@ public <T> T getInstance(String name, Class<T> type) {
 }
 ```
 
-如果要了解更多，请先查阅：[SpringCloud NamedContextFactory 原理与使用 - 简书 (jianshu.com)](https://www.jianshu.com/p/d1e478d5fddb)
+如果要了解更多，请先查阅：[NamendContextFactory的使用与源码](/java-source/named-context-factory)
 
 # 自定义负载均衡配置
 
-只需要通过注解**@LoadBalancerClient**或**@LoadBalancerClients**就可以轻松实现配置
+只需要通过注解`@LoadBalancerClient`或`@LoadBalancerClients`就可以轻松实现配置不同的负载均衡策略。
