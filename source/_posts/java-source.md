@@ -12,6 +12,12 @@ categories: "Java面试"
 
 
 
+# JVM
+
+[synchronized与锁升级](/java-source/synchronized)
+
+
+
 # Spring Boot
 
 [@Conditional的使用](/java-source/conditional)
@@ -21,3 +27,4 @@ categories: "Java面试"
 # Spring Cloud
 
 [NamedContextFactory使用与源码解读](/java-source/named-context-factory)
+

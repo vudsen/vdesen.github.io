@@ -14,3 +14,9 @@ categories: SpringCloud
 [服务调用](/SpringCloud/service-invoke)
 
 [服务降级](/SpringCloud/service-degradation)
+
+[服务网关](/SpringCloud/gateway)
+
+[配置中心](/SpringCloud/config-center)
+
+[服务总线](/SpringCloud/bus)
