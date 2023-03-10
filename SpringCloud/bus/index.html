@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8">
-        <title>Sentinel | IceOfSummerの博客</title>
+        <title>服务总线 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer">
         <meta name="description" content="用来用去还是自己搭的博客靠谱">
         <meta name="keywords" content="">
@@ -99,14 +99,14 @@
 
                 <div class="article">
     <div>
-        <h1>Sentinel </h1>
+        <h1>服务总线 </h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2023/3/7
+            2023/3/10
         </span>
         
         <span class="category">
@@ -126,7 +126,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/service-degradation" style="color: #03a9f4">服务降级</a>
+                <a href="/SpringCloud/bus" style="color: #ffa2c4">服务总线</a>
             </span>
             
         </span>
@@ -134,8 +134,9 @@
     </div>
     
     <div class="content" v-pre>
-        <p><a target="_blank" rel="noopener" href="https://sentinelguard.io/zh-cn/docs/quick-start.html">quick-start | Sentinel (sentinelguard.io)</a></p>
-<p><a target="_blank" rel="noopener" href="https://spring-cloud-alibaba-group.github.io/github-pages/2021/en-us/index.html#_spring_cloud_alibaba_sentinel">Spring Cloud Alibaba Reference Documentation (spring-cloud-alibaba-group.github.io)</a></p>
+        <p>在配置中心中，在配置被修改后，需要手动重启或者对客户端发送POST请求才能将配置刷新，这种操作粒度太大，几乎一次改动都要涉及到所有服务器。</p>
+<p>通过服务总线，可以实现配置的自动刷新。</p>
+<p><a href="springcloud-bus">SpringCloud Bus</a></p>
 
     </div>
     

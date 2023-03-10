@@ -1,0 +1,346 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <title>SpringCloud Gateway | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer">
+        <meta name="description" content="用来用去还是自己搭的博客靠谱">
+        <meta name="keywords" content="">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+        <script src="https://cdn.staticfile.org/vue/3.2.45/vue.global.prod.min.js"></script>
+        <script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css">
+        <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.2.1/css/all.min.css">
+        
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+        
+        
+        
+        <link rel="stylesheet" href="/css/fonts.min.css">
+        <link rel="stylesheet" href="/css/particlex.css">
+    <meta name="generator" content="Hexo 6.3.0"></head>
+    <body>
+        <div id="loading" style="height: 100vh; width: 100vw; left: 0; top: 0; position: fixed; display: flex; z-index: 2147483647; background: #fff; transition: opacity 0.3s ease-out; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; pointer-events: none">
+    <div style="width: 50vmin; height: 50vmin; margin: auto; padding: 50px; border-radius: 50%; display: flex; border: solid 10px #a3ddfb">
+        <div style="margin: auto; text-align: center">
+            <h2>LOADING</h2>
+            <p>加载过慢请开启缓存，浏览器默认开启</p>
+            <img src="/images/loading.gif" style="height: 50px; border-radius: 0">
+        </div>
+    </div>
+</div>
+
+        <div id="layout">
+            <transition name="into">
+            <div id="main" v-show="showpage" style="display: -not-none">
+                <nav id="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+    </div>
+    <div :class="&quot;phone-menu &quot; + menushow" id="phone-menu">
+        <div class="curtain" @click="menushow = !menushow" v-show="menushow"></div>
+        <div class="title" @click="menushow = !menushow">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="menushow">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>SpringCloud Gateway </h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/3/4
+        </span>
+        
+        <span class="category">
+            <a href="/2023/03/04/SpringCloud/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                SpringCloud
+            </a>
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/SpringCloud/gateway/" style="color: #ffa2c4">服务网关</a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <p><a target="_blank" rel="noopener" href="https://spring.io/projects/spring-cloud-gateway#overview">Spring Cloud Gateway</a></p>
+<p>SpringCloud Gateway作为Spring Cloud生态系统中的网关，目标是替代Zuul，在Spring Cloud 2.0以上版本中，没有对新版本的Zuul 2.0以上最新高性能版本进行集成，仍然还是使用的Zuul 1.x非Reactor模式的老版本。而为了提升网关的性能，SpringCloud Gateway是基于WebFlux框架实现的，而WebFlux框架底层则使用了高性能的Reactor模式通信框架Netty</p>
+<h1 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h1><p>Spring Cloud Gateway主要由三部分组成：</p>
+<ul>
+<li><p>Route(路由)：路由是构建网关的基本模块，它由ID，目标URI，一系列的断言和过滤器组成。</p>
+</li>
+<li><p>Predicate(断言)：参考<code>java.util.function.Predicate</code>，开发人员可以匹配HTTP请求中的所有内容，如果请求与断言相匹配则进行路由。</p>
+</li>
+<li><p>Filter(过滤)：指的是Spring框架中GatewayFilter的实例，使用过滤器，可以在请求被路由前或路由后进行修改。</p>
+</li>
+</ul>
+<p>web请求，通过一些匹配条件，定位到真正的服务节点。并在这个转发过程的前后，进行一些精细化控制。 </p>
+<p>predicate就是我们的匹配条件。而Filter，就可以理解为一个无所不能的拦截器。有了这两个元素，再加上目标URI，就可以实现一个具体的路由了.</p>
+<h1 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h1><p>导入依赖：</p>
+<pre><code class="java">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-gateway&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>注意不能导入<code>spring-boot-starter-web</code>，否则会报错。</p>
+<p>主启动类：</p>
+<pre><code class="java">@SpringBootApplication
+@EnableDiscoveryClient
+public class GatewayMain9527 &#123;
+
+    public static void main(String[] args) &#123;
+        SpringApplication.run(GatewayMain9527.class, args);
+    &#125;
+
+&#125;
+</code></pre>
+<h2 id="配置文件配置网关"><a href="#配置文件配置网关" class="headerlink" title="配置文件配置网关"></a>配置文件配置网关</h2><p>配置文件：</p>
+<pre><code class="yaml">server:
+  port: 9527
+spring:
+  application:
+    name: cloud-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: payment_routh # 路由的id
+          uri: http://localhost:8001 # 匹配后提供服务的路由地址
+          predicates:
+            - Path=/payment/get/** # 断言
+        - id: payment_routh2
+          uri: http://localhost:8001
+          predicates:
+            - Path=/payment/lb/**
+
+eureka:
+  instance:
+    hostname: cloud-gateway-service
+  client:
+    service-url:
+      register-with-eureka: true
+      fetch-registry: true
+      defaultZone: http://localhost:7001/eureka
+</code></pre>
+<p>之后就可以通过网络来访问相关的服务了，这个功能类似于Nginx。</p>
+<h2 id="代码配置网关"><a href="#代码配置网关" class="headerlink" title="代码配置网关"></a>代码配置网关</h2><p>除了使用配置文件，还可以通过代码的方式配置网关。</p>
+<pre><code class="java">@SpringBootApplication
+public class DemogatewayApplication &#123;
+    @Bean
+    public RouteLocator customRouteLocator(RouteLocatorBuilder builder) &#123;
+        return builder.routes()
+            .route(&quot;path_route&quot;, r -&gt; r.path(&quot;/get&quot;)
+                .uri(&quot;http://httpbin.org&quot;))
+            .route(&quot;host_route&quot;, r -&gt; r.host(&quot;*.myhost.org&quot;)
+                .uri(&quot;http://httpbin.org&quot;))
+            .route(&quot;rewrite_route&quot;, r -&gt; r.host(&quot;*.rewrite.org&quot;)
+                .filters(f -&gt; f.rewritePath(&quot;/foo/(?&lt;segment&gt;.*)&quot;, &quot;/$&#123;segment&#125;&quot;))
+                .uri(&quot;http://httpbin.org&quot;))
+            .route(&quot;hystrix_route&quot;, r -&gt; r.host(&quot;*.hystrix.org&quot;)
+                .filters(f -&gt; f.hystrix(c -&gt; c.setName(&quot;slowcmd&quot;)))
+                .uri(&quot;http://httpbin.org&quot;))
+            .route(&quot;hystrix_fallback_route&quot;, r -&gt; r.host(&quot;*.hystrixfallback.org&quot;)
+                .filters(f -&gt; f.hystrix(c -&gt; c.setName(&quot;slowcmd&quot;).setFallbackUri(&quot;forward:/hystrixfallback&quot;)))
+                .uri(&quot;http://httpbin.org&quot;))
+            .route(&quot;limit_route&quot;, r -&gt; r
+                .host(&quot;*.limited.org&quot;).and().path(&quot;/anything/**&quot;)
+                .filters(f -&gt; f.requestRateLimiter(c -&gt; c.setRateLimiter(redisRateLimiter())))
+                .uri(&quot;http://httpbin.org&quot;))
+            .build();
+    &#125;
+&#125;
+</code></pre>
+<h1 id="动态路由"><a href="#动态路由" class="headerlink" title="动态路由"></a>动态路由</h1><p>默认情况下Gateway会根据注册中心注册的服务列表，以注册中心上的微服务名为路径创建动态路由进行转发，从而实现动态路由的过程。</p>
+<p>修改配置文件为：</p>
+<pre><code class="yaml">server:
+  port: 9527
+spring:
+  application:
+    name: cloud-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          # 开启从注册中心动态创建路由的过程
+          enabled: true
+      routes:
+        - id: payment_routh # 路由的id
+          uri: lb://cloud-payment-service # 匹配后提供服务的路由地址
+          predicates:
+            - Path=/payment/get/** # 断言
+        - id: payment_routh2
+          uri: lb://cloud-payment-service
+          predicates:
+            - Path=/payment/lb/**
+
+eureka:
+  instance:
+    hostname: cloud-gateway-service
+  client:
+    service-url:
+      register-with-eureka: true
+      fetch-registry: true
+      defaultZone: http://localhost:7001/eureka
+</code></pre>
+<p>之后再正常方法，可以正常使用负载均衡，而且不用配置相关服务器URI</p>
+<h1 id="常用断言-Predicate"><a href="#常用断言-Predicate" class="headerlink" title="常用断言(Predicate)"></a>常用断言(Predicate)</h1><p><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-cloud-gateway/docs/current/reference/html/#gateway-request-predicates-factories">Spring Cloud Gateway - Route Predicate Factories</a></p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>After</td>
+<td>要求访问时间在指定日期之后. 可以通过ZonedDateTime类获取，同样的还有Before，Between</td>
+<td>- After&#x3D;2017-01-20T17:42:47.789-07:00[Asia&#x2F;Shanghai]</td>
+</tr>
+<tr>
+<td>Cookie</td>
+<td>限制用户的Cookie必须包含指定的K-V才能访问，Value可以使用正则表达式</td>
+<td>- Cookie&#x3D;chocolate, .+</td>
+</tr>
+<tr>
+<td>Header</td>
+<td>限制用户的请求头必须包含指定的K-V才能访问，Value可以使用正则表达式</td>
+<td>-Header&#x3D;X-Request-Id, \d+</td>
+</tr>
+</tbody></table>
+<h1 id="过滤器的使用"><a href="#过滤器的使用" class="headerlink" title="过滤器的使用"></a>过滤器的使用</h1><p><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-cloud-gateway/docs/current/reference/html/#gatewayfilter-factories"><code>GatewayFilter</code> Factories</a></p>
+<p>使用过滤器可以在请求被发送之前或请求发送之后都请求数据进行修改。</p>
+<h2 id="使用预设的请求头"><a href="#使用预设的请求头" class="headerlink" title="使用预设的请求头"></a>使用预设的请求头</h2><pre><code class="yaml">spring:
+    cloud:
+        routes:
+            - id: xxx
+              filters:
+              	# 过滤器工厂会在匹配的请求头上添加下面的键值对
+              	- AddRequestHeader=X-Request-Id,1024
+</code></pre>
+<h2 id="配置自定义的全局拦截器"><a href="#配置自定义的全局拦截器" class="headerlink" title="配置自定义的全局拦截器"></a>配置自定义的全局拦截器</h2><pre><code class="java">@Component
+@Order(0)
+@Slf4j
+public class MyLogGatewayFilter implements GlobalFilter &#123;
+    @Override
+    public Mono&lt;Void&gt; filter(ServerWebExchange exchange, GatewayFilterChain chain) &#123;
+        log.info(&quot;*******come in, log is here&quot;);
+        return chain.filter(exchange);
+    &#125;
+
+
+&#125;
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div class="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2023 IceOfSummerの博客
+            <span class="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;IceOfSummer
+        </div>
+        <div>Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp; <a target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a></div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            <div id="showimg">
+                <img id="showimg-content">
+            </div>
+        </div>
+        <script src="/js/functions.js"></script>
+<script src="/js/particlex.js"></script>
+
+
+
+
+
+
+
+    </body>
+</html>

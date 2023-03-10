@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8">
-        <title>Sentinel | IceOfSummerの博客</title>
+        <title>synchronized与锁升级 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer">
         <meta name="description" content="用来用去还是自己搭的博客靠谱">
         <meta name="keywords" content="">
@@ -99,22 +99,22 @@
 
                 <div class="article">
     <div>
-        <h1>Sentinel </h1>
+        <h1>synchronized与锁升级 </h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2023/3/7
+            2023/3/9
         </span>
         
         <span class="category">
-            <a href="/2023/03/04/SpringCloud/">
+            <a href="/2023/03/05/java-source/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
-                SpringCloud
+                Java源码
             </a>
         </span>
         
@@ -126,7 +126,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/service-degradation" style="color: #03a9f4">服务降级</a>
+                <a href="/2023/03/05/java-source#JVM" style="color: #ff7d73">JVM</a>
             </span>
             
         </span>
@@ -134,8 +134,40 @@
     </div>
     
     <div class="content" v-pre>
-        <p><a target="_blank" rel="noopener" href="https://sentinelguard.io/zh-cn/docs/quick-start.html">quick-start | Sentinel (sentinelguard.io)</a></p>
-<p><a target="_blank" rel="noopener" href="https://spring-cloud-alibaba-group.github.io/github-pages/2021/en-us/index.html#_spring_cloud_alibaba_sentinel">Spring Cloud Alibaba Reference Documentation (spring-cloud-alibaba-group.github.io)</a></p>
+        <p>首先我们都知道，synchronized对应了四种锁：</p>
+<p>无锁态 -&gt; 偏向锁 -&gt; 轻量级锁 -&gt; 重量级锁</p>
+<p>其中偏向锁在java15中移除，原因是CAS等无锁操作的运用，导致偏向锁带来的收益已不如过去那么明显，而且在当下多线程应用越来越普遍的情况下，偏向锁带来的锁升级操作反而会影响应用的性能。</p>
+<p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/374">JEP 374: Deprecate and Disable Biased Locking (openjdk.org)</a></p>
+<p>这里就分别讲一下这四种锁。</p>
+<h1 id="无锁态"><a href="#无锁态" class="headerlink" title="无锁态"></a>无锁态</h1><p>首先这里需要注意一点：<font color=red>无锁态只能升级为轻量级锁，不能升级为偏向锁</font>。</p>
+<p>听起来很扯淡，不过我们用代码验证一下。</p>
+<p>我们都知道Java会默认在4秒后启动偏向锁，这个可以用<code>BiasedLockingStartupDelay</code>参数控制，那么在4秒前的锁，在释放后，一定会是无锁态，这时候我们再尝试加锁，看看结果会怎样：</p>
+<pre><code class="java">public class JavaObjectDemo &#123;
+
+    static final Object lock = new Object();
+
+    public static void main(String[] args) throws InterruptedException &#123;
+        new Thread(() -&gt; &#123;
+           synchronized (lock) &#123;
+               System.out.println(ClassLayout.parseInstance(lock).toPrintable());
+               System.out.println(&quot;hello&quot;);
+           &#125;
+           System.out.println(ClassLayout.parseInstance(lock).toPrintable());
+        &#125;).start();
+
+        Thread.sleep(10000);
+        
+        // 因为有锁批量重偏向，如果偏向锁还有用，在第20次获取锁时就会进行批量重偏向，偏向后指向main线程
+        for (int i = 0; i &lt; 40; i++) &#123;
+            synchronized (lock) &#123;
+                System.out.println(ClassLayout.parseInstance(lock).toPrintable());
+            &#125;
+        &#125;
+    &#125;
+
+&#125;
+</code></pre>
+<p>运行后查看输出，可以发现全部都是轻量级锁，并没有发送锁的重偏向(重偏向在后面讲，这里你只需要知道偏向锁若升级次数过多就会偏向为另外一个新线程)。</p>
 
     </div>
     
