@@ -20,3 +20,13 @@ categories: SpringCloud
 [配置中心](/SpringCloud/config-center)
 
 [服务总线](/SpringCloud/bus)
+
+[消息驱动: SpringCloud Stream](/SpringCloud/springcloud-stream)
+
+[分布式请求链路追踪: SpringCloud Sleuth](/SpringCloud/springcloud-sleuth)
+
+[服务注册和配置中心：Nacos](/SpringCloud/nacos)
+
+---
+
+[版本说明 · alibaba/spring-cloud-alibaba Wiki (github.com)](https://github.com/alibaba/spring-cloud-alibaba/wiki/版本说明)

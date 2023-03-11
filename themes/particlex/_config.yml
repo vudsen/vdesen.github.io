@@ -115,17 +115,17 @@ gitalk:
 # Giscus
 # https://github.com/giscus/giscus
 giscus:
-    enable: false
+    enable: true
     src: https://giscus.app/client.js
-    repo:
-    repoID:
-    category:
-    categoryID:
-    mapping: pathname
+    repo: IceOfSummer/iceofsummer.github.io
+    repoID: R_kgDOJFU7OQ
+    category: Announcements
+    categoryID: DIC_kwDOJFU7Oc4CUyC7
+    mapping: title
     strict: 0
     reactionsEnabled: 1
     emitMetadata: 0
-    inputPosition: bottom
+    inputPosition: top
     theme: preferred_color_scheme
     lang: zh-CN
 

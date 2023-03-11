@@ -11,6 +11,8 @@ tags:
 
 Spring Cloud 2020版本以后，默认移除了对Netflix的依赖，其中就包括[Ribbon](https://so.csdn.net/so/search?q=Ribbon&spm=1001.2101.3001.7020)，官方默认推荐使用Spring Cloud Loadbalancer正式替换Ribbon，并成为了Spring Cloud负载均衡器的唯一实现。
 
+# 简单使用
+
 导入依赖:
 
 ```xml
@@ -18,6 +20,21 @@ Spring Cloud 2020版本以后，默认移除了对Netflix的依赖，其中就�
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-starter-loadbalancer</artifactId>
 </dependency>
+```
+
+添加配置类：
+
+```java
+@Configuration
+public class ApplicationContextConfig {
+
+    @Bean
+    @LoadBalanced
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
+}
 ```
 
 # 基本原理
