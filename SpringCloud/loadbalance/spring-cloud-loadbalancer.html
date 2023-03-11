@@ -126,7 +126,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/loadbalance" style="color: #00bcd4">负载均衡</a>
+                <a href="/SpringCloud/loadbalance" style="color: #00a596">负载均衡</a>
             </span>
             
         </span>
@@ -135,11 +135,23 @@
     
     <div class="content" v-pre>
         <p>Spring Cloud 2020版本以后，默认移除了对Netflix的依赖，其中就包括<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=Ribbon&spm=1001.2101.3001.7020">Ribbon</a>，官方默认推荐使用Spring Cloud Loadbalancer正式替换Ribbon，并成为了Spring Cloud负载均衡器的唯一实现。</p>
-<p>导入依赖:</p>
+<h1 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h1><p>导入依赖:</p>
 <pre><code class="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
     &lt;artifactId&gt;spring-cloud-starter-loadbalancer&lt;/artifactId&gt;
 &lt;/dependency&gt;
+</code></pre>
+<p>添加配置类：</p>
+<pre><code class="java">@Configuration
+public class ApplicationContextConfig &#123;
+
+    @Bean
+    @LoadBalanced
+    public RestTemplate restTemplate() &#123;
+        return new RestTemplate();
+    &#125;
+
+&#125;
 </code></pre>
 <h1 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h1><p>其基本原理如下：</p>
 <h3 id="1-RestTemplate"><a href="#1-RestTemplate" class="headerlink" title="1. RestTemplate"></a>1. RestTemplate</h3><p><code>RestTemplate</code>提供了一个<code>setInterceptors</code>方法，用于设置拦截器。</p>
@@ -258,6 +270,10 @@ public &lt;T&gt; T getInstance(String name, Class&lt;T&gt; type) &#123;
     
     
     
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
     
     
     
@@ -288,6 +304,24 @@ public &lt;T&gt; T getInstance(String name, Class&lt;T&gt; type) &#123;
 <script src="/js/particlex.js"></script>
 
 
+
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    data-loading="lazy"
+    crossorigin
+    async
+></script>
 
 
 

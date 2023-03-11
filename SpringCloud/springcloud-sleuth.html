@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8">
-        <title>SpringCloud | IceOfSummerの博客</title>
+        <title>SpringCloud Sleuth | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer">
         <meta name="description" content="用来用去还是自己搭的博客靠谱">
         <meta name="keywords" content="">
@@ -99,18 +99,18 @@
 
                 <div class="article">
     <div>
-        <h1>SpringCloud </h1>
+        <h1>SpringCloud Sleuth </h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2023/3/4
+            2023/3/11
         </span>
         
         <span class="category">
-            <a href="/categories/SpringCloud/">
+            <a href="/2023/03/04/SpringCloud/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
@@ -122,19 +122,31 @@
     </div>
     
     <div class="content" v-pre>
-        <p><img src="https://xds.asia/public/SpringCloud/2023-2-6-5325609d-795f-4dce-8fe3-7fbc68d3cbd3.png" alt="banner"></p>
-<p><a href="/SpringCloud/registry">注册中心</a></p>
-<p><a href="/SpringCloud/loadbalance">负载均衡</a></p>
-<p><a href="/SpringCloud/service-invoke">服务调用</a></p>
-<p><a href="/SpringCloud/service-degradation">服务降级</a></p>
-<p><a href="/SpringCloud/gateway">服务网关</a></p>
-<p><a href="/SpringCloud/config-center">配置中心</a></p>
-<p><a href="/SpringCloud/bus">服务总线</a></p>
-<p><a href="/SpringCloud/springcloud-stream">消息驱动: SpringCloud Stream</a></p>
-<p><a href="/SpringCloud/springcloud-sleuth">分布式请求链路追踪: SpringCloud Sleuth</a></p>
-<p><a href="/SpringCloud/nacos">服务注册和配置中心：Nacos</a></p>
-<hr>
-<p><a target="_blank" rel="noopener" href="https://github.com/alibaba/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E">版本说明 · alibaba&#x2F;spring-cloud-alibaba Wiki (github.com)</a></p>
+        <p>在微服务框架中，一个由客户端发起的请求在后端系统中会经过多个不同的服务节点调用来协同产生最后请求的结果，每一个前段请求都会形成一条复杂的分布式服务调用链路，链路中的任何一环出现高延迟或错误时都会引起整个请求最后的失败。</p>
+<p>在使用前需要下载zipkin，这是一个可视化图像界面，可以将Sleuth的结果展示出来：</p>
+<p><a target="_blank" rel="noopener" href="https://search.maven.org/remote_content?g=io.zipkin&a=zipkin-server&v=LATEST&c=exec">https://search.maven.org/remote_content?g=io.zipkin&amp;a=zipkin-server&amp;v=LATEST&amp;c=exec</a></p>
+<p>在Sleuth中，每条请求链路，都有一个唯一的TraceId、Span标识，每个Span通过parent id关联起来。</p>
+<p><img src="https://xds.asia/public/SpringCloud/2023-2-6-3f34fa6b-ab82-43ea-b82d-207cbe47ded2.webp" alt="链路图"></p>
+<h1 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h1><p>添加配置：</p>
+<pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-sleuth&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-sleuth-zipkin&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>配置文件添加：</p>
+<pre><code class="yaml">spring:
+  zipkin:
+    base-url: http://localhost:9411
+  sleuth:
+    sampler:
+      # 采样率. 介于0到1，使用1则是全部采集
+      probability: 1
+</code></pre>
+<p>之后进行请求，就可以在zipkin上看到了。</p>
 
     </div>
     

@@ -126,7 +126,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/bus" style="color: #ffa2c4">服务总线</a>
+                <a href="/SpringCloud/bus" style="color: #00a596">服务总线</a>
             </span>
             
         </span>
@@ -136,12 +136,19 @@
     <div class="content" v-pre>
         <p>在配置中心中，在配置被修改后，需要手动重启或者对客户端发送POST请求才能将配置刷新，这种操作粒度太大，几乎一次改动都要涉及到所有服务器。</p>
 <p>通过服务总线，可以实现配置的自动刷新。</p>
+<p><strong>什么是总线</strong></p>
+<p>​	在微服务架构的系统中，通常会使用<font color=red>轻量级的消息代理</font>来构建一个<font color=red>共用的消息主题</font>，并让系统中所有微服务实例都连接上来。由于该<font color=red>主题中产生的消息会被所有实例监听和消费</font>，所以称它为消息总线。在总线上的各个实例，都可以方便地广播─些需要让其他连接在该主题上的实例都知道的消息。</p>
+<hr>
 <p><a href="springcloud-bus">SpringCloud Bus</a></p>
 
     </div>
     
     
     
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
     
     
     
@@ -173,6 +180,24 @@
 <script src="/js/particlex.js"></script>
 
 
+
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    data-loading="lazy"
+    crossorigin
+    async
+></script>
 
 
 
