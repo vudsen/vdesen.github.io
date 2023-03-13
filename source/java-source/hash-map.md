@@ -111,7 +111,7 @@ public static int numberOfLeadingZeros(int i) {
 }
 ```
 
-## 2. put
+# 2. put
 
 `put`其实是调用了内部的`putVal`方法：
 
@@ -322,6 +322,36 @@ void transfer(Entry[] newTable) {
                 e = next;
             } while (e != null);
         }
+    }
+}
+```
+
+# 4. 其它
+
+## 4.1 treeifyBin
+
+链表树化的前提是哈希表的容量大于64：
+
+```java
+final void treeifyBin(Node<K,V>[] tab, int hash) {
+    int n, index; Node<K,V> e;
+    // 这里有一个判断
+    if (tab == null || (n = tab.length) < MIN_TREEIFY_CAPACITY)
+        resize();
+    else if ((e = tab[index = (n - 1) & hash]) != null) {
+        TreeNode<K,V> hd = null, tl = null;
+        do {
+            TreeNode<K,V> p = replacementTreeNode(e, null);
+            if (tl == null)
+                hd = p;
+            else {
+                p.prev = tl;
+                tl.next = p;
+            }
+            tl = p;
+        } while ((e = e.next) != null);
+        if ((tab[index] = hd) != null)
+            hd.treeify(tab);
     }
 }
 ```

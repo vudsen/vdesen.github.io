@@ -178,3 +178,7 @@ public <T> T getInstance(String name, Class<T> type) {
 # 自定义负载均衡配置
 
 只需要通过注解`@LoadBalancerClient`或`@LoadBalancerClients`就可以轻松实现配置不同的负载均衡策略。
+
+[Spring Cloud Loadbalancer源码解析和自定义负载均衡策略实现 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/501631014)
+
+[LoadBalancer集成Nacos实现负载均衡_Pymj的博客-CSDN博客](https://blog.csdn.net/apple_52109766/article/details/126669179)

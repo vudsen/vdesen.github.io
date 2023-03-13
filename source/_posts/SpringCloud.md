@@ -27,6 +27,8 @@ categories: SpringCloud
 
 [服务注册和配置中心：Nacos](/SpringCloud/nacos)
 
+[分布式事务：SpringCloud Alibaba Seata](/SpringCloud/springcloud-alibaba-seata)
+
 ---
 
 [版本说明 · alibaba/spring-cloud-alibaba Wiki (github.com)](https://github.com/alibaba/spring-cloud-alibaba/wiki/版本说明)
