@@ -126,7 +126,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#Java" style="color: #ffa2c4">Java</a>
+                <a href="/2023/03/05/java-source#Java" style="color: #ff7d73">Java</a>
             </span>
             
         </span>
@@ -211,7 +211,7 @@ static final int tableSizeFor(int cap) &#123;
     return n - (i &gt;&gt;&gt; 1);
 &#125;
 </code></pre>
-<h2 id="2-put"><a href="#2-put" class="headerlink" title="2. put"></a>2. put</h2><p><code>put</code>其实是调用了内部的<code>putVal</code>方法：</p>
+<h1 id="2-put"><a href="#2-put" class="headerlink" title="2. put"></a>2. put</h1><p><code>put</code>其实是调用了内部的<code>putVal</code>方法：</p>
 <pre><code class="java">public V put(K key, V value) &#123;
     return putVal(hash(key), key, value, false, true);
 &#125;
@@ -402,6 +402,29 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                 e = next;
             &#125; while (e != null);
         &#125;
+    &#125;
+&#125;
+</code></pre>
+<h1 id="4-其它"><a href="#4-其它" class="headerlink" title="4. 其它"></a>4. 其它</h1><h2 id="4-1-treeifyBin"><a href="#4-1-treeifyBin" class="headerlink" title="4.1 treeifyBin"></a>4.1 treeifyBin</h2><p>链表树化的前提是哈希表的容量大于64：</p>
+<pre><code class="java">final void treeifyBin(Node&lt;K,V&gt;[] tab, int hash) &#123;
+    int n, index; Node&lt;K,V&gt; e;
+    // 这里有一个判断
+    if (tab == null || (n = tab.length) &lt; MIN_TREEIFY_CAPACITY)
+        resize();
+    else if ((e = tab[index = (n - 1) &amp; hash]) != null) &#123;
+        TreeNode&lt;K,V&gt; hd = null, tl = null;
+        do &#123;
+            TreeNode&lt;K,V&gt; p = replacementTreeNode(e, null);
+            if (tl == null)
+                hd = p;
+            else &#123;
+                p.prev = tl;
+                tl.next = p;
+            &#125;
+            tl = p;
+        &#125; while ((e = e.next) != null);
+        if ((tab[index] = hd) != null)
+            hd.treeify(tab);
     &#125;
 &#125;
 </code></pre>
