@@ -1,0 +1,641 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <title>线程池 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer">
+        <meta name="description" content="用来用去还是自己搭的博客靠谱">
+        <meta name="keywords" content="">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+        <script src="https://cdn.staticfile.org/vue/3.2.45/vue.global.prod.min.js"></script>
+        <script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css">
+        <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.2.1/css/all.min.css">
+        
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+        
+        
+        
+        <link rel="stylesheet" href="/css/fonts.min.css">
+        <link rel="stylesheet" href="/css/particlex.css">
+    <meta name="generator" content="Hexo 6.3.0"></head>
+    <body>
+        <div id="loading" style="height: 100vh; width: 100vw; left: 0; top: 0; position: fixed; display: flex; z-index: 2147483647; background: #fff; transition: opacity 0.3s ease-out; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; pointer-events: none">
+    <div style="width: 50vmin; height: 50vmin; margin: auto; padding: 50px; border-radius: 50%; display: flex; border: solid 10px #a3ddfb">
+        <div style="margin: auto; text-align: center">
+            <h2>LOADING</h2>
+            <p>加载过慢请开启缓存，浏览器默认开启</p>
+            <img src="/images/loading.gif" style="height: 50px; border-radius: 0">
+        </div>
+    </div>
+</div>
+
+        <div id="layout">
+            <transition name="into">
+            <div id="main" v-show="showpage" style="display: -not-none">
+                <nav id="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+    </div>
+    <div :class="&quot;phone-menu &quot; + menushow" id="phone-menu">
+        <div class="curtain" @click="menushow = !menushow" v-show="menushow"></div>
+        <div class="title" @click="menushow = !menushow">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="menushow">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>线程池 </h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/3/17
+        </span>
+        
+        <span class="category">
+            <a href="/2023/03/05/java-source/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                Java源码
+            </a>
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/2023/03/05/java-source#Java" style="color: #03a9f4">Java</a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <blockquote>
+<p>本篇基于Java11</p>
+</blockquote>
+<h1 id="1-构造器"><a href="#1-构造器" class="headerlink" title="1. 构造器"></a>1. 构造器</h1><p>线程池的构造器很多，我们直接看参数最多的那一个：</p>
+<pre><code class="java">public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue&lt;Runnable&gt; workQueue,
+                              ThreadFactory threadFactory,
+                              RejectedExecutionHandler handler) &#123;
+    if (corePoolSize &lt; 0 ||
+        maximumPoolSize &lt;= 0 ||
+        maximumPoolSize &lt; corePoolSize ||
+        keepAliveTime &lt; 0)
+        throw new IllegalArgumentException();
+    if (workQueue == null || threadFactory == null || handler == null)
+        throw new NullPointerException();
+    this.corePoolSize = corePoolSize;
+    this.maximumPoolSize = maximumPoolSize;
+    this.workQueue = workQueue;
+    this.keepAliveTime = unit.toNanos(keepAliveTime);
+    this.threadFactory = threadFactory;
+    this.handler = handler;
+&#125;
+</code></pre>
+<ul>
+<li><p><code>corePoolSize</code>：线程池保存在线程池中的最低线程数，即使空闲也要保存这么多</p>
+</li>
+<li><p><code>maximumPoolSize</code>：线程池最大的线程数</p>
+</li>
+<li><p><code>keepAliveTime</code>：当线程数大于<code>corePoolSize</code>时，多余的线程多久后被清除</p>
+</li>
+<li><p><code>unit</code>：<code>keepAliveTime</code>的时间单位</p>
+</li>
+<li><p><code>workQueue</code>：保存任务的工作队列</p>
+</li>
+<li><p><code>threadFactory</code>：要创建新线程时使用的工厂类</p>
+</li>
+<li><p><code>handler</code>：当任务由于超出线程池容量而被阻拦时将会执行此拦截器</p>
+</li>
+</ul>
+<h2 id="1-1-拒绝策略"><a href="#1-1-拒绝策略" class="headerlink" title="1.1 拒绝策略"></a>1.1 拒绝策略</h2><p>在<code>ThreadPoolExecutor</code>里有如下4个默认拒绝策略(<code>RejectedExecutionHandler</code>)。</p>
+<ul>
+<li><code>CallerRunsPolicy</code>：如果线程池没有被关闭，则由当前线程执行(即提交任务的那个线程)</li>
+<li><code>AbortPolicy</code>：直接抛出一个<code>RejectedExecutionException</code></li>
+<li><code>DiscardPolicy</code>：直接丢弃，并且没有任何提示</li>
+<li><code>DiscardOldestPolicy</code>：丢弃任务队列中最早加入的一个任务，然后执行当前任务</li>
+</ul>
+<p>其中<code>AbortPolicy</code>为构造器中缺省时的默认值。</p>
+<h2 id="1-2-工作队列"><a href="#1-2-工作队列" class="headerlink" title="1.2 工作队列"></a>1.2 工作队列</h2><ul>
+<li><code>ArrayBlockingQueue</code>：一个基于数组结构的有界阻塞队列，此队列按 FIFO(先进先出)原则对元素进行排序。</li>
+<li><code>LinkedBlockingQueue</code>：一个基于链表结构的无界阻塞队列，此队列按FIFO (先进先出) 排序元素，吞吐量通常要高于ArrayBlockingQueue。静态工厂方法Executors.newFixedThreadPool()使用了这个队列。</li>
+<li><code>SynchronousQueue</code>：一个不存储元素的阻塞队列。每个插入操作必须等到另一个线程调用移除操作，否则插入操作一直处于阻塞状态，吞吐量通常要高于LinkedBlockingQueue，静态工厂方法Executors.newCachedThreadPool使用了这个队列。</li>
+<li><code>PriorityBlockingQueue</code>：一个具有优先级的无限阻塞队列。</li>
+</ul>
+<h1 id="2-ctl"><a href="#2-ctl" class="headerlink" title="2. ctl"></a>2. ctl</h1><p><code>ctl</code>是一个表示线程当前状态的原子整型：</p>
+<pre><code class="java">private final AtomicInteger ctl = new AtomicInteger(ctlOf(RUNNING, 0));
+</code></pre>
+<p>它的低29位为当前正在运行的线程数，高3位表示线程池的状态：</p>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th>源码</th>
+<th>状态位</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RUNNING</td>
+<td>-1 &lt;&lt; COUNT_BITS</td>
+<td>111</td>
+<td>线程池正在正常运行</td>
+</tr>
+<tr>
+<td>SHUTDOWN</td>
+<td>0 &lt;&lt; COUNT_BITS</td>
+<td>000</td>
+<td>线程池准备关闭，此时拒绝新的任务，在所有任务执行完后进入TIDYING状态</td>
+</tr>
+<tr>
+<td>STOP</td>
+<td>1 &lt;&lt; COUNT_BITS</td>
+<td>001</td>
+<td>线程池准备关闭，此时会中断所有正在运行的线程，不再接收新任务，也不会执行已经在队列里的任务，工作线程数为0时进入TIDYING状态</td>
+</tr>
+<tr>
+<td>TIDYING</td>
+<td>2 &lt;&lt; COUNT_BITS</td>
+<td>010</td>
+<td>所有任务已经终止，进行整理状态</td>
+</tr>
+<tr>
+<td>TERMINATED</td>
+<td>3 &lt;&lt; COUNT_BITS</td>
+<td>011</td>
+<td>线程池彻底终止运行</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>COUNT_BITS &#x3D; Integer.SIZE - 3;</p>
+</blockquote>
+<p>关闭线程池可以通过<code>shutdown()</code>或者<code>shutdownNow()</code>来分别进入<code>SHUTDOWN</code>或<code>STOP</code>状态</p>
+<h1 id="3-执行任务"><a href="#3-执行任务" class="headerlink" title="3. 执行任务"></a>3. 执行任务</h1><h2 id="3-1-addWorker"><a href="#3-1-addWorker" class="headerlink" title="3.1 addWorker"></a>3.1 addWorker</h2><pre><code class="java">private boolean addWorker(Runnable firstTask, boolean core) &#123;
+    retry:
+    for (int c = ctl.get();;) &#123;
+        // 检查ctl是否大于等于SHUTDOWN(常量，为0)，即判断是否进入了关闭状态
+        if (runStateAtLeast(c, SHUTDOWN)
+            // 检查ctl是否大于等于STOP(常量，1&lt;&lt;29)，大于等于STOP时时不再接收新任务
+            &amp;&amp; (runStateAtLeast(c, STOP)
+                || firstTask != null
+                || workQueue.isEmpty()))
+            // 表示添加失败
+            return false;
+
+        for (;;) &#123;
+            // 判断当前正在工作的线程是否超出限制
+            if (workerCountOf(c)
+                &gt;= ((core ? corePoolSize : maximumPoolSize) &amp; COUNT_MASK))
+                return false;
+            // 将ctl自增，如果成功则结束最外层循环
+            if (compareAndIncrementWorkerCount(c))
+                break retry;
+            c = ctl.get();  // Re-read ctl
+            // 原子自增失败，判断是否进入关闭状态
+            if (runStateAtLeast(c, SHUTDOWN))
+                // 回到外层循环
+                continue retry;
+            // else CAS failed due to workerCount change; retry inner loop
+        &#125;
+    &#125;
+
+    boolean workerStarted = false;
+    boolean workerAdded = false;
+    Worker w = null;
+    try &#123;
+        w = new Worker(firstTask);
+        // 这个Thread是根据ThreadFactory获取的
+        final Thread t = w.thread;
+        if (t != null) &#123;
+            // 加锁
+            final ReentrantLock mainLock = this.mainLock;
+            mainLock.lock();
+            try &#123;
+                // Recheck while holding lock.
+                // Back out on ThreadFactory failure or if
+                // shut down before lock acquired.
+                int c = ctl.get();
+
+                if (isRunning(c) ||
+                    // 判断当前状态是否为SHUTDOWN，并且任务为空
+                    (runStateLessThan(c, STOP) &amp;&amp; firstTask == null)) &#123;
+                    if (t.getState() != Thread.State.NEW)
+                        throw new IllegalThreadStateException();
+                    // 存到工作线程Set集合里
+                    workers.add(w);
+                    workerAdded = true;
+                    int s = workers.size();
+                    if (s &gt; largestPoolSize)
+                        largestPoolSize = s;
+                &#125;
+            &#125; finally &#123;
+                mainLock.unlock();
+            &#125;
+            if (workerAdded) &#123;
+                // 启动任务
+                t.start();
+                workerStarted = true;
+            &#125;
+        &#125;
+    &#125; finally &#123;
+        if (! workerStarted)
+            addWorkerFailed(w);
+    &#125;
+    return workerStarted;
+&#125;
+</code></pre>
+<h2 id="3-2-execute"><a href="#3-2-execute" class="headerlink" title="3.2 execute"></a>3.2 execute</h2><pre><code class="java">public void execute(Runnable command) &#123;
+    if (command == null)
+        throw new NullPointerException();
+    
+    // ctl是一个原子整型，前3位为运行状态，后29位为运行中的线程数
+    int c = ctl.get();
+    // workerCountOf就是获取后29位
+    if (workerCountOf(c) &lt; corePoolSize) &#123;
+        if (addWorker(command, true))
+            return;
+        c = ctl.get();
+    &#125;
+    // 走到这里，说明addWorker执行失败了，或者工作线程数大于等于了corePoolSize
+    // 如果线程池还在运行，将任务添加到队列里
+    if (isRunning(c) &amp;&amp; workQueue.offer(command)) &#123;
+        int recheck = ctl.get();
+        // 重新判断线程数是否停止了，如果是则移除这个任务
+        if (!isRunning(recheck) &amp;&amp; remove(command))
+            reject(command);
+        else if (workerCountOf(recheck) == 0)
+            addWorker(null, false);
+    &#125;
+    // 再次尝试添加
+    else if (!addWorker(command, false))
+        reject(command);
+&#125;
+</code></pre>
+<h2 id="3-3-线程池是怎么运行的"><a href="#3-3-线程池是怎么运行的" class="headerlink" title="3.3 线程池是怎么运行的"></a>3.3 线程池是怎么运行的</h2><p>其实把上面的代码看完可能还是不清楚线程池是怎么运作的，没事，还记得<code>addWorker</code>里调用了线程的<code>start</code>方法吗，我们来看一下：</p>
+<pre><code class="java">Worker w = null;
+        try &#123;
+            w = new Worker(firstTask);
+            final Thread t = w.thread;
+            ...
+       
+            t.start();
+</code></pre>
+<p>来看一下worker类：</p>
+<pre><code class="java">private final class Worker
+        extends AbstractQueuedSynchronizer
+        implements Runnable
+    &#123;
+    
+    Worker(Runnable firstTask) &#123;
+        setState(-1); // inhibit interrupts until runWorker
+        this.firstTask = firstTask;
+        this.thread = getThreadFactory().newThread(this);
+    &#125;
+
+    /** Delegates main run loop to outer runWorker. */
+    public void run() &#123;
+        runWorker(this);
+    &#125;
+&#125;
+</code></pre>
+<p>可以发现线程调用<code>start</code>方法后实则运行的是<code>runWorker</code>，在看<code>runWorker</code>前先来看一下<code>getTask</code>方法：</p>
+<p>先来看它的注释：</p>
+<blockquote>
+<p>Performs blocking or timed wait for a task, depending on current configuration settings, or returns null if this worker must exit because of any of: 1. There are more than maximumPoolSize workers (due to a call to setMaximumPoolSize). 2. The pool is stopped. 3. The pool is shutdown and the queue is empty. 4. This worker timed out waiting for a task, and timed-out workers are subject to termination (that is, allowCoreThreadTimeOut || workerCount &gt; corePoolSize) both before and after the timed wait, and if the queue is non-empty, this worker is not the last thread in the pool.</p>
+</blockquote>
+<p>大致意思是：执行阻塞或定时等待任务，当出现如下情况时返回null：</p>
+<ul>
+<li>工作线程数超过<code>maximumPoolSize</code></li>
+<li>线程池关闭(调用<code>shutdownNow</code>方法)</li>
+<li>线程池关闭，并且等待队列为空(调用<code>shutdown</code>方法)</li>
+<li>该Worker超时等待一个任务</li>
+</ul>
+<pre><code class="java">private Runnable getTask() &#123;
+    boolean timedOut = false; // Did the last poll() time out?
+
+    for (;;) &#123;
+        int c = ctl.get();
+
+        // Check if queue empty only if necessary.
+        // &amp;&amp;优先级高于||
+        if (runStateAtLeast(c, SHUTDOWN)
+            &amp;&amp; (runStateAtLeast(c, STOP) || workQueue.isEmpty())) &#123;
+            decrementWorkerCount();
+            return null;
+        &#125;
+
+        int wc = workerCountOf(c);
+
+        // Are workers subject to culling?
+        // 允许常驻线程超时 || 线程数量是否大于核心线程数
+        boolean timed = allowCoreThreadTimeOut || wc &gt; corePoolSize;
+
+        // 线程池线程数量超过最大值 || 当前线程开启计时并且超时
+        if ((wc &gt; maximumPoolSize || (timed &amp;&amp; timedOut))
+            &amp;&amp; (wc &gt; 1 || workQueue.isEmpty())) &#123;
+            // 删除worker
+            if (compareAndDecrementWorkerCount(c))
+                return null;
+            continue;
+        &#125;
+
+        try &#123;
+            // 这里都是进行阻塞，直到workQueue弹出一个元素
+            Runnable r = timed ?
+                workQueue.poll(keepAliveTime, TimeUnit.NANOSECONDS) :
+            workQueue.take();
+            if (r != null)
+                return r;
+            // 标记超时
+            timedOut = true;
+        &#125; catch (InterruptedException retry) &#123;
+            timedOut = false;
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>然后再来看<code>runWorker</code>：</p>
+<pre><code class="java">final void runWorker(Worker w) &#123;
+    Thread wt = Thread.currentThread();
+    Runnable task = w.firstTask;
+    w.firstTask = null;
+    w.unlock(); // allow interrupts
+    boolean completedAbruptly = true;
+    try &#123;
+        // 在这里执行任务或者获取任务，当没有新任务时这个worker就会被删掉
+        while (task != null || (task = getTask()) != null) &#123;
+            // 加锁
+            w.lock();
+            // If pool is stopping, ensure thread is interrupted;
+            // if not, ensure thread is not interrupted.  This
+            // requires a recheck in second case to deal with
+            // shutdownNow race while clearing interrupt
+            // 上面的注释意思是：如果线程池被关闭(shutdownNow)，确保线程被中断，否则则确保没有被中断
+            if ((runStateAtLeast(ctl.get(), STOP) || 
+                 (Thread.interrupted() &amp;&amp; runStateAtLeast(ctl.get(), STOP))) &amp;&amp;
+                !wt.isInterrupted())
+                wt.interrupt();
+            try &#123;
+                // 这一步交给了子类实现
+                beforeExecute(wt, task);
+                try &#123;
+                    // 执行任务
+                    task.run();
+                    // 这一步同样交给了子类实现
+                    afterExecute(task, null);
+                &#125; catch (Throwable ex) &#123;
+                    afterExecute(task, ex);
+                    throw ex;
+                &#125;
+            &#125; finally &#123;
+                task = null;
+                w.completedTasks++;
+                w.unlock();
+            &#125;
+        &#125;
+        completedAbruptly = false;
+    &#125; finally &#123;
+        processWorkerExit(w, completedAbruptly);
+    &#125;
+&#125;
+</code></pre>
+<h2 id="3-4-为什么Worker要继承AQS"><a href="#3-4-为什么Worker要继承AQS" class="headerlink" title="3.4 为什么Worker要继承AQS"></a>3.4 为什么Worker要继承AQS</h2><p>在<code>runWorker</code>里我们可以发现，我们是通过worker来加了锁的，这里为什么要加锁呢？我们一个worker不是只有一个线程吗？</p>
+<p>首先观察一下Worker的实现，可以发现它<strong>不是</strong>可重入锁，这个可以去类比<code>ReentrantLock</code>，然后我们还知道，我们调用<code>shutdown</code>时，并不会停掉还在运行中的线程，停掉的是那些正在等待任务的线程，那么我们怎么判断一个Worker正处于那种状态呢？</p>
+<p>我们先从<code>shutdown</code>入手：</p>
+<pre><code class="java">public void shutdown() &#123;
+    final ReentrantLock mainLock = this.mainLock;
+    mainLock.lock();
+    try &#123;
+        checkShutdownAccess();
+        advanceRunState(SHUTDOWN);
+        // 中断闲置的worker
+        interruptIdleWorkers();
+        onShutdown(); // hook for ScheduledThreadPoolExecutor
+    &#125; finally &#123;
+        mainLock.unlock();
+    &#125;
+    tryTerminate();
+&#125;
+
+private void interruptIdleWorkers() &#123;
+    interruptIdleWorkers(false);
+&#125;
+
+private void interruptIdleWorkers(boolean onlyOne) &#123;
+    final ReentrantLock mainLock = this.mainLock;
+    mainLock.lock();
+    try &#123;
+        for (Worker w : workers) &#123;
+            Thread t = w.thread;
+            // 看到这个tryLock没，如果成功拿到锁了，说明当前线程没有执行任务
+            if (!t.isInterrupted() &amp;&amp; w.tryLock()) &#123;
+                try &#123;
+                    t.interrupt();
+                &#125; catch (SecurityException ignore) &#123;
+                &#125; finally &#123;
+                    w.unlock();
+                &#125;
+            &#125;
+            if (onlyOne)
+                break;
+        &#125;
+    &#125; finally &#123;
+        mainLock.unlock();
+    &#125;
+&#125;
+
+// Worker
+public boolean tryLock()  &#123; return tryAcquire(1); &#125;
+
+// Worker
+protected boolean tryAcquire(int unused) &#123;
+    if (compareAndSetState(0, 1)) &#123;
+        setExclusiveOwnerThread(Thread.currentThread());
+        return true;
+    &#125;
+    return false;
+&#125;
+</code></pre>
+<p>在回到<code>Worker</code>，我们再看一眼构造器：</p>
+<pre><code class="java">Worker(Runnable firstTask) &#123;
+    setState(-1); // inhibit interrupts until runWorker 禁止中断直到worker启动，即线程启动
+    this.firstTask = firstTask;
+    this.thread = getThreadFactory().newThread(this);
+&#125;
+</code></pre>
+<p>所以说<code>Worker</code>的初始State为-1，用来禁止线程中断，在调用<code>runWorker</code>后，在最外部有一个<code>unlock</code>解锁操作用于将<code>Worker</code>状态设置为0</p>
+<h1 id="4-mainLock"><a href="#4-mainLock" class="headerlink" title="4. mainLock"></a>4. mainLock</h1><p><code>mainLock</code>的注释如下：</p>
+<blockquote>
+<p>Lock held on access to workers set and related bookkeeping. While we could use a concurrent set of some sort, it turns out to be generally preferable to use a lock. Among the reasons is that this serializes interruptIdleWorkers, which avoids unnecessary interrupt storms, especially during shutdown. Otherwise exiting threads would concurrently interrupt those that have not yet interrupted. It also simplifies some of the associated statistics bookkeeping of largestPoolSize etc. We also hold mainLock on shutdown and shutdownNow, for the sake of ensuring workers set is stable while separately checking permission to interrupt and actually interrupting.</p>
+</blockquote>
+<p>大致意思是：在访问Worker和一些其它计数变量时加锁。虽然可以用并发的集合来处理，但实际上使用锁更好。原因之一是<em>这些序列化的闲置线程将会避免一些无意义的中断风暴，特别是在关闭期间，另外在退出线程时将同时中断尚未中断的线程</em>((没读懂这句话，机翻的)。加锁还可以简化变量的相关记录。另外为了保证Worker的安全，应在退出时进行加锁。(<del>翻译的稀碎，有能力建议自己翻译</del>)</p>
+<h2 id="4-1-processWorkerExit"><a href="#4-1-processWorkerExit" class="headerlink" title="4.1 processWorkerExit"></a>4.1 processWorkerExit</h2><p>顾名思义，这个方法在Worker退出时会被调用</p>
+<pre><code class="java">private void processWorkerExit(Worker w, boolean completedAbruptly) &#123;
+    // 判断是否由于用户异常导致退出
+    if (completedAbruptly) // If abrupt, then workerCount wasn&#39;t adjusted
+        decrementWorkerCount();
+
+    final ReentrantLock mainLock = this.mainLock;
+    mainLock.lock();
+    try &#123;
+        completedTaskCount += w.completedTasks;
+        // 移除worker
+        workers.remove(w);
+    &#125; finally &#123;
+        mainLock.unlock();
+    &#125;
+    // 尝试将线程池从stop或shutdown转换为terminate状态
+    tryTerminate();
+
+    int c = ctl.get();
+    // 判断是否不处于STOP状态
+    if (runStateLessThan(c, STOP)) &#123;
+        // 如果不是由于用户异常导致
+        if (!completedAbruptly) &#123;
+            int min = allowCoreThreadTimeOut ? 0 : corePoolSize;
+            if (min == 0 &amp;&amp; ! workQueue.isEmpty())
+                min = 1;
+            // 确保worker的数量最多有corePoolSize，超过了则不再新建
+            if (workerCountOf(c) &gt;= min)
+                return; // replacement not needed
+        &#125;
+        // 添加一个新Worker
+        addWorker(null, false);
+    &#125;
+&#125;
+</code></pre>
+<h1 id="5-其它"><a href="#5-其它" class="headerlink" title="5. 其它"></a>5. 其它</h1><p>与<code>ThreadPoolExecutor</code>一同作为线程池的还有<code>ForkJoinPool</code>。</p>
+<p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903870896799751">Java多线程之ThreadPoolExecutor和ForkJoinPool的用法 - 掘金 (juejin.cn)</a></p>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div class="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2023 IceOfSummerの博客
+            <span class="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;IceOfSummer
+        </div>
+        <div>Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp; <a target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a></div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            <div id="showimg">
+                <img id="showimg-content">
+            </div>
+        </div>
+        <script src="/js/functions.js"></script>
+<script src="/js/particlex.js"></script>
+
+
+
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    data-loading="lazy"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+    </body>
+</html>

@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8">
-        <title>IceOfSummerの博客</title>
+        <title>常见背包dp | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer">
         <meta name="description" content="用来用去还是自己搭的博客靠谱">
         <meta name="keywords" content="">
@@ -99,21 +99,70 @@
 
                 <div class="article">
     <div>
-        <h1> </h1>
+        <h1>常见背包dp </h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2023/3/13
+            2023/3/17
+        </span>
+        
+        <span class="category">
+            <a href="/2023/03/14/alogorithm/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                算法
+            </a>
         </span>
         
         
     </div>
     
     <div class="content" v-pre>
-        
+        <h1 id="完全背包"><a href="#完全背包" class="headerlink" title="完全背包"></a>完全背包</h1><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/coin-change/description/">322. 零钱兑换 - 力扣（Leetcode）</a></p>
+<pre><code class="python">有N种物品和一个容量为V的背包，每种物品都有无限件可用。
+第i种物品的费用是c[i]，价值是w[i]。
+求解将哪些物品装入背包可使这些物品的费用总和不超过背包容量，且价值总和最大。
+</code></pre>
+<p>为了方便，我就拿上面力扣的题说了。正常情况下dp方程如下：</p>
+<p>​	<code>f[i][j]</code>表示第<code>i</code>个硬币，凑齐<code>j</code>元时花费的最少硬币数</p>
+<p>转移方程为：</p>
+<p>​	<code>f[i][j] = min(f[i - 1][j], f[i][j - coin[i] * k] + k)</code></p>
+<p>可以发现用这个转移方程需要三层遍历(分别枚举<code>i</code>、<code>j</code>和<code>k</code>)，正常情况肯定是会直接T掉的。</p>
+<p>但是仔细观察一下可以发现，<code>k</code>其实没必要遍历，来看一下下面这个转移方程：</p>
+<p>​	<code>f[i][j] = min(f[i - 1][j], f[i][j - coin[i]] + 1)</code></p>
+<p>可能还看不出来，我们把它套进循环里：</p>
+<pre><code class="java">for (int i = 1; i &lt;= coins.length; i++) &#123;
+    int last = i - 1;
+    int coin = coins[last];
+    for (int j = 1; j &lt;= amount; j++) &#123;
+        int val = j &gt;= coin ? f[i][j - coin] + 1 : Integer.MAX_VALUE;
+        f[i][j] = Math.min(f[last][j], val);
+    &#125;
+&#125;
+</code></pre>
+<p>有没有那种感觉了？我们枚举<code>k</code>会导致很大一部分被重复计算了！</p>
+<p>当然，这个dp方程可以把<code>i</code>这一纬给优化掉，而且还不需要倒着遍历。</p>
+<h1 id="多重背包"><a href="#多重背包" class="headerlink" title="多重背包"></a>多重背包</h1><p>多重背包需要和完全背包区分，多重背包是每个物品只能选有限个，而完全背包则是无限个</p>
+<p>完全背包的题目可以使用多重背包来解，不过一般会超时？</p>
+<p><a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P1776">P1776 宝物筛选 - 洛谷 | 计算机科学教育新生态 (luogu.com.cn)</a></p>
+<p>这道题如果暴力dp，那么转移方程和上面完全背包差不多，也是三重遍历：</p>
+<pre><code class="java">for (int i = 1; i &lt;= n; ++i) &#123;
+    for (int j = maxWeight; j &gt;= w[i]; --j) &#123;
+        for (int k = 1; k &lt;= m[i]; ++k) &#123;
+            int last = j - k * w[i];
+            if (last &lt; 0) &#123;
+                break;
+            &#125;
+            f[j] = max(f[j], f[last] + k * v[i]);
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+
     </div>
     
     

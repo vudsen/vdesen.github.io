@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8">
-        <title>Nacos | IceOfSummerの博客</title>
+        <title>矩阵遍历常用手法 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer">
         <meta name="description" content="用来用去还是自己搭的博客靠谱">
         <meta name="keywords" content="">
@@ -99,42 +99,126 @@
 
                 <div class="article">
     <div>
-        <h1>Nacos </h1>
+        <h1>矩阵遍历常用手法 </h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2023/3/1
+            2023/3/14
         </span>
         
         <span class="category">
-            <a href="/2023/03/04/SpringCloud/">
+            <a href="/2023/03/14/alogorithm/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
-                SpringCloud
+                算法
             </a>
         </span>
         
         
-        <span class="tags">
-            <span class="icon">
-                <i class="fa-solid fa-tags fa-fw"></i>
-            </span>
-            
-            <span class="tag">
-                
-                <a href="/SpringCloud/config-center" style="color: #00a596">配置中心</a>
-            </span>
-            
-        </span>
-        
     </div>
     
     <div class="content" v-pre>
-        
+        <p><a target="_blank" rel="noopener" href="http://101.43.147.120/p/P1022">题目详情 - 阿里巴巴-2022.11.5-超级对称矩阵 - Hydro</a></p>
+<p>首先这道题很明显，我们只需要将每4个对应的位置加到最大值即可，这么说可能不好理解，假设矩阵长度为<code>n</code>，坐标从[1, 1]开始(<font color=red>这个很重要，最好不要从零开始，从1开始可以省掉一些数组越界的判断</font>)，打个比方：</p>
+<ul>
+<li>[1, 1]这个点对应[1, n]，[n, 1]，[n, n]这三个点</li>
+<li>[1, 2]这个点对应[2, n]，[n, n - 1]，[n - 1, 1]这三个点</li>
+</ul>
+<p>所以，我们只需要让这四个点的值相同，那么这四个点在旋转时，值一定是相同的。</p>
+<p>这里的问题是要怎么去遍历这四个点，咱们思路有，但是写不出来。</p>
+<p>这时候可以考数组”打表”的方式来处理：</p>
+<pre><code class="c++">const int POINTER_CNT = 4;
+// 左上 右上 右下 左下
+int MOVE[][2] = &#123;&#123;0, 1&#125;, &#123;1, 0&#125;, &#123;0, -1&#125;, &#123;-1, 0&#125;&#125;;
+int pointer[POINTER_CNT][2];
+</code></pre>
+<p>其中<code>pointer</code>包括了我们四个点的位置，数组第二维保存了坐标，在遍历完成一次后这样对点进行移动：</p>
+<pre><code class="c++">for (int j = 0; j &lt; POINTER_CNT; ++j) &#123;
+    pointer[j][0] += MOVE[j][0];
+    pointer[j][1] += MOVE[j][1];
+&#125;
+</code></pre>
+<p>遍历处理完了，现在我们需要处理边界问题。</p>
+<p>不难发现，对于长度为<code>n</code>的矩阵，第一次遍历需要<code>n - 1</code>次，第二次遍历则是<code>n - 1 - 2</code>次，第三次则是<code>n - 1 - 2 - 2</code>次…</p>
+<p>有这个思路这道题就解出来了：</p>
+<pre><code class="c++">#include &lt;iostream&gt;
+#define ll long long
+inline int read()
+&#123;
+    int x=0,f=1;char ch=getchar();
+    while (ch&lt;&#39;0&#39;||ch&gt;&#39;9&#39;)&#123;if (ch==&#39;-&#39;) f=-1;ch=getchar();&#125;
+    while (ch&gt;=&#39;0&#39;&amp;&amp;ch&lt;=&#39;9&#39;)&#123;x=x*10+ch-48;ch=getchar();&#125;
+    return x*f;
+&#125;
+
+template&lt;typename T&gt; T max(T a, T b) &#123;
+    return a &gt; b ? a : b;
+&#125;
+template&lt;typename T&gt; T max4(T a, T b, T c, T d) &#123;
+    return max(max(a, b), max(c, d));
+&#125;
+template&lt;typename T&gt; T min(T a, T b) &#123;
+    return a &lt; b ? a : b;
+&#125;
+const int MAX_N = 102;
+const int POINTER_CNT = 4;
+int matrix[MAX_N][MAX_N];
+// 左上 右上 右下 左下
+int MOVE[][2] = &#123;&#123;0, 1&#125;, &#123;1, 0&#125;, &#123;0, -1&#125;, &#123;-1, 0&#125;&#125;;
+int pointer[POINTER_CNT][2];
+int n;
+// 根据遍历了多少次，我们可以得到每个点的起始坐标。
+void reinit(int offset) &#123;
+    pointer[0][0] = 1 + offset;
+    pointer[0][1] = 1 + offset;
+    pointer[1][0] = 1 + offset;
+    pointer[1][1] = n - offset;
+    pointer[2][0] = n - offset;
+    pointer[2][1] = n - offset;
+    pointer[3][0] = n - offset;
+    pointer[3][1] = 1 + offset;
+&#125;
+
+int main()&#123;
+    n = read();
+    // 8 + 6 + 6 + 2 + 2 + 4
+    for (int i = 1; i &lt;= n; ++i) &#123;
+        for (int j = 1; j &lt;= n; ++j) &#123;
+            matrix[i][j] = read();
+        &#125;
+    &#125;
+    reinit(0);
+    ll ans = 0;
+    int len = n;
+    int offset = 0;
+    // 这里也可以用len是否小于等于0判断
+    while (pointer[0][0] &lt; pointer[2][0] &amp;&amp; pointer[0][1] &lt; pointer[2][1]) &#123;
+        for (int i = 1; i &lt; len; ++i) &#123;
+            int x1 = pointer[0][0], y1 = pointer[0][1];
+            int x2 = pointer[1][0], y2 = pointer[1][1];
+            int x3 = pointer[2][0], y3 = pointer[2][1];
+            int x4 = pointer[3][0], y4 = pointer[3][1];
+            int val1 = matrix[x1][y1], val2 = matrix[x2][y2], val3 = matrix[x3][y3], val4 = matrix[x4][y4];
+            int mx = max4(val1, val2, val3, val4);
+            ans += (mx - val1) + (mx - val2) + (mx - val3) + (mx - val4);
+            for (int j = 0; j &lt; POINTER_CNT; ++j) &#123;
+                pointer[j][0] += MOVE[j][0];
+                pointer[j][1] += MOVE[j][1];
+            &#125;
+        &#125;
+        len -= 2;
+        offset++;
+        reinit(offset);
+    &#125;
+    printf(&quot;%lld&quot;, ans);
+    return 0;
+&#125;
+</code></pre>
+
     </div>
     
     

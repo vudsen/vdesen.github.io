@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8">
-        <title>IceOfSummerの博客</title>
+        <title>面试题记录 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer">
         <meta name="description" content="用来用去还是自己搭的博客靠谱">
         <meta name="keywords" content="">
@@ -97,35 +97,11 @@
     </div>
 </nav>
 
-                <div id="home-head">
-    <div id="home-background"></div>
-    
-    <div id="home-info" @click="homeclick">
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="info">
-            <div class="wrap">
-                <h1>IceOfSummerの博客</h1>
-                <h3>一时起兴搭建的博客</h3>
-                <h5>用来用去还是自己搭的博客靠谱</h5>
-            </div>
-        </span>
+                <div class="article">
+    <div>
+        <h1>面试题记录 </h1>
     </div>
-    
-</div>
-<div id="home-posts-wrap" class="">
-    <div id="home-posts">
-        <div id="posts">
-            
-
-<div class="post">
-    <a href="/2023/03/14/interview/">
-        <h2 class="post-title">面试题记录</h2>
-    </a>
-    <div class="category-and-date">
-        
+    <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
@@ -135,10 +111,9 @@
         
         
     </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <blockquote>
+    
+    <div class="content" v-pre>
+        <blockquote>
 <p>在这里记录一些我觉得比较好的面试题</p>
 </blockquote>
 <h1 id="1-给你10g的字符串数据，内存只有256mb，如何实现排序"><a href="#1-给你10g的字符串数据，内存只有256mb，如何实现排序" class="headerlink" title="1. 给你10g的字符串数据，内存只有256mb，如何实现排序"></a>1. 给你10g的字符串数据，内存只有256mb，如何实现排序</h1><h2 id="1-1-多路并归"><a href="#1-1-多路并归" class="headerlink" title="1.1 多路并归"></a>1.1 多路并归</h2><p>首先将10G的数据分为<code>10 * 1024 / 256 = 40</code>块分别读入后进行排序。</p>
@@ -357,106 +332,19 @@ System.out.println(a + &quot; &quot; + b);
 <p>幻读是针对数据<strong>插入（INSERT）</strong>操作来说的。假设事务A对某些行的内容作了更改，但是还未提交，此时事务B插入了与事务A更改前的记录相同的记录行，并且在事务A提交之前先提交了，而这时，在事务A中查询，会发现好像刚刚的更改对于某些数据未起作用，但其实是事务B刚插入进来的，让用户感觉很魔幻，感觉出现了幻觉，这就叫幻读。</p>
 <p>不可重复读一般针对UPDATE，而幻读重点在INSERT和DELETE</p>
 
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/2023/03/14/interview/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post">
-    <a href="/2023/03/14/alogorithm/">
-        <h2 class="post-title">算法</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2023/3/14
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <p><a href="/algorithm/matrix-traverse">矩阵遍历常用手法</a></p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/2023/03/14/alogorithm/" class="go-post">阅读全文</a>
-</div>
-
-
-            <div class="page-current">
-    <div class="prev">
-        
-    </div>
-    <div class="page-index">
-        
-        <span class="current">1</span>
-        
-        <span>
-            <a class="page-num" href="/page/2/">2</a>
-            
-            
-        </span>
-        
-    </div>
-    <div class="next">
-        
-        <a class="page-num" href="/page/2/">
-            <i class="fa-solid fa-caret-right fa-fw"></i>
-        </a>
-        
-    </div>
-</div>
-
-        </div>
     </div>
     
-    <div id="home-card">
-        <div id="card-div">
-    <div class="card-style" style="width: 300px">
-        <div class="avatar">
-            <img src="https://xds.asia/avatar/1.webp" alt="avatar">
-        </div>
-        <div class="name">IceOfSummer</div>
-        <div class="description">
-            <p>这个人很懒，没有个人简介</p>
-
-        </div>
-        
-        
-    </div>
-</div>
-
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
     </div>
     
+    
+    
+    
 </div>
-<script>
-  (() => {
-    const imageConfig = 'https://xds.asia/public/2023-2-6-8d14e464-2200-4e54-af81-0d9f25f55b3e.webp,https://xds.asia/public/2023-2-0-017e03b0-992c-4844-b28f-869799d32b96.webp,https://xds.asia/public/2023-2-0-66a241f4-eca3-45f3-b590-05aeed688f60.webp,https://xds.asia/public/2023-2-0-481f472f-e980-4cee-8ab8-ca66f5fd370a.webp'
-    if (!imageConfig) {
-      return
-    }
-    const images = imageConfig.split(',')
-    const bgElement = document.getElementById('home-background')
-    const val = `background-image: url("${images[Math.floor((Math.random() * images.length))]}")`
-    bgElement.setAttribute('style', val)
-  })();
-
-</script>
 
                 <footer id="footer">
     <div class="footer-wrap">
@@ -481,6 +369,29 @@ System.out.println(a + &quot; &quot; + b);
         </div>
         <script src="/js/functions.js"></script>
 <script src="/js/particlex.js"></script>
+
+
+
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    data-loading="lazy"
+    crossorigin
+    async
+></script>
+
+
+
 
 
     </body>
