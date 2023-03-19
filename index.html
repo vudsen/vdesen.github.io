@@ -19,7 +19,85 @@
         
         <link rel="stylesheet" href="/css/fonts.min.css">
         <link rel="stylesheet" href="/css/particlex.css">
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <!-- hexo injector head_end start --><script>/**
+ * element[TO_TOP_HEIGHT] = {
+ *  value: 123
+ *  version: 1
+ * }
+ */
+const TO_TOP_HEIGHT = '$toTopHeight'
+let globalVersion = 0
+const IMAGE_URL_FILED = 'lazy'
+
+
+window.addEventListener('load', () => {
+    const elements = fakeArrayToArray(document.getElementsByTagName("img"))
+    console.log(`图片懒加载: 一共找到了${elements.length}张图片`)
+    window.addEventListener('scroll', () => {
+        for (let i = 0, len = elements.length; i < len; ++i) {
+            const e = elements[i]
+            if (isVisible(e)) {
+                console.log('已经加载图片: ', e)
+                loadImage(e)
+                elements.splice(i, 1)
+            }
+        }
+    })
+})
+
+window.addEventListener('resize', () => {
+    globalVersion++
+    console.log('resize')
+})
+
+function loadImage(imageElement) {
+    const url = imageElement.getAttribute(IMAGE_URL_FILED)
+    if (url) {
+        imageElement.setAttribute('src', url)
+        imageElement.removeAttribute(IMAGE_URL_FILED)
+    }
+}
+
+function isVisible(element) {
+    if (!element) {
+        return false
+    }
+    const toTop = getDisToTop(element)
+    return document.documentElement.scrollTop + document.documentElement.clientHeight >= toTop
+}
+
+function fakeArrayToArray(fakeArray) {
+    if (Array.isArray(fakeArray)) {
+        return fakeArray
+    } else if (typeof fakeArray === 'object') {
+        const result = []
+        for (let i = 0, len = fakeArray.length; i < len; ++i) {
+            result[i] = fakeArray[i]
+        }
+        return result
+    } else {
+        throw new Error('传入的参数不是一个伪数组')
+    }
+}
+
+function getDisToTop(element) {
+    const t = element[TO_TOP_HEIGHT]
+    if (t && t.version === globalVersion) {
+        return element[TO_TOP_HEIGHT].value
+    }
+    let temp = element
+    let sum = 0
+    do {
+
+        sum += temp.offsetTop
+        temp = temp.offsetParent
+    } while(!!temp)
+    element[TO_TOP_HEIGHT] = {
+        value: sum,
+        version: globalVersion
+    }
+    return sum
+}</script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head>
     <body>
         <div id="loading" style="height: 100vh; width: 100vw; left: 0; top: 0; position: fixed; display: flex; z-index: 2147483647; background: #fff; transition: opacity 0.3s ease-out; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; pointer-events: none">
     <div style="width: 50vmin; height: 50vmin; margin: auto; padding: 50px; border-radius: 50%; display: flex; border: solid 10px #a3ddfb">
@@ -184,7 +262,7 @@ System.out.println(a + &quot; &quot; + b);
 <h1 id="3-JVM有哪些部分"><a href="#3-JVM有哪些部分" class="headerlink" title="3. JVM有哪些部分"></a>3. JVM有哪些部分</h1><p>这种东西一定要记一共有几个，不然容易说漏。</p>
 <p>JVM从整体分为<strong>三部分</strong>：类加载子系统、运行时数据区以及执行引擎。</p>
 <p>运行时数据区包括<strong>五部分</strong>：方法区、堆、虚拟机栈、PC寄存器以及本地方法栈</p>
-<p><img src="https://xds.asia/public/interview/2023-2-2-4fa15602-b784-43b9-9f62-0dc3b7d5b6e7.webp" alt="JVM结构"></p>
+<p><img lazy="https://xds.asia/public/interview/2023-2-2-4fa15602-b784-43b9-9f62-0dc3b7d5b6e7.webp" alt="JVM结构"></p>
 <h1 id="4-堆在垃圾回收的场景下分哪几部分？每部分如何进行GC？"><a href="#4-堆在垃圾回收的场景下分哪几部分？每部分如何进行GC？" class="headerlink" title="4. 堆在垃圾回收的场景下分哪几部分？每部分如何进行GC？"></a>4. 堆在垃圾回收的场景下分哪几部分？每部分如何进行GC？</h1><p>第一问很简单：总体分为年轻代和老年代，默认占比为1:2。</p>
 <p>可以通过<code>-XX:NewRatio</code>可以设置新生代的比例，但是不要字面理解这个配置的意思：</p>
 <ul>
@@ -194,7 +272,7 @@ System.out.println(a + &quot; &quot; + b);
 </li>
 </ul>
 <p>新生代又分为伊甸园区、幸存者0区和幸存者1区，默认占比为8:1:1，可以通过<code>-XX:SurvivorRatio</code>进行调整。</p>
-<p><img src="https://xds.asia/public/interview/2023-2-2-704f791a-01ef-4274-924a-b16a105818cf.webp" alt="heap"></p>
+<p><img lazy="https://xds.asia/public/interview/2023-2-2-704f791a-01ef-4274-924a-b16a105818cf.webp" alt="heap"></p>
 <p>关于第二问，年轻态的GC称为Young GC(下面简称YGC)或者Minor GC，触发条件如下：</p>
 <ol>
 <li>new的对象优先放到伊甸园区</li>
@@ -209,7 +287,7 @@ System.out.println(a + &quot; &quot; + b);
 <li>如果在垃圾回收后仍然无法在Eden区给对象分配内存，那么对象会直接升级到老年代，如果老年代空间也不足，并且通过Full GC也不足，则会抛出OOM异常</li>
 <li>由Eden区、from区向to区复制时，对象大小大于To Space可用内存，则把该对象转存到老年代，且老年代的可用内存小于该对象大小</li>
 </ul>
-<p><img src="https://xds.asia/public/interview/2023-2-2-0c39b9fd-3ca3-4f3e-9f8c-77bd9b7f5b00.webp" alt="YGC"></p>
+<p><img lazy="https://xds.asia/public/interview/2023-2-2-0c39b9fd-3ca3-4f3e-9f8c-77bd9b7f5b00.webp" alt="YGC"></p>
 <h1 id="5-用过ES吗？请说一下倒排索引"><a href="#5-用过ES吗？请说一下倒排索引" class="headerlink" title="5. 用过ES吗？请说一下倒排索引"></a>5. 用过ES吗？请说一下倒排索引</h1><p>这个东西太长了，建议自行百度了解。</p>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_31960623/article/details/118860928">ES之倒排索引详解_es倒排索引_wh柒八九的博客-CSDN博客</a></p>
 <h1 id="6-Spring用了哪些设计模式"><a href="#6-Spring用了哪些设计模式" class="headerlink" title="6. Spring用了哪些设计模式"></a>6. Spring用了哪些设计模式</h1><p>[Spring中用到了哪些设计模式？ - murphy_gb - 博客园 (cnblogs.com)](<a target="_blank" rel="noopener" href="https://www.cnblogs.com/kyoner/p/10949246.html#:~:text=Spring">https://www.cnblogs.com/kyoner/p/10949246.html#:~:text=Spring</a> 框架中用到了哪些设计模式： 工厂设计模式%3A Spring使用工厂模式通过 BeanFactory、ApplicationContext 创建 bean 对象。,Spring AOP 功能的实现。 单例设计模式%3A Spring 中的 Bean 默认都是单例的。)</p>

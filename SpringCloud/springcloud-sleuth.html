@@ -19,7 +19,85 @@
         
         <link rel="stylesheet" href="/css/fonts.min.css">
         <link rel="stylesheet" href="/css/particlex.css">
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <!-- hexo injector head_end start --><script>/**
+ * element[TO_TOP_HEIGHT] = {
+ *  value: 123
+ *  version: 1
+ * }
+ */
+const TO_TOP_HEIGHT = '$toTopHeight'
+let globalVersion = 0
+const IMAGE_URL_FILED = 'lazy'
+
+
+window.addEventListener('load', () => {
+    const elements = fakeArrayToArray(document.getElementsByTagName("img"))
+    console.log(`图片懒加载: 一共找到了${elements.length}张图片`)
+    window.addEventListener('scroll', () => {
+        for (let i = 0, len = elements.length; i < len; ++i) {
+            const e = elements[i]
+            if (isVisible(e)) {
+                console.log('已经加载图片: ', e)
+                loadImage(e)
+                elements.splice(i, 1)
+            }
+        }
+    })
+})
+
+window.addEventListener('resize', () => {
+    globalVersion++
+    console.log('resize')
+})
+
+function loadImage(imageElement) {
+    const url = imageElement.getAttribute(IMAGE_URL_FILED)
+    if (url) {
+        imageElement.setAttribute('src', url)
+        imageElement.removeAttribute(IMAGE_URL_FILED)
+    }
+}
+
+function isVisible(element) {
+    if (!element) {
+        return false
+    }
+    const toTop = getDisToTop(element)
+    return document.documentElement.scrollTop + document.documentElement.clientHeight >= toTop
+}
+
+function fakeArrayToArray(fakeArray) {
+    if (Array.isArray(fakeArray)) {
+        return fakeArray
+    } else if (typeof fakeArray === 'object') {
+        const result = []
+        for (let i = 0, len = fakeArray.length; i < len; ++i) {
+            result[i] = fakeArray[i]
+        }
+        return result
+    } else {
+        throw new Error('传入的参数不是一个伪数组')
+    }
+}
+
+function getDisToTop(element) {
+    const t = element[TO_TOP_HEIGHT]
+    if (t && t.version === globalVersion) {
+        return element[TO_TOP_HEIGHT].value
+    }
+    let temp = element
+    let sum = 0
+    do {
+
+        sum += temp.offsetTop
+        temp = temp.offsetParent
+    } while(!!temp)
+    element[TO_TOP_HEIGHT] = {
+        value: sum,
+        version: globalVersion
+    }
+    return sum
+}</script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head>
     <body>
         <div id="loading" style="height: 100vh; width: 100vw; left: 0; top: 0; position: fixed; display: flex; z-index: 2147483647; background: #fff; transition: opacity 0.3s ease-out; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; pointer-events: none">
     <div style="width: 50vmin; height: 50vmin; margin: auto; padding: 50px; border-radius: 50%; display: flex; border: solid 10px #a3ddfb">
@@ -126,7 +204,7 @@
 <p>在使用前需要下载zipkin，这是一个可视化图像界面，可以将Sleuth的结果展示出来：</p>
 <p><a target="_blank" rel="noopener" href="https://search.maven.org/remote_content?g=io.zipkin&a=zipkin-server&v=LATEST&c=exec">https://search.maven.org/remote_content?g=io.zipkin&amp;a=zipkin-server&amp;v=LATEST&amp;c=exec</a></p>
 <p>在Sleuth中，每条请求链路，都有一个唯一的TraceId、Span标识，每个Span通过parent id关联起来。</p>
-<p><img src="https://xds.asia/public/SpringCloud/2023-2-6-3f34fa6b-ab82-43ea-b82d-207cbe47ded2.webp" alt="链路图"></p>
+<p><img lazy="https://xds.asia/public/SpringCloud/2023-2-6-3f34fa6b-ab82-43ea-b82d-207cbe47ded2.webp" alt="链路图"></p>
 <h1 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h1><p>添加配置：</p>
 <pre><code class="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
