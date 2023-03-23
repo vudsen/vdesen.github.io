@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8">
-        <title>文章分类 | IceOfSummerの博客</title>
+        <title>IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer">
         <meta name="description" content="用来用去还是自己搭的博客靠谱">
         <meta name="keywords" content="">
@@ -175,13 +175,37 @@ function getDisToTop(element) {
     </div>
 </nav>
 
-                <div id="archives">
+                <div id="home-head">
+    <div id="home-background"></div>
     
-    <div class="categories-tags">
+    <div id="home-info" @click="homeclick">
+        <span class="loop"></span>
+        <span class="loop"></span>
+        <span class="loop"></span>
+        <span class="loop"></span>
+        <span class="info">
+            <div class="wrap">
+                <h1>IceOfSummerの博客</h1>
+                <h3>一时起兴搭建的博客</h3>
+                <h5>用来用去还是自己搭的博客靠谱</h5>
+            </div>
+        </span>
+    </div>
+    
+</div>
+<div id="home-posts-wrap" class="">
+    <div id="home-posts">
+        <div id="posts">
+            
+
+<div class="post">
+    <a href="/2023/03/04/SpringCloud/">
+        <h2 class="post-title">SpringCloud</h2>
+    </a>
+    <div class="category-and-date">
         
-        
-        <span>
-            <a href="/categories/SpringCloud/" style="background: #00a596">
+        <span class="category">
+            <a href="/categories/SpringCloud/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
@@ -189,21 +213,111 @@ function getDisToTop(element) {
             </a>
         </span>
         
-        
-        
-        <span>
-            <a href="/categories/Java%E9%9D%A2%E8%AF%95/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                Java面试
-            </a>
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/3/4
         </span>
         
         
     </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <p><img lazy="https://xds.asia/public/SpringCloud/2023-2-6-5325609d-795f-4dce-8fe3-7fbc68d3cbd3.png" alt="banner"></p>
+<p><a href="/SpringCloud/registry">注册中心</a></p>
+<p><a href="/SpringCloud/loadbalance">负载均衡</a></p>
+<p><a href="/SpringCloud/service-invoke">服务调用</a></p>
+<p><a href="/SpringCloud/service-degradation">服务降级</a></p>
+<p><a href="/SpringCloud/gateway">服务网关</a></p>
+<p><a href="/SpringCloud/config-center">配置中心</a></p>
+<p><a href="/SpringCloud/bus">服务总线</a></p>
+<p><a href="/SpringCloud/springcloud-stream">消息驱动: SpringCloud Stream</a></p>
+<p><a href="/SpringCloud/springcloud-sleuth">分布式请求链路追踪: SpringCloud Sleuth</a></p>
+<p><a href="/SpringCloud/nacos">服务注册和配置中心：Nacos</a></p>
+<p><a href="/SpringCloud/springcloud-alibaba-seata">分布式事务：SpringCloud Alibaba Seata</a></p>
+<hr>
+<p><a target="_blank" rel="noopener" href="https://github.com/alibaba/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E">版本说明 · alibaba&#x2F;spring-cloud-alibaba Wiki (github.com)</a></p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/03/04/SpringCloud/" class="go-post">阅读全文</a>
+</div>
+
+
+            <div class="page-current">
+    <div class="prev">
+        
+        <a class="page-num" href="/page/3/">
+            <i class="fa-solid fa-caret-left fa-fw"></i>
+        </a>
+        
+    </div>
+    <div class="page-index">
+        
+        <span>
+            
+            <a class="page-num" href="/">1</a>
+            <span class="page-omit">...</span>
+            
+            
+                
+                
+                <a class="page-num" href="/page/2">2</a>
+                
+            
+            <a class="page-num" href="/page/3/">3</a>
+        </span>
+        
+        <span class="current">4</span>
+        
+    </div>
+    <div class="next">
+        
+    </div>
+</div>
+
+        </div>
+    </div>
+    
+    <div id="home-card">
+        <div id="card-div">
+    <div class="card-style" style="width: 300px">
+        <div class="avatar">
+            <img src="https://xds.asia/avatar/1.webp" alt="avatar">
+        </div>
+        <div class="name">IceOfSummer</div>
+        <div class="description">
+            <p>这个人很懒，没有个人简介</p>
+
+        </div>
+        
+        
+    </div>
+</div>
+
+    </div>
     
 </div>
+<script>
+  (() => {
+    const imageConfig = 'https://xds.asia/public/2023-2-6-8d14e464-2200-4e54-af81-0d9f25f55b3e.webp,https://xds.asia/public/2023-2-0-017e03b0-992c-4844-b28f-869799d32b96.webp,https://xds.asia/public/2023-2-0-66a241f4-eca3-45f3-b590-05aeed688f60.webp,https://xds.asia/public/2023-2-0-481f472f-e980-4cee-8ab8-ca66f5fd370a.webp,https://xds.asia/public/2023-2-2-2adf4d48-496a-49a4-8ca3-f64e035d8835.webp'
+    if (!imageConfig) {
+      return
+    }
+    const images = imageConfig.split(',')
+    const bgElement = document.getElementById('home-background')
+    const val = `background-image: url("${images[Math.floor((Math.random() * images.length))]}")`
+    bgElement.setAttribute('style', val)
+  })();
+
+</script>
 
                 <footer id="footer">
     <div class="footer-wrap">

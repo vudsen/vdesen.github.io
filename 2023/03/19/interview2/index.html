@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8">
-        <title>文章分类 | IceOfSummerの博客</title>
+        <title>面试题记录2 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer">
         <meta name="description" content="用来用去还是自己搭的博客靠谱">
         <meta name="keywords" content="">
@@ -175,33 +175,74 @@ function getDisToTop(element) {
     </div>
 </nav>
 
-                <div id="archives">
-    
-    <div class="categories-tags">
-        
-        
-        <span>
-            <a href="/categories/SpringCloud/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                SpringCloud
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/categories/Java%E9%9D%A2%E8%AF%95/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                Java面试
-            </a>
+                <div class="article">
+    <div>
+        <h1>面试题记录2 </h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/3/19
         </span>
         
         
     </div>
+    
+    <div class="content" v-pre>
+        <ul>
+<li><a href="/2023/03/14/interview/">第一期</a></li>
+</ul>
+<h1 id="1-简单说一下InnoDB事务实现原理"><a href="#1-简单说一下InnoDB事务实现原理" class="headerlink" title="1. 简单说一下InnoDB事务实现原理"></a>1. 简单说一下InnoDB事务实现原理</h1><p>事务ACID：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>别名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Atomicity</strong></td>
+<td>原子性</td>
+<td>原子性是指事务是一个不可分割的工作单位，事务中的操作要么都发生，要么都不发生</td>
+</tr>
+<tr>
+<td><strong>Consistency</strong></td>
+<td>一致性</td>
+<td>事务前后数据的完整性必须保持一致</td>
+</tr>
+<tr>
+<td><strong>Isolation</strong></td>
+<td>隔离性</td>
+<td>事务的隔离性是多个用户并发访问数据库时，数据库为每一个用户开启的事务，不能被其他事务的操作数据所干扰，多个并发事务之间要相互隔离</td>
+</tr>
+<tr>
+<td><strong>Durability</strong></td>
+<td>持久性</td>
+<td>持久性是指一个事务一旦被提交，它对数据库中数据的改变就是永久性的，接下来即使数据库发生故障也不应该对其有任何影响</td>
+</tr>
+</tbody></table>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/48327345">一文了解InnoDB事务实现原理 - 知乎 (zhihu.com)</a></p>
+<p>上面那个比较深入，下面这个比较好理解一些：</p>
+<p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7012937835967692808">图解InnoDB事务实现原理｜Redo Log&amp;Undo Log - 掘金 (juejin.cn)</a></p>
+<h1 id="2-Redis的内存淘汰算法"><a href="#2-Redis的内存淘汰算法" class="headerlink" title="2. Redis的内存淘汰算法"></a>2. Redis的内存淘汰算法</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/crazymakercircle/article/details/115360829">Redis 内存淘汰策略 （史上最全）_redis内存淘汰策略_40岁资深老架构师尼恩的博客-CSDN博客</a></p>
+<h1 id="3-Redis主从复制"><a href="#3-Redis主从复制" class="headerlink" title="3. Redis主从复制"></a>3. Redis主从复制</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Bilson99/article/details/118732296">Redis（主从复制、哨兵模式、集群）的讲解_redis集哨兵模式哪个节点负责读取数据_五条悟的小迷妹的博客-CSDN博客</a></p>
+<h1 id="4-Redis的持久化方式"><a href="#4-Redis的持久化方式" class="headerlink" title="4. Redis的持久化方式"></a>4. Redis的持久化方式</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Violet_201903027/article/details/100145168">Redis有哪几种持久化方式？优缺点是什么_Listener_code的博客-CSDN博客</a></p>
+<h1 id="5-Redis常见的性能问题和解决方案"><a href="#5-Redis常见的性能问题和解决方案" class="headerlink" title="5. Redis常见的性能问题和解决方案"></a>5. Redis常见的性能问题和解决方案</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7207406497541455929">Redis 常见性能问题和解决方案 - 掘金 (juejin.cn)</a></p>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
     
 </div>
 
@@ -228,6 +269,29 @@ function getDisToTop(element) {
         </div>
         <script src="/js/functions.js"></script>
 <script src="/js/particlex.js"></script>
+
+
+
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    data-loading="lazy"
+    crossorigin
+    async
+></script>
+
+
+
 
 
     </body>

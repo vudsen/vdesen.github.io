@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8">
-        <title>文章分类 | IceOfSummerの博客</title>
+        <title>springboot源码 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer">
         <meta name="description" content="用来用去还是自己搭的博客靠谱">
         <meta name="keywords" content="">
@@ -175,33 +175,52 @@ function getDisToTop(element) {
     </div>
 </nav>
 
-                <div id="archives">
-    
-    <div class="categories-tags">
-        
-        
-        <span>
-            <a href="/categories/SpringCloud/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                SpringCloud
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/categories/Java%E9%9D%A2%E8%AF%95/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                Java面试
-            </a>
+                <div class="article">
+    <div>
+        <h1>springboot源码 </h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/3/23
         </span>
         
         
     </div>
+    
+    <div class="content" v-pre>
+        <h1 id="1-基础"><a href="#1-基础" class="headerlink" title="1. 基础"></a>1. 基础</h1><p>通过<code>AnnotationConfigApplicationContext</code>可以创建一个Spring容器：</p>
+<pre><code class="java">public class MySpringApplication &#123;
+
+    public static void main(String[] args) &#123;
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+
+        UserService userService = (UserService) applicationContext.getBean(&quot;userService&quot;);
+        userService.test();
+    &#125;
+
+&#125;
+
+@ComponentScan(&quot;pers.xds.springboot&quot;)
+public class AppConfig &#123;
+&#125;
+</code></pre>
+<h2 id="1-1-生命周期"><a href="#1-1-生命周期" class="headerlink" title="1.1 生命周期"></a>1.1 生命周期</h2><p>可以在<code>AbstractAutowireCapableBeanFactory#doCreateBean</code>中看到完整的bean生成流程。</p>
+<p>构造方法 -&gt; 普通对象 -&gt; 依赖注入 -&gt; 初始化(afterPropertiesSet) -&gt; 初始化后(AOP) -&gt; 代理对象 -&gt; 放入容器</p>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
     
 </div>
 
@@ -228,6 +247,29 @@ function getDisToTop(element) {
         </div>
         <script src="/js/functions.js"></script>
 <script src="/js/particlex.js"></script>
+
+
+
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    data-loading="lazy"
+    crossorigin
+    async
+></script>
+
+
+
 
 
     </body>
