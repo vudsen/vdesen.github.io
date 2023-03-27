@@ -231,7 +231,7 @@ private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
 
      /** 表示当前节点已经被取消了，即放弃抢锁 */
      static final int CANCELLED =  1;
-     /** 表示当前节点需要被挂起 */
+     /** 表示当前节点的下一个节点的线程需要被唤醒 */
      static final int SIGNAL    = -1;
      /** 表示当前节点已经被挂起，正在等待唤醒信号 */
      static final int CONDITION = -2;
@@ -442,3 +442,221 @@ if (pred != head &&
 
 ![总结](https://xds.asia/public/java-source/2023-2-3-aa7d1ca2-677d-4c91-b6b4-411036b452c2.webp)
 
+# 2. Condition
+
+```java
+ReentrantLock reentrantLock = new ReentrantLock();
+# newCondition是AQS提供的方法
+Condition condition = reentrantLock.newCondition();
+```
+
+对于`Condition`，这里我们来了解一下`await`和`signal`这俩个重要的方法。
+
+```java
+public final void await() throws InterruptedException {
+    if (Thread.interrupted())
+        throw new InterruptedException();
+    Node node = addConditionWaiter();
+    int savedState = fullyRelease(node);
+    int interruptMode = 0;
+    while (!isOnSyncQueue(node)) {
+        LockSupport.park(this);
+        if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
+            break;
+    }
+    if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
+        interruptMode = REINTERRUPT;
+    if (node.nextWaiter != null) // clean up if cancelled
+        unlinkCancelledWaiters();
+    if (interruptMode != 0)
+        reportInterruptAfterWait(interruptMode);
+}
+```
+
+## 2.1 await
+
+### 2.1.2 addConditionWaiter
+
+这个方法会在等待队列的尾部添加一个新节点，在添加前会判断最后一个节点是否已经失效，若失效则会进行链表删除操作，之后创建新节点，添加到链表。
+
+调用这个方法时必须保证当前线程持有锁，否则会抛出异常。
+
+需要注意这里不是操作的AQS的队列，是Condition自己的队列。
+
+```java
+private Node addConditionWaiter() {
+    // 在这里判断当前线程是否已经拿到锁，没拿到就直接抛异常
+    if (!isHeldExclusively())
+        throw new IllegalMonitorStateException();
+    Node t = lastWaiter;
+    // If lastWaiter is cancelled, clean out.
+    // 如果最后一个节点的状态不是Node.CONDITION，则删除这些已经被取消的节点
+    if (t != null && t.waitStatus != Node.CONDITION) {
+        // 这个方法会进行链表删除，删除状态不是Node.CONDITION的节点
+        unlinkCancelledWaiters();
+        t = lastWaiter;
+    }
+	
+    Node node = new Node(Node.CONDITION);
+
+    if (t == null)
+        firstWaiter = node;
+    else
+        t.nextWaiter = node;
+    lastWaiter = node;
+    return node;
+}
+```
+
+### 2.1.2 fullyRelease
+
+`fullyRelease`会释放当前线程占用的锁，如果释放失败，则会删除该节点。
+
+```java
+final int fullyRelease(Node node) {
+    try {
+        // state一般表示重入次数
+        int savedState = getState();
+        if (release(savedState))
+            return savedState;
+        throw new IllegalMonitorStateException();
+    } catch (Throwable t) {
+        node.waitStatus = Node.CANCELLED;
+        throw t;
+    }
+}
+
+public final boolean release(int arg) {
+    if (tryRelease(arg)) {
+        Node h = head;
+        if (h != null && h.waitStatus != 0)
+            // 这里别忘了，头节点要么是拿到锁的线程，要么是占位节点，头结点的下一个才是能够抢锁的线程
+            unparkSuccessor(h);
+        return true;
+    }
+    return false;
+}
+```
+
+### 2.1.3 小总结
+
+```java
+public final void await() throws InterruptedException {
+    if (Thread.interrupted())
+        throw new InterruptedException();
+    // 添加等待节点
+    Node node = addConditionWaiter();
+    // 释放锁
+    int savedState = fullyRelease(node);
+    int interruptMode = 0;
+    // 这个方法有点不太好理解，后面到signal了再讲
+    while (!isOnSyncQueue(node)) {
+        LockSupport.park(this);
+        if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
+            break;
+    }
+    // 到这里说明已经得到信号，想要重新获取锁了，这里就直接将这个节点加到等待队列
+    if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
+        interruptMode = REINTERRUPT;
+    // 清除多余的waiter
+    if (node.nextWaiter != null) // clean up if cancelled
+        unlinkCancelledWaiters();
+    if (interruptMode != 0)
+        // 如果中断模式为THROW_IE，则会抛出异常，如果为REINTERRUPT，则会调用线程的中断方法以维持中断状态
+        reportInterruptAfterWait(interruptMode);
+}
+```
+
+## 2.2 signal
+
+```java
+public final void signal() {
+    if (!isHeldExclusively())
+        throw new IllegalMonitorStateException();
+    Node first = firstWaiter;
+    if (first != null)
+        doSignal(first);
+}
+
+private void doSignal(Node first) {
+    do {
+        if ((firstWaiter = first.nextWaiter) == null)
+            lastWaiter = null;
+        first.nextWaiter = null;
+    } while (!transferForSignal(first) &&
+             (first = firstWaiter) != null);
+}
+
+// 将节点从条件队列移动到同步队列
+final boolean transferForSignal(Node node) {
+    /*
+     * If cannot change waitStatus, the node has been cancelled.
+     */
+    // 将节点状态设置为0(初始化状态)
+    if (!node.compareAndSetWaitStatus(Node.CONDITION, 0))
+        return false;
+
+    /*
+     * Splice onto queue and try to set waitStatus of predecessor to
+     * indicate that thread is (probably) waiting. If cancelled or
+     * attempt to set waitStatus fails, wake up to resync (in which
+     * case the waitStatus can be transiently and harmlessly wrong).
+     */
+    
+    Node p = enq(node);
+    int ws = p.waitStatus;
+    if (ws > 0 || !p.compareAndSetWaitStatus(ws, Node.SIGNAL))
+        LockSupport.unpark(node.thread);
+    return true;
+}
+
+// 将节点插入同步队列，在必要时进行初始化。同时会返回旧的尾结点
+private Node enq(Node node) {
+    for (;;) {
+        Node oldTail = tail;
+        if (oldTail != null) {
+            // 设置prev节点，该操作对于其它线程可见
+            node.setPrevRelaxed(oldTail);
+            if (compareAndSetTail(oldTail, node)) {
+                oldTail.next = node;
+                return oldTail;
+            }
+        } else {
+            // 为头部和尾部初始化一个占位节点
+            initializeSyncQueue();
+        }
+    }
+}
+```
+
+### 2.2.1 isOnSyncQueue
+
+这时我们再来看`isOnSyncQueue`就可以发现清晰多了。
+
+首先在调用`isOnSyncQueue`之前，创建的节点都是在条件队列里的，同步队列里并没有相关的节点。
+
+```java
+final boolean isOnSyncQueue(Node node) {
+    // 如果节点状态为CONDITION，说明一定不在同步队列，我们在上面可以看到，在节点进入同步队列后
+    // 它的waitStatus会被设置为0
+    // 第二个条件则是判断条件队列前面有节点，说明自己肯定还在同步队列里(这里存疑)
+    if (node.waitStatus == Node.CONDITION || node.prev == null)
+        return false;
+    // 如果当前节点有后续节点，说明一定在同步队列，因为对于条件队列，我们只会唤醒头结点，不会跟
+    // 同步队列一样，每个节点都有唤醒的机会，而且被唤醒的时候一定是有人调用了signal或者中断
+    if (node.next != null) // If has successor, it must be on queue
+        return true;
+    /*
+         * node.prev can be non-null, but not yet on queue because
+         * the CAS to place it on queue can fail. So we have to
+         * traverse from tail to make sure it actually made it.  It
+         * will always be near the tail in calls to this method, and
+         * unless the CAS failed (which is unlikely), it will be
+         * there, so we hardly ever traverse much.
+         */
+    // 这里直接遍历同步队列，查看是否在队列里
+    return findNodeFromTail(node);
+}
+```
+
+在同步队列里说明了什么？说明它有机会拿到锁继续运行！所以在`await`里就要跳出循环。

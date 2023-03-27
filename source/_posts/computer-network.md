@@ -103,3 +103,11 @@ tags:
 [TCP/UDP伪头部详解_tcp 伪头部_M、k的博客-CSDN博客](https://blog.csdn.net/weixin_42560250/article/details/113526217)
 
 需要注意的是IP报文的校验不包含数据。
+
+# 3. 路由器和交换机
+
+[如果让你来设计网络 (qq.com)](https://mp.weixin.qq.com/s/jiPMUk6zUdOY6eKxAjNDbQ)
+
+交换机是工作在数据链路层的，它根据每台设备的MAC地址来转发数据。
+
+而路由器是工作在网络层的，它负责IP报文的转发。
