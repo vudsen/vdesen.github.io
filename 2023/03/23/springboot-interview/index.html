@@ -19,21 +19,27 @@
         
         <link rel="stylesheet" href="/css/fonts.min.css">
         <link rel="stylesheet" href="/css/particlex.css">
-    <!-- hexo injector head_end start --><script>/**
- * element[TO_TOP_HEIGHT] = {
- *  value: 123
- *  version: 1
- * }
- */
-const TO_TOP_HEIGHT = '$toTopHeight'
-let globalVersion = 0
-const IMAGE_URL_FILED = 'lazy'
+    <!-- hexo injector head_end start --><script>window.addEventListener('load', () => {
+    /**
+     * element[TO_TOP_HEIGHT] = {
+     *  value: 123
+     *  version: 1
+     * }
+     */
+    const TO_TOP_HEIGHT = '$toTopHeight'
+    let globalVersion = 0
+    const IMAGE_URL_FILED = 'lazy'
 
-
-window.addEventListener('load', () => {
     const elements = fakeArrayToArray(document.getElementsByTagName("img"))
     console.log(`图片懒加载: 一共找到了${elements.length}张图片`)
+    setTimeout(() => {
+        checkElements(elements)
+    }, 1000)
     window.addEventListener('scroll', () => {
+        checkElements(elements)
+    })
+
+    function checkElements(elements) {
         for (let i = 0, len = elements.length; i < len; ++i) {
             const e = elements[i]
             if (isVisible(e)) {
@@ -42,62 +48,64 @@ window.addEventListener('load', () => {
                 elements.splice(i, 1)
             }
         }
+    }
+    
+    window.addEventListener('resize', () => {
+        globalVersion++
+        console.log('resize')
     })
-})
-
-window.addEventListener('resize', () => {
-    globalVersion++
-    console.log('resize')
-})
-
-function loadImage(imageElement) {
-    const url = imageElement.getAttribute(IMAGE_URL_FILED)
-    if (url) {
-        imageElement.setAttribute('src', url)
-        imageElement.removeAttribute(IMAGE_URL_FILED)
-    }
-}
-
-function isVisible(element) {
-    if (!element) {
-        return false
-    }
-    const toTop = getDisToTop(element)
-    return document.documentElement.scrollTop + document.documentElement.clientHeight >= toTop
-}
-
-function fakeArrayToArray(fakeArray) {
-    if (Array.isArray(fakeArray)) {
-        return fakeArray
-    } else if (typeof fakeArray === 'object') {
-        const result = []
-        for (let i = 0, len = fakeArray.length; i < len; ++i) {
-            result[i] = fakeArray[i]
+    
+    function loadImage(imageElement) {
+        const url = imageElement.getAttribute(IMAGE_URL_FILED)
+        if (url) {
+            imageElement.setAttribute('src', url)
+            imageElement.removeAttribute(IMAGE_URL_FILED)
         }
-        return result
-    } else {
-        throw new Error('传入的参数不是一个伪数组')
     }
-}
+    
+    function isVisible(element) {
+        if (!element) {
+            return false
+        }
+        const toTop = getDisToTop(element)
+        return document.documentElement.scrollTop + document.documentElement.clientHeight >= toTop
+    }
+    
+    function fakeArrayToArray(fakeArray) {
+        if (Array.isArray(fakeArray)) {
+            return fakeArray
+        } else if (typeof fakeArray === 'object') {
+            const result = []
+            for (let i = 0, len = fakeArray.length; i < len; ++i) {
+                result[i] = fakeArray[i]
+            }
+            return result
+        } else {
+            throw new Error('传入的参数不是一个伪数组')
+        }
+    }
+    
+    function getDisToTop(element) {
+        const t = element[TO_TOP_HEIGHT]
+        if (t && t.version === globalVersion) {
+            return element[TO_TOP_HEIGHT].value
+        }
+        let temp = element
+        let sum = 0
+        do {
+    
+            sum += temp.offsetTop
+            temp = temp.offsetParent
+        } while(!!temp)
+        element[TO_TOP_HEIGHT] = {
+            value: sum,
+            version: globalVersion
+        }
+        return sum
+    }
+})
 
-function getDisToTop(element) {
-    const t = element[TO_TOP_HEIGHT]
-    if (t && t.version === globalVersion) {
-        return element[TO_TOP_HEIGHT].value
-    }
-    let temp = element
-    let sum = 0
-    do {
-
-        sum += temp.offsetTop
-        temp = temp.offsetParent
-    } while(!!temp)
-    element[TO_TOP_HEIGHT] = {
-        value: sum,
-        version: globalVersion
-    }
-    return sum
-}</script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head>
+</script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head>
     <body>
         <div id="loading" style="height: 100vh; width: 100vw; left: 0; top: 0; position: fixed; display: flex; z-index: 2147483647; background: #fff; transition: opacity 0.3s ease-out; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; pointer-events: none">
     <div style="width: 50vmin; height: 50vmin; margin: auto; padding: 50px; border-radius: 50%; display: flex; border: solid 10px #a3ddfb">
@@ -209,6 +217,20 @@ public class AppConfig &#123;
 </code></pre>
 <h2 id="1-1-生命周期"><a href="#1-1-生命周期" class="headerlink" title="1.1 生命周期"></a>1.1 生命周期</h2><p>可以在<code>AbstractAutowireCapableBeanFactory#doCreateBean</code>中看到完整的bean生成流程。</p>
 <p>构造方法 -&gt; 普通对象 -&gt; 依赖注入 -&gt; 初始化(afterPropertiesSet) -&gt; 初始化后(AOP) -&gt; 代理对象 -&gt; 放入容器</p>
+<p>Spring在注入的时候先根据类型去找，若找到多个，再根据名称去筛选。</p>
+<h2 id="1-2-AOP"><a href="#1-2-AOP" class="headerlink" title="1.2 AOP"></a>1.2 AOP</h2><p>常见的动态代理有两种：</p>
+<ul>
+<li><p>JDK动态代理：基于Java反射机制实现，必须要实现了接口的业务类才生成代理对象。</p>
+</li>
+<li><p>CGLIB动态代理：基于ASM机制实现，通过生成业务类的子类作为代理类。</p>
+</li>
+</ul>
+<p>JDK Proxy的优势：</p>
+<p>​	最小化依赖关系、代码实现简单、简化开发和维护、JDK原生支持，比CGLIB更加可靠，随JDK版本平滑升级。而字节码类库通常需要进行更新以保证在新版Java上能够使用。</p>
+<p>CGLIB的优势：</p>
+<p>​	无需实现接口，达到代理类无侵入，只操作关心的类，而不必为其他相关类增加工作量。高性能。</p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/115744594">Java动态代理之一CGLIB详解 - 知乎 (zhihu.com)</a></p>
+<h2 id="1-3-事务"><a href="#1-3-事务" class="headerlink" title="1.3 事务"></a>1.3 事务</h2><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903608224333838">可能是最漂亮的Spring事务管理详解 - 掘金 (juejin.cn)</a></p>
 
     </div>
     
