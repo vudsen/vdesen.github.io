@@ -11,6 +11,18 @@ tags:
 
 关于`ReentrantLock`这里打算分两部分讲，第一部分则是`lock`和`unlock`的实现，第二部分则是`Condition`的实现。
 
+在这之前有个问题：请说说你对AQS的理解？
+
+面试的时候被问到这种问题就很蛋疼，因为你可能知道它的原理，但是不知道怎么概括出来。
+
+所以个人建议在看源码前一定要看一下每个类上的注释，比如说这里的AQS(这里只截取了部分)：
+
+> Provides a framework for implementing blocking locks and related synchronizers (semaphores, events, etc) that rely on first-in-first-out (FIFO) wait queues. 
+>
+> 提供了一个框架，去帮助开发者实现一个先进先出(FIFO)等待队列的同步锁或相关同步器(事件、信号量等)
+
+如果谈理解的话，用这一句开头就会很舒服、
+
 # 1. 基本内容
 
 ![类继承图](https://xds.asia/public/java-source/2023-2-3-12046ac9-cd7f-4b31-9c43-6f398f6a86a3.webp)
@@ -477,11 +489,9 @@ public final void await() throws InterruptedException {
 
 ### 2.1.2 addConditionWaiter
 
-这个方法会在等待队列的尾部添加一个新节点，在添加前会判断最后一个节点是否已经失效，若失效则会进行链表删除操作，之后创建新节点，添加到链表。
+这个方法会在<font color=red>**条件**队列</font>(每一个`ConditionObject`都会自带一个条件队列)的尾部添加一个新节点，在添加前会判断最后一个节点是否已经失效，若失效则会进行链表删除操作，之后创建新节点，添加到链表。
 
 调用这个方法时必须保证当前线程持有锁，否则会抛出异常。
-
-需要注意这里不是操作的AQS的队列，是Condition自己的队列。
 
 ```java
 private Node addConditionWaiter() {
@@ -521,7 +531,7 @@ final int fullyRelease(Node node) {
             return savedState;
         throw new IllegalMonitorStateException();
     } catch (Throwable t) {
-        node.waitStatus = Node.CANCELLED;
+        node.waitStatus = Node.CAN CELLED;
         throw t;
     }
 }
@@ -549,7 +559,7 @@ public final void await() throws InterruptedException {
     // 释放锁
     int savedState = fullyRelease(node);
     int interruptMode = 0;
-    // 这个方法有点不太好理解，后面到signal了再讲
+    // 这个方法主要是判断节点是否在同步队列里，在同步队列里了说明有机会抢锁了，就不用死循环了
     while (!isOnSyncQueue(node)) {
         LockSupport.park(this);
         if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)

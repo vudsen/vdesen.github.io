@@ -9,29 +9,43 @@ window.addEventListener('load', () => {
     let globalVersion = 0
     const IMAGE_URL_FILED = 'lazy'
 
-    const elements = fakeArrayToArray(document.getElementsByTagName("img"))
+    let elements = [...document.getElementsByTagName("img")]
     console.log(`图片懒加载: 一共找到了${elements.length}张图片`)
+    
     setTimeout(() => {
-        checkElements(elements)
-    }, 1000)
-    window.addEventListener('scroll', () => {
-        checkElements(elements)
-    })
+        // 某些主题会做一些渐变效果导致高度测算有误, 延时一会再初始化
+        globalVersion++
+        checkElements()
+    }, 500);
 
-    function checkElements(elements) {
+    const scrollListener = () => {
+        checkElements()
+    }
+
+    window.addEventListener('scroll', scrollListener)
+
+    function checkElements() {
+        if (elements.length === 0) {
+            console.log('所有图片均已加载')
+            window.removeEventListener('scroll', scrollListener)
+            return
+        }
+        const newArray = []
         for (let i = 0, len = elements.length; i < len; ++i) {
             const e = elements[i]
+            
             if (isVisible(e)) {
                 console.log('已经加载图片: ', e)
                 loadImage(e)
-                elements.splice(i, 1)
+            } else {
+                newArray.push(e)
             }
         }
+        elements = newArray
     }
     
     window.addEventListener('resize', () => {
         globalVersion++
-        console.log('resize')
     })
     
     function loadImage(imageElement) {
@@ -48,20 +62,6 @@ window.addEventListener('load', () => {
         }
         const toTop = getDisToTop(element)
         return document.documentElement.scrollTop + document.documentElement.clientHeight >= toTop
-    }
-    
-    function fakeArrayToArray(fakeArray) {
-        if (Array.isArray(fakeArray)) {
-            return fakeArray
-        } else if (typeof fakeArray === 'object') {
-            const result = []
-            for (let i = 0, len = fakeArray.length; i < len; ++i) {
-                result[i] = fakeArray[i]
-            }
-            return result
-        } else {
-            throw new Error('传入的参数不是一个伪数组')
-        }
     }
     
     function getDisToTop(element) {

@@ -138,4 +138,14 @@ select * from test where id = 1;
 
 网上大部分人讲的都是以ReadCommited级别为例子的，即m_ids里的事务提交后可读，但其实在RepeatableRead隔离级别下是读不了的，只能走undo_log进行回滚。
 
+---
+
+<font color=red>这里可能有点错误，在ReadCommited下可以读已经提交的事务，所以如果trx_id大于等于mid_id，只需要判断对应的事务是否已经提交(或者trx_id指向自己)就能读</font>
+
 # 9. RepeatableRead真的不能避免幻读吗?
+
+[美团三面：一直追问我， MySQL 幻读被彻底解决了吗？_肥肥技术宅的博客-CSDN博客](https://blog.csdn.net/m0_71777195/article/details/126968432)
+
+# 10. 为什么bin_log不能用作崩溃后的恢复
+
+[mysql 为什么不能用binlog来做数据恢复？ - 知乎 (zhihu.com)](https://www.zhihu.com/question/463438061)

@@ -11,4 +11,4 @@ hexo.extend.filter.register('after_post_render', function(data){
     return data;
 });
 
-hexo.extend.injector.register('head_end', `<script>${fs.readFileSync(path.resolve(__dirname, '../js/lazy-load-support.js'), {encoding: 'utf8'})}</script>`)
+hexo.extend.injector.register('head_end', `<script>${fs.readFileSync(path.resolve(__dirname, '../js/lazy-load-support.min.js'), {encoding: 'utf8'})}</script>`)
