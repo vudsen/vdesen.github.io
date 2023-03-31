@@ -19,93 +19,7 @@
         
         <link rel="stylesheet" href="/css/fonts.min.css">
         <link rel="stylesheet" href="/css/particlex.css">
-    <!-- hexo injector head_end start --><script>window.addEventListener('load', () => {
-    /**
-     * element[TO_TOP_HEIGHT] = {
-     *  value: 123
-     *  version: 1
-     * }
-     */
-    const TO_TOP_HEIGHT = '$toTopHeight'
-    let globalVersion = 0
-    const IMAGE_URL_FILED = 'lazy'
-
-    const elements = fakeArrayToArray(document.getElementsByTagName("img"))
-    console.log(`图片懒加载: 一共找到了${elements.length}张图片`)
-    setTimeout(() => {
-        checkElements(elements)
-    }, 1000)
-    window.addEventListener('scroll', () => {
-        checkElements(elements)
-    })
-
-    function checkElements(elements) {
-        for (let i = 0, len = elements.length; i < len; ++i) {
-            const e = elements[i]
-            if (isVisible(e)) {
-                console.log('已经加载图片: ', e)
-                loadImage(e)
-                elements.splice(i, 1)
-            }
-        }
-    }
-    
-    window.addEventListener('resize', () => {
-        globalVersion++
-        console.log('resize')
-    })
-    
-    function loadImage(imageElement) {
-        const url = imageElement.getAttribute(IMAGE_URL_FILED)
-        if (url) {
-            imageElement.setAttribute('src', url)
-            imageElement.removeAttribute(IMAGE_URL_FILED)
-        }
-    }
-    
-    function isVisible(element) {
-        if (!element) {
-            return false
-        }
-        const toTop = getDisToTop(element)
-        return document.documentElement.scrollTop + document.documentElement.clientHeight >= toTop
-    }
-    
-    function fakeArrayToArray(fakeArray) {
-        if (Array.isArray(fakeArray)) {
-            return fakeArray
-        } else if (typeof fakeArray === 'object') {
-            const result = []
-            for (let i = 0, len = fakeArray.length; i < len; ++i) {
-                result[i] = fakeArray[i]
-            }
-            return result
-        } else {
-            throw new Error('传入的参数不是一个伪数组')
-        }
-    }
-    
-    function getDisToTop(element) {
-        const t = element[TO_TOP_HEIGHT]
-        if (t && t.version === globalVersion) {
-            return element[TO_TOP_HEIGHT].value
-        }
-        let temp = element
-        let sum = 0
-        do {
-    
-            sum += temp.offsetTop
-            temp = temp.offsetParent
-        } while(!!temp)
-        element[TO_TOP_HEIGHT] = {
-            value: sum,
-            version: globalVersion
-        }
-        return sum
-    }
-})
-
-</script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head>
+    <!-- hexo injector head_end start --><script>window.addEventListener("load",()=>{const e="$toTopHeight";let t=0;const n="lazy";let o=[...document.getElementsByTagName("img")];console.log(`图片懒加载: 一共找到了${o.length}张图片`),setTimeout(()=>{t++,l()},500);const i=()=>{l()};function l(){if(0===o.length)return console.log("所有图片均已加载"),void window.removeEventListener("scroll",i);const e=[];for(let t=0,n=o.length;t<n;++t){const n=o[t];s(n)?(console.log("已经加载图片: ",n),r(n)):e.push(n)}o=e}function r(e){const t=e.getAttribute(n);t&&(e.setAttribute("src",t),e.removeAttribute(n))}function s(n){if(!n)return!1;const o=function(n){const o=n[e];if(o&&o.version===t)return n[e].value;let i=n,l=0;do{l+=i.offsetTop,i=i.offsetParent}while(i);return n[e]={value:l,version:t},l}(n);return document.documentElement.scrollTop+document.documentElement.clientHeight>=o}window.addEventListener("scroll",i),window.addEventListener("resize",()=>{t++})});</script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head>
     <body>
         <div id="loading" style="height: 100vh; width: 100vw; left: 0; top: 0; position: fixed; display: flex; z-index: 2147483647; background: #fff; transition: opacity 0.3s ease-out; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; pointer-events: none">
     <div style="width: 50vmin; height: 50vmin; margin: auto; padding: 50px; border-radius: 50%; display: flex; border: solid 10px #a3ddfb">
@@ -212,7 +126,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/service-degradation" style="color: #ffa2c4">服务降级</a>
+                <a href="/SpringCloud/service-degradation" style="color: #ff7d73">服务降级</a>
             </span>
             
         </span>

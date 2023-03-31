@@ -19,93 +19,7 @@
         
         <link rel="stylesheet" href="/css/fonts.min.css">
         <link rel="stylesheet" href="/css/particlex.css">
-    <!-- hexo injector head_end start --><script>window.addEventListener('load', () => {
-    /**
-     * element[TO_TOP_HEIGHT] = {
-     *  value: 123
-     *  version: 1
-     * }
-     */
-    const TO_TOP_HEIGHT = '$toTopHeight'
-    let globalVersion = 0
-    const IMAGE_URL_FILED = 'lazy'
-
-    const elements = fakeArrayToArray(document.getElementsByTagName("img"))
-    console.log(`图片懒加载: 一共找到了${elements.length}张图片`)
-    setTimeout(() => {
-        checkElements(elements)
-    }, 1000)
-    window.addEventListener('scroll', () => {
-        checkElements(elements)
-    })
-
-    function checkElements(elements) {
-        for (let i = 0, len = elements.length; i < len; ++i) {
-            const e = elements[i]
-            if (isVisible(e)) {
-                console.log('已经加载图片: ', e)
-                loadImage(e)
-                elements.splice(i, 1)
-            }
-        }
-    }
-    
-    window.addEventListener('resize', () => {
-        globalVersion++
-        console.log('resize')
-    })
-    
-    function loadImage(imageElement) {
-        const url = imageElement.getAttribute(IMAGE_URL_FILED)
-        if (url) {
-            imageElement.setAttribute('src', url)
-            imageElement.removeAttribute(IMAGE_URL_FILED)
-        }
-    }
-    
-    function isVisible(element) {
-        if (!element) {
-            return false
-        }
-        const toTop = getDisToTop(element)
-        return document.documentElement.scrollTop + document.documentElement.clientHeight >= toTop
-    }
-    
-    function fakeArrayToArray(fakeArray) {
-        if (Array.isArray(fakeArray)) {
-            return fakeArray
-        } else if (typeof fakeArray === 'object') {
-            const result = []
-            for (let i = 0, len = fakeArray.length; i < len; ++i) {
-                result[i] = fakeArray[i]
-            }
-            return result
-        } else {
-            throw new Error('传入的参数不是一个伪数组')
-        }
-    }
-    
-    function getDisToTop(element) {
-        const t = element[TO_TOP_HEIGHT]
-        if (t && t.version === globalVersion) {
-            return element[TO_TOP_HEIGHT].value
-        }
-        let temp = element
-        let sum = 0
-        do {
-    
-            sum += temp.offsetTop
-            temp = temp.offsetParent
-        } while(!!temp)
-        element[TO_TOP_HEIGHT] = {
-            value: sum,
-            version: globalVersion
-        }
-        return sum
-    }
-})
-
-</script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head>
+    <!-- hexo injector head_end start --><script>window.addEventListener("load",()=>{const e="$toTopHeight";let t=0;const n="lazy";let o=[...document.getElementsByTagName("img")];console.log(`图片懒加载: 一共找到了${o.length}张图片`),setTimeout(()=>{t++,l()},500);const i=()=>{l()};function l(){if(0===o.length)return console.log("所有图片均已加载"),void window.removeEventListener("scroll",i);const e=[];for(let t=0,n=o.length;t<n;++t){const n=o[t];s(n)?(console.log("已经加载图片: ",n),r(n)):e.push(n)}o=e}function r(e){const t=e.getAttribute(n);t&&(e.setAttribute("src",t),e.removeAttribute(n))}function s(n){if(!n)return!1;const o=function(n){const o=n[e];if(o&&o.version===t)return n[e].value;let i=n,l=0;do{l+=i.offsetTop,i=i.offsetParent}while(i);return n[e]={value:l,version:t},l}(n);return document.documentElement.scrollTop+document.documentElement.clientHeight>=o}window.addEventListener("scroll",i),window.addEventListener("resize",()=>{t++})});</script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head>
     <body>
         <div id="loading" style="height: 100vh; width: 100vw; left: 0; top: 0; position: fixed; display: flex; z-index: 2147483647; background: #fff; transition: opacity 0.3s ease-out; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; pointer-events: none">
     <div style="width: 50vmin; height: 50vmin; margin: auto; padding: 50px; border-radius: 50%; display: flex; border: solid 10px #a3ddfb">
@@ -290,7 +204,11 @@ select * from test where id = 1;
 <p><img lazy="https://xds.asia/public/interview/2023-2-1-7f41e3a0-6d4e-42e8-b44e-d85eecdbd465.webp" alt="流程图"></p>
 <p><del>图画的可能不太好，不过应该能看懂</del></p>
 <p>网上大部分人讲的都是以ReadCommited级别为例子的，即m_ids里的事务提交后可读，但其实在RepeatableRead隔离级别下是读不了的，只能走undo_log进行回滚。</p>
-<h1 id="9-RepeatableRead真的不能避免幻读吗"><a href="#9-RepeatableRead真的不能避免幻读吗" class="headerlink" title="9. RepeatableRead真的不能避免幻读吗?"></a>9. RepeatableRead真的不能避免幻读吗?</h1>
+<hr>
+<p><font color=red>这里可能有点错误，在ReadCommited下可以读已经提交的事务，所以如果trx_id大于等于mid_id，只需要判断对应的事务是否已经提交(或者trx_id指向自己)就能读</font></p>
+<h1 id="9-RepeatableRead真的不能避免幻读吗"><a href="#9-RepeatableRead真的不能避免幻读吗" class="headerlink" title="9. RepeatableRead真的不能避免幻读吗?"></a>9. RepeatableRead真的不能避免幻读吗?</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_71777195/article/details/126968432">美团三面：一直追问我， MySQL 幻读被彻底解决了吗？_肥肥技术宅的博客-CSDN博客</a></p>
+<h1 id="10-为什么bin-log不能用作崩溃后的恢复"><a href="#10-为什么bin-log不能用作崩溃后的恢复" class="headerlink" title="10. 为什么bin_log不能用作崩溃后的恢复"></a>10. 为什么bin_log不能用作崩溃后的恢复</h1><p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/463438061">mysql 为什么不能用binlog来做数据恢复？ - 知乎 (zhihu.com)</a></p>
+
     </div>
     
     

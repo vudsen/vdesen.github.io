@@ -19,93 +19,7 @@
         
         <link rel="stylesheet" href="/css/fonts.min.css">
         <link rel="stylesheet" href="/css/particlex.css">
-    <!-- hexo injector head_end start --><script>window.addEventListener('load', () => {
-    /**
-     * element[TO_TOP_HEIGHT] = {
-     *  value: 123
-     *  version: 1
-     * }
-     */
-    const TO_TOP_HEIGHT = '$toTopHeight'
-    let globalVersion = 0
-    const IMAGE_URL_FILED = 'lazy'
-
-    const elements = fakeArrayToArray(document.getElementsByTagName("img"))
-    console.log(`图片懒加载: 一共找到了${elements.length}张图片`)
-    setTimeout(() => {
-        checkElements(elements)
-    }, 1000)
-    window.addEventListener('scroll', () => {
-        checkElements(elements)
-    })
-
-    function checkElements(elements) {
-        for (let i = 0, len = elements.length; i < len; ++i) {
-            const e = elements[i]
-            if (isVisible(e)) {
-                console.log('已经加载图片: ', e)
-                loadImage(e)
-                elements.splice(i, 1)
-            }
-        }
-    }
-    
-    window.addEventListener('resize', () => {
-        globalVersion++
-        console.log('resize')
-    })
-    
-    function loadImage(imageElement) {
-        const url = imageElement.getAttribute(IMAGE_URL_FILED)
-        if (url) {
-            imageElement.setAttribute('src', url)
-            imageElement.removeAttribute(IMAGE_URL_FILED)
-        }
-    }
-    
-    function isVisible(element) {
-        if (!element) {
-            return false
-        }
-        const toTop = getDisToTop(element)
-        return document.documentElement.scrollTop + document.documentElement.clientHeight >= toTop
-    }
-    
-    function fakeArrayToArray(fakeArray) {
-        if (Array.isArray(fakeArray)) {
-            return fakeArray
-        } else if (typeof fakeArray === 'object') {
-            const result = []
-            for (let i = 0, len = fakeArray.length; i < len; ++i) {
-                result[i] = fakeArray[i]
-            }
-            return result
-        } else {
-            throw new Error('传入的参数不是一个伪数组')
-        }
-    }
-    
-    function getDisToTop(element) {
-        const t = element[TO_TOP_HEIGHT]
-        if (t && t.version === globalVersion) {
-            return element[TO_TOP_HEIGHT].value
-        }
-        let temp = element
-        let sum = 0
-        do {
-    
-            sum += temp.offsetTop
-            temp = temp.offsetParent
-        } while(!!temp)
-        element[TO_TOP_HEIGHT] = {
-            value: sum,
-            version: globalVersion
-        }
-        return sum
-    }
-})
-
-</script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head>
+    <!-- hexo injector head_end start --><script>window.addEventListener("load",()=>{const e="$toTopHeight";let t=0;const n="lazy";let o=[...document.getElementsByTagName("img")];console.log(`图片懒加载: 一共找到了${o.length}张图片`),setTimeout(()=>{t++,l()},500);const i=()=>{l()};function l(){if(0===o.length)return console.log("所有图片均已加载"),void window.removeEventListener("scroll",i);const e=[];for(let t=0,n=o.length;t<n;++t){const n=o[t];s(n)?(console.log("已经加载图片: ",n),r(n)):e.push(n)}o=e}function r(e){const t=e.getAttribute(n);t&&(e.setAttribute("src",t),e.removeAttribute(n))}function s(n){if(!n)return!1;const o=function(n){const o=n[e];if(o&&o.version===t)return n[e].value;let i=n,l=0;do{l+=i.offsetTop,i=i.offsetParent}while(i);return n[e]={value:l,version:t},l}(n);return document.documentElement.scrollTop+document.documentElement.clientHeight>=o}window.addEventListener("scroll",i),window.addEventListener("resize",()=>{t++})});</script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head>
     <body>
         <div id="loading" style="height: 100vh; width: 100vw; left: 0; top: 0; position: fixed; display: flex; z-index: 2147483647; background: #fff; transition: opacity 0.3s ease-out; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; pointer-events: none">
     <div style="width: 50vmin; height: 50vmin; margin: auto; padding: 50px; border-radius: 50%; display: flex; border: solid 10px #a3ddfb">
@@ -212,7 +126,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#Java" style="color: #00a596">Java</a>
+                <a href="/2023/03/05/java-source#Java" style="color: #ff7d73">Java</a>
             </span>
             
         </span>
@@ -221,6 +135,14 @@
     
     <div class="content" v-pre>
         <p>关于<code>ReentrantLock</code>这里打算分两部分讲，第一部分则是<code>lock</code>和<code>unlock</code>的实现，第二部分则是<code>Condition</code>的实现。</p>
+<p>在这之前有个问题：请说说你对AQS的理解？</p>
+<p>面试的时候被问到这种问题就很蛋疼，因为你可能知道它的原理，但是不知道怎么概括出来。</p>
+<p>所以个人建议在看源码前一定要看一下每个类上的注释，比如说这里的AQS(这里只截取了部分)：</p>
+<blockquote>
+<p>Provides a framework for implementing blocking locks and related synchronizers (semaphores, events, etc) that rely on first-in-first-out (FIFO) wait queues. </p>
+<p>提供了一个框架，去帮助开发者实现一个先进先出(FIFO)等待队列的同步锁或相关同步器(事件、信号量等)</p>
+</blockquote>
+<p>如果谈理解的话，用这一句开头就会很舒服、</p>
 <h1 id="1-基本内容"><a href="#1-基本内容" class="headerlink" title="1. 基本内容"></a>1. 基本内容</h1><p><img lazy="https://xds.asia/public/java-source/2023-2-3-12046ac9-cd7f-4b31-9c43-6f398f6a86a3.webp" alt="类继承图"></p>
 <p>对于<code>ReentrantLock</code>，你需要知道它里面有一个<font color="red">等待队列，也就是AQS</font>(<code>AbstractQueuedSynchronizer</code>)，<font color="red">这个队列只有“头部的节点”才有资格抢到锁！但这并不代表其它节点对应的线程不会被唤醒，这些线程只是没有抢锁的资格，在获取资格前抢锁永远失败。在这里需要注意：<strong>没有资格抢锁 !&#x3D; 没有机会被唤醒</strong>。</font></p>
 <p>上面对<font color="skyblue">头部的节点</font>打了引号，是因为在AQS中，头部的节点对应的线程并不是资格抢锁的线程线程，而是头结点的下一个节点对应的线程才具有抢锁的资格。至于为什么，相信把源码看完你也就能理解了。</p>
@@ -612,9 +534,8 @@ Condition condition = reentrantLock.newCondition();
         reportInterruptAfterWait(interruptMode);
 &#125;
 </code></pre>
-<h2 id="2-1-await"><a href="#2-1-await" class="headerlink" title="2.1 await"></a>2.1 await</h2><h3 id="2-1-2-addConditionWaiter"><a href="#2-1-2-addConditionWaiter" class="headerlink" title="2.1.2 addConditionWaiter"></a>2.1.2 addConditionWaiter</h3><p>这个方法会在等待队列的尾部添加一个新节点，在添加前会判断最后一个节点是否已经失效，若失效则会进行链表删除操作，之后创建新节点，添加到链表。</p>
+<h2 id="2-1-await"><a href="#2-1-await" class="headerlink" title="2.1 await"></a>2.1 await</h2><h3 id="2-1-2-addConditionWaiter"><a href="#2-1-2-addConditionWaiter" class="headerlink" title="2.1.2 addConditionWaiter"></a>2.1.2 addConditionWaiter</h3><p>这个方法会在<font color=red><strong>条件</strong>队列</font>(每一个<code>ConditionObject</code>都会自带一个条件队列)的尾部添加一个新节点，在添加前会判断最后一个节点是否已经失效，若失效则会进行链表删除操作，之后创建新节点，添加到链表。</p>
 <p>调用这个方法时必须保证当前线程持有锁，否则会抛出异常。</p>
-<p>需要注意这里不是操作的AQS的队列，是Condition自己的队列。</p>
 <pre><code class="java">private Node addConditionWaiter() &#123;
     // 在这里判断当前线程是否已经拿到锁，没拿到就直接抛异常
     if (!isHeldExclusively())
@@ -647,7 +568,7 @@ Condition condition = reentrantLock.newCondition();
             return savedState;
         throw new IllegalMonitorStateException();
     &#125; catch (Throwable t) &#123;
-        node.waitStatus = Node.CANCELLED;
+        node.waitStatus = Node.CAN CELLED;
         throw t;
     &#125;
 &#125;
@@ -671,7 +592,7 @@ public final boolean release(int arg) &#123;
     // 释放锁
     int savedState = fullyRelease(node);
     int interruptMode = 0;
-    // 这个方法有点不太好理解，后面到signal了再讲
+    // 这个方法主要是判断节点是否在同步队列里，在同步队列里了说明有机会抢锁了，就不用死循环了
     while (!isOnSyncQueue(node)) &#123;
         LockSupport.park(this);
         if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
