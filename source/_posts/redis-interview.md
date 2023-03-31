@@ -126,9 +126,23 @@ typedef struct dictIterator {
 } dictIterator;
 ```
 
+### 3.3.1 安全迭代器和非安全迭代器
+
 [Redis源码学习——安全迭代器和非安全迭代器（一）_damanchen的博客-CSDN博客](https://blog.csdn.net/damanchen/article/details/89474695)
 
 [Redis源码学习——安全迭代器和非安全迭代器（二）_damanchen的博客-CSDN博客](https://blog.csdn.net/damanchen/article/details/89479299)
+
+[跋山涉水 —— 深入 Redis 字典遍历 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/42156903)
+
+安全迭代器：
+
+- 迭代的时候不能rehash，可以进行过期键的删除
+
+非安全迭代器：
+
+- 迭代的时候可以rehash，但是不能进行删除等操作(字典只读)，通过`fingerprint`字段来判断字典是否发生变动
+
+
 
 ## 3.2 间接遍历
 
@@ -337,6 +351,8 @@ Hash类型有两种实现方式：
 - ziplist 编码的哈希对象使用压缩列表作为底层实现
 - hashtable 编码的哈希对象使用字典作为底层实现
 
+[Redis之Hash数据结构底层原理_redis hash原理_不要迷恋发哥的博客-CSDN博客](https://blog.csdn.net/chongfa2008/article/details/119537064)
+
 ### 4.2.1 ziplist
 
 `ziplist`的运作方式<font color=red>类似</font>于一个队列，当有一对键值时，先将值入队，再将键入队。
@@ -348,5 +364,240 @@ Hash类型有两种实现方式：
 - 当hash中的数据项的数目超过512的时候，也就是ziplist数据项超过1024的时候
 - 当hash中插入的任意一个value的长度超过了64的时候
 
+```text
+area        |<---- ziplist header ---->|<----------- entries ------------->|<-end->|
+
+size          4 bytes  4 bytes  2 bytes    ?        ?        ?        ?     1 byte
+            +---------+--------+-------+--------+--------+--------+--------+-------+
+component   | zlbytes | zltail | zllen | entry1 | entry2 |  ...   | entryN | zlend |
+            +---------+--------+-------+--------+--------+--------+--------+-------+
+                                       ^                          ^        ^
+address                                |                          |        |
+                                ZIPLIST_ENTRY_HEAD                |   ZIPLIST_ENTRY_END
+                                                                  |
+                                                         ZIPLIST_ENTRY_TAIL
+```
+
+| 字段    | 类型     | 说明                                |
+| ------- | -------- | ----------------------------------- |
+| zlbytes | uint32_t | 整个ziplist占用的内存字节数。       |
+| zltail  | uint32_t | 到达ziplist表尾节点的偏移量。       |
+| zllen   | uint16_t | ziplist中节点的数量。               |
+| entryX  | ？       | ziplist的各个节点。                 |
+| zlend   | uint8_t  | 常量0b111111，用于标记ziplist末尾。 |
+
 ### 4.2.2 hashtable
 
+hashtable就和Redis最外层的字典是差不多的了。
+
+## 4.3 List
+
+对于List同样也有两种编码：
+
+- ziplist：压缩列表
+- linkedlist：双向链表
+
+满足如下条件时，压缩列表会被转换为双向链表：
+
+- 试图往列表新添加一个字符串值，且这个字符串的长度超过 server.list_max_ziplist_value （默认值为 64 ）
+- ziplist 包含的节点超过 server.list_max_ziplist_entries （默认值为 512 ）
+
+[Redis列表list 底层原理 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/102422311)
+
+## 4.4 Set
+
+Set拥有两种编码：
+
+- intset：使用数组维护set，数组是有序的
+- hashtable：直接使用哈希表维护set
+
+满足如下条件时intset将会被转换成hashtable：
+
+- 保存了非整型的值
+- 元素数量超过了512个
+
+### 4.4.1 intset
+
+数据结构：
+
+```c++
+typedef struct intset {
+    // 这个编码用来决定contents的大小
+    uint32_t encoding;
+    uint32_t length;
+    int8_t contents[];
+} intset;
+```
+
+[redis/intset.h at 971b177fa338fe06cb67a930c6e54467d29ec44f · redis/redis (github.com)](https://github.com/redis/redis/blob/971b177fa338fe06cb67a930c6e54467d29ec44f/src/intset.h#L35)
+
+[面试官：说说Redis中Set数据类型的底层实现 - 掘金 (juejin.cn)](https://juejin.cn/post/6998360508462006308)
+
+## 4.5 zset(Sorted Set)
+
+zset有两种实现：
+
+- zipList：压缩列表
+- skipList：跳表
+
+满足如下条件时zipList会转换成skipList：
+
+- 节点数量大于等于128(server.zset_max_ziplist_entries)
+- 节点的长度大于等64(server.zset_max_ziplist_value)
+
+[Redis 跳跃表skiplist(深入理解,面试再也不用怕)_redis skiplist_妖四灵.Shuen的博客-CSDN博客](https://blog.csdn.net/wangxuelei036/article/details/106272680)
+
+![跳表](https://xds.asia/public/interview/2023-2-4-70e28030-df93-4d4d-9043-9e3afd7b975b.webp)
+
+- header：指向跳跃表的表头节点
+- tail：指向跳跃表的表尾节点
+- level：记录目前跳跃表内，层数最大的那个节点的层数(表头节点的层数不计算在内)
+- length：记录跳跃表的长度，也即是，跳跃表目前包含节点的数量(表头节点不计算在内)
+
+节点数据结构：
+
+```c++
+typedef struct zskiplistNode {
+    // 当前保存的值
+    sds ele;
+    // 分值，用于排序
+    double score;
+    // 前一个节点
+    struct zskiplistNode *backward;
+    // 当前层节点
+    struct zskiplistLevel {
+        struct zskiplistNode *forward;
+        // 跳表的跨度
+        unsigned long span;
+    } level[];
+} zskiplistNode;
+```
+
+[redis/server.h at 971b177fa338fe06cb67a930c6e54467d29ec44f · redis/redis (github.com)](https://github.com/redis/redis/blob/971b177fa338fe06cb67a930c6e54467d29ec44f/src/server.h#L1329)
+
+```c++
+// 跳表
+typedef struct zskiplist {
+    struct zskiplistNode *header, *tail;
+    // 跳表的长度
+    unsigned long length;
+    // 最高层数
+    int level;
+} zskiplist;
+
+// zset数据结构
+typedef struct zset {
+    dict *dict;
+    zskiplist *zsl;
+} zset;
+```
+
+# 5. Redis持久化方式
+
+## 5.1 RDB
+
+RDB即Redis Database，它会将Redis某一时刻的数据以文件的形式全量备份到磁盘。
+
+Redis提供了两个指令来生成RDB，一个是SAVE，这个命令会阻塞主线程，直到RDB生成完毕。
+
+另外一个则是BGSAVE，这时会fork一个子进程去专门负责写入RDB。
+
+在读取数据时用到了写时复制(COW)技术，fork创建出的子进程，**与父进程共享内存空间**。也就是说，如果子进程**不对内存空间进行写入操作的话，内存空间中的数据并不会复制给子进程**，这样创建子进程的速度就很快了！
+
+[LInux fork的写时复制(copy on write)_fork写时复制_富士康质检员张全蛋的博客-CSDN博客](https://blog.csdn.net/qq_34556414/article/details/108399543)
+
+## 5.2 AOF
+
+AOF即Append Only File，它会记录在redis服务器上执行过的命令来实现持久化的目的。
+
+[Redis详解（七）------ AOF 持久化 - YSOcean - 博客园 (cnblogs.com)](https://www.cnblogs.com/ysocean/p/9114267.html)
+
+Redis默认每秒执行一次AOF的写入。
+
+### 5.2.1 AOF重写
+
+为了防止AOF文件过大，当AOF的文件大小超过设定的阈值后，Redis就会启动AOF的文件压缩。
+
+压缩前：
+
+```shell
+sadd animals "cat"
+sadd animals "dog"
+sadd animals "cat"
+sadd animals "lion"
+```
+
+压缩后：
+
+```shell
+sadd animals "cat" "dog" "lion"
+```
+
+# 6. 内存
+
+## 6.1 内存过期策略
+
+Redis对于过期的key有两种删除策略：
+
+- 定期删除
+- 惰性删除
+
+### 6.1.1 定期删除
+
+Redis会将每个设置了过期时间的key放到一个独立的字典中，以后会定期按照某种算法来遍历里面的key。
+
+默认每秒进行10次扫描，每次会随机选取一些key，然后删除其中过期的key，若某次删除的数量超过了选取的`1/4`，则会重复这一步骤。
+
+### 6.1.2 惰性删除
+
+在客户端访问某个key时，若这个key过期，则会将其删除。
+
+## 6.2 内存淘汰策略
+
+当没有可以被删除的key，且Redis内存不足时，此时会根据内存淘汰策略删除一些没有过期的key。
+
+1. noeviction：当内存使用超过配置的时候会返回错误，不会驱逐任何键
+
+2. allkeys-lru：加入键的时候，如果过限，首先通过LRU算法驱逐最久没有使用的键
+
+3. volatile-lru：加入键的时候如果过限，首先从设置了过期时间的键集合中驱逐最久没有使用的键
+
+4. allkeys-random：加入键的时候如果过限，从所有key随机删除
+
+5. volatile-random：加入键的时候如果过限，从过期键的集合中随机驱逐
+
+6. volatile-ttl：从配置了过期时间的键中驱逐马上就要过期的键
+
+7. volatile-lfu：从所有配置了过期时间的键中驱逐使用频率最少的键
+
+8. allkeys-lfu：从所有键中驱逐使用频率最少的键
+
+### 6.2.1 LRU
+
+LRU即Least Recently Used-最近最少使用算法。
+
+LRU会维护一个双向链表，对于新加入的数据或者最近被访问的数据，它们会被存/移动到链表头部，当内存不足的时候删除链表尾部的数据。
+
+优点：
+
+- 好实现
+
+缺点：
+
+- 冷数据可能会把热数据顶掉
+
+### 6.2.2 LFU
+
+LFU即Least Frequently Used。其核心思想是“如果数据过去被访问多次，那么将来被访问的频率也更高”。
+
+LFU的每个数据块都有一个引用计数，所有数据块按照引用计数排序，具有相同引用计数的数据块则按照时间排序。
+
+1. 新加入数据插入到队列尾部（因为引用计数为1）；
+
+2. 队列中的数据被访问后，引用计数增加，队列重新排序；
+
+3. 当需要淘汰数据时，将已经排序的列表最后的数据块删除。
+
+[16 | LFU算法和其他算法相比有优势吗？ (geekbang.org)](https://time.geekbang.org/column/article/413038)
+
+[LFU 缓存 - 提交记录 - 力扣（LeetCode）](https://leetcode.cn/submissions/detail/419560284/)
