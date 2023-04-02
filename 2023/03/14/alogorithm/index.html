@@ -2,39 +2,79 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
     <head>
-        <meta charset="UTF-8">
+        <meta charset="UTF-8" />
         <title>算法 | IceOfSummerの博客</title>
-        <meta name="author" content="IceOfSummer">
-        <meta name="description" content="用来用去还是自己搭的博客靠谱">
-        <meta name="keywords" content="">
-        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-        <script src="https://cdn.staticfile.org/vue/3.2.45/vue.global.prod.min.js"></script>
-        <script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
-        <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css">
-        <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.2.1/css/all.min.css">
-        
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
-        
-        
-        
-        <link rel="stylesheet" href="/css/fonts.min.css">
-        <link rel="stylesheet" href="/css/particlex.css">
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="用来用去还是自己搭的博客靠谱" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="/css/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
     <!-- hexo injector head_end start --><script>window.addEventListener("load",()=>{const e="$toTopHeight";let t=0;const n="lazy";let o=[...document.getElementsByTagName("img")];console.log(`图片懒加载: 一共找到了${o.length}张图片`),setTimeout(()=>{t++,l()},500);const i=()=>{l()};function l(){if(0===o.length)return console.log("所有图片均已加载"),void window.removeEventListener("scroll",i);const e=[];for(let t=0,n=o.length;t<n;++t){const n=o[t];s(n)?(console.log("已经加载图片: ",n),r(n)):e.push(n)}o=e}function r(e){const t=e.getAttribute(n);t&&(e.setAttribute("src",t),e.removeAttribute(n))}function s(n){if(!n)return!1;const o=function(n){const o=n[e];if(o&&o.version===t)return n[e].value;let i=n,l=0;do{l+=i.offsetTop,i=i.offsetParent}while(i);return n[e]={value:l,version:t},l}(n);return document.documentElement.scrollTop+document.documentElement.clientHeight>=o}window.addEventListener("scroll",i),window.addEventListener("resize",()=>{t++})});</script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head>
     <body>
-        <div id="loading" style="height: 100vh; width: 100vw; left: 0; top: 0; position: fixed; display: flex; z-index: 2147483647; background: #fff; transition: opacity 0.3s ease-out; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; pointer-events: none">
-    <div style="width: 50vmin; height: 50vmin; margin: auto; padding: 50px; border-radius: 50%; display: flex; border: solid 10px #a3ddfb">
-        <div style="margin: auto; text-align: center">
-            <h2>LOADING</h2>
-            <p>加载过慢请开启缓存，浏览器默认开启</p>
-            <img src="/images/loading.gif" style="height: 50px; border-radius: 0">
-        </div>
-    </div>
-</div>
-
         <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
             <transition name="into">
-            <div id="main" v-show="showpage" style="display: -not-none">
-                <nav id="menu">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
     <div class="desktop-menu">
         <a class="title" href="/">
             <span>ICEOFSUMMERの博客</span>
@@ -45,25 +85,25 @@
             <span>&ensp;Home</span>
         </a>
         
-        <a href="/about">
+        <a href="/">
             <i class="fa-solid fa-id-card fa-fw"></i>
             <span>&ensp;About</span>
         </a>
         
-        <a href="/archives">
+        <a href="/">
             <i class="fa-solid fa-box-archive fa-fw"></i>
             <span>&ensp;Archives</span>
         </a>
         
     </div>
-    <div :class="&quot;phone-menu &quot; + menushow" id="phone-menu">
-        <div class="curtain" @click="menushow = !menushow" v-show="menushow"></div>
-        <div class="title" @click="menushow = !menushow">
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
             <i class="fa-solid fa-bars fa-fw"></i>
             <span>&emsp;ICEOFSUMMERの博客</span>
         </div>
         <transition name="slide">
-        <div class="items" v-show="menushow">
+        <div class="items" v-show="showMenu">
             
             <a href="/">
                 <div class="item">
@@ -74,7 +114,7 @@
                 </div>
             </a>
             
-            <a href="/about">
+            <a href="/">
                 <div class="item">
                     <div style="min-width: 20px; max-width: 50px; width: 10%">
                         <i class="fa-solid fa-id-card fa-fw"></i>
@@ -83,7 +123,7 @@
                 </div>
             </a>
             
-            <a href="/archives">
+            <a href="/">
                 <div class="item">
                     <div style="min-width: 20px; max-width: 50px; width: 10%">
                         <i class="fa-solid fa-box-archive fa-fw"></i>
@@ -99,7 +139,7 @@
 
                 <div class="article">
     <div>
-        <h1>算法 </h1>
+        <h1>算法</h1>
     </div>
     <div class="info">
         <span class="date">
@@ -112,7 +152,8 @@
         
     </div>
     
-    <div class="content" v-pre>
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
         <p><a href="/algorithm/matrix-traverse">矩阵遍历常用手法</a></p>
 
     </div>
@@ -130,31 +171,36 @@
 </div>
 
                 <footer id="footer">
-    <div class="footer-wrap">
+    <div id="footer-wrap">
         <div>
             &copy;
             2022 - 2023 IceOfSummerの博客
-            <span class="footer-icon">
+            <span id="footer-icon">
                 <i class="fa-solid fa-font-awesome fa-fw"></i>
             </span>
             &commat;IceOfSummer
         </div>
-        <div>Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp; <a target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a></div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
         
     </div>
 </footer>
 
             </div>
             </transition>
-            <div id="showimg">
-                <img id="showimg-content">
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
             </div>
+            </transition>
+            
         </div>
-        <script src="/js/functions.js"></script>
-<script src="/js/particlex.js"></script>
-
-
-
+        <script src="/js/main.js"></script>
+        
+        
 <script
     src="https://giscus.app/client.js"
     data-repo="IceOfSummer/iceofsummer.github.io"
@@ -168,7 +214,6 @@
     data-input-position="top"
     data-theme="preferred_color_scheme"
     data-lang="zh-CN"
-    data-loading="lazy"
     crossorigin
     async
 ></script>
@@ -177,5 +222,6 @@
 
 
 
+        
     </body>
 </html>
