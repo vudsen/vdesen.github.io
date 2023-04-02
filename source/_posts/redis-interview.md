@@ -386,6 +386,22 @@ address                                |                          |        |
 | entryX  | ？       | ziplist的各个节点。                 |
 | zlend   | uint8_t  | 常量0b111111，用于标记ziplist末尾。 |
 
+每个`entry`的结构是这样的：
+
+```text
++-----------------------+----------+---------+
+| previous_entry_length | encoding | content |
++-----------------------+----------+---------+
+```
+
+`previous_entry_length`：前面一个节点的长度(字节)。若前面一个节点的长度小于254字节，则该属性占1个字节的宽度，反正则是占5个字节的宽度，第一个字节是常量`0xFE`(254)
+
+`encoding`：记录content的类型
+
+`content`：保存节点的值
+
+我们可以发现`ziplist`不能从头开始遍历，因为每个节点的长度都是不一样的，在遍历的时候需要根据zltail的值<font color=red>从尾部开始向前遍历</font>。
+
 ### 4.2.2 hashtable
 
 hashtable就和Redis最外层的字典是差不多的了。
@@ -572,6 +588,26 @@ Redis会将每个设置了过期时间的key放到一个独立的字典中，以
 
 8. allkeys-lfu：从所有键中驱逐使用频率最少的键
 
+
+关于LRU和LFU，在redisObject里会保存相关的参数：
+
+```c++
+struct redisObject {
+    unsigned type:4;
+    unsigned encoding:4;
+    unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or
+                            * LFU data (least significant 8 bits frequency
+                            * and most significant 16 bits access time). */
+    int refcount;
+    void *ptr;
+};
+```
+
+[redis/README.md at cb1717865804fdb0561e728d2f3a0a1138099d9d · redis/redis (github.com)](https://github.com/redis/redis/blob/cb1717865804fdb0561e728d2f3a0a1138099d9d/README.md?plain=1#L323)
+
+- 当使用LRU算法时，`lru`整个值都用来表示相关访问时间。
+- 当使用LFU算法时，低8位表示访问频率，高16位表示上一次访问时间
+
 ### 6.2.1 LRU
 
 LRU即Least Recently Used-最近最少使用算法。
@@ -588,16 +624,32 @@ LRU会维护一个双向链表，对于新加入的数据或者最近被访问�
 
 ### 6.2.2 LFU
 
-LFU即Least Frequently Used。其核心思想是“如果数据过去被访问多次，那么将来被访问的频率也更高”。
+LFU即Least Frequently Used-最不经常使用。其核心思想是“如果数据过去被访问多次，那么将来被访问的频率也更高”。
 
-LFU的每个数据块都有一个引用计数，所有数据块按照引用计数排序，具有相同引用计数的数据块则按照时间排序。
+[LFU 缓存 - 提交记录 - 力扣（LeetCode）](https://leetcode.cn/submissions/detail/419560284/)
 
-1. 新加入数据插入到队列尾部（因为引用计数为1）；
+Redis的LFU和上面的LFU有一些不一样，一般的LFU有如下缺点：
 
-2. 队列中的数据被访问后，引用计数增加，队列重新排序；
+- 新增的缓存容易被删除
 
-3. 当需要淘汰数据时，将已经排序的列表最后的数据块删除。
+而Redis在此基础上会将每个数据的访问次数设置为`5`，每次访问会根据其上次访问时间<font color=red>扣除</font>一定的访问次数，然后再根据生成的一个随机数，决定是否对访问次数字段加一：
+
+```c++
+uint8_t LFULogIncr(uint8_t counter) {
+    if (counter == 255) return 255;
+    double r = (double)rand()/RAND_MAX;
+    double baseval = counter - LFU_INIT_VAL;
+    if (baseval < 0) baseval = 0;
+    // 访问次数越多，加一的概率越小
+    double p = 1.0/(baseval*server.lfu_log_factor+1);
+    if (r < p) counter++;
+    return counter;
+}
+```
+
+其中`server.lfu_log_factor`默认为10。
+
+因为访问计数器的长度为8位，最大为255，如果每次访问都加一，很可能会导致溢出。
 
 [16 | LFU算法和其他算法相比有优势吗？ (geekbang.org)](https://time.geekbang.org/column/article/413038)
 
-[LFU 缓存 - 提交记录 - 力扣（LeetCode）](https://leetcode.cn/submissions/detail/419560284/)
