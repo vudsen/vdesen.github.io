@@ -58,7 +58,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <!-- hexo injector head_end start --><script>window.addEventListener("load",()=>{const e="$toTopHeight";let t=0;const n="lazy";let o=[...document.getElementsByTagName("img")];console.log(`图片懒加载: 一共找到了${o.length}张图片`),setTimeout(()=>{t++,l()},500);const i=()=>{l()};function l(){if(0===o.length)return console.log("所有图片均已加载"),void window.removeEventListener("scroll",i);const e=[];for(let t=0,n=o.length;t<n;++t){const n=o[t];s(n)?(console.log("已经加载图片: ",n),r(n)):e.push(n)}o=e}function r(e){const t=e.getAttribute(n);t&&(e.setAttribute("src",t),e.removeAttribute(n))}function s(n){if(!n)return!1;const o=function(n){const o=n[e];if(o&&o.version===t)return n[e].value;let i=n,l=0;do{l+=i.offsetTop,i=i.offsetParent}while(i);return n[e]={value:l,version:t},l}(n);return document.documentElement.scrollTop+document.documentElement.clientHeight>=o}window.addEventListener("scroll",i),window.addEventListener("resize",()=>{t++})});</script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 6.3.0"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -83,14 +83,24 @@
             <span>&ensp;Home</span>
         </a>
         
-        <a href="/">
+        <a href="/about">
             <i class="fa-solid fa-id-card fa-fw"></i>
             <span>&ensp;About</span>
         </a>
         
-        <a href="/">
+        <a href="/archives">
             <i class="fa-solid fa-box-archive fa-fw"></i>
             <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
         </a>
         
     </div>
@@ -112,7 +122,7 @@
                 </div>
             </a>
             
-            <a href="/">
+            <a href="/about">
                 <div class="item">
                     <div style="min-width: 20px; max-width: 50px; width: 10%">
                         <i class="fa-solid fa-id-card fa-fw"></i>
@@ -121,12 +131,30 @@
                 </div>
             </a>
             
-            <a href="/">
+            <a href="/archives">
                 <div class="item">
                     <div style="min-width: 20px; max-width: 50px; width: 10%">
                         <i class="fa-solid fa-box-archive fa-fw"></i>
                     </div>
                     <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
                 </div>
             </a>
             
@@ -158,7 +186,136 @@
         <div id="posts">
             
 
-<div class="post">
+<div class="post post-partial-show">
+    <a href="/2023/04/02/mysql-interview/">
+        <h2 class="post-title">MySql面试</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/4/2
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <h1 id="1-B树和B-树之间的区别"><a href="#1-B树和B-树之间的区别" class="headerlink" title="1. B树和B+树之间的区别"></a>1. B树和B+树之间的区别</h1><blockquote>
+<p>B树有些博客上会写成B-树，部分博客甚至读成了B减树，其实这个减号只是一个连接符，没有任何意义</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.cs.usfca.edu/~galles/visualization/BTree.html">B-Tree Visualization (usfca.edu)</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cs.usfca.edu/~galles/visualization/BPlusTree.html">B+ Tree Visualization (usfca.edu)</a></p>
+<p>B树和B+树的区别：</p>
+<ul>
+<li>B+树只会在叶子节点存储数据，而B树每个节点上都会有数据</li>
+<li>B+树每个叶子节点之间有一个指针乡相连</li>
+</ul>
+<h1 id="2-高度为3的B-树能存多少条数据"><a href="#2-高度为3的B-树能存多少条数据" class="headerlink" title="2. 高度为3的B+树能存多少条数据"></a>2. 高度为3的B+树能存多少条数据</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6974225353371975693">MySQL系列（4）— InnoDB数据页结构 - 掘金 (juejin.cn)</a></p>
+<p>在InnoDB中，索引默认使用的数据结构为B+树，而B+树里的每个节点都是一个页，默认的页大小为<code>16KB</code>。</p>
+<p><img lazy="https://xds.asia/public/post/2023-3-0-fed73c7c-b6fb-40e4-9b27-1a95fccd77c8.webp" alt="page"></p>
+<h1 id="3-简单说一下InnoDB事务实现原理"><a href="#3-简单说一下InnoDB事务实现原理" class="headerlink" title="3. 简单说一下InnoDB事务实现原理"></a>3. 简单说一下InnoDB事务实现原理</h1><p>事务ACID：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>别名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Atomicity</strong></td>
+<td>原子性</td>
+<td>原子性是指事务是一个不可分割的工作单位，事务中的操作要么都发生，要么都不发生</td>
+</tr>
+<tr>
+<td><strong>Consistency</strong></td>
+<td>一致性</td>
+<td>事务前后数据的完整性必须保持一致</td>
+</tr>
+<tr>
+<td><strong>Isolation</strong></td>
+<td>隔离性</td>
+<td>事务的隔离性是多个用户并发访问数据库时，数据库为每一个用户开启的事务，不能被其他事务的操作数据所干扰，多个并发事务之间要相互隔离</td>
+</tr>
+<tr>
+<td><strong>Durability</strong></td>
+<td>持久性</td>
+<td>持久性是指一个事务一旦被提交，它对数据库中数据的改变就是永久性的，接下来即使数据库发生故障也不应该对其有任何影响</td>
+</tr>
+</tbody></table>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/48327345">一文了解InnoDB事务实现原理 - 知乎 (zhihu.com)</a></p>
+<p>上面那个比较深入，下面这个比较好理解一些：</p>
+<p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7012937835967692808">图解InnoDB事务实现原理｜Redo Log&amp;Undo Log - 掘金 (juejin.cn)</a></p>
+<h1 id="4-MySql的三大日志是哪些"><a href="#4-MySql的三大日志是哪些" class="headerlink" title="4.MySql的三大日志是哪些"></a>4.MySql的三大日志是哪些</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7090530790156533773">MySQL三大日志(binlog,redolog,undolog)详解 - 掘金 (juejin.cn)</a></p>
+<p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903842505555981">聊聊MVCC和Next-key Locks - 掘金 (juejin.cn)</a></p>
+<h1 id="5-MySql当前读和快照度"><a href="#5-MySql当前读和快照度" class="headerlink" title="5. MySql当前读和快照度"></a>5. MySql当前读和快照度</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7055073479866974238">mysql快照读原理实现 - 掘金 (juejin.cn)</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/166152616">MySQL 的可重复读到底是怎么实现的？图解 ReadView 机制 - 知乎 (zhihu.com)</a></p>
+<p>这里其实有个问题，如果我只是单独的一条查询语句，没有开启事务，那么怎么去快照读呢？</p>
+<p>这个我自己查了一下，众所周知，MySql里有一个autocommit属性，对于单条SQL，这个值一定是true，那么是不是说明我们每条SQL都会被认作是一个事务呢？</p>
+<p>然后我在官方文档里查了一下：</p>
+<p><img lazy="https://xds.asia/public/interview/2023-2-0-bd1f976d-ac67-49a3-979b-1b9cd4fa2c6d.webp" alt="每条SQL都是一个单独的事务"></p>
+<p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/innodb-autocommit-commit-rollback.html">MySQL :: MySQL 5.7 Reference Manual :: 14.7.2.2 autocommit, Commit, and Rollback</a></p>
+<p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/innodb-autocommit-commit-rollback.html">MySQL :: MySQL 8.0 Reference Manual :: 15.7.2.2 autocommit, Commit, and Rollback</a></p>
+<p>不管是8.0还是5.7，都是这样写的，那么就可以说的通了。每次执行单条SQL都会拿到一个事务id，然后再去进行快照读。</p>
+<p>那么什么是当前读呢，使用下面的sql语句就是当前读：</p>
+<pre><code class="sql"># 加共享锁
+SELECT ... LOCK IN SHARE MODE 
+# 加排它锁
+SELECT ... FROM UPDATE
+</code></pre>
+<p>这两条语句的原理就是给对应的行加上<font color=red>共享锁(读锁)或排它锁(写锁)</font>，当有事务进行增删改时也会加排它锁，对于共享锁，允许多个事务持有(即允许多读)，对于排它锁，则只允许一个事务持有(即只能一个人写，且除了自己其它人都不能读)。</p>
+<p>在排它锁和共享锁下读的的数据就是当前读，这份数据永远是最新的(此时若有其它事务想要修改相关的行，都会被阻塞)。其它状况则就是快照读了，通过MVCC创建ReadView进行数据的读取。</p>
+<h1 id="6-MySql的MVCC"><a href="#6-MySql的MVCC" class="headerlink" title="6. MySql的MVCC"></a>6. MySql的MVCC</h1><p>MVCC(Multiversion Concurrency Control)多版本并发控制。</p>
+<p>首先在在MVCC下，每个表都会多出几个隐藏的列，分别为隐藏主键(row_id)、事务id(trx_id)、回滚指针(roll_pointer)。</p>
+<p>MVCC还有两个重要的组成：undo log(回滚日志)、ReadView。</p>
+<p>更详细的就不说了，因为上面的链接里面都有，主要是下面这四个关系：</p>
+<p>（1）当【版本链中记录的 trx_id 等于当前事务id（trx_id &#x3D; creator_trx_id）】时，说明版本链中的这个版本是当前事务修改的，所以该快照记录对当前事务可见。</p>
+<p>（2）当【版本链中记录的 trx_id 小于活跃事务的最小id（trx_id &lt; min_trx_id）】时，说明版本链中的这条记录已经提交了，所以该快照记录对当前事务可见。</p>
+<p>（3）当【版本链中记录的 trx_id 大于下一个要分配的事务id（trx_id &gt; max_trx_id）】时，该快照记录对当前事务不可见。</p>
+<p>（4）当【版本链中记录的 trx_id 大于等于最小活跃事务id】且【版本链中记录的trx_id小于下一个要分配的事务id】（min_trx_id&lt;&#x3D; trx_id &lt; max_trx_id）时，如果版本链中记录的 trx_id 在活跃事务id列表 m_ids 中，说明生成 ReadView 时，修改记录的事务还没提交，所以该快照记录对当前事务不可见；否则该快照记录对当前事务可见。</p>
+<h2 id="6-1-RepeatableRead是怎么实现的"><a href="#6-1-RepeatableRead是怎么实现的" class="headerlink" title="6.1 RepeatableRead是怎么实现的"></a>6.1 RepeatableRead是怎么实现的</h2><p>我们都知道，RepeatableRead相比ReadCommited能够避免不可重复读的问题(实际也能够避免幻读，是通过加间隙锁实现的)。</p>
+<p>首先我们来看ReadCommitted，使用mysql执行如下指令(假如我们叫它事务A)</p>
+<pre><code class="sql">set session transaction isolation level read committed;
+begin;
+update test set xid = 2 where id = 1;
+# 等一会再提交
+commit;
+</code></pre>
+<p>然后再开一个mysql执行如下指令(假如我们叫它事务B)：</p>
+<pre><code class="sql">set session transaction isolation level read committed;
+begin;
+select * from test where id = 1;
+# 提交上面那个指令后再执行下面这条
+select * from test where id = 1;
+</code></pre>
+<p>这里就不放图了，大家都知道第二次读取会不一样。</p>
+<p>这回我们再将隔离级别设置为RepeatableRead，并同样执行上面的指令。</p>
+<p>这次执行后，<font color=red>发现两次查询的结果都是一样的</font>，而且在事务A执行更新后且没有提交时，B再去读，<font color=red>并没有发生阻塞，因为在修改数据的时候会加排它锁，在读的时候要么是当前读要么是快照读，</font>如果是当前读，那么读操作会堵塞，说明在B这里是快照读，是创建了ReadView的，通过ReadView有效地避免了不可重复读。</p>
+<p>我们再用同样的方式去验证ReadCommited级别的读，发现同样是快照读，那么凭什么RepeatableRead不会读到新值，而ReadCommited会呢？</p>
+<p>这里我画了一个流程图方便理解：</p>
+<p><img lazy="https://xds.asia/public/interview/2023-2-1-7f41e3a0-6d4e-42e8-b44e-d85eecdbd465.webp" alt="流程图"></p>
+<p><del>图画的可能不太好，不过应该能看懂</del></p>
+<p>网上大部分人讲的都是以ReadCommited级别为例子的，即m_ids里的事务提交后可读，但其实在RepeatableRead隔离级别下是读不了的，只能走undo_log进行回滚。</p>
+<hr>
+<p><font color=red>这里可能有点错误，在ReadCommited下可以读已经提交的事务，所以如果trx_id大于等于mid_id，只需要判断对应的事务是否已经提交(或者trx_id指向自己)就能读</font></p>
+<h1 id="7-RepeatableRead真的不能避免幻读吗"><a href="#7-RepeatableRead真的不能避免幻读吗" class="headerlink" title="7. RepeatableRead真的不能避免幻读吗?"></a>7. RepeatableRead真的不能避免幻读吗?</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_71777195/article/details/126968432">美团三面：一直追问我， MySQL 幻读被彻底解决了吗？_肥肥技术宅的博客-CSDN博客</a></p>
+<h1 id="8-为什么bin-log不能用作崩溃后的恢复"><a href="#8-为什么bin-log不能用作崩溃后的恢复" class="headerlink" title="8. 为什么bin_log不能用作崩溃后的恢复"></a>8. 为什么bin_log不能用作崩溃后的恢复</h1><p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/463438061">mysql 为什么不能用binlog来做数据恢复？ - 知乎 (zhihu.com)</a></p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/04/02/mysql-interview/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post post-partial-show">
     <a href="/2023/03/28/redis-interview/">
         <h2 class="post-title">redis面试</h2>
     </a>
@@ -670,6 +827,69 @@ sadd animals &quot;lion&quot;
 <p>其中<code>server.lfu_log_factor</code>默认为10。</p>
 <p>因为访问计数器的长度为8位，最大为255，如果每次访问都加一，很可能会导致溢出。</p>
 <p><a target="_blank" rel="noopener" href="https://time.geekbang.org/column/article/413038">16 | LFU算法和其他算法相比有优势吗？ (geekbang.org)</a></p>
+<h1 id="7-Redis集群"><a href="#7-Redis集群" class="headerlink" title="7. Redis集群"></a>7. Redis集群</h1><p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1751001">一文搞懂 Redis 的三种集群方案 - 腾讯云开发者社区-腾讯云 (tencent.com)</a></p>
+<p>Redis支持三种集群方案：</p>
+<ul>
+<li>主从复制</li>
+<li>哨兵模式</li>
+<li>Cluster模式</li>
+</ul>
+<h2 id="7-1-主从复制"><a href="#7-1-主从复制" class="headerlink" title="7.1 主从复制"></a>7.1 主从复制</h2><p>主从复制主要由一个主数据库与一个或多个从数据库实例组成。</p>
+<p>客户端可对主数据库进行读写操作，对从数据库进行读操作，主数据库写入的数据会实时自动同步给从数据库。</p>
+<p>具体工作机制为：</p>
+<ol>
+<li>slave启动后，向master发送SYNC命令，master接收到SYNC命令后通过bgsave保存快照，并使用缓冲区记录保存快照这段时间内执行的写命令</li>
+<li>master将保存的快照文件发送给slave，并继续记录执行的写命令</li>
+<li>slave接收到快照文件后，加载快照文件，载入数据</li>
+<li>master快照发送完后开始向slave发送缓冲区的写命令，slave接收命令并执行，完成复制初始化</li>
+<li>此后master每次执行一个写命令都会同步发送给slave，保持master与slave之间数据的一致性</li>
+</ol>
+<p>优点：</p>
+<ul>
+<li>master能自动将数据同步到slave，可以进行读写分离，分担master的读压力</li>
+<li>master、slave之间的同步是以非阻塞的方式进行的，同步期间，客户端仍然可以提交查询或更新请求</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li><p>难以支持在线扩容，Redis的容量受限于单机配置</p>
+</li>
+<li><p>master宕机，如果宕机前数据没有同步完，则切换IP后会存在数据不一致的问题</p>
+</li>
+<li><p>不具备自动容错与恢复功能，master或slave的宕机都可能导致客户端请求失败，需要等待机器重启或手动切换客户端IP才能恢复</p>
+</li>
+</ul>
+<h2 id="7-2-哨兵模式"><a href="#7-2-哨兵模式" class="headerlink" title="7.2 哨兵模式"></a>7.2 哨兵模式</h2><p>哨兵模式基于主从复制模式，只是引入了哨兵来监控与自动处理故障。</p>
+<p>哨兵顾名思义，就是来为Redis集群站哨的，一旦发现问题能做出相应的应对处理。其功能包括:</p>
+<ol>
+<li>监控master、slave是否正常运行</li>
+<li>当master出现故障时，能自动将一个slave转换为master（大哥挂了，选一个小弟上位）</li>
+<li>多个哨兵可以监控同一个Redis，哨兵之间也会自动监控</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/06ab9daf921d">Redis哨兵（Sentinel）模式 - 简书 (jianshu.com)</a></p>
+<p>优点：</p>
+<ol>
+<li>哨兵模式基于主从复制模式，所以主从复制模式有的优点，哨兵模式也有</li>
+<li>哨兵模式下，master挂掉可以自动进行切换，系统可用性更高</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>同样也继承了主从模式难以在线扩容的缺点，Redis的容量受限于单机配置</li>
+<li>需要额外的资源来启动sentinel进程，实现相对复杂一点，同时slave节点作为备份节点不提供服务</li>
+</ol>
+<h2 id="7-3-Cluster模式"><a href="#7-3-Cluster模式" class="headerlink" title="7.3 Cluster模式"></a>7.3 Cluster模式</h2><p>Cluster采用无中心结构,它的特点如下：</p>
+<ol>
+<li>所有的redis节点彼此互联(PING-PONG机制),内部使用二进制协议优化传输速度和带宽</li>
+<li>节点的fail是通过集群中超过半数的节点检测失效时才生效</li>
+<li>客户端与redis节点直连,不需要中间代理层.客户端不需要连接集群所有节点,连接集群中任何一个可用节点即可</li>
+</ol>
+<p>Cluster模式的具体工作机制：</p>
+<ol>
+<li>在Redis的每个节点上，都有一个插槽（slot），取值范围为0-16383</li>
+<li>当我们存取key的时候，Redis会根据CRC16的算法得出一个结果，然后把结果对16384求余数，这样每个key都会对应一个编号在0-16383之间的哈希槽，通过这个值，去找到对应的插槽所对应的节点，然后直接自动跳转到这个对应的节点上进行存取操作</li>
+<li>为了保证高可用，Cluster模式也引入主从复制模式，一个主节点对应一个或者多个从节点，当主节点宕机的时候，就会启用从节点</li>
+<li>当其它主节点ping一个主节点A时，如果半数以上的主节点与A通信超时，那么认为主节点A宕机了。如果主节点A和它的从节点都宕机了，那么该集群就无法再提供服务了</li>
+</ol>
+<p>Cluster模式集群节点最小配置6个节点(3主3从，因为需要半数以上)，其中主节点提供读写操作，从节点作为备用节点，不提供请求，只作为故障转移使用。</p>
 
             
         </div>
@@ -681,7 +901,7 @@ sadd animals &quot;lion&quot;
     <a href="/2023/03/28/redis-interview/" class="go-post">阅读全文</a>
 </div>
 
-<div class="post">
+<div class="post post-partial-show">
     <a href="/2023/03/23/springboot-interview/">
         <h2 class="post-title">springboot源码</h2>
     </a>
@@ -716,9 +936,76 @@ public class AppConfig &#123;
 &#125;
 </code></pre>
 <h2 id="1-1-生命周期"><a href="#1-1-生命周期" class="headerlink" title="1.1 生命周期"></a>1.1 生命周期</h2><p>可以在<code>AbstractAutowireCapableBeanFactory#doCreateBean</code>中看到完整的bean生成流程。</p>
-<p>构造方法 -&gt; 普通对象 -&gt; 依赖注入 -&gt; 初始化(afterPropertiesSet) -&gt; 初始化后(AOP) -&gt; 代理对象 -&gt; 放入容器</p>
-<p>Spring在注入的时候先根据类型去找，若找到多个，再根据名称去筛选。</p>
-<h2 id="1-2-AOP"><a href="#1-2-AOP" class="headerlink" title="1.2 AOP"></a>1.2 AOP</h2><p>常见的动态代理有两种：</p>
+<p>大致分为如下过程：</p>
+<p>1.对Bean进行实例化</p>
+<p>2.依赖注入</p>
+<p>3.如果Bean实现了<code>BeanNameAware</code>接口，Spring将调用<code>setBeanName()</code>，设置 <code>Bean</code>的 id（xml文件中bean标签的id）</p>
+<p>4.如果Bean实现了<code>BeanFactoryAware</code>接口，Spring将调用<code>setBeanFactory()</code></p>
+<p>5.如果Bean实现了<code>ApplicationContextAware</code>接口，Spring容器将调用<code>setApplicationContext()</code></p>
+<p>6.如果存在<code>BeanPostProcessor</code>，Spring将调用它们的<code>postProcessBeforeInitialization</code>（预初始化）方法，在Bean初始化前对其进行处理</p>
+<p>7.如果Bean实现了<code>InitializingBean</code>接口，Spring将调用它的<code>afterPropertiesSet</code>方法，然后调用xml定义的 init-method方法(初始化)，两个方法作用类似，都是在初始化 bean 的时候执行</p>
+<p>8.如果存在<code>BeanPostProcessor</code>，Spring将调用它们的<code>postProcessAfterInitialization</code>（后初始化）方法，在Bean初始化后对其进行处理</p>
+<p>9.Bean初始化完成，供应用使用，直到应用被销毁</p>
+<p>10.如果Bean实现了<code>DisposableBean</code>接口，Spring将调用它的<code>destory</code>方法，然后调用在xml中定义的 <code>destory-method</code>方法，这两个方法作用类似，都是在Bean实例销毁前执行。</p>
+<h2 id="1-2-BeanFactory和FactoryBean的区别"><a href="#1-2-BeanFactory和FactoryBean的区别" class="headerlink" title="1.2 BeanFactory和FactoryBean的区别"></a>1.2 BeanFactory和FactoryBean的区别</h2><p><code>BeanFactory</code>：管理Bean的容器，Spring中生成的Bean都是由这个接口的实现来管理的。</p>
+<p><code>FactoryBean</code>：让开发者以编程的方式来创建一个bean，一般用于创建比较复杂的bean。</p>
+<h2 id="1-3-Bean注入容器有哪些方式"><a href="#1-3-Bean注入容器有哪些方式" class="headerlink" title="1.3 Bean注入容器有哪些方式"></a>1.3 Bean注入容器有哪些方式</h2><p>1、使用<code>@Configuration</code>与<code>@Bean</code>注解</p>
+<p>2、使用<code>@Controller</code>、<code>@Service</code>、<code>@Repository</code>、<code>@Component</code> 注解标注该类，然后启用<code>@ComponentScan</code>自动扫描</p>
+<p>3、使用<code>@Import</code> 方法，使用@Import注解把bean导入到当前容器中。</p>
+<h2 id="1-4-Bean的作用域"><a href="#1-4-Bean的作用域" class="headerlink" title="1.4 Bean的作用域"></a>1.4 Bean的作用域</h2><p>1、singleton：单例，Spring中的bean默认都是单例的。</p>
+<p>2、prototype：每次请求都会创建一个新的bean实例。</p>
+<p>3、request：每一次HTTP请求都会产生一个新的bean，该bean仅在当前HTTP request内有效。</p>
+<p>4、session：每一次HTTP请求都会产生一个新的bean，该bean仅在当前HTTP session内有效。</p>
+<p>5、application：限定一个Bean的作用域为<code>ServletContext</code>的生命周期。该作用域仅适用于web的Spring WebApplicationContext环境。</p>
+<h2 id="1-5-自动装配的方式"><a href="#1-5-自动装配的方式" class="headerlink" title="1.5 自动装配的方式"></a>1.5 自动装配的方式</h2><p><code>@Autowired</code>注解会优先根据类型来注入，当有多个bean时，会尝试根据变量名来注入(byname)，如果没有找到就抛出异常。</p>
+<p>可以通过<code>@Qualifier</code>来指定要注入的bean的名称。</p>
+<p><code>@Resource</code>注解会优先byname，找不到再byType。</p>
+<h2 id="1-6-Bean和-Component的区别"><a href="#1-6-Bean和-Component的区别" class="headerlink" title="1.6 @Bean和@Component的区别"></a>1.6 @Bean和@Component的区别</h2><p><code>@Bean</code>只能作用于方法上，表示这个方法会返回一个Bean，一般需要配合<code>@Configuration</code>使用。</p>
+<p><code>@Component</code>只能作用于类型上，表示这个类会作为组件类，并告诉Spring要为这个类创建bean。</p>
+<h3 id="1-6-1-Bean必须在-Configuration里使用吗"><a href="#1-6-1-Bean必须在-Configuration里使用吗" class="headerlink" title="1.6.1 @Bean必须在@Configuration里使用吗?"></a>1.6.1 @Bean必须在@Configuration里使用吗?</h3><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/40256702/spring-bean-can-still-work-without-configuration">Spring: @Bean can still work without @Configuration - Stack Overflow</a></p>
+<p><code>@Bean</code>在<code>@Configuration</code>表示的类里使用时，Spring会为其自动创建一个动态代理对象，在同一个配置类中可以直接调用方法来获取Bean：</p>
+<pre><code class="java">@Configuration
+public class ExampleConfiguration &#123;
+    
+    @Bean
+    public Datasource datasource() &#123;
+        BasicDatasource datasource = new BasicDatasource();
+        // ...
+        return datasource;
+    &#125;
+    
+    public PlatformTransactionManager transactionManager() &#123;
+          // 注意这里是直接调用了方法，每次调用都会返回同一个bean，并不会多次创建
+        return new DataSourceTransactionManager(datasource());
+    &#125;
+    
+&#125;
+</code></pre>
+<p>而在非<code>@Configuration</code>下定义的<code>@Bean</code>会以Lite Mode运作，在该模式下调用其它<code>@Bean</code>方法时，则是普通的方法调用(没有代理对象去拦截调用)。</p>
+<h2 id="1-7-Spring怎么解决循环依赖问题"><a href="#1-7-Spring怎么解决循环依赖问题" class="headerlink" title="1.7 Spring怎么解决循环依赖问题"></a>1.7 Spring怎么解决循环依赖问题</h2><p>对于构造器注入的循环依赖：Spring处理不了，直接抛出<code>BeanCurrentlylnCreationException</code>异常。</p>
+<p>非单例循环依赖：无法处理。</p>
+<p>单例模式下属性注入的循环依赖会通过三级缓存处理循环依赖：</p>
+<p><code>singletonObjects</code>：完成了初始化的单例对象map，bean name –&gt; bean instance</p>
+<p><code>earlySingletonObjects</code>：完成实例化未初始化的单例对象map，bean name –&gt; bean instance</p>
+<p><code>singletonFactories</code>： 单例对象工厂map，bean name –&gt; ObjectFactory，单例对象实例化完成之后会加入singletonFactories。</p>
+<p>假如A依赖了B的实例对象，同时B也依赖A的实例对象。</p>
+<ol>
+<li>A首先完成了实例化，并且将自己添加到singletonFactories中</li>
+<li>接着进行依赖注入，发现自己依赖对象B，此时就尝试去get(B)</li>
+<li>发现B还没有被实例化，对B进行实例化</li>
+<li>然后B在初始化的时候发现自己依赖了对象A，于是尝试get(A)，尝试一级缓存singletonObjects和二级缓存earlySingletonObjects没找到，尝试三级缓存singletonFactories，由于A初始化时将自己添加到了singletonFactories，所以B可以拿到A对象，然后将A从三级缓存中移到二级缓存中</li>
+<li>B拿到A对象后顺利完成了初始化，然后将自己放入到一级缓存singletonObjects中</li>
+<li>此时返回A中，A此时能拿到B的对象顺利完成自己的初始化</li>
+</ol>
+<h2 id="1-8-Spring的单例Bean是否有线程安全问题"><a href="#1-8-Spring的单例Bean是否有线程安全问题" class="headerlink" title="1.8 Spring的单例Bean是否有线程安全问题"></a>1.8 Spring的单例Bean是否有线程安全问题</h2><p>当多个用户同时请求一个服务时，容器会给每一个请求分配一个线程，这时多个线程会并发执行该请求对应的业务逻辑，如果业务逻辑有对单例状态的修改（体现为此单例的成员属性），则必须考虑线程安全问题。</p>
+<p>若每个线程中对全局变量、静态变量只有读操作，而无写操作，那么不会有线程安全问题；若有多个线程同时执行写操作，一般都需要考虑线程同步，否则就可能影响线程安全。</p>
+<p><strong>无状态bean和有状态bean</strong></p>
+<ul>
+<li>有实例变量的bean，可以保存数据，是非线程安全的。</li>
+<li>没有实例变量的对象。不能保存数据，是线程安全的。</li>
+</ul>
+<p>在Spring中无状态的Bean适合用单例模式，这样可以共享实例提高性能。有状态的Bean在多线程环境下不安全，一般用Prototype模式或者使用ThreadLocal解决线程安全问题。</p>
+<h1 id="2-AOP"><a href="#2-AOP" class="headerlink" title="2. AOP"></a>2. AOP</h1><p>常见的动态代理有两种：</p>
 <ul>
 <li><p>JDK动态代理：基于Java反射机制实现，必须要实现了接口的业务类才生成代理对象。</p>
 </li>
@@ -730,7 +1017,7 @@ public class AppConfig &#123;
 <p>CGLIB的优势：</p>
 <p>​	无需实现接口，达到代理类无侵入，只操作关心的类，而不必为其他相关类增加工作量。高性能。</p>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/115744594">Java动态代理之一CGLIB详解 - 知乎 (zhihu.com)</a></p>
-<h2 id="1-3-事务"><a href="#1-3-事务" class="headerlink" title="1.3 事务"></a>1.3 事务</h2><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903608224333838">可能是最漂亮的Spring事务管理详解 - 掘金 (juejin.cn)</a></p>
+<h2 id="3-Spring事务"><a href="#3-Spring事务" class="headerlink" title="3. Spring事务"></a>3. Spring事务</h2><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903608224333838">可能是最漂亮的Spring事务管理详解 - 掘金 (juejin.cn)</a></p>
 
             
         </div>
@@ -740,6 +1027,430 @@ public class AppConfig &#123;
         
     </div>
     <a href="/2023/03/23/springboot-interview/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post post-partial-show">
+    <a href="/2023/03/22/computer-network/">
+        <h2 class="post-title">计网常用知识总结</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/3/22
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <h1 id="1-网际协议IP"><a href="#1-网际协议IP" class="headerlink" title="1. 网际协议IP"></a>1. 网际协议IP</h1><h2 id="1-1-IPv4"><a href="#1-1-IPv4" class="headerlink" title="1.1 IPv4"></a>1.1 IPv4</h2><p><img lazy="https://xds.asia/public/post/2023-2-4-7b4a02b9-5e93-4d3e-80e8-ec67eda52d2a.webp" alt="IP报文格式"></p>
+<ul>
+<li>版本：IPv4为4，IPv6即为6</li>
+<li>首部长度：<font color=red>单位为4字节</font>，因此头部最长为15个4字节，即60字节</li>
+<li>区分服务（旧版叫服务类型）：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/160937314">QoS分类和标记 - 知乎 (zhihu.com)</a></li>
+<li>总长度：总长度包括首部和数据的长度。</li>
+<li>标识：用于路由器分片重组。同一个分片的标志值相同，不同的分片的标识值不同。</li>
+<li>标志：占3位，但只两位可以使用<ul>
+<li>最低位(可以理解为最右边)：记为MF(More Fragment)。MF &#x3D; 1标识后面<strong>还有分片</strong>。</li>
+<li>中间位：记为DF(Don’t Fragment)，意为<strong>不能分片</strong>，只有当DF &#x3D; 0时才允许分片。</li>
+</ul>
+</li>
+<li>片偏移：较长的分组在分片后，某片在原分组中的相对位置，单位是8字节。<ul>
+<li>例如有一个数据有3800字节，被分为了1400字节、1400字节、1000字节(忽略了首部)，则它们的片偏移分别为：<code>0/8 = 0</code>，<code>1400 / 8 = 175</code>，<code>2800 / 8 = 350</code></li>
+</ul>
+</li>
+<li>生存时间：一般称为TTL(Time To Live)，标明数据报在网络中的<strong>寿命</strong>。最初的设计是以<font color=red>秒</font>作为TTL的单位，每经过一个路由器就减掉响应的时间，到零时则会被丢弃。然而随着技术的进步，路由器处理数据报所需的时间不断在缩短，一般都远远小于1秒，后来就把TTL字段的功能改为“跳数限制”，即每经过一个路由器，就将该值减一，到零时就删除掉，最大值为255</li>
+<li>协议：见下表</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>协议名</th>
+<th align="center">ICMP</th>
+<th align="center">IGMP</th>
+<th align="center">IP</th>
+<th align="center">TCP</th>
+<th align="center">EGP</th>
+<th align="center">IGP</th>
+<th align="center">UDP</th>
+<th align="center">IPv6</th>
+<th align="center">ESP</th>
+<th align="center">ICMP-IPv6</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>字段值</td>
+<td align="center">1</td>
+<td align="center">2</td>
+<td align="center">4</td>
+<td align="center"><font color=red>6</font></td>
+<td align="center">8</td>
+<td align="center">9</td>
+<td align="center"><font color=red>17</font></td>
+<td align="center">41</td>
+<td align="center">50</td>
+<td align="center">58</td>
+</tr>
+</tbody></table>
+<ul>
+<li>首部校验和：这个字段只检验数据报的首部，但不包括数据部分。具体运算方式是把首部按16字节划分，然后按照反码算术相加得到。</li>
+<li>源地址：发送IP数据报主机的IP地址</li>
+<li>目的地址：占32位。接收IP数据报主机的IP地址</li>
+<li>选项：由于选项很难背用到，而且也会增加路由器的开销，因此在IPv6中，IP数据报首部长度被改为固定值了</li>
+</ul>
+<h2 id="1-2-IPv6"><a href="#1-2-IPv6" class="headerlink" title="1.2 IPv6"></a>1.2 IPv6</h2><p><img lazy="https://xds.asia/public/post/2023-2-4-48265f3c-796f-4a2e-a261-b4f4ed0cd38f.webp" alt="IPv6"></p>
+<ul>
+<li><p>版本：IPv6肯定就是6了</p>
+</li>
+<li><p>通信量类(Traffic Class)：这是为了区分不同的IPv6数据报的类别或优先级，和IPv4的区分服务字段的作用相似。</p>
+</li>
+<li><p>流标号(Flow Label)：IPv6的一个新的机制是支持资源预分配，并且允许路由器把每个数据报与一个给定的资源分配相联系。</p>
+</li>
+<li><p>有效荷载长度：它指明IPv6数据报除基本首部以为的字节数（所有扩展首部都算在有效荷载之内）。</p>
+</li>
+<li><p>下一个首部：它相当于IPv4的协议字段或可选字段。</p>
+</li>
+<li><p>跳数限制：用来防止数据报在网络中无期限的存在。</p>
+</li>
+</ul>
+<h1 id="2-TCP"><a href="#2-TCP" class="headerlink" title="2. TCP"></a>2. TCP</h1><h2 id="2-1-三次握手"><a href="#2-1-三次握手" class="headerlink" title="2.1 三次握手"></a>2.1 三次握手</h2><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/430799766">深入浅出TCP三次握手 （多图详解） - 知乎 (zhihu.com)</a></p>
+<p>主要是要记住客户端和服务端的状态：</p>
+<ul>
+<li>客户端：CLOSED -&gt; SYN-SENT -&gt; ESTABLISHED</li>
+<li>服务端：CLOSED -&gt; SYN-RCVD -&gt; ESTABLISHED</li>
+</ul>
+<p>之后在每次通信时，下次消息的<code>seq</code>为对方上次消息的<code>ack</code>，下次消息的<code>ack</code>为对方上次消息的<code>seq + 总数据长度</code>(同一个<code>seq</code>可能会有多个消息)</p>
+<p><font color=red>在握手时，虽然数据长度为0，在理解时需要将其”当做”长度为1。</font></p>
+<h2 id="2-2-四次挥手"><a href="#2-2-四次挥手" class="headerlink" title="2.2 四次挥手"></a>2.2 四次挥手</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/LOOKTOMMER/article/details/121307137">TCP四次挥手详解_‍oOoOoOooOO的博客-CSDN博客</a></p>
+<p>客户端和服务端的状态：</p>
+<ul>
+<li>客户端(主动关闭的那一方)：ESTABLISHED -&gt; FIN_WAIT -&gt; TIME_WAIT(等待2ms) -&gt; CLOSE</li>
+<li>服务端(响应关闭的那一方)：ESTABLISHED -&gt; CLOSE_WAIT -&gt; LAST_ACK -&gt; CLOSE</li>
+</ul>
+<p>这里在主动关闭的那一方需要等待2ms，原因如下：</p>
+<ul>
+<li><p>首先占用该端口，因为IP报文在网络中的生存时间是有限的，让旧的报文全部在网络中被丢弃</p>
+</li>
+<li><p>若主动关闭的那一方的ACK没有被服务端收到，此时服务端再次返回一个FIN报文，会被客户端错误的以为是一个错误报文而导致状态重置(发送RST报文)</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/99943313">TCP的TIME_WAIT状态 - 知乎 (zhihu.com)</a></p>
+<h2 id="2-3-TCP报文格式"><a href="#2-3-TCP报文格式" class="headerlink" title="2.3 TCP报文格式"></a>2.3 TCP报文格式</h2><p><a target="_blank" rel="noopener" href="http://c.biancheng.net/view/6441.html">TCP报文格式解析 (biancheng.net)</a></p>
+<p>其中可能比较难记的就是8个标志位的前两个了，其实只需要记住全称就不容易忘了：</p>
+<ul>
+<li>CWR：Congestion Window Reduce</li>
+<li>ECE：ECN Echo，全称Explicit Congestin Notification Echo</li>
+</ul>
+<p>里面还有个校验和，这里需要知道是怎么算的。在计算机网络第八版P218中介绍了UDP的检验和计算：</p>
+<ul>
+<li>首先在数据报前添加一个伪首部</li>
+<li>将校验和的位置置零</li>
+<li>以16位2个字节为单位，如果由于数据的长度导致无法满足该条件，则在数据部分后补零即可。之后将所有数据相加，如果溢出，则添加到低位(二进制反码运算求和)</li>
+<li>将结果取反添加到校验和的位置</li>
+</ul>
+<p>在验证时同样使用上面的方法，但不用把校验位置零，若计算结果最终为全1，则表示数据无误</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_42560250/article/details/113526217">TCP&#x2F;UDP伪头部详解_tcp 伪头部_M、k的博客-CSDN博客</a></p>
+<p>需要注意的是IP报文的校验不包含数据。</p>
+<h1 id="3-路由器和交换机"><a href="#3-路由器和交换机" class="headerlink" title="3. 路由器和交换机"></a>3. 路由器和交换机</h1><p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/jiPMUk6zUdOY6eKxAjNDbQ">如果让你来设计网络 (qq.com)</a></p>
+<p>交换机是工作在数据链路层的，它根据每台设备的MAC地址来转发数据。</p>
+<p>而路由器是工作在网络层的，它负责IP报文的转发。</p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/03/22/computer-network/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post post-partial-show">
+    <a href="/2023/03/19/interview2/">
+        <h2 class="post-title">面试题记录2</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/3/19
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <ul>
+<li><a href="/2023/03/14/interview/">第一期</a></li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/circle/discuss/uRUsKF/">八股文｜后端｜MySQL｜答案 - 力扣（LeetCode）</a></p>
+<h1 id="1-Redis的内存淘汰算法"><a href="#1-Redis的内存淘汰算法" class="headerlink" title="1. Redis的内存淘汰算法"></a>1. Redis的内存淘汰算法</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/crazymakercircle/article/details/115360829">Redis 内存淘汰策略 （史上最全）_redis内存淘汰策略_40岁资深老架构师尼恩的博客-CSDN博客</a></p>
+<h1 id="2-Redis主从复制"><a href="#2-Redis主从复制" class="headerlink" title="2. Redis主从复制"></a>2. Redis主从复制</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Bilson99/article/details/118732296">Redis（主从复制、哨兵模式、集群）的讲解_redis集哨兵模式哪个节点负责读取数据_五条悟的小迷妹的博客-CSDN博客</a></p>
+<h1 id="3-Redis的持久化方式"><a href="#3-Redis的持久化方式" class="headerlink" title="3. Redis的持久化方式"></a>3. Redis的持久化方式</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Violet_201903027/article/details/100145168">Redis有哪几种持久化方式？优缺点是什么_Listener_code的博客-CSDN博客</a></p>
+<h1 id="4-Redis常见的性能问题和解决方案"><a href="#4-Redis常见的性能问题和解决方案" class="headerlink" title="4. Redis常见的性能问题和解决方案"></a>4. Redis常见的性能问题和解决方案</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7207406497541455929">Redis 常见性能问题和解决方案 - 掘金 (juejin.cn)</a></p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/03/19/interview2/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post post-partial-show">
+    <a href="/2023/03/14/interview/">
+        <h2 class="post-title">面试题记录</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/3/14
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <blockquote>
+<p>在这里记录一些我觉得比较好的面试题</p>
+</blockquote>
+<h1 id="1-给你10g的字符串数据，内存只有256mb，如何实现排序"><a href="#1-给你10g的字符串数据，内存只有256mb，如何实现排序" class="headerlink" title="1. 给你10g的字符串数据，内存只有256mb，如何实现排序"></a>1. 给你10g的字符串数据，内存只有256mb，如何实现排序</h1><h2 id="1-1-多路并归"><a href="#1-1-多路并归" class="headerlink" title="1.1 多路并归"></a>1.1 多路并归</h2><p>首先将10G的数据分为<code>10 * 1024 / 256 = 40</code>块分别读入后进行排序。</p>
+<p>之后采用<a target="_blank" rel="noopener" href="https://cn.bing.com/search?q=%E5%A4%9A%E8%B7%AF%E5%BD%92%E5%B9%B6&qs=n&form=QBRE&=%25e%E7%AE%A1%E7%90%86%E6%90%9C%E7%B4%A2%E5%8E%86%E5%8F%B2%E8%AE%B0%E5%BD%95%25E&sp=-1&lq=0&pq=%E5%A4%9A%E8%B7%AF%E5%BD%92%E5%B9%B6&sc=10-4&sk=&cvid=4970BA4F5DC249979A1987C240B84F23&ghsh=0&ghacc=0&ghpl=">多路归并</a>的方法实现排序：</p>
+<p>将每一个小文件的第一个数取出，即每一个小文件里的最小数，对这些数进行归并排序，将这些数里的最小数字<code>num(i)</code>写入大文件的第一行，然后将对应文件的指针加一并读入新的值，同时大文件的指针加一，重复该操作直到全部写入完毕。</p>
+<p>假设数据被分为了<code>k</code>段，总共的数据量为<code>n</code>，我们每次获取最小值需要遍历<code>k</code>次，一共需要比较<code>n</code>次，每块数据排序耗时<code>log(n / k)</code>，总共的时间复杂度为<code>O(k*log(n/k) + nk)</code></p>
+<h2 id="1-2-败者树"><a href="#1-2-败者树" class="headerlink" title="1.2 败者树"></a>1.2 败者树</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/meihao1203/p/9561256.html">败者树，图解败者树，算法执行调整每一步详细分析 - 正在加载…… - 博客园 (cnblogs.com)</a></p>
+<p>败者树同样也要先排序，但是每次寻找最小值的世界复杂度为<code>O(log(k))</code>左右，总时间复杂度大致为<code>O(k*log(n/k) + n * log(k))</code></p>
+<h1 id="2-写一个java方法，实现参数a-b值的交换"><a href="#2-写一个java方法，实现参数a-b值的交换" class="headerlink" title="2. 写一个java方法，实现参数a,b值的交换"></a>2. 写一个java方法，实现参数a,b值的交换</h1><p>这个题目一上来就挺懵逼的，因为Java是值传递，所以基本数据类型咱就别想了，如果是包装类，则可以通过反射进行交换：</p>
+<pre><code class="java">public static void swap(Integer a, Integer b) throws Exception &#123;
+    Integer temp = new Integer(a);
+    Field field = Integer.class.getDeclaredField(&quot;value&quot;);
+    field.setAccessible(true);
+    field.set(a, b);
+    field.set(b, temp);
+&#125;
+</code></pre>
+<p>但是这样有风险，咱们都知道包装类在[-128, 127]以内的数字返回的都是同一个对象，也就是说我们要是修改了这些值，也会影响后续的对象：</p>
+<pre><code class="java">Integer a = 1, b = 2;
+swap(a, b);
+System.out.println(a);
+System.out.println(b);
+Integer test = 1;
+System.out.println(test);
+</code></pre>
+<p>输出:</p>
+<pre><code class="text">2
+1
+2
+</code></pre>
+<p>具体内容可以看<code>Integer#valueOf</code></p>
+<p>在测试的时候发现一个有趣的现象：</p>
+<pre><code class="java">Integer a = 1, b = 2;
+swap(a, b);
+System.out.println(a + &quot; &quot; + b);
+</code></pre>
+<p>输出：</p>
+<pre><code class="text">Exception in thread &quot;main&quot; java.lang.InternalError: Storage is not completely initialized, 1 bytes left
+    at java.base/java.lang.StringConcatHelper.newString(StringConcatHelper.java:346)
+    at juc.CHMTest.main(CHMTest.java:13)
+</code></pre>
+<p>用debug稍微看了一下，不知道为什么。。</p>
+<h1 id="3-JVM有哪些部分"><a href="#3-JVM有哪些部分" class="headerlink" title="3. JVM有哪些部分"></a>3. JVM有哪些部分</h1><p>这种东西一定要记一共有几个，不然容易说漏。</p>
+<p>JVM从整体分为<strong>三部分</strong>：类加载子系统、运行时数据区以及执行引擎。</p>
+<p>运行时数据区包括<strong>五部分</strong>：方法区、堆、虚拟机栈、PC寄存器以及本地方法栈</p>
+<p><img lazy="https://xds.asia/public/interview/2023-2-2-4fa15602-b784-43b9-9f62-0dc3b7d5b6e7.webp" alt="JVM结构"></p>
+<h1 id="4-堆在垃圾回收的场景下分哪几部分？每部分如何进行GC？"><a href="#4-堆在垃圾回收的场景下分哪几部分？每部分如何进行GC？" class="headerlink" title="4. 堆在垃圾回收的场景下分哪几部分？每部分如何进行GC？"></a>4. 堆在垃圾回收的场景下分哪几部分？每部分如何进行GC？</h1><p>第一问很简单：总体分为年轻代和老年代，默认占比为1:2。</p>
+<p>可以通过<code>-XX:NewRatio</code>可以设置新生代的比例，但是不要字面理解这个配置的意思：</p>
+<ul>
+<li><p>默认<code>-XX:NewRatio=2</code>，代表新生代占1，老年代占2，新生代占整个堆的1&#x2F;3</p>
+</li>
+<li><p>比如<code>-XX:NewRatio=4</code>，代表新生代占1，老年代占4，新生代占整个堆的1&#x2F;5</p>
+</li>
+</ul>
+<p>新生代又分为伊甸园区、幸存者0区和幸存者1区，默认占比为8:1:1，可以通过<code>-XX:SurvivorRatio</code>进行调整。</p>
+<p><img lazy="https://xds.asia/public/interview/2023-2-2-704f791a-01ef-4274-924a-b16a105818cf.webp" alt="heap"></p>
+<p>关于第二问，年轻态的GC称为Young GC(下面简称YGC)或者Minor GC，触发条件如下：</p>
+<ol>
+<li>new的对象优先放到伊甸园区</li>
+<li>当伊甸园区的空间不足时，此时进行YGC，清除Eden区的所有垃圾，并将存活的对象放到幸存者0区</li>
+<li>如果再次触发垃圾回收，清除Eden区和幸存者0区的垃圾，并将存活的对象放到幸存者1区</li>
+<li>如果再次重复，清除Eden区和幸存者1区的垃圾，并将存活的对象放到幸存者0区</li>
+<li>….</li>
+</ol>
+<p>特殊情况：</p>
+<ul>
+<li>当某个对象循环超过指定次数后，会被放到老年代，默认为15次，可以通过<code>-XX:MaxTenuringThreshold=&lt;N&gt;</code>设置</li>
+<li>如果在垃圾回收后仍然无法在Eden区给对象分配内存，那么对象会直接升级到老年代，如果老年代空间也不足，并且通过Full GC也不足，则会抛出OOM异常</li>
+<li>由Eden区、from区向to区复制时，对象大小大于To Space可用内存，则把该对象转存到老年代，且老年代的可用内存小于该对象大小</li>
+</ul>
+<p><img lazy="https://xds.asia/public/interview/2023-2-2-0c39b9fd-3ca3-4f3e-9f8c-77bd9b7f5b00.webp" alt="YGC"></p>
+<h1 id="5-用过ES吗？请说一下倒排索引"><a href="#5-用过ES吗？请说一下倒排索引" class="headerlink" title="5. 用过ES吗？请说一下倒排索引"></a>5. 用过ES吗？请说一下倒排索引</h1><p>这个东西太长了，建议自行百度了解。</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_31960623/article/details/118860928">ES之倒排索引详解_es倒排索引_wh柒八九的博客-CSDN博客</a></p>
+<h1 id="6-Spring用了哪些设计模式"><a href="#6-Spring用了哪些设计模式" class="headerlink" title="6. Spring用了哪些设计模式"></a>6. Spring用了哪些设计模式</h1><p>[Spring中用到了哪些设计模式？ - murphy_gb - 博客园 (cnblogs.com)](<a target="_blank" rel="noopener" href="https://www.cnblogs.com/kyoner/p/10949246.html#:~:text=Spring">https://www.cnblogs.com/kyoner/p/10949246.html#:~:text=Spring</a> 框架中用到了哪些设计模式： 工厂设计模式%3A Spring使用工厂模式通过 BeanFactory、ApplicationContext 创建 bean 对象。,Spring AOP 功能的实现。 单例设计模式%3A Spring 中的 Bean 默认都是单例的。)</p>
+<h1 id="7-简单说一下B-树"><a href="#7-简单说一下B-树" class="headerlink" title="7. 简单说一下B+树"></a>7. 简单说一下B+树</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/a519640026/article/details/106940115">一文彻底搞懂MySQL基础：B树和B+树的区别_b树和b+树有什么区别_公众号：码农富哥的博客-CSDN博客</a></p>
+<h1 id="8-聚集索引和非聚集索引是什么"><a href="#8-聚集索引和非聚集索引是什么" class="headerlink" title="8. 聚集索引和非聚集索引是什么"></a>8. 聚集索引和非聚集索引是什么</h1><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/s-b-b/p/8334593.html">聚集索引与非聚集索引的总结 - {-）大傻逼 - 博客园 (cnblogs.com)</a></p>
+<p>大致意思就是数据库会根据聚集索引去创建对应的表，而表中实际的数据也存在这里面。非聚集索引只会保存对应的键以及它所指向的主键值，因此使用非聚集索引查询时，会进行两次查询：第一次根据非聚集索引拿到主键值，再根据主键值到聚集索引里去查数据。</p>
+<p>聚簇索引：数据文件和索引文件在一起</p>
+<p>非聚簇索引：数据文件和索引文件分开</p>
+<h1 id="9-MyISAM和InnoDB引擎的区别"><a href="#9-MyISAM和InnoDB引擎的区别" class="headerlink" title="9. MyISAM和InnoDB引擎的区别"></a>9. MyISAM和InnoDB引擎的区别</h1><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/354375289">MyISAM VS InnoDB - 知乎 (zhihu.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_40228200/article/details/122080566">MySQL引擎详解（二）——MyISAM引擎特性_永远是少年啊的博客-CSDN博客</a></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>InnoDB</th>
+<th>MyISAM</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>事务支持</td>
+<td>支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>表级锁定</td>
+<td>锁行，前提是用了主键</td>
+<td>锁整个表</td>
+</tr>
+<tr>
+<td>读写锁</td>
+<td>在锁行的前提下，读写互不影响</td>
+<td>只能一个写，或者多个读</td>
+</tr>
+<tr>
+<td>缓存</td>
+<td>缓存数据+索引</td>
+<td>只缓存索引</td>
+</tr>
+<tr>
+<td>查询效率(相对)</td>
+<td>一般</td>
+<td>高</td>
+</tr>
+<tr>
+<td>增删改效率(相对)</td>
+<td>一般</td>
+<td>低</td>
+</tr>
+<tr>
+<td>AUTO_INCREMENT</td>
+<td>自动增长列只能是组合索引的第一列</td>
+<td>自动增长列可以是组合索引的任意列</td>
+</tr>
+<tr>
+<td>外键</td>
+<td>支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>主键</td>
+<td>必须有</td>
+<td>可以没有</td>
+</tr>
+<tr>
+<td>表的具体行数</td>
+<td>会遍历整个表</td>
+<td>保存了总行数，查询时会直接取出来</td>
+</tr>
+<tr>
+<td>聚簇索引</td>
+<td>是</td>
+<td>否</td>
+</tr>
+</tbody></table>
+<h1 id="10-Spring-Bean的生命周期"><a href="#10-Spring-Bean的生命周期" class="headerlink" title="10. Spring Bean的生命周期"></a>10. Spring Bean的生命周期</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_39911567/article/details/111039200">spring生命周期七个过程_面试官：请你讲解一下Spring Bean的生命周期_weixin_39911567的博客-CSDN博客</a></p>
+<h1 id="11-Spring-Bean的作用域"><a href="#11-Spring-Bean的作用域" class="headerlink" title="11. Spring Bean的作用域"></a>11. Spring Bean的作用域</h1><table>
+<thead>
+<tr>
+<th>作用域</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>singleton</td>
+<td>注册一个单例的bean，这是默认的注册方式</td>
+</tr>
+<tr>
+<td>prototype</td>
+<td>每次从容器中调用Bean时，都返回一个新的实例</td>
+</tr>
+<tr>
+<td>request</td>
+<td>每次Http请求都会创建一个新的Bean</td>
+</tr>
+<tr>
+<td>session</td>
+<td>同一个HttpSession都会共享一个Bean</td>
+</tr>
+<tr>
+<td>application</td>
+<td>限定一个Bean的作用域为<code>ServletContext</code>的生命周期。该作用域仅适用于web的Spring WebApplicationContext环境。</td>
+</tr>
+</tbody></table>
+<h1 id="12-MySql的四种事务隔离级别"><a href="#12-MySql的四种事务隔离级别" class="headerlink" title="12. MySql的四种事务隔离级别"></a>12. MySql的四种事务隔离级别</h1><table>
+<thead>
+<tr>
+<th>隔离级别</th>
+<th>脏读</th>
+<th>不可重复读</th>
+<th>幻读</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>READ_UNCOMMITTED(读未提交)</td>
+<td>可能</td>
+<td>可能</td>
+<td>可能</td>
+</tr>
+<tr>
+<td>READ_COMMITTED(读提交)</td>
+<td>不可能</td>
+<td>可能</td>
+<td>可能</td>
+</tr>
+<tr>
+<td>REPEATABLE_READ(可重复读)</td>
+<td>不可能</td>
+<td>不可能</td>
+<td>可能</td>
+</tr>
+<tr>
+<td>SERIALIZABLE(串行化)</td>
+<td>不可能</td>
+<td>不可能</td>
+<td>不可能</td>
+</tr>
+</tbody></table>
+<p><strong>脏读</strong></p>
+<p>脏读指的是读到了其他事务未提交的数据，未提交意味着这些数据可能会回滚，也就是可能最终不会存到数据库中，也就是不存在的数据。读到了并不一定最终存在的数据，这就是脏读。</p>
+<p><strong>可重复读</strong></p>
+<p>可重复读指的是在一个事务内，最开始读到的数据和事务结束前的任意时刻读到的同一批数据都是一致的。通常针对数据<strong>更新（UPDATE）</strong>操作。</p>
+<p><strong>不可重复读</strong></p>
+<p>对比可重复读，不可重复读指的是在同一事务内，不同的时刻读到的同一批数据可能是不一样的，可能会受到其他事务的影响，比如其他事务改了这批数据并提交了。通常针对数据<strong>更新（UPDATE）</strong>操作。</p>
+<p><strong>幻读</strong></p>
+<p>幻读是针对数据<strong>插入（INSERT）</strong>操作来说的。假设事务A对某些行的内容作了更改，但是还未提交，此时事务B插入了与事务A更改前的记录相同的记录行，并且在事务A提交之前先提交了，而这时，在事务A中查询，会发现好像刚刚的更改对于某些数据未起作用，但其实是事务B刚插入进来的，让用户感觉很魔幻，感觉出现了幻觉，这就叫幻读。</p>
+<p>不可重复读一般针对UPDATE，而幻读重点在INSERT和DELETE</p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/03/14/interview/" class="go-post">阅读全文</a>
 </div>
 
 
@@ -754,11 +1465,6 @@ public class AppConfig &#123;
         <span>
             <a class="page-num" href="/page/2/">2</a>
             
-            <a class="page-num" href="/page/3">3</a>
-            
-            
-            <span class="page-omit">...</span>
-            <a class="page-num" href="/page/4">4</a>
             
         </span>
         
@@ -787,6 +1493,14 @@ public class AppConfig &#123;
 
         </div>
         
+        
+        <div class="friend-links">
+            
+            <div class="friend-link">
+                <a target="_blank" rel="noopener" href="https://argvchs.netlify.app">Argvchs</a>
+            </div>
+            
+        </div>
         
     </div>
 </div>

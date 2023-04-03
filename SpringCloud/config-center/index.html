@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <!-- hexo injector head_end start --><script>window.addEventListener("load",()=>{const e="$toTopHeight";let t=0;const n="lazy";let o=[...document.getElementsByTagName("img")];console.log(`图片懒加载: 一共找到了${o.length}张图片`),setTimeout(()=>{t++,l()},500);const i=()=>{l()};function l(){if(0===o.length)return console.log("所有图片均已加载"),void window.removeEventListener("scroll",i);const e=[];for(let t=0,n=o.length;t<n;++t){const n=o[t];s(n)?(console.log("已经加载图片: ",n),r(n)):e.push(n)}o=e}function r(e){const t=e.getAttribute(n);t&&(e.setAttribute("src",t),e.removeAttribute(n))}function s(n){if(!n)return!1;const o=function(n){const o=n[e];if(o&&o.version===t)return n[e].value;let i=n,l=0;do{l+=i.offsetTop,i=i.offsetParent}while(i);return n[e]={value:l,version:t},l}(n);return document.documentElement.scrollTop+document.documentElement.clientHeight>=o}window.addEventListener("scroll",i),window.addEventListener("resize",()=>{t++})});</script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 6.3.0"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -85,14 +85,24 @@
             <span>&ensp;Home</span>
         </a>
         
-        <a href="/">
+        <a href="/about">
             <i class="fa-solid fa-id-card fa-fw"></i>
             <span>&ensp;About</span>
         </a>
         
-        <a href="/">
+        <a href="/archives">
             <i class="fa-solid fa-box-archive fa-fw"></i>
             <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
         </a>
         
     </div>
@@ -114,7 +124,7 @@
                 </div>
             </a>
             
-            <a href="/">
+            <a href="/about">
                 <div class="item">
                     <div style="min-width: 20px; max-width: 50px; width: 10%">
                         <i class="fa-solid fa-id-card fa-fw"></i>
@@ -123,12 +133,30 @@
                 </div>
             </a>
             
-            <a href="/">
+            <a href="/archives">
                 <div class="item">
                     <div style="min-width: 20px; max-width: 50px; width: 10%">
                         <i class="fa-solid fa-box-archive fa-fw"></i>
                     </div>
                     <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
                 </div>
             </a>
             
@@ -166,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/config-center" style="color: #ff7d73">配置中心</a>
+                <a href="/SpringCloud/config-center" style="color: #00a596">配置中心</a>
             </span>
             
         </span>

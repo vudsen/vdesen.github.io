@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <!-- hexo injector head_end start --><script>window.addEventListener("load",()=>{const e="$toTopHeight";let t=0;const n="lazy";let o=[...document.getElementsByTagName("img")];console.log(`图片懒加载: 一共找到了${o.length}张图片`),setTimeout(()=>{t++,l()},500);const i=()=>{l()};function l(){if(0===o.length)return console.log("所有图片均已加载"),void window.removeEventListener("scroll",i);const e=[];for(let t=0,n=o.length;t<n;++t){const n=o[t];s(n)?(console.log("已经加载图片: ",n),r(n)):e.push(n)}o=e}function r(e){const t=e.getAttribute(n);t&&(e.setAttribute("src",t),e.removeAttribute(n))}function s(n){if(!n)return!1;const o=function(n){const o=n[e];if(o&&o.version===t)return n[e].value;let i=n,l=0;do{l+=i.offsetTop,i=i.offsetParent}while(i);return n[e]={value:l,version:t},l}(n);return document.documentElement.scrollTop+document.documentElement.clientHeight>=o}window.addEventListener("scroll",i),window.addEventListener("resize",()=>{t++})});</script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 6.3.0"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -85,14 +85,24 @@
             <span>&ensp;Home</span>
         </a>
         
-        <a href="/">
+        <a href="/about">
             <i class="fa-solid fa-id-card fa-fw"></i>
             <span>&ensp;About</span>
         </a>
         
-        <a href="/">
+        <a href="/archives">
             <i class="fa-solid fa-box-archive fa-fw"></i>
             <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
         </a>
         
     </div>
@@ -114,7 +124,7 @@
                 </div>
             </a>
             
-            <a href="/">
+            <a href="/about">
                 <div class="item">
                     <div style="min-width: 20px; max-width: 50px; width: 10%">
                         <i class="fa-solid fa-id-card fa-fw"></i>
@@ -123,12 +133,30 @@
                 </div>
             </a>
             
-            <a href="/">
+            <a href="/archives">
                 <div class="item">
                     <div style="min-width: 20px; max-width: 50px; width: 10%">
                         <i class="fa-solid fa-box-archive fa-fw"></i>
                     </div>
                     <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
                 </div>
             </a>
             
@@ -171,9 +199,76 @@ public class AppConfig &#123;
 &#125;
 </code></pre>
 <h2 id="1-1-生命周期"><a href="#1-1-生命周期" class="headerlink" title="1.1 生命周期"></a>1.1 生命周期</h2><p>可以在<code>AbstractAutowireCapableBeanFactory#doCreateBean</code>中看到完整的bean生成流程。</p>
-<p>构造方法 -&gt; 普通对象 -&gt; 依赖注入 -&gt; 初始化(afterPropertiesSet) -&gt; 初始化后(AOP) -&gt; 代理对象 -&gt; 放入容器</p>
-<p>Spring在注入的时候先根据类型去找，若找到多个，再根据名称去筛选。</p>
-<h2 id="1-2-AOP"><a href="#1-2-AOP" class="headerlink" title="1.2 AOP"></a>1.2 AOP</h2><p>常见的动态代理有两种：</p>
+<p>大致分为如下过程：</p>
+<p>1.对Bean进行实例化</p>
+<p>2.依赖注入</p>
+<p>3.如果Bean实现了<code>BeanNameAware</code>接口，Spring将调用<code>setBeanName()</code>，设置 <code>Bean</code>的 id（xml文件中bean标签的id）</p>
+<p>4.如果Bean实现了<code>BeanFactoryAware</code>接口，Spring将调用<code>setBeanFactory()</code></p>
+<p>5.如果Bean实现了<code>ApplicationContextAware</code>接口，Spring容器将调用<code>setApplicationContext()</code></p>
+<p>6.如果存在<code>BeanPostProcessor</code>，Spring将调用它们的<code>postProcessBeforeInitialization</code>（预初始化）方法，在Bean初始化前对其进行处理</p>
+<p>7.如果Bean实现了<code>InitializingBean</code>接口，Spring将调用它的<code>afterPropertiesSet</code>方法，然后调用xml定义的 init-method方法(初始化)，两个方法作用类似，都是在初始化 bean 的时候执行</p>
+<p>8.如果存在<code>BeanPostProcessor</code>，Spring将调用它们的<code>postProcessAfterInitialization</code>（后初始化）方法，在Bean初始化后对其进行处理</p>
+<p>9.Bean初始化完成，供应用使用，直到应用被销毁</p>
+<p>10.如果Bean实现了<code>DisposableBean</code>接口，Spring将调用它的<code>destory</code>方法，然后调用在xml中定义的 <code>destory-method</code>方法，这两个方法作用类似，都是在Bean实例销毁前执行。</p>
+<h2 id="1-2-BeanFactory和FactoryBean的区别"><a href="#1-2-BeanFactory和FactoryBean的区别" class="headerlink" title="1.2 BeanFactory和FactoryBean的区别"></a>1.2 BeanFactory和FactoryBean的区别</h2><p><code>BeanFactory</code>：管理Bean的容器，Spring中生成的Bean都是由这个接口的实现来管理的。</p>
+<p><code>FactoryBean</code>：让开发者以编程的方式来创建一个bean，一般用于创建比较复杂的bean。</p>
+<h2 id="1-3-Bean注入容器有哪些方式"><a href="#1-3-Bean注入容器有哪些方式" class="headerlink" title="1.3 Bean注入容器有哪些方式"></a>1.3 Bean注入容器有哪些方式</h2><p>1、使用<code>@Configuration</code>与<code>@Bean</code>注解</p>
+<p>2、使用<code>@Controller</code>、<code>@Service</code>、<code>@Repository</code>、<code>@Component</code> 注解标注该类，然后启用<code>@ComponentScan</code>自动扫描</p>
+<p>3、使用<code>@Import</code> 方法，使用@Import注解把bean导入到当前容器中。</p>
+<h2 id="1-4-Bean的作用域"><a href="#1-4-Bean的作用域" class="headerlink" title="1.4 Bean的作用域"></a>1.4 Bean的作用域</h2><p>1、singleton：单例，Spring中的bean默认都是单例的。</p>
+<p>2、prototype：每次请求都会创建一个新的bean实例。</p>
+<p>3、request：每一次HTTP请求都会产生一个新的bean，该bean仅在当前HTTP request内有效。</p>
+<p>4、session：每一次HTTP请求都会产生一个新的bean，该bean仅在当前HTTP session内有效。</p>
+<p>5、application：限定一个Bean的作用域为<code>ServletContext</code>的生命周期。该作用域仅适用于web的Spring WebApplicationContext环境。</p>
+<h2 id="1-5-自动装配的方式"><a href="#1-5-自动装配的方式" class="headerlink" title="1.5 自动装配的方式"></a>1.5 自动装配的方式</h2><p><code>@Autowired</code>注解会优先根据类型来注入，当有多个bean时，会尝试根据变量名来注入(byname)，如果没有找到就抛出异常。</p>
+<p>可以通过<code>@Qualifier</code>来指定要注入的bean的名称。</p>
+<p><code>@Resource</code>注解会优先byname，找不到再byType。</p>
+<h2 id="1-6-Bean和-Component的区别"><a href="#1-6-Bean和-Component的区别" class="headerlink" title="1.6 @Bean和@Component的区别"></a>1.6 @Bean和@Component的区别</h2><p><code>@Bean</code>只能作用于方法上，表示这个方法会返回一个Bean，一般需要配合<code>@Configuration</code>使用。</p>
+<p><code>@Component</code>只能作用于类型上，表示这个类会作为组件类，并告诉Spring要为这个类创建bean。</p>
+<h3 id="1-6-1-Bean必须在-Configuration里使用吗"><a href="#1-6-1-Bean必须在-Configuration里使用吗" class="headerlink" title="1.6.1 @Bean必须在@Configuration里使用吗?"></a>1.6.1 @Bean必须在@Configuration里使用吗?</h3><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/40256702/spring-bean-can-still-work-without-configuration">Spring: @Bean can still work without @Configuration - Stack Overflow</a></p>
+<p><code>@Bean</code>在<code>@Configuration</code>表示的类里使用时，Spring会为其自动创建一个动态代理对象，在同一个配置类中可以直接调用方法来获取Bean：</p>
+<pre><code class="java">@Configuration
+public class ExampleConfiguration &#123;
+    
+    @Bean
+    public Datasource datasource() &#123;
+        BasicDatasource datasource = new BasicDatasource();
+        // ...
+        return datasource;
+    &#125;
+    
+    public PlatformTransactionManager transactionManager() &#123;
+          // 注意这里是直接调用了方法，每次调用都会返回同一个bean，并不会多次创建
+        return new DataSourceTransactionManager(datasource());
+    &#125;
+    
+&#125;
+</code></pre>
+<p>而在非<code>@Configuration</code>下定义的<code>@Bean</code>会以Lite Mode运作，在该模式下调用其它<code>@Bean</code>方法时，则是普通的方法调用(没有代理对象去拦截调用)。</p>
+<h2 id="1-7-Spring怎么解决循环依赖问题"><a href="#1-7-Spring怎么解决循环依赖问题" class="headerlink" title="1.7 Spring怎么解决循环依赖问题"></a>1.7 Spring怎么解决循环依赖问题</h2><p>对于构造器注入的循环依赖：Spring处理不了，直接抛出<code>BeanCurrentlylnCreationException</code>异常。</p>
+<p>非单例循环依赖：无法处理。</p>
+<p>单例模式下属性注入的循环依赖会通过三级缓存处理循环依赖：</p>
+<p><code>singletonObjects</code>：完成了初始化的单例对象map，bean name –&gt; bean instance</p>
+<p><code>earlySingletonObjects</code>：完成实例化未初始化的单例对象map，bean name –&gt; bean instance</p>
+<p><code>singletonFactories</code>： 单例对象工厂map，bean name –&gt; ObjectFactory，单例对象实例化完成之后会加入singletonFactories。</p>
+<p>假如A依赖了B的实例对象，同时B也依赖A的实例对象。</p>
+<ol>
+<li>A首先完成了实例化，并且将自己添加到singletonFactories中</li>
+<li>接着进行依赖注入，发现自己依赖对象B，此时就尝试去get(B)</li>
+<li>发现B还没有被实例化，对B进行实例化</li>
+<li>然后B在初始化的时候发现自己依赖了对象A，于是尝试get(A)，尝试一级缓存singletonObjects和二级缓存earlySingletonObjects没找到，尝试三级缓存singletonFactories，由于A初始化时将自己添加到了singletonFactories，所以B可以拿到A对象，然后将A从三级缓存中移到二级缓存中</li>
+<li>B拿到A对象后顺利完成了初始化，然后将自己放入到一级缓存singletonObjects中</li>
+<li>此时返回A中，A此时能拿到B的对象顺利完成自己的初始化</li>
+</ol>
+<h2 id="1-8-Spring的单例Bean是否有线程安全问题"><a href="#1-8-Spring的单例Bean是否有线程安全问题" class="headerlink" title="1.8 Spring的单例Bean是否有线程安全问题"></a>1.8 Spring的单例Bean是否有线程安全问题</h2><p>当多个用户同时请求一个服务时，容器会给每一个请求分配一个线程，这时多个线程会并发执行该请求对应的业务逻辑，如果业务逻辑有对单例状态的修改（体现为此单例的成员属性），则必须考虑线程安全问题。</p>
+<p>若每个线程中对全局变量、静态变量只有读操作，而无写操作，那么不会有线程安全问题；若有多个线程同时执行写操作，一般都需要考虑线程同步，否则就可能影响线程安全。</p>
+<p><strong>无状态bean和有状态bean</strong></p>
+<ul>
+<li>有实例变量的bean，可以保存数据，是非线程安全的。</li>
+<li>没有实例变量的对象。不能保存数据，是线程安全的。</li>
+</ul>
+<p>在Spring中无状态的Bean适合用单例模式，这样可以共享实例提高性能。有状态的Bean在多线程环境下不安全，一般用Prototype模式或者使用ThreadLocal解决线程安全问题。</p>
+<h1 id="2-AOP"><a href="#2-AOP" class="headerlink" title="2. AOP"></a>2. AOP</h1><p>常见的动态代理有两种：</p>
 <ul>
 <li><p>JDK动态代理：基于Java反射机制实现，必须要实现了接口的业务类才生成代理对象。</p>
 </li>
@@ -185,7 +280,7 @@ public class AppConfig &#123;
 <p>CGLIB的优势：</p>
 <p>​	无需实现接口，达到代理类无侵入，只操作关心的类，而不必为其他相关类增加工作量。高性能。</p>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/115744594">Java动态代理之一CGLIB详解 - 知乎 (zhihu.com)</a></p>
-<h2 id="1-3-事务"><a href="#1-3-事务" class="headerlink" title="1.3 事务"></a>1.3 事务</h2><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903608224333838">可能是最漂亮的Spring事务管理详解 - 掘金 (juejin.cn)</a></p>
+<h2 id="3-Spring事务"><a href="#3-Spring事务" class="headerlink" title="3. Spring事务"></a>3. Spring事务</h2><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903608224333838">可能是最漂亮的Spring事务管理详解 - 掘金 (juejin.cn)</a></p>
 
     </div>
     
