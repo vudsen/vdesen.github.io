@@ -9,7 +9,7 @@
     posts = posts.slice(current, config.index_generator.per_page + current);
 %>
 <% posts.forEach(post => { %>
-<div class="post">
+<div class="post post-partial-show">
     <a href="<%- url_for(post.path) %>">
         <h2 class="post-title"><%= post.title %></h2>
     </a>

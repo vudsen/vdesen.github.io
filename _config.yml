@@ -2,6 +2,56 @@
 ## Docs: https://hexo.io/docs/configuration.html
 ## Source: https://github.com/hexojs/hexo/
 
+theme_config:
+  background: 
+    - https://xds.asia/public/2023-2-6-8d14e464-2200-4e54-af81-0d9f25f55b3e.webp
+    - https://xds.asia/public/2023-2-0-017e03b0-992c-4844-b28f-869799d32b96.webp
+    - https://xds.asia/public/2023-2-0-66a241f4-eca3-45f3-b590-05aeed688f60.webp
+    - https://xds.asia/public/2023-2-0-481f472f-e980-4cee-8ab8-ca66f5fd370a.webp
+    - https://xds.asia/public/2023-2-2-2adf4d48-496a-49a4-8ca3-f64e035d8835.webp
+  avatar: https://xds.asia/avatar/1.webp
+  menu:
+    Home:
+        name: house
+        theme: solid
+        src: /
+    About:
+        name: id-card
+        theme: solid
+        src: /about
+    Archives:
+        name: box-archive
+        theme: solid
+        src: /archives
+  card:
+    enable: true
+    description: |
+        这个人很懒，没有个人简介
+        
+    iconLinks:
+        {}
+        # <name>:
+        #    name: <icon-name>
+        #    theme: <icon-theme>
+        #    link: <link-url>
+    friendLinks:
+        {}
+        # <name>: <link-url>
+  giscus:
+    enable: true
+    src: https://giscus.app/client.js
+    repo: IceOfSummer/iceofsummer.github.io
+    repoID: R_kgDOJFU7OQ
+    category: Announcements
+    categoryID: DIC_kwDOJFU7Oc4CUyC7
+    mapping: title
+    strict: 0
+    reactionsEnabled: 1
+    emitMetadata: 0
+    inputPosition: top
+    theme: preferred_color_scheme
+    lang: zh-CN
+    
 # Site
 title: IceOfSummerの博客
 subtitle: '一时起兴搭建的博客'
@@ -62,7 +112,7 @@ prismjs:
 # order_by: Posts order. (Order by date descending by default)
 index_generator:
   path: ''
-  per_page: 2
+  per_page: 6
   order_by: -date
 
 # Category & Tag
