@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#Java" style="color: #00bcd4">Java</a>
+                <a href="/2023/03/05/java-source#Java" style="color: #00a596">Java</a>
             </span>
             
         </span>
@@ -209,7 +209,7 @@
 <p>所以个人建议在看源码前一定要看一下每个类上的注释，比如说这里的AQS(这里只截取了部分)：</p>
 <blockquote>
 <p>Provides a framework for implementing blocking locks and related synchronizers (semaphores, events, etc) that rely on first-in-first-out (FIFO) wait queues. </p>
-<p>提供了一个框架，去帮助开发者实现一个先进先出(FIFO)等待队列的同步锁或相关同步器(事件、信号量等)</p>
+<p>提供了一个框架，去帮助开发者实现一个依赖于先进先出(FIFO)等待队列的同步锁或相关同步器(事件、信号量等)</p>
 </blockquote>
 <p>如果谈理解的话，用这一句开头就会很舒服、</p>
 <h1 id="1-基本内容"><a href="#1-基本内容" class="headerlink" title="1. 基本内容"></a>1. 基本内容</h1><p><img lazy="https://xds.asia/public/java-source/2023-2-3-12046ac9-cd7f-4b31-9c43-6f398f6a86a3.webp" alt="类继承图"></p>
@@ -667,7 +667,7 @@ public final boolean release(int arg) &#123;
         if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
             break;
     &#125;
-    // 到这里说明已经得到信号，想要重新获取锁了，这里就直接将这个节点加到等待队列
+    // 到这里说明已经得到信号，想要重新获取锁了，就让它去抢锁
     if (acquireQueued(node, savedState) &amp;&amp; interruptMode != THROW_IE)
         interruptMode = REINTERRUPT;
     // 清除多余的waiter

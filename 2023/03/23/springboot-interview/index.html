@@ -280,7 +280,33 @@ public class ExampleConfiguration &#123;
 <p>CGLIB的优势：</p>
 <p>​	无需实现接口，达到代理类无侵入，只操作关心的类，而不必为其他相关类增加工作量。高性能。</p>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/115744594">Java动态代理之一CGLIB详解 - 知乎 (zhihu.com)</a></p>
-<h2 id="3-Spring事务"><a href="#3-Spring事务" class="headerlink" title="3. Spring事务"></a>3. Spring事务</h2><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903608224333838">可能是最漂亮的Spring事务管理详解 - 掘金 (juejin.cn)</a></p>
+<h1 id="3-Spring事务"><a href="#3-Spring事务" class="headerlink" title="3. Spring事务"></a>3. Spring事务</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903608224333838">可能是最漂亮的Spring事务管理详解 - 掘金 (juejin.cn)</a></p>
+<h1 id="4-MyBatis工作原理"><a href="#4-MyBatis工作原理" class="headerlink" title="4. MyBatis工作原理"></a>4. MyBatis工作原理</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6993253212853633055#heading-8">一文搞懂Mybatis架构与工作原理 - 掘金 (juejin.cn)</a></p>
+<ol>
+<li><p>加载映射文件(通过动态代理和xml为接口生成对应的代理类)</p>
+</li>
+<li><p>构造会话工程(SqlSessionFactory)</p>
+</li>
+<li><p>创建会话对象(SqlSession)</p>
+<pre><code class="java">try (SqlSession session = sqlSessionFactory.openSession()) &#123;
+  BlogMapper mapper = session.getMapper(BlogMapper.class);
+  Blog blog = mapper.selectBlog(101);
+&#125;
+</code></pre>
+</li>
+<li><p>Executor执行器</p>
+<p>Mybatis会通过Executor去执行SQL语句。一般这里面会有缓存的实现。</p>
+</li>
+<li><p>MappedStatement对象</p>
+<p>对映射信息的封装，它存储了一个SQL对应的所有信息。Mybatis 通过解析 XML 和 mapper 接口上的注解，生成 sql 对应的 MappedStatement 实例</p>
+</li>
+<li><p>输入参数映射</p>
+</li>
+<li><p>输出参数映射</p>
+</li>
+</ol>
+<p>​	将数据库输出转换为 <code>Map</code>，<code>List</code>或自定义的类型</p>
+<p><img lazy="https://xds.asia/public/post/2023-3-2-ca9cc3cd-cb95-4437-8182-2476f326260d.webp"></p>
 
     </div>
     

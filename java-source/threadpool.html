@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#Java" style="color: #00bcd4">Java</a>
+                <a href="/2023/03/05/java-source#Java" style="color: #ff7d73">Java</a>
             </span>
             
         </span>
@@ -245,6 +245,14 @@
 <li><p><code>handler</code>：当任务由于超出线程池容量而被阻拦时将会执行此拦截器</p>
 </li>
 </ul>
+<p>线程池的基本工作流程如下：</p>
+<ol>
+<li>调用<code>execute</code>执行一个任务</li>
+<li>若工作线程数小于<code>corePoolSize</code>，则创建一个新的工作线程去执行这个任务</li>
+<li>若工作线程数已经大于等于<code>corePoolSize</code>，则将任务添加到工作队列中，工作线程执行完后会自动去执行队列中的任务</li>
+<li>若队列已满，则尝试增加工作线程去执行任务</li>
+<li>若工作线程数超过<code>maximumPoolSize</code>，则执行拒绝策略</li>
+</ol>
 <h2 id="1-1-拒绝策略"><a href="#1-1-拒绝策略" class="headerlink" title="1.1 拒绝策略"></a>1.1 拒绝策略</h2><p>在<code>ThreadPoolExecutor</code>里有如下4个默认拒绝策略(<code>RejectedExecutionHandler</code>)。</p>
 <ul>
 <li><code>CallerRunsPolicy</code>：如果线程池没有被关闭，则由当前线程执行(即提交任务的那个线程)</li>
