@@ -207,8 +207,7 @@ final V putVal(K key, V value, boolean onlyIfAbsent) {
             synchronized (f) {
                 // 确保这个没有被修改
                 if (tabAt(tab, i) == f) {
-                    // 判断fh是否大于0？？ 正常人看到这里一定会非常懵逼，因为通过spread计算的hash不可能为负数
-                    // 先别急，既然有负数，肯定后面还干了什么东西的，咱们接着往下看。
+                    // 这里要知道，如果节点是红黑树，哈希值为-2
                     if (fh >= 0) {
                         // 这个值代表链表的大小
                         binCount = 1;
@@ -345,13 +344,15 @@ private final void transfer(Node<K,V>[] tab, Node<K,V>[] nextTab) {
                      (this, TRANSFERINDEX, nextIndex,
                       nextBound = (nextIndex > stride ?
                                    nextIndex - stride : 0))) {
-                // 到这里，说明当前线程已经接下了[nextBound, i]这块区域重新分配的任务
+                // 到这里，说明当前线程已经接下了[nextBound, nextIndex - 1]这块区域重新分配的任务
                 bound = nextBound;
                 i = nextIndex - 1;
                 advance = false;
             }
         }
-        // i小于0，说明线程没拿到任务，后面俩条件意义不明。。
+        // i小于0，说明线程没拿到任务
+        // 至于后面那俩，我们仔细观察即可发现：这两个发生的条件是某一个线程进行扩容时，其它线程已经扩容完了
+        // 并且又开启了新一轮的扩容
         if (i < 0 || i >= n || i + n >= nextn) {
             int sc;
             // 判断扩容已经完成
@@ -518,6 +519,25 @@ private final void addCount(long x, int check) {
     }
 }
 ```
+
+关于`rs << RESIZE_STAMP_SHIFT`可能不好理解，这里我们举个例子：
+
+```java
+int n = 16;
+int i = Integer.numberOfLeadingZeros(n) | (1 << 15);
+//        System.out.println(Integer.toBinaryString());
+System.out.println(Integer.toBinaryString(i));
+System.out.println(Integer.toBinaryString(i << 16));
+```
+
+输出：
+
+```text
+1000000000011011
+10000000000110110000000000000000
+```
+
+我们在开头也说过了，ctl高16位代表一个版本号，第16位然后再减一代表当前正在扩容的线程数，所有这里就代表当前有一个线程正在进行扩容。
 
 ## 2.4 sumCount
 

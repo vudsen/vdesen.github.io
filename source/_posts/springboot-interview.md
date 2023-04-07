@@ -173,6 +173,39 @@ CGLIB的优势：
 
 [Java动态代理之一CGLIB详解 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/115744594)
 
-## 3. Spring事务
+# 3. Spring事务
 
 [可能是最漂亮的Spring事务管理详解 - 掘金 (juejin.cn)](https://juejin.cn/post/6844903608224333838)
+
+# 4. MyBatis工作原理
+
+[一文搞懂Mybatis架构与工作原理 - 掘金 (juejin.cn)](https://juejin.cn/post/6993253212853633055#heading-8)
+
+1. 加载映射文件(通过动态代理和xml为接口生成对应的代理类)
+
+2. 构造会话工程(SqlSessionFactory)
+
+3. 创建会话对象(SqlSession)
+
+   ```java
+   try (SqlSession session = sqlSessionFactory.openSession()) {
+     BlogMapper mapper = session.getMapper(BlogMapper.class);
+     Blog blog = mapper.selectBlog(101);
+   }
+   ```
+
+4. Executor执行器
+
+   Mybatis会通过Executor去执行SQL语句。一般这里面会有缓存的实现。
+
+5. MappedStatement对象
+
+   对映射信息的封装，它存储了一个SQL对应的所有信息。Mybatis 通过解析 XML 和 mapper 接口上的注解，生成 sql 对应的 MappedStatement 实例
+
+6. 输入参数映射
+
+7. 输出参数映射
+
+​	将数据库输出转换为 `Map`，`List`或自定义的类型
+
+![](https://xds.asia/public/post/2023-3-2-ca9cc3cd-cb95-4437-8182-2476f326260d.webp)

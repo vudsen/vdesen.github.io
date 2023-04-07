@@ -19,7 +19,7 @@ tags:
 
 > Provides a framework for implementing blocking locks and related synchronizers (semaphores, events, etc) that rely on first-in-first-out (FIFO) wait queues. 
 >
-> 提供了一个框架，去帮助开发者实现一个先进先出(FIFO)等待队列的同步锁或相关同步器(事件、信号量等)
+> 提供了一个框架，去帮助开发者实现一个依赖于先进先出(FIFO)等待队列的同步锁或相关同步器(事件、信号量等)
 
 如果谈理解的话，用这一句开头就会很舒服、
 
@@ -565,7 +565,7 @@ public final void await() throws InterruptedException {
         if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
             break;
     }
-    // 到这里说明已经得到信号，想要重新获取锁了，这里就直接将这个节点加到等待队列
+    // 到这里说明已经得到信号，想要重新获取锁了，就让它去抢锁
     if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
         interruptMode = REINTERRUPT;
     // 清除多余的waiter

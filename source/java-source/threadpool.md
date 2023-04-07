@@ -48,6 +48,14 @@ public ThreadPoolExecutor(int corePoolSize,
 - `threadFactory`：要创建新线程时使用的工厂类
 - `handler`：当任务由于超出线程池容量而被阻拦时将会执行此拦截器
 
+线程池的基本工作流程如下：
+
+1. 调用`execute`执行一个任务
+2. 若工作线程数小于`corePoolSize`，则创建一个新的工作线程去执行这个任务
+3. 若工作线程数已经大于等于`corePoolSize`，则将任务添加到工作队列中，工作线程执行完后会自动去执行队列中的任务
+4. 若队列已满，则尝试增加工作线程去执行任务
+5. 若工作线程数超过`maximumPoolSize`，则执行拒绝策略
+
 ## 1.1 拒绝策略
 
 在`ThreadPoolExecutor`里有如下4个默认拒绝策略(`RejectedExecutionHandler`)。

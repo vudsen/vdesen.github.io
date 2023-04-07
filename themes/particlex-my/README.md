@@ -6,6 +6,15 @@
 
 -   [GitHub Pages](https://iceofsummer.github.io/)
 
+## 新特性
+
+因为是魔改版本，所以有我自己新加的一些东西:
+
+- [x] 图片懒加载(在**外部**配置文件中配置`lazyload.disabled=true`即可关闭，修改配置后可能需要清除缓存：`hexo cl`)
+- [x] 资源压缩(js和css代码全部经过压缩)
+- [x] 文章目录
+- [x] 不再以个人头像为网页图标(默认加载`favicon.ico`，你可以直接将网站图标丢到`source`目录下)
+- [x] 首页不再显示文章全部内容，只会显示部分内容(v1.0.1及以上版本可用)
 
 ## 安装
 
@@ -35,11 +44,3 @@ prismjs:
 
 其它配置请在[ParticleX](https://github.com/argvchs/hexo-theme-particlex)中查看。
 
-## 新特性
-
-因为是魔改版本，所以有我自己新加的一些东西:
-
-- [x] 图片懒加载(在**外部**配置文件中配置`lazyload.disabled=true`即可关闭，修改配置后可能需要清除缓存：`hexo cl`)
-- [x] 资源压缩(js和css代码全部经过压缩)
-- [x] 文章目录
-- [x] 不再以个人头像为网页图标(默认加载`favicon.ico`，你可以直接将网站图标丢到`source`目录下)
