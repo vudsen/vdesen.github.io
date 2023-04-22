@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Netty面试题 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="用来用去还是自己搭的博客靠谱" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 6.3.0"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>Netty面试题</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/4/10
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="1-为什么要用Netty"><a href="#1-为什么要用Netty" class="headerlink" title="1. 为什么要用Netty"></a>1. 为什么要用Netty</h1><p>Netty是一个基于Java NIO封装的高性能网络通信框架。它主要有以下优势：</p>
+<ol>
+<li>Netty提供了比NIO更简单的API<ul>
+<li>很容易地实现Reactor模型</li>
+</ul>
+</li>
+<li>Netty在NIO的基础上做出了很多优化<ul>
+<li>内存池</li>
+<li>零拷贝</li>
+</ul>
+</li>
+<li>Netty内置了多种通信协议</li>
+</ol>
+<p>用官方的总结就是：<strong>Netty 成功地找到了一种在不妥协可维护性和性能的情况下实现易于开发，性能，稳定性和灵活性的方法。</strong></p>
+<h1 id="2-Netty零拷贝"><a href="#2-Netty零拷贝" class="headerlink" title="2. Netty零拷贝"></a>2. Netty零拷贝</h1><p>Netty零拷贝主要在五个方面：</p>
+<ol>
+<li>Netty默认情况下使用直接内存，避免了从JVM堆内存拷贝到直接内存这一次拷贝，而是直接从直接使用直接内存进行Socket读写</li>
+<li>Netty的文件传输调用了<code>FileRegion</code>包装的<code>transferTo</code>方法，可以直接将文件从缓冲区发送到目标Channel</li>
+<li>Netty提供了<code>CompositeByteBuf</code>类，可以将多个ByteBuf合并为一个逻辑上的ByteBuf，避免了多个ByteBuf的拷贝。</li>
+<li>通过<code>ByteBuf.wrap</code>方法，可以将byte[]数组、ByteBuffer包装成一个ByteBuf，从而避免了拷贝</li>
+<li><code>ByteBuf</code>支持slice操作，可以将ByteBuf分解为多个共享同一存储区域的ByteBuf，避免了内存的拷贝</li>
+</ol>
+<h1 id="3-Netty内存管理"><a href="#3-Netty内存管理" class="headerlink" title="3. Netty内存管理"></a>3. Netty内存管理</h1><p>为了减少频繁向操作系统申请内存的情况，Netty会一次性申请一块较大的内存(由ChunkSize决定，默认为16M)，这块内存被称为<code>PoolChunk</code>。</p>
+<p>而在一个<code>Chunk</code>下，又分为了一个一个页，叫做<code>Page</code>，默认为8K，即默认情况下一个Chunk有2048个页。</p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/422289486">超详细图文详解神秘的 Netty 高性能内存管理 - 知乎 (zhihu.com)</a></p>
+<h2 id="3-1-PoolChunk如何管理Page"><a href="#3-1-PoolChunk如何管理Page" class="headerlink" title="3.1 PoolChunk如何管理Page"></a>3.1 PoolChunk如何管理Page</h2><p>PoolChunk通过一个完全二叉树来管理Page，这颗二叉树的深度为12(2^11 &#x3D; 2048)。</p>
+<p>PoolChunk会维护一个<code>memeoryMap</code>数组，这个数组对应着每个节点，它的值代表这个节点之下的第几层还存在未分配的节点。</p>
+<ul>
+<li>比如说第9层的<code>memeoryMap</code>值为9，代表这个节点下面的子节点都未被分配</li>
+<li>若第9层的<code>memeoryMap</code>为10，代表它本身不可被分配，但第10层有子节点可以被分配</li>
+<li>若第9层的<code>memeoryMap</code>为12(树的高度)，代表当前节点下的所有子节点都不可分配</li>
+</ul>
+<p>那么我们怎么分配呢？</p>
+<p>比如我们要15KB的空间，这里会先向上取8的整数，也就是16K，也就是2^1 * 8，拿到指数1，通过depth - 1 &#x3D; 12 - 1得到11，那么我们只需要去找<code>memeoryMap</code>为11的节点即可。在分配后，父节点的<code>memeoryMap</code>等于两个子节点的最小值。</p>
+<h2 id="3-2-Page的管理"><a href="#3-2-Page的管理" class="headerlink" title="3.2 Page的管理"></a>3.2 Page的管理</h2><p>一个Page有8K，一般我们的应用程序是用不了这么多的，因此每个Page下会再次分隔。但这次分隔并不是以完全二叉树的形式，因为太占空间了，而是将这8K划分为等长的n份，一般会由<code>PoolSubpage</code>管理，一般分为两类：</p>
+<ul>
+<li>tiny：用于分配小于512字节的内存，一般大小为16B，32B，…，496B，每次增长为16的倍数，共32个。</li>
+<li>small：用于分配大于等于512字节的内存，一般大小为512B、1K、2K，4K。</li>
+</ul>
+<p>对于每个块，会有一个bitMap去判断是否使用，可以理解为Java中的<code>BitSet</code></p>
+<h2 id="3-3-Chunk的管理"><a href="#3-3-Chunk的管理" class="headerlink" title="3.3 Chunk的管理"></a>3.3 Chunk的管理</h2><p>每个PoolChunk通过<code>PoolArena</code>类来管理，这些Chunk被封装在<code>PoolChunkList</code>类中，这是一个双向链表。</p>
+<p><code>PoolArena</code>有6个<code>PoolChunkList</code>：</p>
+<ul>
+<li>qInit：存储内存利用率 0-25% 的 chunk</li>
+<li>q000：存储内存利用率 1-50% 的 chunk</li>
+<li>q025：存储内存利用率 25-75% 的 chunk</li>
+<li>q050：存储内存利用率 50-100% 的 chunk</li>
+<li>q075：存储内存利用率 75-100%的 chunk</li>
+<li>q100：存储内存利用率 100%的 chunk</li>
+</ul>
+<p><code>PoolArena</code>分配内存的顺序是：q050、q025、q000、qInit、q075</p>
+<p>这样分配的好处是可以提高内存的利用率，以及减少链表的遍历次数。</p>
+<h2 id="3-4-PoolThreadCache"><a href="#3-4-PoolThreadCache" class="headerlink" title="3.4 PoolThreadCache"></a>3.4 PoolThreadCache</h2><p>PoolThreadCache利用了ThreadLocal，每次线程在申请内存时都会优先从这里面获取。</p>
+<ul>
+<li>在释放已分配的内存块时，不放回到 Chunk 中，而是缓存到 ThreadCache 中</li>
+<li>在分配内存块时，优先从 ThreadCache 获取。若无法获取到，再从 Chunk 中分配</li>
+<li>通过这样的方式，既能提高分配效率，又尽可能的避免多线程的同步和竞争</li>
+</ul>
+<h1 id="4-直接内存回收原理"><a href="#4-直接内存回收原理" class="headerlink" title="4. 直接内存回收原理"></a>4. 直接内存回收原理</h1><p>每个ByteBuf都实现了一个<code>ReferenceCounted</code>接口，netty也是直接采用了引用计数法来进行内存回收。</p>
+<h1 id="5-怎么判断ByteBuffer是否处于写模式或读模式"><a href="#5-怎么判断ByteBuffer是否处于写模式或读模式" class="headerlink" title="5. 怎么判断ByteBuffer是否处于写模式或读模式"></a>5. 怎么判断ByteBuffer是否处于写模式或读模式</h1><p><code>ByteBuffer</code>有三个重要参数：<code>position</code>、<code>limit</code>、<code>capacity</code>，而平常我们说的读模式或写模式只是用来方便我们理解的东西，真正在ByteBuffer的实现里并不存在什么读模式和写模式，也就是说你在”读模式下”仍然可以写。</p>
+<p>例如下面的代码：</p>
+<pre><code class="java">ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+
+byte[] hello = &quot;hello&quot;.getBytes(StandardCharsets.UTF_8);
+System.out.println(Arrays.toString(hello));
+// &quot;write mode&quot;
+byteBuffer.put(hello);
+// &quot;read mode&quot;
+byteBuffer.flip();
+// write again
+byteBuffer.put(&quot;h&quot;.getBytes(StandardCharsets.UTF_8));
+
+while (byteBuffer.hasRemaining()) &#123;
+    System.out.print(byteBuffer.get() + &quot; &quot;);
+&#125;
+</code></pre>
+<p><font color=red>在”读模式”下去写的时候，并不会报错</font>，由于切换到了”读模式”，此时<code>position = 0，limit = 写模式的offset</code>，因此在写的时候，会从索引0处开始写，写完后，<code>position</code>变为1，我们再读的话也就只能从索引1读到4了。</p>
+<p>如果硬要判断是不是”读模式”或”写模式”，可以根据<code>position</code>和<code>limit</code>的值进行判断：</p>
+<ul>
+<li>如<code>limit = capacity</code>，表示当前<strong>可能</strong>为写模式</li>
+</ul>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2023 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;IceOfSummer
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>

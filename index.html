@@ -10,7 +10,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
         <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
 <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
-<link rel="stylesheet" href="/css/fonts.min.css" />
+<link rel="stylesheet" href="/static/fonts.min.css" />
 <script>
   const mixins = {};
   const h = (arg1, arg2, arg3) => {
@@ -185,6 +185,146 @@
     <div id="home-posts">
         <div id="posts">
             
+
+<div class="post post-partial-show">
+    <a href="/2023/04/20/docker/">
+        <h2 class="post-title">Docker</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/4/20
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <p><a href="/docker/quick-start">快速入门</a></p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/04/20/docker/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post post-partial-show">
+    <a href="/2023/04/10/netty-interview/">
+        <h2 class="post-title">Netty面试题</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/4/10
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <h1 id="1-为什么要用Netty"><a href="#1-为什么要用Netty" class="headerlink" title="1. 为什么要用Netty"></a>1. 为什么要用Netty</h1><p>Netty是一个基于Java NIO封装的高性能网络通信框架。它主要有以下优势：</p>
+<ol>
+<li>Netty提供了比NIO更简单的API<ul>
+<li>很容易地实现Reactor模型</li>
+</ul>
+</li>
+<li>Netty在NIO的基础上做出了很多优化<ul>
+<li>内存池</li>
+<li>零拷贝</li>
+</ul>
+</li>
+<li>Netty内置了多种通信协议</li>
+</ol>
+<p>用官方的总结就是：<strong>Netty 成功地找到了一种在不妥协可维护性和性能的情况下实现易于开发，性能，稳定性和灵活性的方法。</strong></p>
+<h1 id="2-Netty零拷贝"><a href="#2-Netty零拷贝" class="headerlink" title="2. Netty零拷贝"></a>2. Netty零拷贝</h1><p>Netty零拷贝主要在五个方面：</p>
+<ol>
+<li>Netty默认情况下使用直接内存，避免了从JVM堆内存拷贝到直接内存这一次拷贝，而是直接从直接使用直接内存进行Socket读写</li>
+<li>Netty的文件传输调用了<code>FileRegion</code>包装的<code>transferTo</code>方法，可以直接将文件从缓冲区发送到目标Channel</li>
+<li>Netty提供了<code>CompositeByteBuf</code>类，可以将多个ByteBuf合并为一个逻辑上的ByteBuf，避免了多个ByteBuf的拷贝。</li>
+<li>通过<code>ByteBuf.wrap</code>方法，可以将byte[]数组、ByteBuffer包装成一个ByteBuf，从而避免了拷贝</li>
+<li><code>ByteBuf</code>支持slice操作，可以将ByteBuf分解为多个共享同一存储区域的ByteBuf，避免了内存的拷贝</li>
+</ol>
+<h1 id="3-Netty内存管理"><a href="#3-Netty内存管理" class="headerlink" title="3. Netty内存管理"></a>3. Netty内存管理</h1><p>为了减少频繁向操作系统申请内存的情况，Netty会一次性申请一块较大的内存(由ChunkSize决定，默认为16M)，这块内存被称为<code>PoolChunk</code>。</p>
+<p>而在一个<code>Chunk</code>下，又分为了一个一个页，叫做<code>Page</code>，默认为8K，即默认情况下一个Chunk有2048个页。</p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/422289486">超详细图文详解神秘的 Netty 高性能内存管理 - 知乎 (zhihu.com)</a></p>
+<h2 id="3-1-PoolChunk如何管理Page"><a href="#3-1-PoolChunk如何管理Page" class="headerlink" title="3.1 PoolChunk如何管理Page"></a>3.1 PoolChunk如何管理Page</h2><p>PoolChunk通过一个完全二叉树来管理Page，这颗二叉树的深度为12(2^11 &#x3D; 2048)。</p>
+<p>PoolChunk会维护一个<code>memeoryMap</code>数组，这个数组对应着每个节点，它的值代表这个节点之下的第几层还存在未分配的节点。</p>
+<ul>
+<li>比如说第9层的<code>memeoryMap</code>值为9，代表这个节点下面的子节点都未被分配</li>
+<li>若第9层的<code>memeoryMap</code>为10，代表它本身不可被分配，但第10层有子节点可以被分配</li>
+<li>若第9层的<code>memeoryMap</code>为12(树的高度)，代表当前节点下的所有子节点都不可分配</li>
+</ul>
+<p>那么我们怎么分配呢？</p>
+<p>比如我们要15KB的空间，这里会先向上取8的整数，也就是16K，也就是2^1 * 8，拿到指数1，通过depth - 1 &#x3D; 12 - 1得到11，那么我们只需要去找<code>memeoryMap</code>为11的节点即可。在分配后，父节点的<code>memeoryMap</code>等于两个子节点的最小值。</p>
+<h2 id="3-2-Page的管理"><a href="#3-2-Page的管理" class="headerlink" title="3.2 Page的管理"></a>3.2 Page的管理</h2><p>一个Page有8K，一般我们的应用程序是用不了这么多的，因此每个Page下会再次分隔。但这次分隔并不是以完全二叉树的形式，因为太占空间了，而是将这8K划分为等长的n份，一般会由<code>PoolSubpage</code>管理，一般分为两类：</p>
+<ul>
+<li>tiny：用于分配小于512字节的内存，一般大小为16B，32B，…，496B，每次增长为16的倍数，共32个。</li>
+<li>small：用于分配大于等于512字节的内存，一般大小为512B、1K、2K，4K。</li>
+</ul>
+<p>对于每个块，会有一个bitMap去判断是否使用，可以理解为Java中的<code>BitSet</code></p>
+<h2 id="3-3-Chunk的管理"><a href="#3-3-Chunk的管理" class="headerlink" title="3.3 Chunk的管理"></a>3.3 Chunk的管理</h2><p>每个PoolChunk通过<code>PoolArena</code>类来管理，这些Chunk被封装在<code>PoolChunkList</code>类中，这是一个双向链表。</p>
+<p><code>PoolArena</code>有6个<code>PoolChunkList</code>：</p>
+<ul>
+<li>qInit：存储内存利用率 0-25% 的 chunk</li>
+<li>q000：存储内存利用率 1-50% 的 chunk</li>
+<li>q025：存储内存利用率 25-75% 的 chunk</li>
+<li>q050：存储内存利用率 50-100% 的 chunk</li>
+<li>q075：存储内存利用率 75-100%的 chunk</li>
+<li>q100：存储内存利用率 100%的 chunk</li>
+</ul>
+<p><code>PoolArena</code>分配内存的顺序是：q050、q025、q000、qInit、q075</p>
+<p>这样分配的好处是可以提高内存的利用率，以及减少链表的遍历次数。</p>
+<h2 id="3-4-PoolThreadCache"><a href="#3-4-PoolThreadCache" class="headerlink" title="3.4 PoolThreadCache"></a>3.4 PoolThreadCache</h2><p>PoolThreadCache利用了ThreadLocal，每次线程在申请内存时都会优先从这里面获取。</p>
+<ul>
+<li>在释放已分配的内存块时，不放回到 Chunk 中，而是缓存到 ThreadCache 中</li>
+<li>在分配内存块时，优先从 ThreadCache 获取。若无法获取到，再从 Chunk 中分配</li>
+<li>通过这样的方式，既能提高分配效率，又尽可能的避免多线程的同步和竞争</li>
+</ul>
+<h1 id="4-直接内存回收原理"><a href="#4-直接内存回收原理" class="headerlink" title="4. 直接内存回收原理"></a>4. 直接内存回收原理</h1><p>每个ByteBuf都实现了一个<code>ReferenceCounted</code>接口，netty也是直接采用了引用计数法来进行内存回收。</p>
+<h1 id="5-怎么判断ByteBuffer是否处于写模式或读模式"><a href="#5-怎么判断ByteBuffer是否处于写模式或读模式" class="headerlink" title="5. 怎么判断ByteBuffer是否处于写模式或读模式"></a>5. 怎么判断ByteBuffer是否处于写模式或读模式</h1><p><code>ByteBuffer</code>有三个重要参数：<code>position</code>、<code>limit</code>、<code>capacity</code>，而平常我们说的读模式或写模式只是用来方便我们理解的东西，真正在ByteBuffer的实现里并不存在什么读模式和写模式，也就是说你在”读模式下”仍然可以写。</p>
+<p>例如下面的代码：</p>
+<pre><code class="java">ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+
+byte[] hello = &quot;hello&quot;.getBytes(StandardCharsets.UTF_8);
+System.out.println(Arrays.toString(hello));
+// &quot;write mode&quot;
+byteBuffer.put(hello);
+// &quot;read mode&quot;
+byteBuffer.flip();
+// write again
+byteBuffer.put(&quot;h&quot;.getBytes(StandardCharsets.UTF_8));
+
+while (byteBuffer.hasRemaining()) &#123;
+    System.out.print(byteBuffer.get() + &quot; &quot;);
+&#125;
+</code></pre>
+<p><font color=red>在”读模式”下去写的时候，并不会报错</font>，由于切换到了”读模式”，此时<code>position = 0，limit = 写模式的offset</code>，因此在写的时候，会从索引0处开始写，写完后，<code>position</code>变为1，我们再读的话也就只能从索引1读到4了。</p>
+<p>如果硬要判断是不是”读模式”或”写模式”，可以根据<code>position</code>和<code>limit</code>的值进行判断：</p>
+<ul>
+<li>如<code>limit = capacity</code>，表示当前<strong>可能</strong>为写模式</li>
+</ul>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/04/10/netty-interview/" class="go-post">阅读全文</a>
+</div>
 
 <div class="post post-partial-show">
     <a href="/2023/04/02/mysql-interview/">
@@ -890,6 +1030,7 @@ sadd animals &quot;lion&quot;
 <li>当其它主节点ping一个主节点A时，如果半数以上的主节点与A通信超时，那么认为主节点A宕机了。如果主节点A和它的从节点都宕机了，那么该集群就无法再提供服务了</li>
 </ol>
 <p>Cluster模式集群节点最小配置6个节点(3主3从，因为需要半数以上)，其中主节点提供读写操作，从节点作为备用节点，不提供请求，只作为故障转移使用。</p>
+<h1 id="8-分布式锁"><a href="#8-分布式锁" class="headerlink" title="8. 分布式锁"></a>8. 分布式锁</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/v123411739/article/details/114501792?spm=1001.2014.3001.5502">面试必问的分布式锁，你懂了吗？_几年经验会问分布式锁_程序员囧辉的博客-CSDN博客</a></p>
 
             
         </div>
@@ -987,16 +1128,33 @@ public class ExampleConfiguration &#123;
 <p>单例模式下属性注入的循环依赖会通过三级缓存处理循环依赖：</p>
 <p><code>singletonObjects</code>：完成了初始化的单例对象map，bean name –&gt; bean instance</p>
 <p><code>earlySingletonObjects</code>：完成实例化未初始化的单例对象map，bean name –&gt; bean instance</p>
-<p><code>singletonFactories</code>： 单例对象工厂map，bean name –&gt; ObjectFactory，单例对象实例化完成之后会加入singletonFactories。</p>
-<p>假如A依赖了B的实例对象，同时B也依赖A的实例对象。</p>
-<ol>
-<li>A首先完成了实例化，并且将自己添加到singletonFactories中</li>
-<li>接着进行依赖注入，发现自己依赖对象B，此时就尝试去get(B)</li>
-<li>发现B还没有被实例化，对B进行实例化</li>
-<li>然后B在初始化的时候发现自己依赖了对象A，于是尝试get(A)，尝试一级缓存singletonObjects和二级缓存earlySingletonObjects没找到，尝试三级缓存singletonFactories，由于A初始化时将自己添加到了singletonFactories，所以B可以拿到A对象，然后将A从三级缓存中移到二级缓存中</li>
-<li>B拿到A对象后顺利完成了初始化，然后将自己放入到一级缓存singletonObjects中</li>
-<li>此时返回A中，A此时能拿到B的对象顺利完成自己的初始化</li>
-</ol>
+<p><code>singletonFactories</code>： 单例对象工厂map，bean name –&gt; ObjectFactory，存放 bean 工厂对象</p>
+<p>具体的执行逻辑可以在<code>DefaultSingletonBeanRegistry</code>中看到，这里贴出核心方法：</p>
+<pre><code class="java">protected Object getSingleton(String beanName, boolean allowEarlyReference) &#123;
+    Object singletonObject = this.singletonObjects.get(beanName);
+    if (singletonObject == null &amp;&amp; this.isSingletonCurrentlyInCreation(beanName)) &#123;
+        singletonObject = this.earlySingletonObjects.get(beanName);
+        if (singletonObject == null &amp;&amp; allowEarlyReference) &#123;
+            synchronized(this.singletonObjects) &#123;
+                singletonObject = this.singletonObjects.get(beanName);
+                if (singletonObject == null) &#123;
+                    singletonObject = this.earlySingletonObjects.get(beanName);
+                    if (singletonObject == null) &#123;
+                        ObjectFactory&lt;?&gt; singletonFactory = (ObjectFactory)this.singletonFactories.get(beanName);
+                        if (singletonFactory != null) &#123;
+                            singletonObject = singletonFactory.getObject();
+                            this.earlySingletonObjects.put(beanName, singletonObject);
+                            this.singletonFactories.remove(beanName);
+                        &#125;
+                    &#125;
+                &#125;
+            &#125;
+        &#125;
+    &#125;
+
+    return singletonObject;
+&#125;
+</code></pre>
 <h2 id="1-8-Spring的单例Bean是否有线程安全问题"><a href="#1-8-Spring的单例Bean是否有线程安全问题" class="headerlink" title="1.8 Spring的单例Bean是否有线程安全问题"></a>1.8 Spring的单例Bean是否有线程安全问题</h2><p>当多个用户同时请求一个服务时，容器会给每一个请求分配一个线程，这时多个线程会并发执行该请求对应的业务逻辑，如果业务逻辑有对单例状态的修改（体现为此单例的成员属性），则必须考虑线程安全问题。</p>
 <p>若每个线程中对全局变量、静态变量只有读操作，而无写操作，那么不会有线程安全问题；若有多个线程同时执行写操作，一般都需要考虑线程同步，否则就可能影响线程安全。</p>
 <p><strong>无状态bean和有状态bean</strong></p>
@@ -1005,6 +1163,7 @@ public class ExampleConfiguration &#123;
 <li>没有实例变量的对象。不能保存数据，是线程安全的。</li>
 </ul>
 <p>在Spring中无状态的Bean适合用单例模式，这样可以共享实例提高性能。有状态的Bean在多线程环境下不安全，一般用Prototype模式或者使用ThreadLocal解决线程安全问题。</p>
+<h2 id="1-9-Spring容器的启动过程"><a href="#1-9-Spring容器的启动过程" class="headerlink" title="1.9 Spring容器的启动过程"></a>1.9 Spring容器的启动过程</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_35190492/article/details/110383213">阿里面试真题：Spring容器启动流程_spring启动流程面试题_敖 丙的博客-CSDN博客</a></p>
 <h1 id="2-AOP"><a href="#2-AOP" class="headerlink" title="2. AOP"></a>2. AOP</h1><p>常见的动态代理有两种：</p>
 <ul>
 <li><p>JDK动态代理：基于Java反射机制实现，必须要实现了接口的业务类才生成代理对象。</p>
@@ -1157,7 +1316,7 @@ public class ExampleConfiguration &#123;
 <li>客户端(主动关闭的那一方)：ESTABLISHED -&gt; FIN_WAIT -&gt; TIME_WAIT(等待2ms) -&gt; CLOSE</li>
 <li>服务端(响应关闭的那一方)：ESTABLISHED -&gt; CLOSE_WAIT -&gt; LAST_ACK -&gt; CLOSE</li>
 </ul>
-<p>这里在主动关闭的那一方需要等待2ms，原因如下：</p>
+<p>这里在主动关闭的那一方需要等待2MSL，原因如下：</p>
 <ul>
 <li><p>首先占用该端口，因为IP报文在网络中的生存时间是有限的，让旧的报文全部在网络中被丢弃</p>
 </li>
@@ -1193,290 +1352,6 @@ public class ExampleConfiguration &#123;
         
     </div>
     <a href="/2023/03/22/computer-network/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post post-partial-show">
-    <a href="/2023/03/19/interview2/">
-        <h2 class="post-title">面试题记录2</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2023/3/19
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <ul>
-<li><a href="/2023/03/14/interview/">第一期</a></li>
-</ul>
-<p><a target="_blank" rel="noopener" href="https://leetcode.cn/circle/discuss/uRUsKF/">八股文｜后端｜MySQL｜答案 - 力扣（LeetCode）</a></p>
-<h1 id="1-Redis的内存淘汰算法"><a href="#1-Redis的内存淘汰算法" class="headerlink" title="1. Redis的内存淘汰算法"></a>1. Redis的内存淘汰算法</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/crazymakercircle/article/details/115360829">Redis 内存淘汰策略 （史上最全）_redis内存淘汰策略_40岁资深老架构师尼恩的博客-CSDN博客</a></p>
-<h1 id="2-Redis主从复制"><a href="#2-Redis主从复制" class="headerlink" title="2. Redis主从复制"></a>2. Redis主从复制</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Bilson99/article/details/118732296">Redis（主从复制、哨兵模式、集群）的讲解_redis集哨兵模式哪个节点负责读取数据_五条悟的小迷妹的博客-CSDN博客</a></p>
-<h1 id="3-Redis的持久化方式"><a href="#3-Redis的持久化方式" class="headerlink" title="3. Redis的持久化方式"></a>3. Redis的持久化方式</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Violet_201903027/article/details/100145168">Redis有哪几种持久化方式？优缺点是什么_Listener_code的博客-CSDN博客</a></p>
-<h1 id="4-Redis常见的性能问题和解决方案"><a href="#4-Redis常见的性能问题和解决方案" class="headerlink" title="4. Redis常见的性能问题和解决方案"></a>4. Redis常见的性能问题和解决方案</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7207406497541455929">Redis 常见性能问题和解决方案 - 掘金 (juejin.cn)</a></p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/2023/03/19/interview2/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post post-partial-show">
-    <a href="/2023/03/14/interview/">
-        <h2 class="post-title">面试题记录</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2023/3/14
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <blockquote>
-<p>在这里记录一些我觉得比较好的面试题</p>
-</blockquote>
-<h1 id="1-给你10g的字符串数据，内存只有256mb，如何实现排序"><a href="#1-给你10g的字符串数据，内存只有256mb，如何实现排序" class="headerlink" title="1. 给你10g的字符串数据，内存只有256mb，如何实现排序"></a>1. 给你10g的字符串数据，内存只有256mb，如何实现排序</h1><h2 id="1-1-多路并归"><a href="#1-1-多路并归" class="headerlink" title="1.1 多路并归"></a>1.1 多路并归</h2><p>首先将10G的数据分为<code>10 * 1024 / 256 = 40</code>块分别读入后进行排序。</p>
-<p>之后采用<a target="_blank" rel="noopener" href="https://cn.bing.com/search?q=%E5%A4%9A%E8%B7%AF%E5%BD%92%E5%B9%B6&qs=n&form=QBRE&=%25e%E7%AE%A1%E7%90%86%E6%90%9C%E7%B4%A2%E5%8E%86%E5%8F%B2%E8%AE%B0%E5%BD%95%25E&sp=-1&lq=0&pq=%E5%A4%9A%E8%B7%AF%E5%BD%92%E5%B9%B6&sc=10-4&sk=&cvid=4970BA4F5DC249979A1987C240B84F23&ghsh=0&ghacc=0&ghpl=">多路归并</a>的方法实现排序：</p>
-<p>将每一个小文件的第一个数取出，即每一个小文件里的最小数，对这些数进行归并排序，将这些数里的最小数字<code>num(i)</code>写入大文件的第一行，然后将对应文件的指针加一并读入新的值，同时大文件的指针加一，重复该操作直到全部写入完毕。</p>
-<p>假设数据被分为了<code>k</code>段，总共的数据量为<code>n</code>，我们每次获取最小值需要遍历<code>k</code>次，一共需要比较<code>n</code>次，每块数据排序耗时<code>log(n / k)</code>，总共的时间复杂度为<code>O(k*log(n/k) + nk)</code></p>
-<h2 id="1-2-败者树"><a href="#1-2-败者树" class="headerlink" title="1.2 败者树"></a>1.2 败者树</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/meihao1203/p/9561256.html">败者树，图解败者树，算法执行调整每一步详细分析 - 正在加载…… - 博客园 (cnblogs.com)</a></p>
-<p>败者树同样也要先排序，但是每次寻找最小值的世界复杂度为<code>O(log(k))</code>左右，总时间复杂度大致为<code>O(k*log(n/k) + n * log(k))</code></p>
-<h1 id="2-写一个java方法，实现参数a-b值的交换"><a href="#2-写一个java方法，实现参数a-b值的交换" class="headerlink" title="2. 写一个java方法，实现参数a,b值的交换"></a>2. 写一个java方法，实现参数a,b值的交换</h1><p>这个题目一上来就挺懵逼的，因为Java是值传递，所以基本数据类型咱就别想了，如果是包装类，则可以通过反射进行交换：</p>
-<pre><code class="java">public static void swap(Integer a, Integer b) throws Exception &#123;
-    Integer temp = new Integer(a);
-    Field field = Integer.class.getDeclaredField(&quot;value&quot;);
-    field.setAccessible(true);
-    field.set(a, b);
-    field.set(b, temp);
-&#125;
-</code></pre>
-<p>但是这样有风险，咱们都知道包装类在[-128, 127]以内的数字返回的都是同一个对象，也就是说我们要是修改了这些值，也会影响后续的对象：</p>
-<pre><code class="java">Integer a = 1, b = 2;
-swap(a, b);
-System.out.println(a);
-System.out.println(b);
-Integer test = 1;
-System.out.println(test);
-</code></pre>
-<p>输出:</p>
-<pre><code class="text">2
-1
-2
-</code></pre>
-<p>具体内容可以看<code>Integer#valueOf</code></p>
-<p>在测试的时候发现一个有趣的现象：</p>
-<pre><code class="java">Integer a = 1, b = 2;
-swap(a, b);
-System.out.println(a + &quot; &quot; + b);
-</code></pre>
-<p>输出：</p>
-<pre><code class="text">Exception in thread &quot;main&quot; java.lang.InternalError: Storage is not completely initialized, 1 bytes left
-    at java.base/java.lang.StringConcatHelper.newString(StringConcatHelper.java:346)
-    at juc.CHMTest.main(CHMTest.java:13)
-</code></pre>
-<p>用debug稍微看了一下，不知道为什么。。</p>
-<h1 id="3-JVM有哪些部分"><a href="#3-JVM有哪些部分" class="headerlink" title="3. JVM有哪些部分"></a>3. JVM有哪些部分</h1><p>这种东西一定要记一共有几个，不然容易说漏。</p>
-<p>JVM从整体分为<strong>三部分</strong>：类加载子系统、运行时数据区以及执行引擎。</p>
-<p>运行时数据区包括<strong>五部分</strong>：方法区、堆、虚拟机栈、PC寄存器以及本地方法栈</p>
-<p><img lazy="https://xds.asia/public/interview/2023-2-2-4fa15602-b784-43b9-9f62-0dc3b7d5b6e7.webp" alt="JVM结构"></p>
-<h1 id="4-堆在垃圾回收的场景下分哪几部分？每部分如何进行GC？"><a href="#4-堆在垃圾回收的场景下分哪几部分？每部分如何进行GC？" class="headerlink" title="4. 堆在垃圾回收的场景下分哪几部分？每部分如何进行GC？"></a>4. 堆在垃圾回收的场景下分哪几部分？每部分如何进行GC？</h1><p>第一问很简单：总体分为年轻代和老年代，默认占比为1:2。</p>
-<p>可以通过<code>-XX:NewRatio</code>可以设置新生代的比例，但是不要字面理解这个配置的意思：</p>
-<ul>
-<li><p>默认<code>-XX:NewRatio=2</code>，代表新生代占1，老年代占2，新生代占整个堆的1&#x2F;3</p>
-</li>
-<li><p>比如<code>-XX:NewRatio=4</code>，代表新生代占1，老年代占4，新生代占整个堆的1&#x2F;5</p>
-</li>
-</ul>
-<p>新生代又分为伊甸园区、幸存者0区和幸存者1区，默认占比为8:1:1，可以通过<code>-XX:SurvivorRatio</code>进行调整。</p>
-<p><img lazy="https://xds.asia/public/interview/2023-2-2-704f791a-01ef-4274-924a-b16a105818cf.webp" alt="heap"></p>
-<p>关于第二问，年轻态的GC称为Young GC(下面简称YGC)或者Minor GC，触发条件如下：</p>
-<ol>
-<li>new的对象优先放到伊甸园区</li>
-<li>当伊甸园区的空间不足时，此时进行YGC，清除Eden区的所有垃圾，并将存活的对象放到幸存者0区</li>
-<li>如果再次触发垃圾回收，清除Eden区和幸存者0区的垃圾，并将存活的对象放到幸存者1区</li>
-<li>如果再次重复，清除Eden区和幸存者1区的垃圾，并将存活的对象放到幸存者0区</li>
-<li>….</li>
-</ol>
-<p>特殊情况：</p>
-<ul>
-<li>当某个对象循环超过指定次数后，会被放到老年代，默认为15次，可以通过<code>-XX:MaxTenuringThreshold=&lt;N&gt;</code>设置</li>
-<li>如果在垃圾回收后仍然无法在Eden区给对象分配内存，那么对象会直接升级到老年代，如果老年代空间也不足，并且通过Full GC也不足，则会抛出OOM异常</li>
-<li>由Eden区、from区向to区复制时，对象大小大于To Space可用内存，则把该对象转存到老年代，且老年代的可用内存小于该对象大小</li>
-</ul>
-<p><img lazy="https://xds.asia/public/interview/2023-2-2-0c39b9fd-3ca3-4f3e-9f8c-77bd9b7f5b00.webp" alt="YGC"></p>
-<h1 id="5-用过ES吗？请说一下倒排索引"><a href="#5-用过ES吗？请说一下倒排索引" class="headerlink" title="5. 用过ES吗？请说一下倒排索引"></a>5. 用过ES吗？请说一下倒排索引</h1><p>这个东西太长了，建议自行百度了解。</p>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_31960623/article/details/118860928">ES之倒排索引详解_es倒排索引_wh柒八九的博客-CSDN博客</a></p>
-<h1 id="6-Spring用了哪些设计模式"><a href="#6-Spring用了哪些设计模式" class="headerlink" title="6. Spring用了哪些设计模式"></a>6. Spring用了哪些设计模式</h1><p>[Spring中用到了哪些设计模式？ - murphy_gb - 博客园 (cnblogs.com)](<a target="_blank" rel="noopener" href="https://www.cnblogs.com/kyoner/p/10949246.html#:~:text=Spring">https://www.cnblogs.com/kyoner/p/10949246.html#:~:text=Spring</a> 框架中用到了哪些设计模式： 工厂设计模式%3A Spring使用工厂模式通过 BeanFactory、ApplicationContext 创建 bean 对象。,Spring AOP 功能的实现。 单例设计模式%3A Spring 中的 Bean 默认都是单例的。)</p>
-<h1 id="7-简单说一下B-树"><a href="#7-简单说一下B-树" class="headerlink" title="7. 简单说一下B+树"></a>7. 简单说一下B+树</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/a519640026/article/details/106940115">一文彻底搞懂MySQL基础：B树和B+树的区别_b树和b+树有什么区别_公众号：码农富哥的博客-CSDN博客</a></p>
-<h1 id="8-聚集索引和非聚集索引是什么"><a href="#8-聚集索引和非聚集索引是什么" class="headerlink" title="8. 聚集索引和非聚集索引是什么"></a>8. 聚集索引和非聚集索引是什么</h1><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/s-b-b/p/8334593.html">聚集索引与非聚集索引的总结 - {-）大傻逼 - 博客园 (cnblogs.com)</a></p>
-<p>大致意思就是数据库会根据聚集索引去创建对应的表，而表中实际的数据也存在这里面。非聚集索引只会保存对应的键以及它所指向的主键值，因此使用非聚集索引查询时，会进行两次查询：第一次根据非聚集索引拿到主键值，再根据主键值到聚集索引里去查数据。</p>
-<p>聚簇索引：数据文件和索引文件在一起</p>
-<p>非聚簇索引：数据文件和索引文件分开</p>
-<h1 id="9-MyISAM和InnoDB引擎的区别"><a href="#9-MyISAM和InnoDB引擎的区别" class="headerlink" title="9. MyISAM和InnoDB引擎的区别"></a>9. MyISAM和InnoDB引擎的区别</h1><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/354375289">MyISAM VS InnoDB - 知乎 (zhihu.com)</a></p>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_40228200/article/details/122080566">MySQL引擎详解（二）——MyISAM引擎特性_永远是少年啊的博客-CSDN博客</a></p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>InnoDB</th>
-<th>MyISAM</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>事务支持</td>
-<td>支持</td>
-<td>不支持</td>
-</tr>
-<tr>
-<td>表级锁定</td>
-<td>锁行，前提是用了主键</td>
-<td>锁整个表</td>
-</tr>
-<tr>
-<td>读写锁</td>
-<td>在锁行的前提下，读写互不影响</td>
-<td>只能一个写，或者多个读</td>
-</tr>
-<tr>
-<td>缓存</td>
-<td>缓存数据+索引</td>
-<td>只缓存索引</td>
-</tr>
-<tr>
-<td>查询效率(相对)</td>
-<td>一般</td>
-<td>高</td>
-</tr>
-<tr>
-<td>增删改效率(相对)</td>
-<td>一般</td>
-<td>低</td>
-</tr>
-<tr>
-<td>AUTO_INCREMENT</td>
-<td>自动增长列只能是组合索引的第一列</td>
-<td>自动增长列可以是组合索引的任意列</td>
-</tr>
-<tr>
-<td>外键</td>
-<td>支持</td>
-<td>不支持</td>
-</tr>
-<tr>
-<td>主键</td>
-<td>必须有</td>
-<td>可以没有</td>
-</tr>
-<tr>
-<td>表的具体行数</td>
-<td>会遍历整个表</td>
-<td>保存了总行数，查询时会直接取出来</td>
-</tr>
-<tr>
-<td>聚簇索引</td>
-<td>是</td>
-<td>否</td>
-</tr>
-</tbody></table>
-<h1 id="10-Spring-Bean的生命周期"><a href="#10-Spring-Bean的生命周期" class="headerlink" title="10. Spring Bean的生命周期"></a>10. Spring Bean的生命周期</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_39911567/article/details/111039200">spring生命周期七个过程_面试官：请你讲解一下Spring Bean的生命周期_weixin_39911567的博客-CSDN博客</a></p>
-<h1 id="11-Spring-Bean的作用域"><a href="#11-Spring-Bean的作用域" class="headerlink" title="11. Spring Bean的作用域"></a>11. Spring Bean的作用域</h1><table>
-<thead>
-<tr>
-<th>作用域</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>singleton</td>
-<td>注册一个单例的bean，这是默认的注册方式</td>
-</tr>
-<tr>
-<td>prototype</td>
-<td>每次从容器中调用Bean时，都返回一个新的实例</td>
-</tr>
-<tr>
-<td>request</td>
-<td>每次Http请求都会创建一个新的Bean</td>
-</tr>
-<tr>
-<td>session</td>
-<td>同一个HttpSession都会共享一个Bean</td>
-</tr>
-<tr>
-<td>application</td>
-<td>限定一个Bean的作用域为<code>ServletContext</code>的生命周期。该作用域仅适用于web的Spring WebApplicationContext环境。</td>
-</tr>
-</tbody></table>
-<h1 id="12-MySql的四种事务隔离级别"><a href="#12-MySql的四种事务隔离级别" class="headerlink" title="12. MySql的四种事务隔离级别"></a>12. MySql的四种事务隔离级别</h1><table>
-<thead>
-<tr>
-<th>隔离级别</th>
-<th>脏读</th>
-<th>不可重复读</th>
-<th>幻读</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>READ_UNCOMMITTED(读未提交)</td>
-<td>可能</td>
-<td>可能</td>
-<td>可能</td>
-</tr>
-<tr>
-<td>READ_COMMITTED(读提交)</td>
-<td>不可能</td>
-<td>可能</td>
-<td>可能</td>
-</tr>
-<tr>
-<td>REPEATABLE_READ(可重复读)</td>
-<td>不可能</td>
-<td>不可能</td>
-<td>可能</td>
-</tr>
-<tr>
-<td>SERIALIZABLE(串行化)</td>
-<td>不可能</td>
-<td>不可能</td>
-<td>不可能</td>
-</tr>
-</tbody></table>
-<p><strong>脏读</strong></p>
-<p>脏读指的是读到了其他事务未提交的数据，未提交意味着这些数据可能会回滚，也就是可能最终不会存到数据库中，也就是不存在的数据。读到了并不一定最终存在的数据，这就是脏读。</p>
-<p><strong>可重复读</strong></p>
-<p>可重复读指的是在一个事务内，最开始读到的数据和事务结束前的任意时刻读到的同一批数据都是一致的。通常针对数据<strong>更新（UPDATE）</strong>操作。</p>
-<p><strong>不可重复读</strong></p>
-<p>对比可重复读，不可重复读指的是在同一事务内，不同的时刻读到的同一批数据可能是不一样的，可能会受到其他事务的影响，比如其他事务改了这批数据并提交了。通常针对数据<strong>更新（UPDATE）</strong>操作。</p>
-<p><strong>幻读</strong></p>
-<p>幻读是针对数据<strong>插入（INSERT）</strong>操作来说的。假设事务A对某些行的内容作了更改，但是还未提交，此时事务B插入了与事务A更改前的记录相同的记录行，并且在事务A提交之前先提交了，而这时，在事务A中查询，会发现好像刚刚的更改对于某些数据未起作用，但其实是事务B刚插入进来的，让用户感觉很魔幻，感觉出现了幻觉，这就叫幻读。</p>
-<p>不可重复读一般针对UPDATE，而幻读重点在INSERT和DELETE</p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/2023/03/14/interview/" class="go-post">阅读全文</a>
 </div>
 
 
@@ -1523,7 +1398,7 @@ System.out.println(a + &quot; &quot; + b);
         <div class="friend-links">
             
             <div class="friend-link">
-                <a target="_blank" rel="noopener" href="https://www.qdovo.com">lovelyJason</a>
+                <a target="_blank" rel="noopener" href="https://argvchs.netlify.app">Argvchs</a>
             </div>
             
         </div>

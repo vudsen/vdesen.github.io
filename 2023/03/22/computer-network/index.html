@@ -10,7 +10,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
         <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
 <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
-<link rel="stylesheet" href="/css/fonts.min.css" />
+<link rel="stylesheet" href="/static/fonts.min.css" />
 <script>
   const mixins = {};
   const h = (arg1, arg2, arg3) => {
@@ -266,7 +266,7 @@
 <li>客户端(主动关闭的那一方)：ESTABLISHED -&gt; FIN_WAIT -&gt; TIME_WAIT(等待2ms) -&gt; CLOSE</li>
 <li>服务端(响应关闭的那一方)：ESTABLISHED -&gt; CLOSE_WAIT -&gt; LAST_ACK -&gt; CLOSE</li>
 </ul>
-<p>这里在主动关闭的那一方需要等待2ms，原因如下：</p>
+<p>这里在主动关闭的那一方需要等待2MSL，原因如下：</p>
 <ul>
 <li><p>首先占用该端口，因为IP报文在网络中的生存时间是有限的，让旧的报文全部在网络中被丢弃</p>
 </li>
