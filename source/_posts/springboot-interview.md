@@ -131,16 +131,36 @@ public class ExampleConfiguration {
 
 `earlySingletonObjects`：完成实例化未初始化的单例对象map，bean name --> bean instance
 
-`singletonFactories`： 单例对象工厂map，bean name --> ObjectFactory，单例对象实例化完成之后会加入singletonFactories。
+`singletonFactories`： 单例对象工厂map，bean name --> ObjectFactory，存放 bean 工厂对象
 
-假如A依赖了B的实例对象，同时B也依赖A的实例对象。
+具体的执行逻辑可以在`DefaultSingletonBeanRegistry`中看到，这里贴出核心方法：
 
-1. A首先完成了实例化，并且将自己添加到singletonFactories中
-2. 接着进行依赖注入，发现自己依赖对象B，此时就尝试去get(B)
-3. 发现B还没有被实例化，对B进行实例化
-4. 然后B在初始化的时候发现自己依赖了对象A，于是尝试get(A)，尝试一级缓存singletonObjects和二级缓存earlySingletonObjects没找到，尝试三级缓存singletonFactories，由于A初始化时将自己添加到了singletonFactories，所以B可以拿到A对象，然后将A从三级缓存中移到二级缓存中
-5. B拿到A对象后顺利完成了初始化，然后将自己放入到一级缓存singletonObjects中
-6. 此时返回A中，A此时能拿到B的对象顺利完成自己的初始化
+```java
+protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+    Object singletonObject = this.singletonObjects.get(beanName);
+    if (singletonObject == null && this.isSingletonCurrentlyInCreation(beanName)) {
+        singletonObject = this.earlySingletonObjects.get(beanName);
+        if (singletonObject == null && allowEarlyReference) {
+            synchronized(this.singletonObjects) {
+                singletonObject = this.singletonObjects.get(beanName);
+                if (singletonObject == null) {
+                    singletonObject = this.earlySingletonObjects.get(beanName);
+                    if (singletonObject == null) {
+                        ObjectFactory<?> singletonFactory = (ObjectFactory)this.singletonFactories.get(beanName);
+                        if (singletonFactory != null) {
+                            singletonObject = singletonFactory.getObject();
+                            this.earlySingletonObjects.put(beanName, singletonObject);
+                            this.singletonFactories.remove(beanName);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return singletonObject;
+}
+```
 
 ## 1.8 Spring的单例Bean是否有线程安全问题
 
@@ -154,6 +174,10 @@ public class ExampleConfiguration {
 - 没有实例变量的对象。不能保存数据，是线程安全的。
 
 在Spring中无状态的Bean适合用单例模式，这样可以共享实例提高性能。有状态的Bean在多线程环境下不安全，一般用Prototype模式或者使用ThreadLocal解决线程安全问题。
+
+## 1.9 Spring容器的启动过程
+
+[阿里面试真题：Spring容器启动流程_spring启动流程面试题_敖 丙的博客-CSDN博客](https://blog.csdn.net/qq_35190492/article/details/110383213)
 
 # 2. AOP
 

@@ -74,7 +74,7 @@ tags:
 - 客户端(主动关闭的那一方)：ESTABLISHED -> FIN_WAIT -> TIME_WAIT(等待2ms) -> CLOSE
 - 服务端(响应关闭的那一方)：ESTABLISHED -> CLOSE_WAIT -> LAST_ACK -> CLOSE
 
-这里在主动关闭的那一方需要等待2ms，原因如下：
+这里在主动关闭的那一方需要等待2MSL，原因如下：
 
 - 首先占用该端口，因为IP报文在网络中的生存时间是有限的，让旧的报文全部在网络中被丢弃
 
