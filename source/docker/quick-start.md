@@ -3,7 +3,7 @@ title: 快速入门
 date: 2023-04-20 20:27:25
 categories:
   data:
-    - { name: "Docker", path: "/2023/03/04/SpringCloud/" }
+    - { name: "Docker", path: "/2023/04/20/docker/" }
 ---
 
 # 1. 安装和启动
@@ -146,7 +146,7 @@ docker ps
 
 - 重新进入正在运行的容器：
 
-  - `docker exec -it [容器ID]`
+  - `docker exec -it [容器ID] /bin/bash`
   - `docker attach [容器ID]`
 
   attach直接进入容器启动命令的终端，不会启动新的进程，用exit退出，会导致容器停止
@@ -207,3 +207,51 @@ $docker: docker images
 docker run -it --privileged=true -v /宿主机绝对路径目录:/容器内目录 镜像名
 ```
 
+之后在该目录下的修改就能够相互同步。
+
+使用如下指令可以查看具体设置的容器数据卷：
+
+```shell
+# docker inspect会显示容器详细信息
+docker inspect [容器ID] | grep -A 9 Mounts
+```
+
+## 4.1 权限控制
+
+默认情况下，容器对共享目录下可读可写，但是在某些情况下容器只能读不能写，所以需要权限控制：
+
+```shell
+docker run -it --privileged=true -v /宿主机绝对路径目录:/容器内目录:ro 镜像名
+```
+
+在`-v`后面添加`:ro`即可让容器对共享目录只读，如果使用`rw`表示可读可写，默认为`rw`
+
+## 4.2 卷的继承和共享
+
+使用如下指令可以继承某个卷：
+
+```shell
+docker run -it --privileged=true --volumes-from [父容器NAME/容器ID] [容器ID]
+```
+
+即使父容器被关闭或者被删除了，子容器也仍然能够使用这个卷。
+
+# 5. 其它
+
+## 5.1 安装MySql
+
+运行指令：
+
+```shell
+docker run -d -p 3306:3306 --privileged=true -v /var/log/mysql:/var/log/mysql -v /var/lib/mysql -v /etc/mysql/conf.d:/ect/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name mysql mysql
+```
+
+进入配置文件夹夹（/var/mysql/conf.d），添加配置文件（xxx.cnf）：
+
+```text
+[client]
+default_character_set=utf8
+[mysqld]
+collation_server=utf8_general_ci
+character_set_server=utf8
+```
