@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>服务降级 | IceOfSummerの博客</title>
+        <title>Docker Network | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="用来用去还是自己搭的博客靠谱" />
         <meta name="keywords" content="" />
@@ -167,69 +167,86 @@
 
                 <div class="article">
     <div>
-        <h1>服务降级</h1>
+        <h1>Docker Network</h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2023/3/6
+            2023/4/25
         </span>
         
         <span class="category">
-            <a href="/2023/03/04/SpringCloud/">
+            <a href="/2023/04/20/docker/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
-                SpringCloud
+                Docker
             </a>
         </span>
         
-        
-        <span class="tags">
-            <span class="icon">
-                <i class="fa-solid fa-tags fa-fw"></i>
-            </span>
-            
-            <span class="tag">
-                
-                <a href="/SpringCloud/service-degradation" style="color: #00bcd4">服务降级</a>
-            </span>
-            
-        </span>
         
     </div>
     
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
-        <p>多个微服务之间调用的时候，假设微服务A调用微服务B和C，微服务B和微服务C又调用其它的微服务，这就是所谓的“扇出”。如果扇出链路上的某个微服务的调用响应时间过长或不可用，对微服务A的调用就会占用越来越多的系统资源，从而引起系统崩溃，这就是所谓的<font color="skyblue">“雪崩效应”</font></p>
-<p>对于高流量的应用来说，单一的后端依赖可能会导致所有服务器上的所有资源都在几秒钟内饱和。比失败更糟糕的是，这些应用程序还可能导致服务之间的延迟增加，备份队列，线程和其他系统资源紧张，导致整个系统发生更多的级联故障。这些都表示需要对故障和延迟进行隔离和管理，以便单个依赖关系的失败，不能取消整个应用程序或系统。</p>
-<p>通常在一个模块下的某个实例失败后，这个模块仍然还会接收流量，然后这个有问题的模块还调用了其它的模块，这样就会发生联级故障，或者叫雪崩。</p>
-<p>所以我们需要在一个依赖出现问题的情况下，<font color="red">不能导致整体的服务失败，避免级联故障，以提高分布式系统的弹性。</font></p>
-<p>“断路器”本身是一种开关装置，当某个服务单元发生故障之后，通过断路器的故障监控（类似熔断保险丝)，<font color="red">向调用方返回一个符合预期的、可处理的备选响应（FallBack)，而不是长时间的等待或者抛出调用方无法处理的异常</font>，这样就保证了服务调用方的线程不会被长时间、不必要地占用，从而避免了故障在分布式系统中的蔓延，乃至雪崩。</p>
-<p>这里有三个重要概念：</p>
+        <h1 id="1-基础"><a href="#1-基础" class="headerlink" title="1. 基础"></a>1. 基础</h1><p>Docker网络的作用：</p>
 <ul>
-<li><p>服务降级</p>
-<p><a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/313046">服务降级-阿里云开发者社区 (aliyun.com)</a></p>
-<p>在服务无法时候时，返回一个”fallback”给客户端，这就是服务降级。</p>
-<p>如下操作会触发降级：</p>
+<li>容器间的互联和通信以及端口映射</li>
+<li>容器IP变动时可以通过服务名直接进行网络通信，不会造成实际的影响</li>
+</ul>
+<p>在docker启动后，会创建一个名为docker0的虚拟网桥：</p>
+<pre><code class="shell">[root@localhost ~]# ifconfig
+docker0: flags=4099&lt;UP,BROADCAST,MULTICAST&gt;  mtu 1500
+        inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255
+        ether 02:42:5c:ee:2d:f9  txqueuelen 0  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+        
+        ...
+</code></pre>
+<p>默认会创建3大网络模式：</p>
+<pre><code class="shell">[root@localhost ~]# docker network ls
+NETWORK ID     NAME      DRIVER    SCOPE
+669ce7bca3dc   bridge    bridge    local
+488ca754e88f   host      host      local
+7a933f50d749   none      null      local
+</code></pre>
+<p>常用命令：</p>
 <ul>
-<li>程序运行异常</li>
-<li>超时</li>
-<li>服务熔断触发服务降级</li>
-<li>线程池&#x2F;信号量过多也会导致服务降级</li>
+<li>查看网络：<code>docker network ls</code></li>
+<li>查看网络源数据：<code>docker network inspect 网络名</code></li>
+<li>删除网络：<code>docker network rm 网络名</code></li>
 </ul>
-</li>
-<li><p>服务熔断</p>
-<p>当服务器访问量过多时，直接拒绝后续的访问，然后调用服务降级的方法并返回相关提示</p>
-</li>
-<li><p>服务限流</p>
-<p>限制接口在一定时间的访问量，限制高并发等操作。</p>
-</li>
-</ul>
-<p><a href="hystrix">Hystrix</a><font color="red">(已经进入维护模式)</font></p>
-<p><a href="sentinel">Sentinel</a></p>
+<p>Dokcer的网络模式有如下几种：</p>
+<table>
+<thead>
+<tr>
+<th>网络模式</th>
+<th>间接</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>bridge</td>
+<td>为每一个容器分配、设置IP等，并将容器连接到一个docker0虚拟网桥。默认为该模式</td>
+</tr>
+<tr>
+<td>host</td>
+<td>容器将不会虚拟出自己的网卡，配置自己的IP等，而是使用宿主机的IP和端口</td>
+</tr>
+<tr>
+<td>none</td>
+<td>容器有独立的Network Namespace，但并没有对其进行任何网络设置，如分配veth pair和网桥连接、IP等</td>
+</tr>
+<tr>
+<td>container</td>
+<td>新创建的容器不会创建自己的网卡和配置自己的IP，而是和一个指定的容器共享IP、端口范围等</td>
+</tr>
+</tbody></table>
+<h2 id="1-1-bridge"><a href="#1-1-bridge" class="headerlink" title="1.1 bridge"></a>1.1 bridge</h2><p><img lazy="https://xds.asia/public/docker/2023-3-3-06313489-0426-4ddd-905e-909d6f44bcf1.webp" alt="bride"></p>
 
     </div>
     

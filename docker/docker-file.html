@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>服务降级 | IceOfSummerの博客</title>
+        <title>DockerFile | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="用来用去还是自己搭的博客靠谱" />
         <meta name="keywords" content="" />
@@ -167,69 +167,145 @@
 
                 <div class="article">
     <div>
-        <h1>服务降级</h1>
+        <h1>DockerFile</h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2023/3/6
+            2023/4/25
         </span>
         
         <span class="category">
-            <a href="/2023/03/04/SpringCloud/">
+            <a href="/2023/04/20/docker/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
-                SpringCloud
+                Docker
             </a>
         </span>
         
-        
-        <span class="tags">
-            <span class="icon">
-                <i class="fa-solid fa-tags fa-fw"></i>
-            </span>
-            
-            <span class="tag">
-                
-                <a href="/SpringCloud/service-degradation" style="color: #00bcd4">服务降级</a>
-            </span>
-            
-        </span>
         
     </div>
     
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
-        <p>多个微服务之间调用的时候，假设微服务A调用微服务B和C，微服务B和微服务C又调用其它的微服务，这就是所谓的“扇出”。如果扇出链路上的某个微服务的调用响应时间过长或不可用，对微服务A的调用就会占用越来越多的系统资源，从而引起系统崩溃，这就是所谓的<font color="skyblue">“雪崩效应”</font></p>
-<p>对于高流量的应用来说，单一的后端依赖可能会导致所有服务器上的所有资源都在几秒钟内饱和。比失败更糟糕的是，这些应用程序还可能导致服务之间的延迟增加，备份队列，线程和其他系统资源紧张，导致整个系统发生更多的级联故障。这些都表示需要对故障和延迟进行隔离和管理，以便单个依赖关系的失败，不能取消整个应用程序或系统。</p>
-<p>通常在一个模块下的某个实例失败后，这个模块仍然还会接收流量，然后这个有问题的模块还调用了其它的模块，这样就会发生联级故障，或者叫雪崩。</p>
-<p>所以我们需要在一个依赖出现问题的情况下，<font color="red">不能导致整体的服务失败，避免级联故障，以提高分布式系统的弹性。</font></p>
-<p>“断路器”本身是一种开关装置，当某个服务单元发生故障之后，通过断路器的故障监控（类似熔断保险丝)，<font color="red">向调用方返回一个符合预期的、可处理的备选响应（FallBack)，而不是长时间的等待或者抛出调用方无法处理的异常</font>，这样就保证了服务调用方的线程不会被长时间、不必要地占用，从而避免了故障在分布式系统中的蔓延，乃至雪崩。</p>
-<p>这里有三个重要概念：</p>
+        <h1 id="1-基础"><a href="#1-基础" class="headerlink" title="1. 基础"></a>1. 基础</h1><p>Dockerfile是用来构建Docker镜像的文本文件，是由一条条构建镜像所需的指令和参数构成的脚本。</p>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/builder/">Dockerfile reference | Docker Documentation</a></p>
+<h2 id="1-1-DockerFile执行流程"><a href="#1-1-DockerFile执行流程" class="headerlink" title="1.1 DockerFile执行流程"></a>1.1 DockerFile执行流程</h2><ol>
+<li>docker从基础镜像运行一个容器</li>
+<li>执行一条指令并对容器作出修改</li>
+<li>执行类似<code>docker commit</code>的操作提交一个新的镜像层</li>
+<li>docker再基于刚提交的镜像运行一个新容器</li>
+<li>执行dockerfile中的下一条指令直到所有指令都执行完成</li>
+</ol>
+<h2 id="1-2-DockerFile常用保留字"><a href="#1-2-DockerFile常用保留字" class="headerlink" title="1.2 DockerFile常用保留字"></a>1.2 DockerFile常用保留字</h2><ul>
+<li><p>FROM：基础镜像，当前新镜像是基于哪个镜像的，指定一个已经存在的镜像作为基础镜像</p>
+</li>
+<li><p>MAINTAINER：镜像维护者的姓名和邮箱地址</p>
+</li>
+<li><p>RUN：容器构建时需要执行的命令</p>
 <ul>
-<li><p>服务降级</p>
-<p><a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/313046">服务降级-阿里云开发者社区 (aliyun.com)</a></p>
-<p>在服务无法时候时，返回一个”fallback”给客户端，这就是服务降级。</p>
-<p>如下操作会触发降级：</p>
-<ul>
-<li>程序运行异常</li>
-<li>超时</li>
-<li>服务熔断触发服务降级</li>
-<li>线程池&#x2F;信号量过多也会导致服务降级</li>
+<li>Shell格式：<code>RUN 命令</code></li>
+<li>Exec格式：<code>RUN [可执行文件, 参数1, 参数2, ...]</code><ul>
+<li>例如：<code>RUN [&#39;test.sh&#39;, &#39;dev&#39;, &#39;offline&#39;]</code>等价于<code>RUN test.sh dev offline</code></li>
 </ul>
 </li>
-<li><p>服务熔断</p>
-<p>当服务器访问量过多时，直接拒绝后续的访问，然后调用服务降级的方法并返回相关提示</p>
+</ul>
 </li>
-<li><p>服务限流</p>
-<p>限制接口在一定时间的访问量，限制高并发等操作。</p>
+<li><p>EXPOSE：容器对外暴露的端口</p>
+</li>
+<li><p>WORKDIR：指定在创建容器后，终端默认登陆进来的工作目录(登陆终端后的默认路径)</p>
+</li>
+<li><p>USER：指定该镜像以什么样的用户去执行，默认为ROOT</p>
+</li>
+<li><p>ENV：用来在构建过程中设置环境变量</p>
+</li>
+<li><p>VOLUME：指定容器数据卷</p>
+</li>
+<li><p>ADD：将宿主机目录下的文件拷贝进镜像（会自动处理URL和解压tar压缩包）</p>
+</li>
+<li><p>COPY：拷贝文件和目录到镜像中</p>
+</li>
+<li><p>CMD：指定容器启动后要干的事情，<font color=red>若有多个CMD，则只有最后一个生效，并且CMD会被<code>docker run</code>之后的参数替换</font>。</p>
+<ul>
+<li><p>例如Tomcat配置文件的CMD命令如下：</p>
+<pre><code class="shell">CMD [&quot;catalina.sh&quot;, &quot;run&quot;]
+</code></pre>
+<p>我们使用如下指令启动容器：</p>
+<pre><code class="shell">docker run -it -p 8080:8080 [TOMCAT镜像ID] /bin/bash
+</code></pre>
+<p>则命令会被替换成这样：</p>
+<pre><code class="shell">CMD [&quot;/bin/bash&quot;, &quot;run&quot;]
+</code></pre>
+<p>此时TOMCAT也将启动失败</p>
 </li>
 </ul>
-<p><a href="hystrix">Hystrix</a><font color="red">(已经进入维护模式)</font></p>
-<p><a href="sentinel">Sentinel</a></p>
+</li>
+<li><p>ENTRYPOINT：指定一个容器启动时要执行的命令，类似于CMD，但区别是ENTRYPOINT不会被<code>docker run</code>后面的命令覆盖，<font color=red>而且后面的参数会被送给ENTRYPOINT指令所运行的指令。</font></p>
+<p>ENTRYPOINT可以和CMD一起使用，一般是变参才会使用CMD，这里的CMD等于是在给ENTRYPOINT传参。</p>
+<p>当指定了ENTRYPOINT后，CMD的含义就发生了变化，不再是直接运行其命令，而是将CMD的内容作为参数传递给ENTRYPOINT指令。</p>
+<p>例如通过Dockerfile构建Nginx：</p>
+<pre><code class="shell">FROM nginx
+
+ENTRYPOINT [&quot;nginx&quot;, &quot;-c&quot;]
+CMD [&quot;/etc/nginx/nginx.conf&quot;]
+</code></pre>
+<p><code>docker run nginx -c /etc/nginx/new.conf</code>最终会运行：<code>nginx -c /etc/nginx/new.conf</code></p>
+</li>
+</ul>
+<h2 id="1-3-自定义镜像案例"><a href="#1-3-自定义镜像案例" class="headerlink" title="1.3 自定义镜像案例"></a>1.3 自定义镜像案例</h2><p>自定义一个centos镜像，并且具备vim+ifconfig+jdk11。</p>
+<p>在Linux下创建一个<code>Dockerfile</code>文件：</p>
+<pre><code class="shell">vim Dockerfile
+</code></pre>
+<p>添加内容：</p>
+<pre><code class="dockerfile">FROM centos
+MAINTAINER xds&lt;2237803016@qq.com&gt;
+
+ENV MYPATH /usr/local
+WORKDIR $MYPATH
+
+# centos需要执行下面的命令，否则yum可能会报错。或者将FROM换成centos7
+RUN sed -i &#39;s/mirrorlist/#mirrorlist/g&#39; /etc/yum.repos.d/CentOS-*
+RUN sed -i &#39;s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g&#39; /etc/yum.repos.d/CentOS-*
+RUN yum makecache
+
+# 安装vim
+RUN yum -y install vim
+
+# 安装ifconfig
+RUN yum -y install net-tools
+
+# 安装java8
+RUN yum -y install glibc.i686
+RUN mkdir /usr/local/java
+
+# 添加java文件，必须和Dockerfile在同一目录
+ADD jdk-11.0.19.tar.gz /usr/local/java
+# 设置java环境变量
+# 这里后面的文件名就是上面压缩包的文件名，ADD指令会自动为我们解压
+ENV JAVA_HOME /usr/local/java/jdk-11.0.19
+ENV JRE_HOME $JAVA_HOME/jre
+ENV CLASSPATH $JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar:$JRE_HOME/lib:$CLASSPATH
+ENV PATH $JAVA_HOME/bin:$PATH
+
+EXPOSE 80
+CMD echo $MYPATH
+CMD echo &quot;success--------ok&quot;
+CMD /bin/bash
+</code></pre>
+<p>打包制作镜像（注意后面有个点）：</p>
+<pre><code class="shell">docker build -t [镜像名]:[TAG] .
+</code></pre>
+<h1 id="2-虚悬镜像"><a href="#2-虚悬镜像" class="headerlink" title="2. 虚悬镜像"></a>2. 虚悬镜像</h1><p>如果在build的时候没有指定镜像名和TAG，在build后出来的镜像名和TAG都会为<none></p>
+<p>在某些情况下由于docker的错误也会产生虚悬镜像。</p>
+<p>使用如下指令查看所有虚悬镜像：</p>
+<pre><code class="shell">docker images ls -f dangling=true
+</code></pre>
+<p>虚悬镜像没有存在的意义，可以直接删除：</p>
+<pre><code class="shell">docker image prune
+</code></pre>
 
     </div>
     

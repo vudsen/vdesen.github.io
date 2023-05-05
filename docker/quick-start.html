@@ -178,7 +178,7 @@
         </span>
         
         <span class="category">
-            <a href="/2023/03/04/SpringCloud/">
+            <a href="/2023/04/20/docker/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
@@ -293,7 +293,7 @@
 </li>
 <li><p>重新进入正在运行的容器：</p>
 <ul>
-<li><code>docker exec -it [容器ID]</code></li>
+<li><code>docker exec -it [容器ID] /bin/bash</code></li>
 <li><code>docker attach [容器ID]</code></li>
 </ul>
 <p>attach直接进入容器启动命令的终端，不会启动新的进程，用exit退出，会导致容器停止</p>
@@ -334,6 +334,29 @@ $docker: docker images
 <p>卷的设计目的就是<font color=red>数据的持久化</font>，完全独立于容器的生存周期，因此Docker不会在容器删除时删除其挂载的数据卷</p>
 <p>使用容器数据卷：</p>
 <pre><code class="shell">docker run -it --privileged=true -v /宿主机绝对路径目录:/容器内目录 镜像名
+</code></pre>
+<p>之后在该目录下的修改就能够相互同步。</p>
+<p>使用如下指令可以查看具体设置的容器数据卷：</p>
+<pre><code class="shell"># docker inspect会显示容器详细信息
+docker inspect [容器ID] | grep -A 9 Mounts
+</code></pre>
+<h2 id="4-1-权限控制"><a href="#4-1-权限控制" class="headerlink" title="4.1 权限控制"></a>4.1 权限控制</h2><p>默认情况下，容器对共享目录下可读可写，但是在某些情况下容器只能读不能写，所以需要权限控制：</p>
+<pre><code class="shell">docker run -it --privileged=true -v /宿主机绝对路径目录:/容器内目录:ro 镜像名
+</code></pre>
+<p>在<code>-v</code>后面添加<code>:ro</code>即可让容器对共享目录只读，如果使用<code>rw</code>表示可读可写，默认为<code>rw</code></p>
+<h2 id="4-2-卷的继承和共享"><a href="#4-2-卷的继承和共享" class="headerlink" title="4.2 卷的继承和共享"></a>4.2 卷的继承和共享</h2><p>使用如下指令可以继承某个卷：</p>
+<pre><code class="shell">docker run -it --privileged=true --volumes-from [父容器NAME/容器ID] [容器ID]
+</code></pre>
+<p>即使父容器被关闭或者被删除了，子容器也仍然能够使用这个卷。</p>
+<h1 id="5-其它"><a href="#5-其它" class="headerlink" title="5. 其它"></a>5. 其它</h1><h2 id="5-1-安装MySql"><a href="#5-1-安装MySql" class="headerlink" title="5.1 安装MySql"></a>5.1 安装MySql</h2><p>运行指令：</p>
+<pre><code class="shell">docker run -d -p 3306:3306 --privileged=true -v /var/log/mysql:/var/log/mysql -v /var/lib/mysql -v /etc/mysql/conf.d:/ect/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name mysql mysql
+</code></pre>
+<p>进入配置文件夹夹（&#x2F;var&#x2F;mysql&#x2F;conf.d），添加配置文件（xxx.cnf）：</p>
+<pre><code class="text">[client]
+default_character_set=utf8
+[mysqld]
+collation_server=utf8_general_ci
+character_set_server=utf8
 </code></pre>
 
     </div>
