@@ -187,6 +187,178 @@
             
 
 <div class="post post-partial-show">
+    <a href="/2023/03/23/springboot-interview/">
+        <h2 class="post-title">springboot源码</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/3/23
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <h1 id="1-基础"><a href="#1-基础" class="headerlink" title="1. 基础"></a>1. 基础</h1><p>通过<code>AnnotationConfigApplicationContext</code>可以创建一个Spring容器：</p>
+<pre><code class="java">public class MySpringApplication &#123;
+
+    public static void main(String[] args) &#123;
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+
+        UserService userService = (UserService) applicationContext.getBean(&quot;userService&quot;);
+        userService.test();
+    &#125;
+
+&#125;
+
+@ComponentScan(&quot;pers.xds.springboot&quot;)
+public class AppConfig &#123;
+&#125;
+</code></pre>
+<h2 id="1-1-生命周期"><a href="#1-1-生命周期" class="headerlink" title="1.1 生命周期"></a>1.1 生命周期</h2><p>可以在<code>AbstractAutowireCapableBeanFactory#doCreateBean</code>中看到完整的bean生成流程。</p>
+<p>大致分为如下过程：</p>
+<p>1.对Bean进行实例化</p>
+<p>2.依赖注入</p>
+<p>3.如果Bean实现了<code>BeanNameAware</code>接口，Spring将调用<code>setBeanName()</code>，设置 <code>Bean</code>的 id（xml文件中bean标签的id）</p>
+<p>4.如果Bean实现了<code>BeanFactoryAware</code>接口，Spring将调用<code>setBeanFactory()</code></p>
+<p>5.如果Bean实现了<code>ApplicationContextAware</code>接口，Spring容器将调用<code>setApplicationContext()</code></p>
+<p>6.如果存在<code>BeanPostProcessor</code>，Spring将调用它们的<code>postProcessBeforeInitialization</code>（预初始化）方法，在Bean初始化前对其进行处理</p>
+<p>7.如果Bean实现了<code>InitializingBean</code>接口，Spring将调用它的<code>afterPropertiesSet</code>方法，然后调用xml定义的 init-method方法(初始化)，两个方法作用类似，都是在初始化 bean 的时候执行</p>
+<p>8.如果存在<code>BeanPostProcessor</code>，Spring将调用它们的<code>postProcessAfterInitialization</code>（后初始化）方法，在Bean初始化后对其进行处理</p>
+<p>9.Bean初始化完成，供应用使用，直到应用被销毁</p>
+<p>10.如果Bean实现了<code>DisposableBean</code>接口，Spring将调用它的<code>destory</code>方法，然后调用在xml中定义的 <code>destory-method</code>方法，这两个方法作用类似，都是在Bean实例销毁前执行。</p>
+<h2 id="1-2-BeanFactory和FactoryBean的区别"><a href="#1-2-BeanFactory和FactoryBean的区别" class="headerlink" title="1.2 BeanFactory和FactoryBean的区别"></a>1.2 BeanFactory和FactoryBean的区别</h2><p><code>BeanFactory</code>：管理Bean的容器，Spring中生成的Bean都是由这个接口的实现来管理的。</p>
+<p><code>FactoryBean</code>：让开发者以编程的方式来创建一个bean，一般用于创建比较复杂的bean。</p>
+<h2 id="1-3-Bean注入容器有哪些方式"><a href="#1-3-Bean注入容器有哪些方式" class="headerlink" title="1.3 Bean注入容器有哪些方式"></a>1.3 Bean注入容器有哪些方式</h2><p>1、使用<code>@Configuration</code>与<code>@Bean</code>注解</p>
+<p>2、使用<code>@Controller</code>、<code>@Service</code>、<code>@Repository</code>、<code>@Component</code> 注解标注该类，然后启用<code>@ComponentScan</code>自动扫描</p>
+<p>3、使用<code>@Import</code> 方法，使用@Import注解把bean导入到当前容器中。</p>
+<h2 id="1-4-Bean的作用域"><a href="#1-4-Bean的作用域" class="headerlink" title="1.4 Bean的作用域"></a>1.4 Bean的作用域</h2><p>1、singleton：单例，Spring中的bean默认都是单例的。</p>
+<p>2、prototype：每次请求都会创建一个新的bean实例。</p>
+<p>3、request：每一次HTTP请求都会产生一个新的bean，该bean仅在当前HTTP request内有效。</p>
+<p>4、session：每一次HTTP请求都会产生一个新的bean，该bean仅在当前HTTP session内有效。</p>
+<p>5、application：限定一个Bean的作用域为<code>ServletContext</code>的生命周期。该作用域仅适用于web的Spring WebApplicationContext环境。</p>
+<h2 id="1-5-自动装配的方式"><a href="#1-5-自动装配的方式" class="headerlink" title="1.5 自动装配的方式"></a>1.5 自动装配的方式</h2><p><code>@Autowired</code>注解会优先根据类型来注入，当有多个bean时，会尝试根据变量名来注入(byname)，如果没有找到就抛出异常。</p>
+<p>可以通过<code>@Qualifier</code>来指定要注入的bean的名称。</p>
+<p><code>@Resource</code>注解会优先byname，找不到再byType。</p>
+<h2 id="1-6-Bean和-Component的区别"><a href="#1-6-Bean和-Component的区别" class="headerlink" title="1.6 @Bean和@Component的区别"></a>1.6 @Bean和@Component的区别</h2><p><code>@Bean</code>只能作用于方法上，表示这个方法会返回一个Bean，一般需要配合<code>@Configuration</code>使用。</p>
+<p><code>@Component</code>只能作用于类型上，表示这个类会作为组件类，并告诉Spring要为这个类创建bean。</p>
+<h3 id="1-6-1-Bean必须在-Configuration里使用吗"><a href="#1-6-1-Bean必须在-Configuration里使用吗" class="headerlink" title="1.6.1 @Bean必须在@Configuration里使用吗?"></a>1.6.1 @Bean必须在@Configuration里使用吗?</h3><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/40256702/spring-bean-can-still-work-without-configuration">Spring: @Bean can still work without @Configuration - Stack Overflow</a></p>
+<p><code>@Bean</code>在<code>@Configuration</code>表示的类里使用时，Spring会为其自动创建一个动态代理对象，在同一个配置类中可以直接调用方法来获取Bean：</p>
+<pre><code class="java">@Configuration
+public class ExampleConfiguration &#123;
+    
+    @Bean
+    public Datasource datasource() &#123;
+        BasicDatasource datasource = new BasicDatasource();
+        // ...
+        return datasource;
+    &#125;
+    
+    public PlatformTransactionManager transactionManager() &#123;
+          // 注意这里是直接调用了方法，每次调用都会返回同一个bean，并不会多次创建
+        return new DataSourceTransactionManager(datasource());
+    &#125;
+    
+&#125;
+</code></pre>
+<p>而在非<code>@Configuration</code>下定义的<code>@Bean</code>会以Lite Mode运作，在该模式下调用其它<code>@Bean</code>方法时，则是普通的方法调用(没有代理对象去拦截调用)。</p>
+<h2 id="1-7-Spring怎么解决循环依赖问题"><a href="#1-7-Spring怎么解决循环依赖问题" class="headerlink" title="1.7 Spring怎么解决循环依赖问题"></a>1.7 Spring怎么解决循环依赖问题</h2><p>对于构造器注入的循环依赖：Spring处理不了，直接抛出<code>BeanCurrentlylnCreationException</code>异常。</p>
+<p>非单例循环依赖：无法处理。</p>
+<p>单例模式下属性注入的循环依赖会通过三级缓存处理循环依赖：</p>
+<p><code>singletonObjects</code>：完成了初始化的单例对象map，bean name –&gt; bean instance</p>
+<p><code>earlySingletonObjects</code>：完成实例化未初始化的单例对象map，bean name –&gt; bean instance</p>
+<p><code>singletonFactories</code>： 单例对象工厂map，bean name –&gt; ObjectFactory，存放 bean 工厂对象</p>
+<p>具体的执行逻辑可以在<code>DefaultSingletonBeanRegistry</code>中看到，这里贴出核心方法：</p>
+<pre><code class="java">protected Object getSingleton(String beanName, boolean allowEarlyReference) &#123;
+    Object singletonObject = this.singletonObjects.get(beanName);
+    if (singletonObject == null &amp;&amp; this.isSingletonCurrentlyInCreation(beanName)) &#123;
+        singletonObject = this.earlySingletonObjects.get(beanName);
+        if (singletonObject == null &amp;&amp; allowEarlyReference) &#123;
+            synchronized(this.singletonObjects) &#123;
+                singletonObject = this.singletonObjects.get(beanName);
+                if (singletonObject == null) &#123;
+                    singletonObject = this.earlySingletonObjects.get(beanName);
+                    if (singletonObject == null) &#123;
+                        ObjectFactory&lt;?&gt; singletonFactory = (ObjectFactory)this.singletonFactories.get(beanName);
+                        if (singletonFactory != null) &#123;
+                            singletonObject = singletonFactory.getObject();
+                            this.earlySingletonObjects.put(beanName, singletonObject);
+                            this.singletonFactories.remove(beanName);
+                        &#125;
+                    &#125;
+                &#125;
+            &#125;
+        &#125;
+    &#125;
+
+    return singletonObject;
+&#125;
+</code></pre>
+<h2 id="1-8-Spring的单例Bean是否有线程安全问题"><a href="#1-8-Spring的单例Bean是否有线程安全问题" class="headerlink" title="1.8 Spring的单例Bean是否有线程安全问题"></a>1.8 Spring的单例Bean是否有线程安全问题</h2><p>当多个用户同时请求一个服务时，容器会给每一个请求分配一个线程，这时多个线程会并发执行该请求对应的业务逻辑，如果业务逻辑有对单例状态的修改（体现为此单例的成员属性），则必须考虑线程安全问题。</p>
+<p>若每个线程中对全局变量、静态变量只有读操作，而无写操作，那么不会有线程安全问题；若有多个线程同时执行写操作，一般都需要考虑线程同步，否则就可能影响线程安全。</p>
+<p><strong>无状态bean和有状态bean</strong></p>
+<ul>
+<li>有实例变量的bean，可以保存数据，是非线程安全的。</li>
+<li>没有实例变量的对象。不能保存数据，是线程安全的。</li>
+</ul>
+<p>在Spring中无状态的Bean适合用单例模式，这样可以共享实例提高性能。有状态的Bean在多线程环境下不安全，一般用Prototype模式或者使用ThreadLocal解决线程安全问题。</p>
+<h2 id="1-9-Spring容器的启动过程"><a href="#1-9-Spring容器的启动过程" class="headerlink" title="1.9 Spring容器的启动过程"></a>1.9 Spring容器的启动过程</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_35190492/article/details/110383213">阿里面试真题：Spring容器启动流程_spring启动流程面试题_敖 丙的博客-CSDN博客</a></p>
+<h1 id="2-AOP"><a href="#2-AOP" class="headerlink" title="2. AOP"></a>2. AOP</h1><p>常见的动态代理有两种：</p>
+<ul>
+<li><p>JDK动态代理：基于Java反射机制实现，必须要实现了接口的业务类才生成代理对象。</p>
+</li>
+<li><p>CGLIB动态代理：基于ASM机制实现，通过生成业务类的子类作为代理类。</p>
+</li>
+</ul>
+<p>JDK Proxy的优势：</p>
+<p>​	最小化依赖关系、代码实现简单、简化开发和维护、JDK原生支持，比CGLIB更加可靠，随JDK版本平滑升级。而字节码类库通常需要进行更新以保证在新版Java上能够使用。</p>
+<p>CGLIB的优势：</p>
+<p>​	无需实现接口，达到代理类无侵入，只操作关心的类，而不必为其他相关类增加工作量。高性能。</p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/115744594">Java动态代理之一CGLIB详解 - 知乎 (zhihu.com)</a></p>
+<h1 id="3-Spring事务"><a href="#3-Spring事务" class="headerlink" title="3. Spring事务"></a>3. Spring事务</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903608224333838">可能是最漂亮的Spring事务管理详解 - 掘金 (juejin.cn)</a></p>
+<h1 id="4-MyBatis工作原理"><a href="#4-MyBatis工作原理" class="headerlink" title="4. MyBatis工作原理"></a>4. MyBatis工作原理</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6993253212853633055#heading-8">一文搞懂Mybatis架构与工作原理 - 掘金 (juejin.cn)</a></p>
+<ol>
+<li><p>加载映射文件(通过动态代理和xml为接口生成对应的代理类)</p>
+</li>
+<li><p>构造会话工程(SqlSessionFactory)</p>
+</li>
+<li><p>创建会话对象(SqlSession)</p>
+<pre><code class="java">try (SqlSession session = sqlSessionFactory.openSession()) &#123;
+  BlogMapper mapper = session.getMapper(BlogMapper.class);
+  Blog blog = mapper.selectBlog(101);
+&#125;
+</code></pre>
+</li>
+<li><p>Executor执行器</p>
+<p>Mybatis会通过Executor去执行SQL语句。一般这里面会有缓存的实现。</p>
+</li>
+<li><p>MappedStatement对象</p>
+<p>对映射信息的封装，它存储了一个SQL对应的所有信息。Mybatis 通过解析 XML 和 mapper 接口上的注解，生成 sql 对应的 MappedStatement 实例</p>
+</li>
+<li><p>输入参数映射</p>
+</li>
+<li><p>输出参数映射</p>
+</li>
+</ol>
+<p>​	将数据库输出转换为 <code>Map</code>，<code>List</code>或自定义的类型</p>
+<p><img lazy="https://xds.asia/public/post/2023-3-2-ca9cc3cd-cb95-4437-8182-2476f326260d.webp"></p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/03/23/springboot-interview/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post post-partial-show">
     <a href="/2023/03/22/computer-network/">
         <h2 class="post-title">计网常用知识总结</h2>
     </a>
@@ -686,58 +858,6 @@ System.out.println(a + &quot; &quot; + b);
     <a href="/2023/03/05/java-source/" class="go-post">阅读全文</a>
 </div>
 
-<div class="post post-partial-show">
-    <a href="/2023/03/04/SpringCloud/">
-        <h2 class="post-title">SpringCloud</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="category">
-            <a href="/categories/SpringCloud/">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                SpringCloud
-            </a>
-        </span>
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2023/3/4
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <p><img lazy="https://xds.asia/public/SpringCloud/2023-2-6-5325609d-795f-4dce-8fe3-7fbc68d3cbd3.png" alt="banner"></p>
-<p><a href="/SpringCloud/registry">注册中心</a></p>
-<p><a href="/SpringCloud/loadbalance">负载均衡</a></p>
-<p><a href="/SpringCloud/service-invoke">服务调用</a></p>
-<p><a href="/SpringCloud/service-degradation">服务降级</a></p>
-<p><a href="/SpringCloud/gateway">服务网关</a></p>
-<p><a href="/SpringCloud/config-center">配置中心</a></p>
-<p><a href="/SpringCloud/bus">服务总线</a></p>
-<p><a href="/SpringCloud/springcloud-stream">消息驱动: SpringCloud Stream</a></p>
-<p><a href="/SpringCloud/springcloud-sleuth">分布式请求链路追踪: SpringCloud Sleuth</a></p>
-<p><a href="/SpringCloud/nacos">服务注册和配置中心：Nacos</a></p>
-<p><a href="/SpringCloud/springcloud-alibaba-seata">分布式事务：SpringCloud Alibaba Seata</a></p>
-<hr>
-<p><a target="_blank" rel="noopener" href="https://github.com/alibaba/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E">版本说明 · alibaba&#x2F;spring-cloud-alibaba Wiki (github.com)</a></p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/2023/03/04/SpringCloud/" class="go-post">阅读全文</a>
-</div>
-
 
             <div class="page-current">
     <div class="prev">
@@ -757,8 +877,18 @@ System.out.println(a + &quot; &quot; + b);
         
         <span class="current">2</span>
         
+        <span>
+            <a class="page-num" href="/page/3/">3</a>
+            
+            
+        </span>
+        
     </div>
     <div class="next">
+        
+        <a class="page-num" href="/page/3/">
+            <i class="fa-solid fa-caret-right fa-fw"></i>
+        </a>
         
     </div>
 </div>

@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>OpenFeign | IceOfSummerの博客</title>
+        <title>IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="用来用去还是自己搭的博客靠谱" />
         <meta name="keywords" content="" />
@@ -47,9 +47,7 @@
 
 
 
-
-
-
+<script src="/js/lib/home.js"></script>
 
 <link rel="stylesheet" href="/css/main.css" />
 
@@ -165,20 +163,37 @@
     </div>
 </nav>
 
-                <div class="article">
-    <div>
-        <h1>OpenFeign</h1>
-    </div>
-    <div class="info">
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2023/3/6
+                <div id="home-head">
+    <div id="home-background" ref="homeBackground" data-image="https://xds.asia/public/2023-2-6-8d14e464-2200-4e54-af81-0d9f25f55b3e.webp,https://xds.asia/public/2023-2-0-017e03b0-992c-4844-b28f-869799d32b96.webp,https://xds.asia/public/2023-2-0-66a241f4-eca3-45f3-b590-05aeed688f60.webp,https://xds.asia/public/2023-2-0-481f472f-e980-4cee-8ab8-ca66f5fd370a.webp,https://xds.asia/public/2023-2-2-2adf4d48-496a-49a4-8ca3-f64e035d8835.webp"></div>
+    
+    <div id="home-info" @click="homeClick">
+        <span class="loop"></span>
+        <span class="loop"></span>
+        <span class="loop"></span>
+        <span class="loop"></span>
+        <span class="info">
+            <div class="wrap">
+                <h1>IceOfSummerの博客</h1>
+                <h3>一时起兴搭建的博客</h3>
+                <h5>用来用去还是自己搭的博客靠谱</h5>
+            </div>
         </span>
+    </div>
+    
+</div>
+<div id="home-posts-wrap"  ref="homePostsWrap">
+    <div id="home-posts">
+        <div id="posts">
+            
+
+<div class="post post-partial-show">
+    <a href="/2023/03/04/SpringCloud/">
+        <h2 class="post-title">SpringCloud</h2>
+    </a>
+    <div class="category-and-date">
         
         <span class="category">
-            <a href="/2023/03/04/SpringCloud/">
+            <a href="/categories/SpringCloud/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
@@ -186,115 +201,93 @@
             </a>
         </span>
         
-        
-        <span class="tags">
+        <span class="date">
             <span class="icon">
-                <i class="fa-solid fa-tags fa-fw"></i>
+                <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            
-            <span class="tag">
-                
-                <a href="/SpringCloud/service-invoke" style="color: #03a9f4">服务调用</a>
-            </span>
-            
+            2023/3/4
         </span>
         
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <p><img lazy="https://xds.asia/public/SpringCloud/2023-2-6-5325609d-795f-4dce-8fe3-7fbc68d3cbd3.png" alt="banner"></p>
+<p><a href="/SpringCloud/registry">注册中心</a></p>
+<p><a href="/SpringCloud/loadbalance">负载均衡</a></p>
+<p><a href="/SpringCloud/service-invoke">服务调用</a></p>
+<p><a href="/SpringCloud/service-degradation">服务降级</a></p>
+<p><a href="/SpringCloud/gateway">服务网关</a></p>
+<p><a href="/SpringCloud/config-center">配置中心</a></p>
+<p><a href="/SpringCloud/bus">服务总线</a></p>
+<p><a href="/SpringCloud/springcloud-stream">消息驱动: SpringCloud Stream</a></p>
+<p><a href="/SpringCloud/springcloud-sleuth">分布式请求链路追踪: SpringCloud Sleuth</a></p>
+<p><a href="/SpringCloud/nacos">服务注册和配置中心：Nacos</a></p>
+<p><a href="/SpringCloud/springcloud-alibaba-seata">分布式事务：SpringCloud Alibaba Seata</a></p>
+<hr>
+<p><a target="_blank" rel="noopener" href="https://github.com/alibaba/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E">版本说明 · alibaba&#x2F;spring-cloud-alibaba Wiki (github.com)</a></p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/03/04/SpringCloud/" class="go-post">阅读全文</a>
+</div>
+
+
+            <div class="page-current">
+    <div class="prev">
+        
+        <a class="page-num" href="/page/2/">
+            <i class="fa-solid fa-caret-left fa-fw"></i>
+        </a>
+        
+    </div>
+    <div class="page-index">
+        
+        <span>
+            
+            
+                
+                <a class="page-num" href="/">1</a>
+                
+                
+            
+            <a class="page-num" href="/page/2/">2</a>
+        </span>
+        
+        <span class="current">3</span>
+        
+    </div>
+    <div class="next">
+        
+    </div>
+</div>
+
+        </div>
     </div>
     
-    <toc-component></toc-component>
-    <div class="content" v-pre id="main-content">
-        <p><a target="_blank" rel="noopener" href="https://spring.io/projects/spring-cloud-openfeign">Spring Cloud OpenFeign(官方文档)</a></p>
-<p>Feign是一个声明式的Web服务客户端，让编写Web服务客户端变得更加容易，只需创建一个接口并在接口上添加注解即可。</p>
-<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>依赖：</p>
-<pre><code class="xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-cloud-starter-openfeign&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre>
-<p>在消费者端，直接在接口上添加<code>@FeignClient</code>注解，然后再填上服务提供者的调用接口：</p>
-<pre><code class="java">@Service
-@FeignClient(&quot;CLOUD-PAYMENT-SERVICE&quot;)
-public interface PaymentFeignService &#123;
+    <div id="home-card">
+        <div id="card-div">
+    <div class="card-style" style="width: 300px">
+        <div class="avatar">
+            <img src="https://xds.asia/avatar/1.webp" alt="avatar" />
+        </div>
+        <div class="name">IceOfSummer</div>
+        <div class="description">
+            <p>这个人很懒，没有个人简介</p>
 
-    @GetMapping(&quot;/payment/get/&#123;id&#125;&quot;)
-    CommonResult&lt;Payment&gt; getPaymentById(@PathVariable(&quot;id&quot;) Long id);
-
-&#125;
-</code></pre>
-<p>之后直接注入后使用即可：</p>
-<pre><code class="java">@RestController
-public class OrderFeignController &#123;
-
-    private PaymentFeignService paymentFeignService;
-
-    @Autowired
-    public void setPaymentFeignService(PaymentFeignService paymentFeignService) &#123;
-        this.paymentFeignService = paymentFeignService;
-    &#125;
-
-
-    @GetMapping(&quot;/payment/&#123;id&#125;&quot;)
-    public CommonResult&lt;Payment&gt; queryPayment(@PathVariable Long id) &#123;
-        return paymentFeignService.getPaymentById(id);
-    &#125;
-
-
-&#125;
-</code></pre>
-<h2 id="超时控制"><a href="#超时控制" class="headerlink" title="超时控制"></a>超时控制</h2><p>若调用远程服务时间过长，则会抛出一个<code>java.net.SocketTimeoutException: Read timed out</code>表示请求超时。默认是5秒超时。</p>
-<h3 id="在配置文件中修改超时控制"><a href="#在配置文件中修改超时控制" class="headerlink" title="在配置文件中修改超时控制"></a>在配置文件中修改超时控制</h3><pre><code class="yaml">feign:
-  client:
-    config:
-      # 服务名
-      CLOUD-PAYMENT-SERVICE:
-          # 日志级别
-          logger-level: NONE
-          # 连接超时 默认2秒
-        connect-timeout: 1
-        # 请求处理超时，默认5秒
-        read-timeout: 1
-</code></pre>
-<h3 id="全局配置超时时间"><a href="#全局配置超时时间" class="headerlink" title="全局配置超时时间"></a>全局配置超时时间</h3><pre><code class="java">@Configuration
-public class FeignConfig &#123;
-    
-    @Bean
-    public Request.Options options() &#123;
-        return new Request.Options(1, TimeUnit.SECONDS, 1, TimeUnit.SECONDS, true);
-    &#125;
-    
-&#125;
-</code></pre>
-<h1 id="日志增强"><a href="#日志增强" class="headerlink" title="日志增强"></a>日志增强</h1><p>Feign提供了日志打印功能，我们可以通过配置来调整日志级别，从而了解Feign中Http请求的细节。可以对Fegin的调用情况进行监控。</p>
-<p><strong>Feign日志级别：</strong></p>
-<ul>
-<li><font color="skyblue">NONE</font>: 默认的，不显示任何日志</li>
-<li><font color="skyblue">BASIC</font>：仅记录请求方法、URL、响应状态码及执行时间</li>
-<li><font color="skyblue">HEADERS</font>：除了BASIC中定义的信息之外，还有请求和响应的头信息</li>
-<li><font color="skyblue">FULL</font>：除了HEADERS中订单的信息之外，还有请求和响应的正文以及元数据</li>
-</ul>
-<p>可以通过配置文件配置，也可以通过Spring配置：</p>
-<pre><code class="java">@Configuration
-public class FeignConfig &#123;
-
-    @Bean
-    Logger.Level feignLoggerLevel() &#123;
-        return Logger.Level.FULL;
-    &#125;
-
-&#125;
-</code></pre>
+        </div>
+        
+        
+    </div>
+</div>
 
     </div>
-    
-    
-    
-    
-    <div id="comment">
-        <div id="giscus-container" class="giscus"></div>
-    </div>
-    
-    
-    
     
 </div>
 
@@ -327,29 +320,6 @@ public class FeignConfig &#123;
             
         </div>
         <script src="/js/main.js"></script>
-        
-        
-<script
-    src="https://giscus.app/client.js"
-    data-repo="IceOfSummer/iceofsummer.github.io"
-    data-repo-id="R_kgDOJFU7OQ"
-    data-category="Announcements"
-    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
-    data-mapping="title"
-    data-strict="0"
-    data-reactions-enabled="1"
-    data-emit-metadata="0"
-    data-input-position="top"
-    data-theme="preferred_color_scheme"
-    data-lang="zh-CN"
-    crossorigin
-    async
-></script>
-
-
-
-
-
         
     </body>
 </html>

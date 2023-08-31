@@ -45,6 +45,8 @@
 
 
 
+<script src="/js/lib/search.js"></script>
+
 
 
 <link rel="stylesheet" href="/css/main.css" />
@@ -163,6 +165,8 @@
 
                 
 <div id="archives">
+    
+    <input id="search-bar" class="input" placeholder="搜索" v-model="rawSearch" />
     
     <div id="timeline-wrap" ref="timeline">
         
@@ -344,6 +348,20 @@
                 <div class="item-time">2023/5/4</div>
                 <a href="/2023/05/04/svn/">
                     <h3>svn</h3>
+                </a>
+                <div class="info">
+                    
+                    
+                </div>
+            </div>
+        </div>
+        
+        <div class="timeline" data-title="通过环境变量传递tomcathttps证书密码">
+            <div class="timeline-tail"></div>
+            <div class="timeline-content">
+                <div class="item-time">2023/8/30</div>
+                <a href="/2023/08/30/tomcat-custom-https/">
+                    <h3>通过环境变量传递Tomcat https证书密码</h3>
                 </a>
                 <div class="info">
                     
