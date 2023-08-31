@@ -91,7 +91,7 @@ crypto:
 
 # Search
 search:
-    enable: false
+    enable: true
 
 # Giscus
 # https://github.com/giscus/giscus
