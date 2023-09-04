@@ -187,6 +187,70 @@
             
 
 <div class="post post-partial-show">
+    <a href="/2023/09/04/docker-launch/">
+        <h2 class="post-title">Docker常用启动参数</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="category">
+            <a href="/categories/Docker/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                Docker
+            </a>
+        </span>
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/9/4
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <p>不定时更新…</p>
+<h1 id="达梦8"><a href="#达梦8" class="headerlink" title="达梦8"></a>达梦8</h1><pre><code class="shell">docker run -d -p 5236:5236 --restart=always --name dm8_01 --privileged=true -e PAGE_SIZE=16 -e LD_LIBRARY_PATH=/opt/dmdbms/bin -e INSTANCE_NAME=dm8_01 -v /data/dm8_01:/opt/dmdbms/data dm8_single:v8.1.2.128_ent_x86_64_ctm_pack4
+</code></pre>
+<h1 id="人大金仓"><a href="#人大金仓" class="headerlink" title="人大金仓"></a>人大金仓</h1><pre><code class="shell">docker run -d -it --privileged=true -p 54321:54321 -v /opt/docker/kingbase-latest/opt/:/opt --name kingbase-latest godmeowicesun/kingbase:latest
+</code></pre>
+<ul>
+<li><p>端口: 54321</p>
+</li>
+<li><p>用户名: SYSTEM</p>
+</li>
+<li><p>密码: 123456</p>
+</li>
+<li><p>默认数据库: TEST</p>
+</li>
+</ul>
+<h1 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h1><pre><code class="shell">docker run --name mysql -p 3307:3306 -e MYSQL_ROOT_PASSWORD=123456 --privileged -v /home/vagrant/mysql5.7/data:/var/lib/mysql -d mysql:5.7.42
+</code></pre>
+<h1 id="opengauss5-0-0"><a href="#opengauss5-0-0" class="headerlink" title="opengauss5.0.0"></a>opengauss5.0.0</h1><pre><code class="shell">docker run --hostname=fcdea04e2440 --env=GS_PASSWORD=P@ssw0rd --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --env=EXEC_GOSU=gosu-amd64 --env=GOSU_VERSION=1.12 --env=PGDATA=/var/lib/opengauss/data --volume=/var/lib/opengauss/data:/var/lib/opengauss/data --privileged --workdir=/ -p 5432:5432 --restart=no --label=&#39;CREATE_DATE=2022-10&#39; --label=&#39;GAUSS_SERVER=openGauss-5.0.0&#39; --label=&#39;MAIL=heguofeng@huawei.com&#39; --runtime=runc -d opengauss/opengauss:5.0.0
+</code></pre>
+<h1 id="opengauss2-1-0"><a href="#opengauss2-1-0" class="headerlink" title="opengauss2.1.0"></a>opengauss2.1.0</h1><pre><code class="shell">docker run --name opengauss2.1.0 --privileged=true -d -e GS_PASSWORD=P@ssw0rd -u root -p 5432:5432 enmotech/opengauss:2.1.0
+</code></pre>
+<h1 id="oracel"><a href="#oracel" class="headerlink" title="oracel"></a>oracel</h1><pre><code class="shell">docker run -d --name oracle-db -p 1521:1521 --privileged -e ORACLE_PWD=123456 -e ORACLE_CHARACTERSET=utf8mb4 -v /opt/oracle/oradata container-registry.oracle.com/database/free:latest
+</code></pre>
+<p><a target="_blank" rel="noopener" href="https://container-registry.oracle.com/ords/f?p=113:4:13054629146525:::4:P4_REPOSITORY,AI_REPOSITORY,AI_REPOSITORY_NAME,P4_REPOSITORY_NAME,P4_EULA_ID,P4_BUSINESS_AREA_ID:1863,1863,Oracle%20Database%20Free,Oracle%20Database%20Free,1,0&cs=3AJX-e6QGdNtweUNwoM_S6Bx1QBnHxTQChj06uKkm5-wObbTXatpBsvWpkNOZlJJdiGb7W-BEXdATDDaCQn1gOw">文档</a></p>
+<h1 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h1><pre><code class="shell">docker run -d --name redis-node-1 --net host --privileged=true -v /data/redis/share/redis-node-1:/data redis --cluster-enabled yes --appendonly yes --port 6381
+</code></pre>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/09/04/docker-launch/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post post-partial-show">
     <a href="/2023/08/30/tomcat-custom-https/">
         <h2 class="post-title">通过环境变量传递Tomcat https证书密码</h2>
     </a>
@@ -744,593 +808,6 @@ select * from test where id = 1;
         
     </div>
     <a href="/2023/04/02/mysql-interview/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post post-partial-show">
-    <a href="/2023/03/28/redis-interview/">
-        <h2 class="post-title">redis面试</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2023/3/28
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <h1 id="1-Redis字典"><a href="#1-Redis字典" class="headerlink" title="1. Redis字典"></a>1. Redis字典</h1><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/555430730">深入理解Redis 数据结构—字典 - 知乎 (zhihu.com)</a></p>
-<blockquote>
-<p>可以这样理解：Redis的字典就是java7的HashMap，即哈希表+链表</p>
-</blockquote>
-<p>Redis字典使用的哈希表结构如下：<a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/2.6/src/dict.h#L68-L73">redis&#x2F;dict.h at 2.6 · redis&#x2F;redis (github.com)</a></p>
-<pre><code class="c++">typedef struct dictht &#123;
-     // table 数组
-    dictEntry **table;
-    // 哈希表的大小
-    unsigned long size;
-    // 等于size-1，用于计算索引值, 这里说明size肯定是2的幂
-    unsigned long sizemask;
-    // 已有的键值对数量
-    unsigned long used;
-&#125; dictht;
-</code></pre>
-<p><code>dictEntry</code>就是哈希节点了：<a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/2.6/src/dict.h#L47-L55">redis&#x2F;dict.h at 2.6 · redis&#x2F;redis (github.com)</a></p>
-<pre><code class="c++">typedef struct dictEntry &#123;
-    // 键
-    void *key;
-    // 值   
-    union &#123;
-        void *val;
-        uint64_t u64;
-        int64_t s64;
-    &#125; v;
-    // 指向下一个哈希表节点，形成链表
-    struct dictEntry *next;
-&#125; dictEntry;
-</code></pre>
-<p>Redis中的字典则由<code>dict</code>组成：<a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/2.6/src/dict.h#L75-L81">redis&#x2F;dict.h at 2.6 · redis&#x2F;redis (github.com)</a></p>
-<pre><code class="c++">typedef struct dict &#123;
-    // 类型特定的函数，提供增删改查等功能 
-    dictType *type;
-   // 私有函数
-    void *privdata;
-    // 哈希表, 这里的二维是后面用来扩容的
-    dictht ht[2];
-    // rehash 索引，记录了当前扩容的进度
-    int rehashidx; /* rehashing not in progress if rehashidx == -1 */
-    // 用来记录当前运行的安全迭代器数，当不为0的时候表示有安全迭代器正在执行，这时候就会暂停rehash操作
-    int iterators; /* number of iterators currently running */
-&#125; dict;
-</code></pre>
-<p><img lazy="https://xds.asia/public/post/2023-2-3-0c4958ca-7128-481d-807c-0c95384937ec.webp" alt="总览"></p>
-<h1 id="2-Redis扩容与缩容"><a href="#2-Redis扩容与缩容" class="headerlink" title="2. Redis扩容与缩容"></a>2. Redis扩容与缩容</h1><p>我们用<code>ht[0].used/ht[0].size</code>表示负载因子</p>
-<h2 id="2-1-扩容"><a href="#2-1-扩容" class="headerlink" title="2.1 扩容"></a>2.1 扩容</h2><ul>
-<li><p>如果没有<strong>fork</strong>子进程在执行<strong>RDB</strong>或者<strong>AOF</strong>的持久化，一旦满足<strong>负载因子大于等于1</strong>，此时触发扩容；</p>
-</li>
-<li><p>如果有<strong>fork</strong>子进程在执行<strong>RDB</strong>或者<strong>AOF</strong>的持久化时，则需要满足<strong>负载因子大于5</strong>，此时触发扩容。</p>
-</li>
-</ul>
-<p>Redis在扩容时使用的是渐进式哈希，即每次值移动一部分的数据到新的哈希表中。</p>
-<p>在字典<code>dict</code>中，<code>dict.ht[0]</code>代表旧的哈希表，<code>dict.ht[1]</code>代表新的哈希表，每次扩容时会将容量乘2，同时<code>dict.rehashidx</code>代表rehash的进度，表示<code>dict.ht[0]</code>中，小于该索引的值都已经被移动到<code>dict.ht[1]</code>中了，此时需要在<code>dict.ht[1]</code>中进行相关的增删改查操作，反之则在<code>dict.ht[0]</code>中进行。</p>
-<p>在扩容期间，每次进行增删改查都会将<code>dict.rehashidx</code>加一，并进行相关的rehash操作。</p>
-<p>在扩容完毕后，将<code>dict.ht[0]</code>指向<code>dict.ht[1]</code>，并删除旧的哈希表。</p>
-<h2 id="2-2-缩容"><a href="#2-2-缩容" class="headerlink" title="2.2 缩容"></a>2.2 缩容</h2><p>当负载因子小于0.1时，Redis就会对哈希表进行收缩操作。</p>
-<p>相关操作和扩容一样，在<code>dict.ht[1]</code>处创建新的哈希表，之后再渐进式rehash。</p>
-<h2 id="2-3-其它问题"><a href="#2-3-其它问题" class="headerlink" title="2.3 其它问题"></a>2.3 其它问题</h2><p>假如在rehash扩容的时候，我们一直插入，会不会导致再次扩容呢？</p>
-<p>假设此时哈希表容量为<code>n</code>，元素数量为<code>n</code>，在扩容哈希表容量后变为<code>2n</code>，而对于Redis来说，完成rehash需要<code>2n - n = n</code>次操作，所以我们最多进行<code>n</code>次插入，插入完后元素数量也变为<code>2n</code>，再次触发扩容。</p>
-<p>对于负载因子为5的时候，假设此时哈希表容量为<code>n</code>，元素数量为<code>5n + 1</code>，扩容后哈希表容量为<code>2n</code>，同样我们可以插入<code>n</code>个元素，此时元素数量变为<code>6n + 1</code>，负载因子为<code>(6n + 1) / 2n</code>约等于3，此时不会触发扩容。</p>
-<h1 id="3-字典遍历"><a href="#3-字典遍历" class="headerlink" title="3. 字典遍历"></a>3. 字典遍历</h1><h2 id="3-1-全遍历"><a href="#3-1-全遍历" class="headerlink" title="3.1 全遍历"></a>3.1 全遍历</h2><p>使用如下指令就会执行全遍历，返回所有的key：</p>
-<pre><code class="shell">keys *
-</code></pre>
-<p>优点：</p>
-<ul>
-<li>返回的key不会重复</li>
-</ul>
-<p>缺点：</p>
-<ul>
-<li>在遍历完前会阻塞服务器</li>
-</ul>
-<p>迭代器结构：</p>
-<pre><code class="c++">typedef struct dictIterator &#123;
-    dict *d; //迭代的字典
-    int index; //当前迭代到Hash表中哪个索引值
-    int table, safe; //table用于表示当前正在迭代的Hash表,即ht[0]与ht[1]，safe用于表示当前创建的是否为安全迭代器
-    dictEntry *entry, *nextEntry;//当前节点，下一个节点
-    /* unsafe iterator fingerprint for misuse detection. */
-    long long fingerprint;//字典的指纹，当字典未发生改变时，该值不变，发生改变时则值也随着改变
-&#125; dictIterator;
-</code></pre>
-<h3 id="3-3-1-安全迭代器和非安全迭代器"><a href="#3-3-1-安全迭代器和非安全迭代器" class="headerlink" title="3.3.1 安全迭代器和非安全迭代器"></a>3.3.1 安全迭代器和非安全迭代器</h3><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/damanchen/article/details/89474695">Redis源码学习——安全迭代器和非安全迭代器（一）_damanchen的博客-CSDN博客</a></p>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/damanchen/article/details/89479299">Redis源码学习——安全迭代器和非安全迭代器（二）_damanchen的博客-CSDN博客</a></p>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/42156903">跋山涉水 —— 深入 Redis 字典遍历 - 知乎 (zhihu.com)</a></p>
-<p>安全迭代器：</p>
-<ul>
-<li>迭代的时候不能rehash，可以进行过期键的删除</li>
-</ul>
-<p>非安全迭代器：</p>
-<ul>
-<li>迭代的时候可以rehash，但是不能进行删除等操作(字典只读)，通过<code>fingerprint</code>字段来判断字典是否发生变动</li>
-</ul>
-<h2 id="3-2-间接遍历"><a href="#3-2-间接遍历" class="headerlink" title="3.2 间接遍历"></a>3.2 间接遍历</h2><p>使用<code>scan</code>命令可以间接遍历，这个命令每次会返回一个下一个需要遍历的索引值：</p>
-<pre><code class="shell">redis 127.0.0.1:6379&gt; scan 0
-1) &quot;17&quot;
-2)  1) &quot;key:12&quot;
-    2) &quot;key:8&quot;
-    3) &quot;key:4&quot;
-    4) &quot;key:14&quot;
-    5) &quot;key:16&quot;
-    6) &quot;key:17&quot;
-    7) &quot;key:15&quot;
-    8) &quot;key:10&quot;
-    9) &quot;key:3&quot;
-   10) &quot;key:7&quot;
-   11) &quot;key:1&quot;
-redis 127.0.0.1:6379&gt; scan 17
-1) &quot;0&quot;
-2) 1) &quot;key:5&quot;
-   2) &quot;key:18&quot;
-   3) &quot;key:0&quot;
-   4) &quot;key:2&quot;
-   5) &quot;key:19&quot;
-   6) &quot;key:13&quot;
-   7) &quot;key:6&quot;
-   8) &quot;key:9&quot;
-   9) &quot;key:11&quot;
-</code></pre>
-<p><a target="_blank" rel="noopener" href="https://redis.com.cn/commands/scan.html">Redis SCAN 命令</a></p>
-<p>优点：</p>
-<ul>
-<li>一次只返回部分内容，响应较快，不会较长时间阻塞服务器</li>
-</ul>
-<p>缺点：</p>
-<ul>
-<li>可能会返回重复的值</li>
-</ul>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/ldw201510803006/article/details/124052245">redis scan 命令底层原理（为什么会重复扫描？）_redis scan命令原理_柏油的博客-CSDN博客</a></p>
-<p>这里第一次看可能会有这个疑问，我们打个比方：</p>
-<p>遍历顺序：00 -&gt; 10 -&gt; 01 -&gt; 11</p>
-<p>若正好遍历到10时扩容完毕了，则新顺序为：</p>
-<p>000 -&gt; 100 -&gt; 010 -&gt; 110 -&gt; 001 -&gt; 101 -&gt; 011 -&gt; 111</p>
-<p>此时我们在第三个位置，即010那里。</p>
-<p>这时候可能就有疑问了：<font color=red>100那里不就遍历不到了吗？这不是丢数据了吗？</font></p>
-<p>但这样其实是想多了，我们来看000和100，假如哈希表长度为4时，这两个索引下的元素会落到哪个哈希表下？</p>
-<p>很明显，这两个位置的元素都会落到00这个索引的下面，因为哈希表长度为4时，索引位置的取法就是和<code>0x11</code>做与操作，而000和100低两位相同，所以它们俩在之前就在00处，以链表的形式组合在了一起，当遍历到10时，100也肯定被遍历了。</p>
-<hr>
-<p>总结一下就是<code>scan</code>命令会在哈希表缩容的时候造成数据重复，在rehash的期间也会造成重复。</p>
-<p>在rehash期间调用<code>scan</code>，Redis会先扫小表，假如最终索引为v，然后会接着在大表中从v开始扫。</p>
-<h1 id="4-五大基本数据类型"><a href="#4-五大基本数据类型" class="headerlink" title="4. 五大基本数据类型"></a>4. 五大基本数据类型</h1><p>在看数据类型前，我们再回顾一下entry的结构：</p>
-<pre><code class="c++">typedef struct dictEntry &#123;
-    // 键
-    void *key;
-    // 值   
-    union &#123;
-        void *val;
-        uint64_t u64;
-        int64_t s64;
-    &#125; v;
-    // 指向下一个哈希表节点，形成链表
-    struct dictEntry *next;
-&#125; dictEntry;
-</code></pre>
-<p>有没有发现一个问题：这个v代表值，那么这个值是个什么东西？？</p>
-<p>这里其实是C语言的union，可以让多个变量使用同一个内存空间：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/595288133">C&#x2F;C++ union 使用教程 (常见操作与缺陷) - 知乎 (zhihu.com)</a></p>
-<p>你可以这样理解：这里的v即有三种类型，即<code>void*</code>、<code>uint64_t</code>(64位无符号整数)、<code>int64_t</code>(64位有符号整数)。</p>
-<p>对应<code>void*</code>你可以理解为Java中的<code>Object</code>类型，用它做参数的话就可以传入任意对象，更详细的信息可以看这篇博客：<a target="_blank" rel="noopener" href="https://blog.csdn.net/NeverLate_gogogo/article/details/79308195">void<em>（指针）的类型转换-专讲_void</em>转换_NeverLate_gogogo的博客-CSDN博客</a></p>
-<hr>
-<p>一般情况下<code>void*</code>都是指向<code>redisObject </code>：<a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/cb1717865804fdb0561e728d2f3a0a1138099d9d/README.md?plain=1#L323">redis&#x2F;README.md at cb1717865804fdb0561e728d2f3a0a1138099d9d · redis&#x2F;redis (github.com)</a></p>
-<pre><code class="c++">struct redisObject &#123;
-    unsigned type:4;
-    unsigned encoding:4;
-    unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or
-                            * LFU data (least significant 8 bits frequency
-                            * and most significant 16 bits access time). */
-    int refcount;
-    void *ptr;
-&#125;;
-</code></pre>
-<ul>
-<li><p><code>type</code>：没啥好说的，每种数据结构的标识符</p>
-</li>
-<li><p><code>encoding</code>：编码</p>
-<ul>
-<li><p>以string来说，就有三种：<code>int</code> , <code>embstr</code> , <code>raw</code>：</p>
-<pre><code class="shell">127.0.0.1:6379&gt; SET counter 1
-OK
-127.0.0.1:6379&gt; OBJECT ENCODING counter
-&quot;int&quot;
-127.0.0.1:6379&gt; SET name &quot;Tom&quot;
-OK
-127.0.0.1:6379&gt; OBJECT ENCODING name
-&quot;embstr&quot;
-127.0.0.1:6379&gt; SETBIT bits 1 1
-(integer) 0
-127.0.0.1:6379&gt; OBJECT ENCODING bits
-&quot;raw&quot;
-</code></pre>
-</li>
-</ul>
-</li>
-<li><p><code>lru</code>：给Redis做内存淘汰用</p>
-</li>
-<li><p><code>refcount</code>：引用计数，这个值为0的时候这个对象会被清除</p>
-</li>
-<li><p><code>ptr</code>：指向对象的实际表示，可能有多个指向同一个对象，一般还要配合encoding判断</p>
-</li>
-</ul>
-<h2 id="4-1-String"><a href="#4-1-String" class="headerlink" title="4.1 String"></a>4.1 String</h2><p>Redis 的字符串是动态字符串，是可以修改的字符串，可以勉强理解为Java里的<code>StringBuilder</code>。</p>
-<p>当字符串需要扩容时，有如下两种情况：</p>
-<ul>
-<li>当字符串长度小于 1M 时，扩容都是加倍现有的空间</li>
-<li>超过 1M，扩容时一次只会多扩 1M 的空间</li>
-</ul>
-<p>字符串最大长度为512MB。<br>数据结构：<a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/cb1717865804fdb0561e728d2f3a0a1138099d9d/src/sds.h#L45">redis&#x2F;sds.h at cb1717865804fdb0561e728d2f3a0a1138099d9d · redis&#x2F;redis (github.com)</a></p>
-<pre><code class="c++">#define SDS_TYPE_5  0
-#define SDS_TYPE_8  1
-#define SDS_TYPE_16 2
-#define SDS_TYPE_32 3
-#define SDS_TYPE_64 4
-typedef char *sds;
-
-struct __attribute__ ((__packed__)) sdshdr8 &#123;
-    uint8_t len; /* used */
-    uint8_t alloc; /* excluding the header and null terminator */
-    unsigned char flags; /* 3 lsb of type, 5 unused bits */
-    char buf[];
-&#125;;
-struct __attribute__ ((__packed__)) sdshdr16 &#123;
-    uint16_t len; /* used */
-    uint16_t alloc; /* excluding the header and null terminator */
-    unsigned char flags; /* 3 lsb of type, 5 unused bits */
-    char buf[];
-&#125;;
-struct __attribute__ ((__packed__)) sdshdr32 &#123;
-    uint32_t len; /* used */
-    uint32_t alloc; /* excluding the header and null terminator */
-    unsigned char flags; /* 3 lsb of type, 5 unused bits */
-    char buf[];
-&#125;;
-struct __attribute__ ((__packed__)) sdshdr64 &#123;
-    uint64_t len; /* used */
-    uint64_t alloc; /* excluding the header and null terminator */
-    unsigned char flags; /* 3 lsb of type, 5 unused bits */
-    char buf[];
-&#125;;
-</code></pre>
-<p>我们可以发现，字符串结构体基本由<code>len</code>(已使用的长度)、<code>alloc</code>(最大长度&#x2F;分配的长度)、<code>flags</code>(标志信息)、<code>buf</code>(字符串内容)组成。</p>
-<p>字符串拼接：<a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/cb1717865804fdb0561e728d2f3a0a1138099d9d/src/sds.c#LL483">redis&#x2F;sds.c at cb1717865804fdb0561e728d2f3a0a1138099d9d · redis&#x2F;redis · GitHub</a></p>
-<pre><code class="c++">sds sdscatlen(sds s, const void *t, size_t len) &#123;
-    size_t curlen = sdslen(s);
-    s = sdsMakeRoomFor(s,len);
-    // 内存不足
-    if (s == NULL) return NULL;
-    memcpy(s+curlen, t, len);
-    sdssetlen(s, curlen+len);
-    s[curlen+len] = &#39;\0&#39;;
-    return s;
-&#125;
-</code></pre>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/269496479">要懂redis，首先得看懂sds（全网最细节的sds讲解） - 知乎 (zhihu.com)</a></p>
-<h2 id="4-2-Hash"><a href="#4-2-Hash" class="headerlink" title="4.2 Hash"></a>4.2 Hash</h2><p>Hash类型有两种实现方式：</p>
-<ul>
-<li>ziplist 编码的哈希对象使用压缩列表作为底层实现</li>
-<li>hashtable 编码的哈希对象使用字典作为底层实现</li>
-</ul>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/chongfa2008/article/details/119537064">Redis之Hash数据结构底层原理_redis hash原理_不要迷恋发哥的博客-CSDN博客</a></p>
-<h3 id="4-2-1-ziplist"><a href="#4-2-1-ziplist" class="headerlink" title="4.2.1 ziplist"></a>4.2.1 ziplist</h3><p><code>ziplist</code>的运作方式<font color=red>类似</font>于一个队列，当有一对键值时，先将值入队，再将键入队。</p>
-<p>这种设计完全不符合哈希表的设计，所以只会在数据量较少时使用。</p>
-<p>当发生如下情况时，<code>ziplist</code>会被转换为真正的哈希表(字典)：</p>
-<ul>
-<li>当hash中的数据项的数目超过512的时候，也就是ziplist数据项超过1024的时候</li>
-<li>当hash中插入的任意一个value的长度超过了64的时候</li>
-</ul>
-<pre><code class="text">area        |&lt;---- ziplist header ----&gt;|&lt;----------- entries -------------&gt;|&lt;-end-&gt;|
-
-size          4 bytes  4 bytes  2 bytes    ?        ?        ?        ?     1 byte
-            +---------+--------+-------+--------+--------+--------+--------+-------+
-component   | zlbytes | zltail | zllen | entry1 | entry2 |  ...   | entryN | zlend |
-            +---------+--------+-------+--------+--------+--------+--------+-------+
-                                       ^                          ^        ^
-address                                |                          |        |
-                                ZIPLIST_ENTRY_HEAD                |   ZIPLIST_ENTRY_END
-                                                                  |
-                                                         ZIPLIST_ENTRY_TAIL
-</code></pre>
-<table>
-<thead>
-<tr>
-<th>字段</th>
-<th>类型</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>zlbytes</td>
-<td>uint32_t</td>
-<td>整个ziplist占用的内存字节数。</td>
-</tr>
-<tr>
-<td>zltail</td>
-<td>uint32_t</td>
-<td>到达ziplist表尾节点的偏移量。</td>
-</tr>
-<tr>
-<td>zllen</td>
-<td>uint16_t</td>
-<td>ziplist中节点的数量。</td>
-</tr>
-<tr>
-<td>entryX</td>
-<td>？</td>
-<td>ziplist的各个节点。</td>
-</tr>
-<tr>
-<td>zlend</td>
-<td>uint8_t</td>
-<td>常量0b111111，用于标记ziplist末尾。</td>
-</tr>
-</tbody></table>
-<p>每个<code>entry</code>的结构是这样的：</p>
-<pre><code class="text">+-----------------------+----------+---------+
-| previous_entry_length | encoding | content |
-+-----------------------+----------+---------+
-</code></pre>
-<p><code>previous_entry_length</code>：前面一个节点的长度(字节)。若前面一个节点的长度小于254字节，则该属性占1个字节的宽度，反正则是占5个字节的宽度，第一个字节是常量<code>0xFE</code>(254)</p>
-<p><code>encoding</code>：记录content的类型</p>
-<p><code>content</code>：保存节点的值</p>
-<p>我们可以发现<code>ziplist</code>不能从头开始遍历，因为每个节点的长度都是不一样的，在遍历的时候需要根据zltail的值<font color=red>从尾部开始向前遍历</font>。</p>
-<h3 id="4-2-2-hashtable"><a href="#4-2-2-hashtable" class="headerlink" title="4.2.2 hashtable"></a>4.2.2 hashtable</h3><p>hashtable就和Redis最外层的字典是差不多的了。</p>
-<h2 id="4-3-List"><a href="#4-3-List" class="headerlink" title="4.3 List"></a>4.3 List</h2><p>对于List同样也有两种编码：</p>
-<ul>
-<li>ziplist：压缩列表</li>
-<li>linkedlist：双向链表</li>
-</ul>
-<p>满足如下条件时，压缩列表会被转换为双向链表：</p>
-<ul>
-<li>试图往列表新添加一个字符串值，且这个字符串的长度超过 server.list_max_ziplist_value （默认值为 64 ）</li>
-<li>ziplist 包含的节点超过 server.list_max_ziplist_entries （默认值为 512 ）</li>
-</ul>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/102422311">Redis列表list 底层原理 - 知乎 (zhihu.com)</a></p>
-<h2 id="4-4-Set"><a href="#4-4-Set" class="headerlink" title="4.4 Set"></a>4.4 Set</h2><p>Set拥有两种编码：</p>
-<ul>
-<li>intset：使用数组维护set，数组是有序的</li>
-<li>hashtable：直接使用哈希表维护set</li>
-</ul>
-<p>满足如下条件时intset将会被转换成hashtable：</p>
-<ul>
-<li>保存了非整型的值</li>
-<li>元素数量超过了512个</li>
-</ul>
-<h3 id="4-4-1-intset"><a href="#4-4-1-intset" class="headerlink" title="4.4.1 intset"></a>4.4.1 intset</h3><p>数据结构：</p>
-<pre><code class="c++">typedef struct intset &#123;
-    // 这个编码用来决定contents的大小
-    uint32_t encoding;
-    uint32_t length;
-    int8_t contents[];
-&#125; intset;
-</code></pre>
-<p><a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/971b177fa338fe06cb67a930c6e54467d29ec44f/src/intset.h#L35">redis&#x2F;intset.h at 971b177fa338fe06cb67a930c6e54467d29ec44f · redis&#x2F;redis (github.com)</a></p>
-<p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6998360508462006308">面试官：说说Redis中Set数据类型的底层实现 - 掘金 (juejin.cn)</a></p>
-<h2 id="4-5-zset-Sorted-Set"><a href="#4-5-zset-Sorted-Set" class="headerlink" title="4.5 zset(Sorted Set)"></a>4.5 zset(Sorted Set)</h2><p>zset有两种实现：</p>
-<ul>
-<li>zipList：压缩列表</li>
-<li>skipList：跳表</li>
-</ul>
-<p>满足如下条件时zipList会转换成skipList：</p>
-<ul>
-<li>节点数量大于等于128(server.zset_max_ziplist_entries)</li>
-<li>节点的长度大于等64(server.zset_max_ziplist_value)</li>
-</ul>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/wangxuelei036/article/details/106272680">Redis 跳跃表skiplist(深入理解,面试再也不用怕)_redis skiplist_妖四灵.Shuen的博客-CSDN博客</a></p>
-<p><img lazy="https://xds.asia/public/interview/2023-2-4-70e28030-df93-4d4d-9043-9e3afd7b975b.webp" alt="跳表"></p>
-<ul>
-<li>header：指向跳跃表的表头节点</li>
-<li>tail：指向跳跃表的表尾节点</li>
-<li>level：记录目前跳跃表内，层数最大的那个节点的层数(表头节点的层数不计算在内)</li>
-<li>length：记录跳跃表的长度，也即是，跳跃表目前包含节点的数量(表头节点不计算在内)</li>
-</ul>
-<p>节点数据结构：</p>
-<pre><code class="c++">typedef struct zskiplistNode &#123;
-    // 当前保存的值
-    sds ele;
-    // 分值，用于排序
-    double score;
-    // 前一个节点
-    struct zskiplistNode *backward;
-    // 当前层节点
-    struct zskiplistLevel &#123;
-        struct zskiplistNode *forward;
-        // 跳表的跨度
-        unsigned long span;
-    &#125; level[];
-&#125; zskiplistNode;
-</code></pre>
-<p><a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/971b177fa338fe06cb67a930c6e54467d29ec44f/src/server.h#L1329">redis&#x2F;server.h at 971b177fa338fe06cb67a930c6e54467d29ec44f · redis&#x2F;redis (github.com)</a></p>
-<pre><code class="c++">// 跳表
-typedef struct zskiplist &#123;
-    struct zskiplistNode *header, *tail;
-    // 跳表的长度
-    unsigned long length;
-    // 最高层数
-    int level;
-&#125; zskiplist;
-
-// zset数据结构
-typedef struct zset &#123;
-    dict *dict;
-    zskiplist *zsl;
-&#125; zset;
-</code></pre>
-<h1 id="5-Redis持久化方式"><a href="#5-Redis持久化方式" class="headerlink" title="5. Redis持久化方式"></a>5. Redis持久化方式</h1><h2 id="5-1-RDB"><a href="#5-1-RDB" class="headerlink" title="5.1 RDB"></a>5.1 RDB</h2><p>RDB即Redis Database，它会将Redis某一时刻的数据以文件的形式全量备份到磁盘。</p>
-<p>Redis提供了两个指令来生成RDB，一个是SAVE，这个命令会阻塞主线程，直到RDB生成完毕。</p>
-<p>另外一个则是BGSAVE，这时会fork一个子进程去专门负责写入RDB。</p>
-<p>在读取数据时用到了写时复制(COW)技术，fork创建出的子进程，<strong>与父进程共享内存空间</strong>。也就是说，如果子进程<strong>不对内存空间进行写入操作的话，内存空间中的数据并不会复制给子进程</strong>，这样创建子进程的速度就很快了！</p>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_34556414/article/details/108399543">LInux fork的写时复制(copy on write)_fork写时复制_富士康质检员张全蛋的博客-CSDN博客</a></p>
-<h2 id="5-2-AOF"><a href="#5-2-AOF" class="headerlink" title="5.2 AOF"></a>5.2 AOF</h2><p>AOF即Append Only File，它会记录在redis服务器上执行过的命令来实现持久化的目的。</p>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/ysocean/p/9114267.html">Redis详解（七）—— AOF 持久化 - YSOcean - 博客园 (cnblogs.com)</a></p>
-<p>Redis默认每秒执行一次AOF的写入。</p>
-<h3 id="5-2-1-AOF重写"><a href="#5-2-1-AOF重写" class="headerlink" title="5.2.1 AOF重写"></a>5.2.1 AOF重写</h3><p>为了防止AOF文件过大，当AOF的文件大小超过设定的阈值后，Redis就会启动AOF的文件压缩。</p>
-<p>压缩前：</p>
-<pre><code class="shell">sadd animals &quot;cat&quot;
-sadd animals &quot;dog&quot;
-sadd animals &quot;cat&quot;
-sadd animals &quot;lion&quot;
-</code></pre>
-<p>压缩后：</p>
-<pre><code class="shell">sadd animals &quot;cat&quot; &quot;dog&quot; &quot;lion&quot;
-</code></pre>
-<h1 id="6-内存"><a href="#6-内存" class="headerlink" title="6. 内存"></a>6. 内存</h1><h2 id="6-1-内存过期策略"><a href="#6-1-内存过期策略" class="headerlink" title="6.1 内存过期策略"></a>6.1 内存过期策略</h2><p>Redis对于过期的key有两种删除策略：</p>
-<ul>
-<li>定期删除</li>
-<li>惰性删除</li>
-</ul>
-<h3 id="6-1-1-定期删除"><a href="#6-1-1-定期删除" class="headerlink" title="6.1.1 定期删除"></a>6.1.1 定期删除</h3><p>Redis会将每个设置了过期时间的key放到一个独立的字典中，以后会定期按照某种算法来遍历里面的key。</p>
-<p>默认每秒进行10次扫描，每次会随机选取一些key，然后删除其中过期的key，若某次删除的数量超过了选取的<code>1/4</code>，则会重复这一步骤。</p>
-<h3 id="6-1-2-惰性删除"><a href="#6-1-2-惰性删除" class="headerlink" title="6.1.2 惰性删除"></a>6.1.2 惰性删除</h3><p>在客户端访问某个key时，若这个key过期，则会将其删除。</p>
-<h2 id="6-2-内存淘汰策略"><a href="#6-2-内存淘汰策略" class="headerlink" title="6.2 内存淘汰策略"></a>6.2 内存淘汰策略</h2><p>当没有可以被删除的key，且Redis内存不足时，此时会根据内存淘汰策略删除一些没有过期的key。</p>
-<ol>
-<li><p>noeviction：当内存使用超过配置的时候会返回错误，不会驱逐任何键</p>
-</li>
-<li><p>allkeys-lru：加入键的时候，如果过限，首先通过LRU算法驱逐最久没有使用的键</p>
-</li>
-<li><p>volatile-lru：加入键的时候如果过限，首先从设置了过期时间的键集合中驱逐最久没有使用的键</p>
-</li>
-<li><p>allkeys-random：加入键的时候如果过限，从所有key随机删除</p>
-</li>
-<li><p>volatile-random：加入键的时候如果过限，从过期键的集合中随机驱逐</p>
-</li>
-<li><p>volatile-ttl：从配置了过期时间的键中驱逐马上就要过期的键</p>
-</li>
-<li><p>volatile-lfu：从所有配置了过期时间的键中驱逐使用频率最少的键</p>
-</li>
-<li><p>allkeys-lfu：从所有键中驱逐使用频率最少的键</p>
-</li>
-</ol>
-<p>关于LRU和LFU，在redisObject里会保存相关的参数：</p>
-<pre><code class="c++">struct redisObject &#123;
-    unsigned type:4;
-    unsigned encoding:4;
-    unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or
-                            * LFU data (least significant 8 bits frequency
-                            * and most significant 16 bits access time). */
-    int refcount;
-    void *ptr;
-&#125;;
-</code></pre>
-<p><a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/cb1717865804fdb0561e728d2f3a0a1138099d9d/README.md?plain=1#L323">redis&#x2F;README.md at cb1717865804fdb0561e728d2f3a0a1138099d9d · redis&#x2F;redis (github.com)</a></p>
-<ul>
-<li>当使用LRU算法时，<code>lru</code>整个值都用来表示相关访问时间。</li>
-<li>当使用LFU算法时，低8位表示访问频率，高16位表示上一次访问时间</li>
-</ul>
-<h3 id="6-2-1-LRU"><a href="#6-2-1-LRU" class="headerlink" title="6.2.1 LRU"></a>6.2.1 LRU</h3><p>LRU即Least Recently Used-最近最少使用算法。</p>
-<p>LRU会维护一个双向链表，对于新加入的数据或者最近被访问的数据，它们会被存&#x2F;移动到链表头部，当内存不足的时候删除链表尾部的数据。</p>
-<p>优点：</p>
-<ul>
-<li>好实现</li>
-</ul>
-<p>缺点：</p>
-<ul>
-<li>冷数据可能会把热数据顶掉</li>
-</ul>
-<h3 id="6-2-2-LFU"><a href="#6-2-2-LFU" class="headerlink" title="6.2.2 LFU"></a>6.2.2 LFU</h3><p>LFU即Least Frequently Used-最不经常使用。其核心思想是“如果数据过去被访问多次，那么将来被访问的频率也更高”。</p>
-<p><a target="_blank" rel="noopener" href="https://leetcode.cn/submissions/detail/419560284/">LFU 缓存 - 提交记录 - 力扣（LeetCode）</a></p>
-<p>Redis的LFU和上面的LFU有一些不一样，一般的LFU有如下缺点：</p>
-<ul>
-<li>新增的缓存容易被删除</li>
-</ul>
-<p>而Redis在此基础上会将每个数据的访问次数设置为<code>5</code>，每次访问会根据其上次访问时间<font color=red>扣除</font>一定的访问次数，然后再根据生成的一个随机数，决定是否对访问次数字段加一：</p>
-<pre><code class="c++">uint8_t LFULogIncr(uint8_t counter) &#123;
-    if (counter == 255) return 255;
-    double r = (double)rand()/RAND_MAX;
-    double baseval = counter - LFU_INIT_VAL;
-    if (baseval &lt; 0) baseval = 0;
-    // 访问次数越多，加一的概率越小
-    double p = 1.0/(baseval*server.lfu_log_factor+1);
-    if (r &lt; p) counter++;
-    return counter;
-&#125;
-</code></pre>
-<p>其中<code>server.lfu_log_factor</code>默认为10。</p>
-<p>因为访问计数器的长度为8位，最大为255，如果每次访问都加一，很可能会导致溢出。</p>
-<p><a target="_blank" rel="noopener" href="https://time.geekbang.org/column/article/413038">16 | LFU算法和其他算法相比有优势吗？ (geekbang.org)</a></p>
-<h1 id="7-Redis集群"><a href="#7-Redis集群" class="headerlink" title="7. Redis集群"></a>7. Redis集群</h1><p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1751001">一文搞懂 Redis 的三种集群方案 - 腾讯云开发者社区-腾讯云 (tencent.com)</a></p>
-<p>Redis支持三种集群方案：</p>
-<ul>
-<li>主从复制</li>
-<li>哨兵模式</li>
-<li>Cluster模式</li>
-</ul>
-<h2 id="7-1-主从复制"><a href="#7-1-主从复制" class="headerlink" title="7.1 主从复制"></a>7.1 主从复制</h2><p>主从复制主要由一个主数据库与一个或多个从数据库实例组成。</p>
-<p>客户端可对主数据库进行读写操作，对从数据库进行读操作，主数据库写入的数据会实时自动同步给从数据库。</p>
-<p>具体工作机制为：</p>
-<ol>
-<li>slave启动后，向master发送SYNC命令，master接收到SYNC命令后通过bgsave保存快照，并使用缓冲区记录保存快照这段时间内执行的写命令</li>
-<li>master将保存的快照文件发送给slave，并继续记录执行的写命令</li>
-<li>slave接收到快照文件后，加载快照文件，载入数据</li>
-<li>master快照发送完后开始向slave发送缓冲区的写命令，slave接收命令并执行，完成复制初始化</li>
-<li>此后master每次执行一个写命令都会同步发送给slave，保持master与slave之间数据的一致性</li>
-</ol>
-<p>优点：</p>
-<ul>
-<li>master能自动将数据同步到slave，可以进行读写分离，分担master的读压力</li>
-<li>master、slave之间的同步是以非阻塞的方式进行的，同步期间，客户端仍然可以提交查询或更新请求</li>
-</ul>
-<p>缺点：</p>
-<ul>
-<li><p>难以支持在线扩容，Redis的容量受限于单机配置</p>
-</li>
-<li><p>master宕机，如果宕机前数据没有同步完，则切换IP后会存在数据不一致的问题</p>
-</li>
-<li><p>不具备自动容错与恢复功能，master或slave的宕机都可能导致客户端请求失败，需要等待机器重启或手动切换客户端IP才能恢复</p>
-</li>
-</ul>
-<h2 id="7-2-哨兵模式"><a href="#7-2-哨兵模式" class="headerlink" title="7.2 哨兵模式"></a>7.2 哨兵模式</h2><p>哨兵模式基于主从复制模式，只是引入了哨兵来监控与自动处理故障。</p>
-<p>哨兵顾名思义，就是来为Redis集群站哨的，一旦发现问题能做出相应的应对处理。其功能包括:</p>
-<ol>
-<li>监控master、slave是否正常运行</li>
-<li>当master出现故障时，能自动将一个slave转换为master（大哥挂了，选一个小弟上位）</li>
-<li>多个哨兵可以监控同一个Redis，哨兵之间也会自动监控</li>
-</ol>
-<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/06ab9daf921d">Redis哨兵（Sentinel）模式 - 简书 (jianshu.com)</a></p>
-<p>优点：</p>
-<ol>
-<li>哨兵模式基于主从复制模式，所以主从复制模式有的优点，哨兵模式也有</li>
-<li>哨兵模式下，master挂掉可以自动进行切换，系统可用性更高</li>
-</ol>
-<p>缺点：</p>
-<ol>
-<li>同样也继承了主从模式难以在线扩容的缺点，Redis的容量受限于单机配置</li>
-<li>需要额外的资源来启动sentinel进程，实现相对复杂一点，同时slave节点作为备份节点不提供服务</li>
-</ol>
-<h2 id="7-3-Cluster模式"><a href="#7-3-Cluster模式" class="headerlink" title="7.3 Cluster模式"></a>7.3 Cluster模式</h2><p>Cluster采用无中心结构,它的特点如下：</p>
-<ol>
-<li>所有的redis节点彼此互联(PING-PONG机制),内部使用二进制协议优化传输速度和带宽</li>
-<li>节点的fail是通过集群中超过半数的节点检测失效时才生效</li>
-<li>客户端与redis节点直连,不需要中间代理层.客户端不需要连接集群所有节点,连接集群中任何一个可用节点即可</li>
-</ol>
-<p>Cluster模式的具体工作机制：</p>
-<ol>
-<li>在Redis的每个节点上，都有一个插槽（slot），取值范围为0-16383</li>
-<li>当我们存取key的时候，Redis会根据CRC16的算法得出一个结果，然后把结果对16384求余数，这样每个key都会对应一个编号在0-16383之间的哈希槽，通过这个值，去找到对应的插槽所对应的节点，然后直接自动跳转到这个对应的节点上进行存取操作</li>
-<li>为了保证高可用，Cluster模式也引入主从复制模式，一个主节点对应一个或者多个从节点，当主节点宕机的时候，就会启用从节点</li>
-<li>当其它主节点ping一个主节点A时，如果半数以上的主节点与A通信超时，那么认为主节点A宕机了。如果主节点A和它的从节点都宕机了，那么该集群就无法再提供服务了</li>
-</ol>
-<p>Cluster模式集群节点最小配置6个节点(3主3从，因为需要半数以上)，其中主节点提供读写操作，从节点作为备用节点，不提供请求，只作为故障转移使用。</p>
-<h1 id="8-分布式锁"><a href="#8-分布式锁" class="headerlink" title="8. 分布式锁"></a>8. 分布式锁</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/v123411739/article/details/114501792?spm=1001.2014.3001.5502">面试必问的分布式锁，你懂了吗？_几年经验会问分布式锁_程序员囧辉的博客-CSDN博客</a></p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/2023/03/28/redis-interview/" class="go-post">阅读全文</a>
 </div>
 
 
