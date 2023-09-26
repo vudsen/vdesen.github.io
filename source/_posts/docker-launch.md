@@ -50,5 +50,5 @@ docker run -d --name oracle-db -p 1521:1521 --privileged -e ORACLE_PWD=123456 -e
 # redis
 
 ```shell
-docker run -d --name redis-node-1 --net host --privileged=true -v /data/redis/share/redis-node-1:/data redis --cluster-enabled yes --appendonly yes --port 6381
+docker run -d --name redis --net host --privileged=true -v /data/redis/share/redis-node-1:/data redis --requirepass 123456 --appendonly yes --port 6381
 ```
