@@ -215,7 +215,7 @@
 <h1 id="oracel"><a href="#oracel" class="headerlink" title="oracel"></a>oracel</h1><pre><code class="shell">docker run -d --name oracle-db -p 1521:1521 --privileged -e ORACLE_PWD=123456 -e ORACLE_CHARACTERSET=utf8mb4 -v /opt/oracle/oradata container-registry.oracle.com/database/free:latest
 </code></pre>
 <p><a target="_blank" rel="noopener" href="https://container-registry.oracle.com/ords/f?p=113:4:13054629146525:::4:P4_REPOSITORY,AI_REPOSITORY,AI_REPOSITORY_NAME,P4_REPOSITORY_NAME,P4_EULA_ID,P4_BUSINESS_AREA_ID:1863,1863,Oracle%20Database%20Free,Oracle%20Database%20Free,1,0&cs=3AJX-e6QGdNtweUNwoM_S6Bx1QBnHxTQChj06uKkm5-wObbTXatpBsvWpkNOZlJJdiGb7W-BEXdATDDaCQn1gOw">文档</a></p>
-<h1 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h1><pre><code class="shell">docker run -d --name redis-node-1 --net host --privileged=true -v /data/redis/share/redis-node-1:/data redis --cluster-enabled yes --appendonly yes --port 6381
+<h1 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h1><pre><code class="shell">docker run -d --name redis --net host --privileged=true -v /data/redis/share/redis-node-1:/data redis --requirepass 123456 --appendonly yes --port 6381
 </code></pre>
 
     </div>

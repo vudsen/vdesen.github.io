@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/loadbalance" style="color: #ff7d73">负载均衡</a>
+                <a href="/SpringCloud/loadbalance" style="color: #00bcd4">负载均衡</a>
             </span>
             
         </span>
@@ -215,10 +215,10 @@
 <p>​	Nginx是服务器负载均衡，客户端所有请求都会交给Nginx，然后由Nginx实现转发请求。即负载均衡是由服务端实现的，可以叫做<code>集中式LB</code>。</p>
 <p>​	Ribbon本地负载均衡，在调用微服务接口时，会在注册中心获取注册的服务器列表后缓存到本地，从而在本地实现RPC远程服务调用技术，可以叫做<code>进程内LB</code>。</p>
 <h2 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h2><p>导入依赖</p>
-<pre><code class="xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-cloud-starter-netflix-ribbon&lt;/artifactId&gt;
-&lt;/dependency&gt;
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-netflix-ribbon&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
 </code></pre>
 <p>之后添加配置类：</p>
 <pre><code class="java">import org.springframework.cloud.client.loadbalancer.LoadBalanced;

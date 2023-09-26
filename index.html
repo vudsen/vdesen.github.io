@@ -187,6 +187,96 @@
             
 
 <div class="post post-partial-show">
+    <a href="/2023/09/04/arthas/">
+        <h2 class="post-title">Arthas诊断线上问题</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="category">
+            <a href="/categories/%E7%BA%BF%E4%B8%8A%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                线上问题排查
+            </a>
+        </span>
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/9/4
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <h1 id="1-安装arthas"><a href="#1-安装arthas" class="headerlink" title="1. 安装arthas"></a>1. 安装arthas</h1><p>如果没有用docker，直接从官网下载然后丢服务器就行了，如果用的是docker那么就麻烦一点，这里我整了一个脚本来一键安装：</p>
+<pre><code class="sh">if [ -z $1 ];then
+    echo -e &quot;\e[32m用法: install-arthas.sh [容器名|容器ID] [用户名(可选，默认xxx，必须和启动tomcat的用户一致)]\e[0m&quot;
+        exit 0
+fi
+if [ -z $2 ];then
+    $user=xxx
+else
+    $user=$2
+fi
+
+echo &quot;installing arthas...&quot;
+# 这里把jdk换成你自己的，因为docker里面可能装的jre，如果装的jdk则可以不塞jdk进去
+docker cp jdk-8u381-linux-x64.tar.gz $1:/opt/jdk.tar.gz
+docker cp arthas-packaging-3.7.1-bin.zip $1:/opt/arthas.zip
+# 用root用户给所有人权限
+docker exec -it -u root $1 chmod 777 /opt/jdk.tar.gz
+docker exec -it -u root $1 chmod 777 /opt/arthas.zip
+# 这里一定不要让root用户解压，不然会没权限
+docker exec -it -u $user $1 tar zxvf /opt/jdk.tar.gz
+docker exec -it -u root $1 mkdir /opt/arthas
+docker exec -it -u root $1 chown hcs /opt/arthas
+docker exec -it -u $user $1 unzip /opt/arthas.zip -d /opt/arthas
+docker exec -it -u $user $1 echo &quot;/opt/jdk/jdk1.8.0_381/bin/java -jar /opt/arthas/arthas-boot.jar&quot; &amp;gt; /opt/arthas.sh
+docker exec -it -u $user $1 chmod 777 /opt/arthas.sh
+echo &quot;install arthas success!&quot;
+</code></pre>
+<p>也可以在外面创建一个启动脚本：</p>
+<pre><code class="sh">if [ -z $1 ];then
+    echo -e &quot;\e[32m用法: arthas.sh [容器名|容器ID] [用户名(可选，默认hcs，必须和启动tomcat的用户一致)]\e[0m&quot;
+        exit 0
+fi
+
+if [ -z $2 ];then
+    $user=hcs
+else
+    $user=$2
+fi
+docker exec -it -u $user $1 /opt/jdk/jdk1.8.0_381/bin/java -jar /opt/arthas/arthas-boot.jar
+</code></pre>
+<h1 id="2-watch"><a href="#2-watch" class="headerlink" title="2. watch"></a>2. watch</h1><h2 id="2-1-基本使用"><a href="#2-1-基本使用" class="headerlink" title="2.1 基本使用"></a>2.1 基本使用</h2><p>例如有一个Encoder的encrypt方法我们想要观察，但是由于每次请求这个方法都会被调用很多次，如果不加限制，每次会爆出很多不相干的信息。</p>
+<p>watch提供了一个condition-express选项来帮助我们过滤输出：</p>
+<pre><code class="sh">watch xxx.Encoder encrypt &#123;returnObj&#125; &#39;params[0]==&quot;P@ssw0rd&quot;&#39;
+</code></pre>
+<p>上面这条指令则是让arthas在第一个参数是<code>P@ssw0rd</code>的时候输出调用的返回值</p>
+<h2 id="2-2-观察异常抛出"><a href="#2-2-观察异常抛出" class="headerlink" title="2.2 观察异常抛出"></a>2.2 观察异常抛出</h2><p>有些时候，代码抛出了异常，但是又被另外一个异常包了一层抛出去了，例如<code>throw new RuntimeException(e)</code>，甚至有的时候<br>没有被抛出：<code>log.error(e.getMessage())</code>，导致我们不能看到我们想要的调用栈。</p>
+<p>而watch也提供了观察异常抛出的功能。假如有一个Encoder的encrypt方法抛出了一个ExceptionA，但是没有打印栈信息，我们可以用<br>如下指令：</p>
+<pre><code class="sh">watch xxx.Encoder encrypt &#123;throwExp&#125; -e -x 2
+</code></pre>
+<p><code>-e</code>表示抛出异常才触发。<br><code>-x</code>表示输出属性的遍历深度，这个是啥意思呢，例如-x的值为1的时候，watch输出的结果可能就只是对象的toString，而-x的值为2的时候，watch也会输出这个对象里面属性的toString，如果等于3，则是对象里面的属性的属性的toString…</p>
+<hr>
+<p>随缘更新。。</p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/09/04/arthas/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post post-partial-show">
     <a href="/2023/09/04/docker-launch/">
         <h2 class="post-title">Docker常用启动参数</h2>
     </a>
@@ -237,7 +327,7 @@
 <h1 id="oracel"><a href="#oracel" class="headerlink" title="oracel"></a>oracel</h1><pre><code class="shell">docker run -d --name oracle-db -p 1521:1521 --privileged -e ORACLE_PWD=123456 -e ORACLE_CHARACTERSET=utf8mb4 -v /opt/oracle/oradata container-registry.oracle.com/database/free:latest
 </code></pre>
 <p><a target="_blank" rel="noopener" href="https://container-registry.oracle.com/ords/f?p=113:4:13054629146525:::4:P4_REPOSITORY,AI_REPOSITORY,AI_REPOSITORY_NAME,P4_REPOSITORY_NAME,P4_EULA_ID,P4_BUSINESS_AREA_ID:1863,1863,Oracle%20Database%20Free,Oracle%20Database%20Free,1,0&cs=3AJX-e6QGdNtweUNwoM_S6Bx1QBnHxTQChj06uKkm5-wObbTXatpBsvWpkNOZlJJdiGb7W-BEXdATDDaCQn1gOw">文档</a></p>
-<h1 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h1><pre><code class="shell">docker run -d --name redis-node-1 --net host --privileged=true -v /data/redis/share/redis-node-1:/data redis --cluster-enabled yes --appendonly yes --port 6381
+<h1 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h1><pre><code class="shell">docker run -d --name redis --net host --privileged=true -v /data/redis/share/redis-node-1:/data redis --requirepass 123456 --appendonly yes --port 6381
 </code></pre>
 
             
@@ -248,6 +338,153 @@
         
     </div>
     <a href="/2023/09/04/docker-launch/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post post-partial-show">
+    <a href="/2023/09/04/mysql_to_opengauss/">
+        <h2 class="post-title">MySQL迁移到高斯数据库</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="category">
+            <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%81%E7%A7%BB/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                数据库迁移
+            </a>
+        </span>
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/9/4
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <h1 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h1><p>公司要求项目去适配高斯数据库，看了一下，高斯数据库就可以当做postgresql用，有啥问题把高斯换成postgresql来查就行。<br>其实整个项目没有太大的变动，只是几个函数需要改一下，如果用mybatis就更简单了：</p>
+<pre><code class="java">@Bean
+public VendorDatabaseIdProvider vendorDatabaseIdProvider() &#123;
+    VendorDatabaseIdProvider vendorDatabaseIdProvider = new VendorDatabaseIdProvider();
+    Properties properties = new Properties();
+    properties.put(&quot;MySQL&quot;, &quot;mysql&quot;);
+    properties.put(&quot;Oracle&quot;, &quot;oracle&quot;);
+    properties.put(&quot;PostgreSQL&quot;, &quot;pgsql&quot;);
+    properties.put(&quot;DM DBMS&quot;, &quot;dm&quot;);
+    vendorDatabaseIdProvider.setProperties(properties);
+    return vendorDatabaseIdProvider;
+&#125;
+
+@Bean
+public SqlSessionFactoryBean sqlSessionFactoryBean(@Qualifier(&quot;dataSource&quot;) DataSource dataSource) throws Exception &#123;
+    SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
+    factoryBean.setDataSource(dataSource);
+    factoryBean.setDatabaseIdProvider(databaseIdProvider());
+    factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(mapperLocations));
+    return factoryBean;
+&#125;
+</code></pre>
+<p>添加上面配置后，碰到不兼容的函数可以这样处理：</p>
+<pre><code class="xml">&amp;lt;select id=&quot;maxid&quot; databaseId=&quot;pgsql&quot; resultType=&quot;int&quot;&amp;gt;
+    select another_max(power_id) from tb_xx
+&amp;lt;/select&amp;gt;
+&amp;lt;!-- 给一个默认的 --&amp;gt;
+&amp;lt;select id=&quot;maxid&quot; resultType=&quot;int&quot;&amp;gt;
+    select max(power_id) from tb_xx
+&amp;lt;/select&amp;gt;
+</code></pre>
+<p>这样idea会爆红，可能看着有点不舒服。</p>
+<p>也可以考虑这样写：</p>
+<pre><code class="xml">&amp;lt;choose&amp;gt;
+    &amp;lt;when test=&quot;_databaseId == &#39;oracle&#39;&quot;&amp;gt;
+        xxx
+    &amp;lt;/when&amp;gt;
+    &amp;lt;when test=&quot;_databaseId == &#39;dm&#39;&quot;&amp;gt;
+        xxx
+    &amp;lt;/when&amp;gt;
+    &amp;lt;when test=&quot;_databaseId == &#39;mysql&#39;&quot;&amp;gt;
+        xxx
+    &amp;lt;/when&amp;gt;
+    &amp;lt;when test=&quot;_databaseId == &#39;informix&#39; or _databaseId == &#39;gbase8s&#39;&quot;&amp;gt;
+        xxx
+    &amp;lt;/when&amp;gt;
+    &amp;lt;otherwise&amp;gt;
+        xxx
+    &amp;lt;/otherwise&amp;gt;
+&amp;lt;/choose&amp;gt;
+</code></pre>
+<p>两种都可以，如果太复杂了建议用第一种。</p>
+<hr>
+<p>本来到这，已经完事大吉了，就去mapper里面去检查一下有没有哪个函数是高斯没有的，然后改一下就行。</p>
+<p>结果，万万没想到，项目里面有拿StringBuilder搞SQL拼串的代码，结果写的全是坑，这玩意狠狠折磨了我好几个星期！</p>
+<h1 id="2-别名问题"><a href="#2-别名问题" class="headerlink" title="2. 别名问题"></a>2. 别名问题</h1><pre><code class="sql">SELECT id AS userId FROM user
+</code></pre>
+<p>上面这个SQL很简单，就是查用户id，然后起个别名叫<code>userId</code>，乍一看好像没什么，下面我放个图，大家来找不同：</p>
+<p><img lazy="https://xds.asia/public/2023-9/Snipaste_2023-09-26_10-45-53.webp" alt="找不同"></p>
+<p>发现了吗？仔细看一下userId，有没有发现查出来全部变成小写了？</p>
+<p>在我们项目代码里，直接从结果集里面拿userId，结果拿不到爆空指针！</p>
+<p>原本我以为是配置问题，把大小写搞得不敏感了，结果去网上搜了一下，结果只有表名能修改大小写敏感。</p>
+<p>所以要怎么改呢，其实只需要在别名的左右加上双引号就行了：</p>
+<pre><code class="sql">SELECT id AS &quot;userId&quot; FROM user
+</code></pre>
+<p>这个操作同样兼容mysql。</p>
+<h1 id="3-COUNT"><a href="#3-COUNT" class="headerlink" title="3. COUNT(*)"></a>3. COUNT(*)</h1><pre><code class="sql">SELECT COUNT(*) FROM userId
+</code></pre>
+<p>又是一个非常简单的SQL，然后咱们又来找不同：</p>
+<p>高斯的结果：</p>
+<p><img lazy="https://xds.asia/public/2023-9/gs-count.webp" alt="gs-count"></p>
+<p>mysql的结果：</p>
+<p><img lazy="https://xds.asia/public/2023-9/mysql-count.webp" alt="mysql-count"></p>
+<p>相信一眼就能看出来，mysql拿需要用<code>COUNT(*)</code>，而高斯则需要用<code>count</code>拿。</p>
+<p>这里最好的解决办法就只有取别名了，全部都叫同一个就行了。</p>
+<h1 id="不兼容的函数-语法"><a href="#不兼容的函数-语法" class="headerlink" title="不兼容的函数&#x2F;语法"></a>不兼容的函数&#x2F;语法</h1><table>
+<thead>
+<tr>
+<th align="center">MySql函数名</th>
+<th align="center">高斯函数名</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">LIMIT offset, size</td>
+<td align="center">LIMIT size OFFSET offset</td>
+<td align="center">高斯不支持mysql的语法，Mysql支持高斯的语法，更换时注意offset和size的位置需要交换</td>
+</tr>
+<tr>
+<td align="center">group_concat(col)</td>
+<td align="center">array_to_string(array_agg(col), ‘,’)</td>
+<td align="center">group_concat</td>
+</tr>
+<tr>
+<td align="center">date_format(col, ‘%Y-%m-%d’)</td>
+<td align="center">to_char(col, ‘yyyy-mm-dd’)</td>
+<td align="center">日期转字符串</td>
+</tr>
+<tr>
+<td align="center">delete from tb1, tb2</td>
+<td align="center">不兼容，推荐使用子查询</td>
+<td align="center">mysql 删除时选择两张表，高斯不支持</td>
+</tr>
+<tr>
+<td align="center">IFNULL(xx, fallback)</td>
+<td align="center">COALESCE(xx, fallback)</td>
+<td align="center">当列为空时使用默认值</td>
+</tr>
+</tbody></table>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/09/04/mysql_to_opengauss/" class="go-post">阅读全文</a>
 </div>
 
 <div class="post post-partial-show">
@@ -351,8 +588,8 @@ public class EncryptedHttp11Protocol extends Http11NioProtocol &#123;
 <p>我们只需要找到一个方法在配置ssl前修改配置，提供密码即可。</p>
 <p>你别说，还真被我找到了，在启动类添加下面的代码：</p>
 <pre><code class="java">@Bean
-public WebServerFactoryCustomizer&lt;UndertowServletWebServerFactory&gt; webServerFactoryCustomizer() &#123;
-    return factory -&gt; &#123;
+public WebServerFactoryCustomizer&amp;lt;UndertowServletWebServerFactory&amp;gt; webServerFactoryCustomizer() &#123;
+    return factory -&amp;gt; &#123;
         Ssl ssl = factory.getSsl();
         if (ssl == null || !ssl.isEnabled()) &#123;
             return;
@@ -382,7 +619,7 @@ java.io.IOException: parseAlgParameters failed: ObjectIdentifier() -- data isn&#
         at sun.security.tools.keytool.Main.run(Main.java:366)
         at sun.security.tools.keytool.Main.main(Main.java:359)
 Caused by: java.io.IOException: ObjectIdentifier() -- data isn&#39;t an object ID (tag = 48)
-        at sun.security.util.ObjectIdentifier.&lt;init&gt;(ObjectIdentifier.java:257)
+        at sun.security.util.ObjectIdentifier.&amp;lt;init&amp;gt;(ObjectIdentifier.java:257)
         at sun.security.util.DerInputStream.getOID(DerInputStream.java:314)
         at com.sun.crypto.provider.PBES2Parameters.engineInit(PBES2Parameters.java:267)
         at java.security.AlgorithmParameters.init(AlgorithmParameters.java:293)
@@ -423,7 +660,7 @@ Caused by: java.io.IOException: ObjectIdentifier() -- data isn&#39;t an object I
 <p>直接下载安装包即可，下载完成后不需要配置环境变量之类的，SVN也不需要你去命令行里去敲哪些什么指令，它自己有很丰富的图形客户端，这点是比GIT好一点点的。</p>
 <p>直接对着任意地方右键，如果出现<code>TortoiseSVN</code>的选项，就说明安装成功了（对着桌面按是没有的，需要进随便一个文件夹）。</p>
 <h1 id="2-创建仓库"><a href="#2-创建仓库" class="headerlink" title="2. 创建仓库"></a>2. 创建仓库</h1><p>SVN不支持离线操作，也就是说你想要创建一个仓库，你必须先去服务器支棱一个起来，这里我们直接用码云（<a target="_blank" rel="noopener" href="https://gitee.com/">工作台 - Gitee.com</a>）就好了。</p>
-<p>随便创建一个项目，点击管理 -&gt; 功能设置 -&gt; 启用SVN访问。</p>
+<p>随便创建一个项目，点击管理 -&amp;gt; 功能设置 -&amp;gt; 启用SVN访问。</p>
 <p>之后克隆项目，记得要选SVN的协议：</p>
 <p><img lazy="https://xds.asia/public/svn/2023-4-4-f7e03d78-69bd-4d0e-99dd-7f795e9bb813.webp" alt="克隆地址"></p>
 <p>之后进入任意文件夹，鼠标右键，点击<code>Checkout</code>，之后会弹出来这个：</p>
@@ -496,7 +733,7 @@ hello world
 hello world
 hello world
 
-&lt;&lt;&lt;&lt;&lt;&lt;&lt; .mine
+&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt; .mine
 hello world
 
 
@@ -522,7 +759,7 @@ hello world
 3
 12
 3
-123312312&gt;&gt;&gt;&gt;&gt;&gt;&gt; .r4
+123312312&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt; .r4
 </code></pre>
 <p>这特么谁看得懂，别急，还记得之前我说过SVN有丰富的图形客户端吗？这里就还真有解决冲突用的玩意：</p>
 <p><img lazy="https://xds.asia/public/svn/2023-4-4-bd001ea3-fca1-4b2d-9950-64f0e52cc430.webp" alt="Edit conflicts"></p>
@@ -569,245 +806,6 @@ hello world
         
     </div>
     <a href="/2023/04/20/docker/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post post-partial-show">
-    <a href="/2023/04/10/netty-interview/">
-        <h2 class="post-title">Netty面试题</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2023/4/10
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <h1 id="1-为什么要用Netty"><a href="#1-为什么要用Netty" class="headerlink" title="1. 为什么要用Netty"></a>1. 为什么要用Netty</h1><p>Netty是一个基于Java NIO封装的高性能网络通信框架。它主要有以下优势：</p>
-<ol>
-<li>Netty提供了比NIO更简单的API<ul>
-<li>很容易地实现Reactor模型</li>
-</ul>
-</li>
-<li>Netty在NIO的基础上做出了很多优化<ul>
-<li>内存池</li>
-<li>零拷贝</li>
-</ul>
-</li>
-<li>Netty内置了多种通信协议</li>
-</ol>
-<p>用官方的总结就是：<strong>Netty 成功地找到了一种在不妥协可维护性和性能的情况下实现易于开发，性能，稳定性和灵活性的方法。</strong></p>
-<h1 id="2-Netty零拷贝"><a href="#2-Netty零拷贝" class="headerlink" title="2. Netty零拷贝"></a>2. Netty零拷贝</h1><p>Netty零拷贝主要在五个方面：</p>
-<ol>
-<li>Netty默认情况下使用直接内存，避免了从JVM堆内存拷贝到直接内存这一次拷贝，而是直接从直接使用直接内存进行Socket读写</li>
-<li>Netty的文件传输调用了<code>FileRegion</code>包装的<code>transferTo</code>方法，可以直接将文件从缓冲区发送到目标Channel</li>
-<li>Netty提供了<code>CompositeByteBuf</code>类，可以将多个ByteBuf合并为一个逻辑上的ByteBuf，避免了多个ByteBuf的拷贝。</li>
-<li>通过<code>ByteBuf.wrap</code>方法，可以将byte[]数组、ByteBuffer包装成一个ByteBuf，从而避免了拷贝</li>
-<li><code>ByteBuf</code>支持slice操作，可以将ByteBuf分解为多个共享同一存储区域的ByteBuf，避免了内存的拷贝</li>
-</ol>
-<h1 id="3-Netty内存管理"><a href="#3-Netty内存管理" class="headerlink" title="3. Netty内存管理"></a>3. Netty内存管理</h1><p>为了减少频繁向操作系统申请内存的情况，Netty会一次性申请一块较大的内存(由ChunkSize决定，默认为16M)，这块内存被称为<code>PoolChunk</code>。</p>
-<p>而在一个<code>Chunk</code>下，又分为了一个一个页，叫做<code>Page</code>，默认为8K，即默认情况下一个Chunk有2048个页。</p>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/422289486">超详细图文详解神秘的 Netty 高性能内存管理 - 知乎 (zhihu.com)</a></p>
-<h2 id="3-1-PoolChunk如何管理Page"><a href="#3-1-PoolChunk如何管理Page" class="headerlink" title="3.1 PoolChunk如何管理Page"></a>3.1 PoolChunk如何管理Page</h2><p>PoolChunk通过一个完全二叉树来管理Page，这颗二叉树的深度为12(2^11 &#x3D; 2048)。</p>
-<p>PoolChunk会维护一个<code>memeoryMap</code>数组，这个数组对应着每个节点，它的值代表这个节点之下的第几层还存在未分配的节点。</p>
-<ul>
-<li>比如说第9层的<code>memeoryMap</code>值为9，代表这个节点下面的子节点都未被分配</li>
-<li>若第9层的<code>memeoryMap</code>为10，代表它本身不可被分配，但第10层有子节点可以被分配</li>
-<li>若第9层的<code>memeoryMap</code>为12(树的高度)，代表当前节点下的所有子节点都不可分配</li>
-</ul>
-<p>那么我们怎么分配呢？</p>
-<p>比如我们要15KB的空间，这里会先向上取8的整数，也就是16K，也就是2^1 * 8，拿到指数1，通过depth - 1 &#x3D; 12 - 1得到11，那么我们只需要去找<code>memeoryMap</code>为11的节点即可。在分配后，父节点的<code>memeoryMap</code>等于两个子节点的最小值。</p>
-<h2 id="3-2-Page的管理"><a href="#3-2-Page的管理" class="headerlink" title="3.2 Page的管理"></a>3.2 Page的管理</h2><p>一个Page有8K，一般我们的应用程序是用不了这么多的，因此每个Page下会再次分隔。但这次分隔并不是以完全二叉树的形式，因为太占空间了，而是将这8K划分为等长的n份，一般会由<code>PoolSubpage</code>管理，一般分为两类：</p>
-<ul>
-<li>tiny：用于分配小于512字节的内存，一般大小为16B，32B，…，496B，每次增长为16的倍数，共32个。</li>
-<li>small：用于分配大于等于512字节的内存，一般大小为512B、1K、2K，4K。</li>
-</ul>
-<p>对于每个块，会有一个bitMap去判断是否使用，可以理解为Java中的<code>BitSet</code></p>
-<h2 id="3-3-Chunk的管理"><a href="#3-3-Chunk的管理" class="headerlink" title="3.3 Chunk的管理"></a>3.3 Chunk的管理</h2><p>每个PoolChunk通过<code>PoolArena</code>类来管理，这些Chunk被封装在<code>PoolChunkList</code>类中，这是一个双向链表。</p>
-<p><code>PoolArena</code>有6个<code>PoolChunkList</code>：</p>
-<ul>
-<li>qInit：存储内存利用率 0-25% 的 chunk</li>
-<li>q000：存储内存利用率 1-50% 的 chunk</li>
-<li>q025：存储内存利用率 25-75% 的 chunk</li>
-<li>q050：存储内存利用率 50-100% 的 chunk</li>
-<li>q075：存储内存利用率 75-100%的 chunk</li>
-<li>q100：存储内存利用率 100%的 chunk</li>
-</ul>
-<p><code>PoolArena</code>分配内存的顺序是：q050、q025、q000、qInit、q075</p>
-<p>这样分配的好处是可以提高内存的利用率，以及减少链表的遍历次数。</p>
-<h2 id="3-4-PoolThreadCache"><a href="#3-4-PoolThreadCache" class="headerlink" title="3.4 PoolThreadCache"></a>3.4 PoolThreadCache</h2><p>PoolThreadCache利用了ThreadLocal，每次线程在申请内存时都会优先从这里面获取。</p>
-<ul>
-<li>在释放已分配的内存块时，不放回到 Chunk 中，而是缓存到 ThreadCache 中</li>
-<li>在分配内存块时，优先从 ThreadCache 获取。若无法获取到，再从 Chunk 中分配</li>
-<li>通过这样的方式，既能提高分配效率，又尽可能的避免多线程的同步和竞争</li>
-</ul>
-<h1 id="4-直接内存回收原理"><a href="#4-直接内存回收原理" class="headerlink" title="4. 直接内存回收原理"></a>4. 直接内存回收原理</h1><p>每个ByteBuf都实现了一个<code>ReferenceCounted</code>接口，netty也是直接采用了引用计数法来进行内存回收。</p>
-<h1 id="5-怎么判断ByteBuffer是否处于写模式或读模式"><a href="#5-怎么判断ByteBuffer是否处于写模式或读模式" class="headerlink" title="5. 怎么判断ByteBuffer是否处于写模式或读模式"></a>5. 怎么判断ByteBuffer是否处于写模式或读模式</h1><p><code>ByteBuffer</code>有三个重要参数：<code>position</code>、<code>limit</code>、<code>capacity</code>，而平常我们说的读模式或写模式只是用来方便我们理解的东西，真正在ByteBuffer的实现里并不存在什么读模式和写模式，也就是说你在”读模式下”仍然可以写。</p>
-<p>例如下面的代码：</p>
-<pre><code class="java">ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
-
-byte[] hello = &quot;hello&quot;.getBytes(StandardCharsets.UTF_8);
-System.out.println(Arrays.toString(hello));
-// &quot;write mode&quot;
-byteBuffer.put(hello);
-// &quot;read mode&quot;
-byteBuffer.flip();
-// write again
-byteBuffer.put(&quot;h&quot;.getBytes(StandardCharsets.UTF_8));
-
-while (byteBuffer.hasRemaining()) &#123;
-    System.out.print(byteBuffer.get() + &quot; &quot;);
-&#125;
-</code></pre>
-<p><font color=red>在”读模式”下去写的时候，并不会报错</font>，由于切换到了”读模式”，此时<code>position = 0，limit = 写模式的offset</code>，因此在写的时候，会从索引0处开始写，写完后，<code>position</code>变为1，我们再读的话也就只能从索引1读到4了。</p>
-<p>如果硬要判断是不是”读模式”或”写模式”，可以根据<code>position</code>和<code>limit</code>的值进行判断：</p>
-<ul>
-<li>如<code>limit = capacity</code>，表示当前<strong>可能</strong>为写模式</li>
-</ul>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/2023/04/10/netty-interview/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post post-partial-show">
-    <a href="/2023/04/02/mysql-interview/">
-        <h2 class="post-title">MySql面试</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2023/4/2
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <h1 id="1-B树和B-树之间的区别"><a href="#1-B树和B-树之间的区别" class="headerlink" title="1. B树和B+树之间的区别"></a>1. B树和B+树之间的区别</h1><blockquote>
-<p>B树有些博客上会写成B-树，部分博客甚至读成了B减树，其实这个减号只是一个连接符，没有任何意义</p>
-</blockquote>
-<p><a target="_blank" rel="noopener" href="https://www.cs.usfca.edu/~galles/visualization/BTree.html">B-Tree Visualization (usfca.edu)</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.cs.usfca.edu/~galles/visualization/BPlusTree.html">B+ Tree Visualization (usfca.edu)</a></p>
-<p>B树和B+树的区别：</p>
-<ul>
-<li>B+树只会在叶子节点存储数据，而B树每个节点上都会有数据</li>
-<li>B+树每个叶子节点之间有一个指针乡相连</li>
-</ul>
-<h1 id="2-高度为3的B-树能存多少条数据"><a href="#2-高度为3的B-树能存多少条数据" class="headerlink" title="2. 高度为3的B+树能存多少条数据"></a>2. 高度为3的B+树能存多少条数据</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6974225353371975693">MySQL系列（4）— InnoDB数据页结构 - 掘金 (juejin.cn)</a></p>
-<p>在InnoDB中，索引默认使用的数据结构为B+树，而B+树里的每个节点都是一个页，默认的页大小为<code>16KB</code>。</p>
-<p><img lazy="https://xds.asia/public/post/2023-3-0-fed73c7c-b6fb-40e4-9b27-1a95fccd77c8.webp" alt="page"></p>
-<h1 id="3-简单说一下InnoDB事务实现原理"><a href="#3-简单说一下InnoDB事务实现原理" class="headerlink" title="3. 简单说一下InnoDB事务实现原理"></a>3. 简单说一下InnoDB事务实现原理</h1><p>事务ACID：</p>
-<table>
-<thead>
-<tr>
-<th>名称</th>
-<th>别名</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>Atomicity</strong></td>
-<td>原子性</td>
-<td>原子性是指事务是一个不可分割的工作单位，事务中的操作要么都发生，要么都不发生</td>
-</tr>
-<tr>
-<td><strong>Consistency</strong></td>
-<td>一致性</td>
-<td>事务前后数据的完整性必须保持一致</td>
-</tr>
-<tr>
-<td><strong>Isolation</strong></td>
-<td>隔离性</td>
-<td>事务的隔离性是多个用户并发访问数据库时，数据库为每一个用户开启的事务，不能被其他事务的操作数据所干扰，多个并发事务之间要相互隔离</td>
-</tr>
-<tr>
-<td><strong>Durability</strong></td>
-<td>持久性</td>
-<td>持久性是指一个事务一旦被提交，它对数据库中数据的改变就是永久性的，接下来即使数据库发生故障也不应该对其有任何影响</td>
-</tr>
-</tbody></table>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/48327345">一文了解InnoDB事务实现原理 - 知乎 (zhihu.com)</a></p>
-<p>上面那个比较深入，下面这个比较好理解一些：</p>
-<p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7012937835967692808">图解InnoDB事务实现原理｜Redo Log&amp;Undo Log - 掘金 (juejin.cn)</a></p>
-<h1 id="4-MySql的三大日志是哪些"><a href="#4-MySql的三大日志是哪些" class="headerlink" title="4.MySql的三大日志是哪些"></a>4.MySql的三大日志是哪些</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7090530790156533773">MySQL三大日志(binlog,redolog,undolog)详解 - 掘金 (juejin.cn)</a></p>
-<p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903842505555981">聊聊MVCC和Next-key Locks - 掘金 (juejin.cn)</a></p>
-<h1 id="5-MySql当前读和快照度"><a href="#5-MySql当前读和快照度" class="headerlink" title="5. MySql当前读和快照度"></a>5. MySql当前读和快照度</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7055073479866974238">mysql快照读原理实现 - 掘金 (juejin.cn)</a></p>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/166152616">MySQL 的可重复读到底是怎么实现的？图解 ReadView 机制 - 知乎 (zhihu.com)</a></p>
-<p>这里其实有个问题，如果我只是单独的一条查询语句，没有开启事务，那么怎么去快照读呢？</p>
-<p>这个我自己查了一下，众所周知，MySql里有一个autocommit属性，对于单条SQL，这个值一定是true，那么是不是说明我们每条SQL都会被认作是一个事务呢？</p>
-<p>然后我在官方文档里查了一下：</p>
-<p><img lazy="https://xds.asia/public/interview/2023-2-0-bd1f976d-ac67-49a3-979b-1b9cd4fa2c6d.webp" alt="每条SQL都是一个单独的事务"></p>
-<p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/innodb-autocommit-commit-rollback.html">MySQL :: MySQL 5.7 Reference Manual :: 14.7.2.2 autocommit, Commit, and Rollback</a></p>
-<p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/innodb-autocommit-commit-rollback.html">MySQL :: MySQL 8.0 Reference Manual :: 15.7.2.2 autocommit, Commit, and Rollback</a></p>
-<p>不管是8.0还是5.7，都是这样写的，那么就可以说的通了。每次执行单条SQL都会拿到一个事务id，然后再去进行快照读。</p>
-<p>那么什么是当前读呢，使用下面的sql语句就是当前读：</p>
-<pre><code class="sql"># 加共享锁
-SELECT ... LOCK IN SHARE MODE 
-# 加排它锁
-SELECT ... FROM UPDATE
-</code></pre>
-<p>这两条语句的原理就是给对应的行加上<font color=red>共享锁(读锁)或排它锁(写锁)</font>，当有事务进行增删改时也会加排它锁，对于共享锁，允许多个事务持有(即允许多读)，对于排它锁，则只允许一个事务持有(即只能一个人写，且除了自己其它人都不能读)。</p>
-<p>在排它锁和共享锁下读的的数据就是当前读，这份数据永远是最新的(此时若有其它事务想要修改相关的行，都会被阻塞)。其它状况则就是快照读了，通过MVCC创建ReadView进行数据的读取。</p>
-<h1 id="6-MySql的MVCC"><a href="#6-MySql的MVCC" class="headerlink" title="6. MySql的MVCC"></a>6. MySql的MVCC</h1><p>MVCC(Multiversion Concurrency Control)多版本并发控制。</p>
-<p>首先在在MVCC下，每个表都会多出几个隐藏的列，分别为隐藏主键(row_id)、事务id(trx_id)、回滚指针(roll_pointer)。</p>
-<p>MVCC还有两个重要的组成：undo log(回滚日志)、ReadView。</p>
-<p>更详细的就不说了，因为上面的链接里面都有，主要是下面这四个关系：</p>
-<p>（1）当【版本链中记录的 trx_id 等于当前事务id（trx_id &#x3D; creator_trx_id）】时，说明版本链中的这个版本是当前事务修改的，所以该快照记录对当前事务可见。</p>
-<p>（2）当【版本链中记录的 trx_id 小于活跃事务的最小id（trx_id &lt; min_trx_id）】时，说明版本链中的这条记录已经提交了，所以该快照记录对当前事务可见。</p>
-<p>（3）当【版本链中记录的 trx_id 大于下一个要分配的事务id（trx_id &gt; max_trx_id）】时，该快照记录对当前事务不可见。</p>
-<p>（4）当【版本链中记录的 trx_id 大于等于最小活跃事务id】且【版本链中记录的trx_id小于下一个要分配的事务id】（min_trx_id&lt;&#x3D; trx_id &lt; max_trx_id）时，如果版本链中记录的 trx_id 在活跃事务id列表 m_ids 中，说明生成 ReadView 时，修改记录的事务还没提交，所以该快照记录对当前事务不可见；否则该快照记录对当前事务可见。</p>
-<h2 id="6-1-RepeatableRead是怎么实现的"><a href="#6-1-RepeatableRead是怎么实现的" class="headerlink" title="6.1 RepeatableRead是怎么实现的"></a>6.1 RepeatableRead是怎么实现的</h2><p>我们都知道，RepeatableRead相比ReadCommited能够避免不可重复读的问题(实际也能够避免幻读，是通过加间隙锁实现的)。</p>
-<p>首先我们来看ReadCommitted，使用mysql执行如下指令(假如我们叫它事务A)</p>
-<pre><code class="sql">set session transaction isolation level read committed;
-begin;
-update test set xid = 2 where id = 1;
-# 等一会再提交
-commit;
-</code></pre>
-<p>然后再开一个mysql执行如下指令(假如我们叫它事务B)：</p>
-<pre><code class="sql">set session transaction isolation level read committed;
-begin;
-select * from test where id = 1;
-# 提交上面那个指令后再执行下面这条
-select * from test where id = 1;
-</code></pre>
-<p>这里就不放图了，大家都知道第二次读取会不一样。</p>
-<p>这回我们再将隔离级别设置为RepeatableRead，并同样执行上面的指令。</p>
-<p>这次执行后，<font color=red>发现两次查询的结果都是一样的</font>，而且在事务A执行更新后且没有提交时，B再去读，<font color=red>并没有发生阻塞，因为在修改数据的时候会加排它锁，在读的时候要么是当前读要么是快照读，</font>如果是当前读，那么读操作会堵塞，说明在B这里是快照读，是创建了ReadView的，通过ReadView有效地避免了不可重复读。</p>
-<p>我们再用同样的方式去验证ReadCommited级别的读，发现同样是快照读，那么凭什么RepeatableRead不会读到新值，而ReadCommited会呢？</p>
-<p>这里我画了一个流程图方便理解：</p>
-<p><img lazy="https://xds.asia/public/interview/2023-2-1-7f41e3a0-6d4e-42e8-b44e-d85eecdbd465.webp" alt="流程图"></p>
-<p><del>图画的可能不太好，不过应该能看懂</del></p>
-<p>网上大部分人讲的都是以ReadCommited级别为例子的，即m_ids里的事务提交后可读，但其实在RepeatableRead隔离级别下是读不了的，只能走undo_log进行回滚。</p>
-<hr>
-<p><font color=red>这里可能有点错误，在ReadCommited下可以读已经提交的事务，所以如果trx_id大于等于mid_id，只需要判断对应的事务是否已经提交(或者trx_id指向自己)就能读</font></p>
-<h1 id="7-RepeatableRead真的不能避免幻读吗"><a href="#7-RepeatableRead真的不能避免幻读吗" class="headerlink" title="7. RepeatableRead真的不能避免幻读吗?"></a>7. RepeatableRead真的不能避免幻读吗?</h1><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_71777195/article/details/126968432">美团三面：一直追问我， MySQL 幻读被彻底解决了吗？_肥肥技术宅的博客-CSDN博客</a></p>
-<h1 id="8-为什么bin-log不能用作崩溃后的恢复"><a href="#8-为什么bin-log不能用作崩溃后的恢复" class="headerlink" title="8. 为什么bin_log不能用作崩溃后的恢复"></a>8. 为什么bin_log不能用作崩溃后的恢复</h1><p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/463438061">mysql 为什么不能用binlog来做数据恢复？ - 知乎 (zhihu.com)</a></p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/2023/04/02/mysql-interview/" class="go-post">阅读全文</a>
 </div>
 
 

@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#Java" style="color: #03a9f4">Java</a>
+                <a href="/2023/03/05/java-source#Java" style="color: #ffa2c4">Java</a>
             </span>
             
         </span>
@@ -213,12 +213,12 @@
 <p>接下来我将根据自己的理解，一步一步阅读HashMap源码(我使用的是jdk11，与java8应该不会有太大差距)。</p>
 <h1 id="1-构造器"><a href="#1-构造器" class="headerlink" title="1. 构造器"></a>1. 构造器</h1><p>HashMap有四个构造器：</p>
 <pre><code class="java">public HashMap(int initialCapacity, float loadFactor) &#123;
-    if (initialCapacity &lt; 0)
+    if (initialCapacity &amp;lt; 0)
         throw new IllegalArgumentException(&quot;Illegal initial capacity: &quot; +
                                            initialCapacity);
-    if (initialCapacity &gt; MAXIMUM_CAPACITY)
+    if (initialCapacity &amp;gt; MAXIMUM_CAPACITY)
         initialCapacity = MAXIMUM_CAPACITY;
-    if (loadFactor &lt;= 0 || Float.isNaN(loadFactor))
+    if (loadFactor &amp;lt;= 0 || Float.isNaN(loadFactor))
         throw new IllegalArgumentException(&quot;Illegal load factor: &quot; +
                                            loadFactor);
     this.loadFactor = loadFactor;
@@ -233,32 +233,32 @@ public HashMap() &#123;
     this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
 &#125;
 
-public HashMap(Map&lt;? extends K, ? extends V&gt; m) &#123;
+public HashMap(Map&amp;lt;? extends K, ? extends V&amp;gt; m) &#123;
     this.loadFactor = DEFAULT_LOAD_FACTOR;
     putMapEntries(m, false);
 &#125;
 </code></pre>
 <p>可以发现其中出现了两个属性：<code>loadFactor(负载因子)</code>和<code>threshold(扩容阈值)</code></p>
 <p>首先需要知道这样一个关系：<code>threshold = loadFactor * capacity</code></p>
-<p>其中<code>capacity</code>为整个Hash表数组长度，当<code>size(插入到HashMap中元素的个数) &gt; threshold</code>时，就会对HashMap进行扩容。</p>
+<p>其中<code>capacity</code>为整个Hash表数组长度，当<code>size(插入到HashMap中元素的个数) &amp;gt; threshold</code>时，就会对HashMap进行扩容。</p>
 <p>可以发现，除了第四个构造器，其它3个其实都没有对Hash表数组进行初始化，只是设置了扩容阈值和负载因子而已。</p>
 <h2 id="1-1-tableSizeFor"><a href="#1-1-tableSizeFor" class="headerlink" title="1.1 tableSizeFor"></a>1.1 tableSizeFor</h2><p>第一个构造器中，在给threshold赋值前，还调用了tableSizeFor方法：</p>
 <pre><code class="java">// java11
 static final int tableSizeFor(int cap) &#123;
-    int n = -1 &gt;&gt;&gt; Integer.numberOfLeadingZeros(cap - 1);
-    return (n &lt; 0) ? 1 : (n &gt;= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+    int n = -1 &amp;gt;&amp;gt;&amp;gt; Integer.numberOfLeadingZeros(cap - 1);
+    return (n &amp;lt; 0) ? 1 : (n &amp;gt;= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
 &#125;
 
 // java8
 static final int tableSizeFor(int cap) &#123;
     int n = cap - 1;
     //移位运算
-    n |= n &gt;&gt;&gt; 1;
-    n |= n &gt;&gt;&gt; 2;
-    n |= n &gt;&gt;&gt; 4;
-    n |= n &gt;&gt;&gt; 8;
-    n |= n &gt;&gt;&gt; 16;
-    return (n &lt; 0) ? 1 : (n &gt;= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+    n |= n &amp;gt;&amp;gt;&amp;gt; 1;
+    n |= n &amp;gt;&amp;gt;&amp;gt; 2;
+    n |= n &amp;gt;&amp;gt;&amp;gt; 4;
+    n |= n &amp;gt;&amp;gt;&amp;gt; 8;
+    n |= n &amp;gt;&amp;gt;&amp;gt; 16;
+    return (n &amp;lt; 0) ? 1 : (n &amp;gt;= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
 &#125;
 </code></pre>
 <p>具体可以看这篇文章：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/xiyixiaodao/p/14483876.html">HashMap之tableSizeFor方法图解 - 希夷小道 - 博客园 (cnblogs.com)</a></p>
@@ -269,15 +269,15 @@ static final int tableSizeFor(int cap) &#123;
 <p>在Java11中，主要通过<code>Integer.numberOfLeadingZeros</code>获取最高位1的左边有几个0，然后再对<code>-1</code>进行无符号位移得到结果：</p>
 <pre><code class="java">public static int numberOfLeadingZeros(int i) &#123;
     // HD, Count leading 0&#39;s
-    if (i &lt;= 0)
+    if (i &amp;lt;= 0)
         return i == 0 ? 32 : 0;
     int n = 31;
         // 这里类似二分搜索
-    if (i &gt;= 1 &lt;&lt; 16) &#123; n -= 16; i &gt;&gt;&gt;= 16; &#125;
-    if (i &gt;= 1 &lt;&lt;  8) &#123; n -=  8; i &gt;&gt;&gt;=  8; &#125;
-    if (i &gt;= 1 &lt;&lt;  4) &#123; n -=  4; i &gt;&gt;&gt;=  4; &#125;
-    if (i &gt;= 1 &lt;&lt;  2) &#123; n -=  2; i &gt;&gt;&gt;=  2; &#125;
-    return n - (i &gt;&gt;&gt; 1);
+    if (i &amp;gt;= 1 &amp;lt;&amp;lt; 16) &#123; n -= 16; i &amp;gt;&amp;gt;&amp;gt;= 16; &#125;
+    if (i &amp;gt;= 1 &amp;lt;&amp;lt;  8) &#123; n -=  8; i &amp;gt;&amp;gt;&amp;gt;=  8; &#125;
+    if (i &amp;gt;= 1 &amp;lt;&amp;lt;  4) &#123; n -=  4; i &amp;gt;&amp;gt;&amp;gt;=  4; &#125;
+    if (i &amp;gt;= 1 &amp;lt;&amp;lt;  2) &#123; n -=  2; i &amp;gt;&amp;gt;&amp;gt;=  2; &#125;
+    return n - (i &amp;gt;&amp;gt;&amp;gt; 1);
 &#125;
 </code></pre>
 <h1 id="2-put"><a href="#2-put" class="headerlink" title="2. put"></a>2. put</h1><p><code>put</code>其实是调用了内部的<code>putVal</code>方法：</p>
@@ -297,7 +297,7 @@ static final int tableSizeFor(int cap) &#123;
  */
 final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                boolean evict) &#123;
-        Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; int n, i;
+        Node&amp;lt;K,V&amp;gt;[] tab; Node&amp;lt;K,V&amp;gt; p; int n, i;
         // 在这里将哈希表赋值给tab
         if ((tab = table) == null || (n = tab.length) == 0)
             // 到这里表示hash表没有初始化，在这里进行扩容
@@ -308,21 +308,21 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
         else &#123;
             // 到这里说明当前位置有节点，p就是那个节点
             // 这里的e代表：若有相同的key，则用变量e暂时保存下来，再根据onlyIfAbsent参数考虑是否替换
-            Node&lt;K,V&gt; e; K k;
+            Node&amp;lt;K,V&amp;gt; e; K k;
             if (p.hash == hash &amp;&amp;
                 ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))
                 // 相同的key，考虑是否替换
                 e = p;
             else if (p instanceof TreeNode)
                 // p是一个树的根节点，把新节点插入到树里，该方法会返回之前的旧值，如果没有则返回null
-                e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(this, tab, hash, key, value);
+                e = ((TreeNode&amp;lt;K,V&amp;gt;)p).putTreeVal(this, tab, hash, key, value);
             else &#123;
                 // p链表头部，遍历到尾部后进行插入
                 for (int binCount = 0; ; ++binCount) &#123;
                     if ((e = p.next) == null) &#123;
                         p.next = newNode(hash, key, value, null);
                         // **如果链表节点数量超过TREEIFY_THRESHOLD，则将链表进行树化，默认值为8**
-                        if (binCount &gt;= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                        if (binCount &amp;gt;= TREEIFY_THRESHOLD - 1) // -1 for 1st
                             treeifyBin(tab, hash);
                         break;
                     &#125;
@@ -345,15 +345,15 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
         &#125;
         ++modCount;
         // 在这里判断总节点数是否超过阈值，若超过则进行扩容
-        if (++size &gt; threshold)
+        if (++size &amp;gt; threshold)
             resize();
         afterNodeInsertion(evict);
         return null;
 &#125;
 </code></pre>
-<h1 id="3-resize"><a href="#3-resize" class="headerlink" title="3. resize"></a>3. resize</h1><pre><code class="java">final Node&lt;K,V&gt;[] resize() &#123;
+<h1 id="3-resize"><a href="#3-resize" class="headerlink" title="3. resize"></a>3. resize</h1><pre><code class="java">final Node&amp;lt;K,V&amp;gt;[] resize() &#123;
     // 首先保存好旧哈希表
-    Node&lt;K,V&gt;[] oldTab = table;
+    Node&amp;lt;K,V&amp;gt;[] oldTab = table;
     // 旧的容量
     int oldCap = (oldTab == null) ? 0 : oldTab.length;
     // 旧的阈值
@@ -361,19 +361,19 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
     // 新的容量和阈值
     int newCap, newThr = 0;
     // 如果旧容量大于0，说明已经初始化过了
-    if (oldCap &gt; 0) &#123;
+    if (oldCap &amp;gt; 0) &#123;
         // 如果超过容量最大值，则不再进行扩容，即将扩容阈值设置为Int最大值
-        if (oldCap &gt;= MAXIMUM_CAPACITY) &#123;
+        if (oldCap &amp;gt;= MAXIMUM_CAPACITY) &#123;
             threshold = Integer.MAX_VALUE;
             return oldTab;
         &#125;
         // 这里将容量乘2，至于后面那个判断意义不是很明确，因为后面也有关于newThr的判断
-        else if ((newCap = oldCap &lt;&lt; 1) &lt; MAXIMUM_CAPACITY &amp;&amp;
-                 oldCap &gt;= DEFAULT_INITIAL_CAPACITY)
-            newThr = oldThr &lt;&lt; 1; // double threshold
+        else if ((newCap = oldCap &amp;lt;&amp;lt; 1) &amp;lt; MAXIMUM_CAPACITY &amp;&amp;
+                 oldCap &amp;gt;= DEFAULT_INITIAL_CAPACITY)
+            newThr = oldThr &amp;lt;&amp;lt; 1; // double threshold
     &#125;
     // 因为之前判断过oldCap是否大于0，所以到这里oldCap一定等于0，因此后面的判断都是去初始化哈希表的
-    else if (oldThr &gt; 0) // initial capacity was placed in threshold
+    else if (oldThr &amp;gt; 0) // initial capacity was placed in threshold
         newCap = oldThr;
     else &#123;               // zero initial threshold signifies using defaults
         // 旧阈值为0，标示使用了空参构造器，并且还没有初始化
@@ -384,17 +384,17 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
         // 设置扩容阈值
         float ft = (float)newCap * loadFactor;
         // 防止超出上限
-        newThr = (newCap &lt; MAXIMUM_CAPACITY &amp;&amp; ft &lt; (float)MAXIMUM_CAPACITY ?
+        newThr = (newCap &amp;lt; MAXIMUM_CAPACITY &amp;&amp; ft &amp;lt; (float)MAXIMUM_CAPACITY ?
                   (int)ft : Integer.MAX_VALUE);
     &#125;
     threshold = newThr;
     @SuppressWarnings(&#123;&quot;rawtypes&quot;,&quot;unchecked&quot;&#125;)
-    Node&lt;K,V&gt;[] newTab = (Node&lt;K,V&gt;[])new Node[newCap];
+    Node&amp;lt;K,V&amp;gt;[] newTab = (Node&amp;lt;K,V&amp;gt;[])new Node[newCap];
     table = newTab;
     if (oldTab != null) &#123;
         // 在这里重新计算hash，并将节点放到新的哈希表中
-        for (int j = 0; j &lt; oldCap; ++j) &#123;
-            Node&lt;K,V&gt; e;
+        for (int j = 0; j &amp;lt; oldCap; ++j) &#123;
+            Node&amp;lt;K,V&amp;gt; e;
             if ((e = oldTab[j]) != null) &#123;
                 oldTab[j] = null;
                 // 如果当前节点只有一个，则直接将其移动
@@ -402,14 +402,14 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                     newTab[e.hash &amp; (newCap - 1)] = e;
                 // 如果当前节点为树节点，则重新建树
                 else if (e instanceof TreeNode)
-                    ((TreeNode&lt;K,V&gt;)e).split(this, newTab, j, oldCap);
+                    ((TreeNode&amp;lt;K,V&amp;gt;)e).split(this, newTab, j, oldCap);
                 else &#123; // preserve order
                     // 到这里说明当前节点是有多个节点的链表
                     // 这里lo代表低位，hi代表高位
                     // 因为扩容只是将capacity左移了一位，因此对于一个节点及其子节点，它们最多分散到两个位置
-                    Node&lt;K,V&gt; loHead = null, loTail = null;
-                    Node&lt;K,V&gt; hiHead = null, hiTail = null;
-                    Node&lt;K,V&gt; next;
+                    Node&amp;lt;K,V&amp;gt; loHead = null, loTail = null;
+                    Node&amp;lt;K,V&amp;gt; hiHead = null, hiTail = null;
+                    Node&amp;lt;K,V&amp;gt; next;
                     do &#123;
                         next = e.next;
                         if ((e.hash &amp; oldCap) == 0) &#123;
@@ -459,12 +459,12 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 <pre><code class="java">void transfer(Entry[] newTable) &#123;
     Entry[] src = table;
     int newCapacity = newTable.length;
-    for (int j = 0; j &lt; src.length; j++) &#123;
-        Entry&lt;K,V&gt; e = src[j];
+    for (int j = 0; j &amp;lt; src.length; j++) &#123;
+        Entry&amp;lt;K,V&amp;gt; e = src[j];
         if (e != null) &#123;
             src[j] = null;
             do &#123;
-                Entry&lt;K,V&gt; next = e.next;
+                Entry&amp;lt;K,V&amp;gt; next = e.next;
                 int i = indexFor(e.hash, newCapacity);
                 e.next = newTable[i];
                 newTable[i] = e;
@@ -475,15 +475,15 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 &#125;
 </code></pre>
 <h1 id="4-其它"><a href="#4-其它" class="headerlink" title="4. 其它"></a>4. 其它</h1><h2 id="4-1-treeifyBin"><a href="#4-1-treeifyBin" class="headerlink" title="4.1 treeifyBin"></a>4.1 treeifyBin</h2><p>链表树化的前提是哈希表的容量大于64：</p>
-<pre><code class="java">final void treeifyBin(Node&lt;K,V&gt;[] tab, int hash) &#123;
-    int n, index; Node&lt;K,V&gt; e;
+<pre><code class="java">final void treeifyBin(Node&amp;lt;K,V&amp;gt;[] tab, int hash) &#123;
+    int n, index; Node&amp;lt;K,V&amp;gt; e;
     // 这里有一个判断
-    if (tab == null || (n = tab.length) &lt; MIN_TREEIFY_CAPACITY)
+    if (tab == null || (n = tab.length) &amp;lt; MIN_TREEIFY_CAPACITY)
         resize();
     else if ((e = tab[index = (n - 1) &amp; hash]) != null) &#123;
-        TreeNode&lt;K,V&gt; hd = null, tl = null;
+        TreeNode&amp;lt;K,V&amp;gt; hd = null, tl = null;
         do &#123;
-            TreeNode&lt;K,V&gt; p = replacementTreeNode(e, null);
+            TreeNode&amp;lt;K,V&amp;gt; p = replacementTreeNode(e, null);
             if (tl == null)
                 hd = p;
             else &#123;

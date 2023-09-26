@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#Spring-Cloud" style="color: #00bcd4">SpringCloud</a>
+                <a href="/2023/03/05/java-source#Spring-Cloud" style="color: #00a596">SpringCloud</a>
             </span>
             
         </span>
@@ -254,7 +254,7 @@
     // 获取上一次填充令牌桶的时间
     long oldLastFillTime = lastFilledTime.get();
     // 如果已经被别人改过了，就直接退出
-    if (currentTime &lt;= oldLastFillTime) &#123;
+    if (currentTime &amp;lt;= oldLastFillTime) &#123;
         return;
     &#125;
     // 获取现有的令牌数量
@@ -264,7 +264,7 @@
 
     if (storedTokens.compareAndSet(oldValue, newValue)) &#123;
         long currentValue = storedTokens.addAndGet(0 - passQps);
-        if (currentValue &lt; 0) &#123;
+        if (currentValue &amp;lt; 0) &#123;
             storedTokens.set(0L);
         &#125;
         lastFilledTime.set(currentTime);
@@ -279,11 +279,11 @@ private long coolDownTokens(long currentTime, long passQps) &#123;
 
     // 当令牌的消耗程度远远低于警戒线的时候
     // newValue = (已有令牌数量 + (时间间隔多少毫秒) * 每毫秒产生令牌的数量)
-    if (oldValue &lt; warningToken) &#123;
+    if (oldValue &amp;lt; warningToken) &#123;
         newValue = (long)(oldValue + (currentTime - lastFilledTime.get()) * count / 1000);
-    &#125; else if (oldValue &gt; warningToken) &#123;
+    &#125; else if (oldValue &amp;gt; warningToken) &#123;
         // 到这里，说明还是冷启动阶段
-        if (passQps &lt; (int)count / coldFactor) &#123;
+        if (passQps &amp;lt; (int)count / coldFactor) &#123;
             newValue = (long)(oldValue + (currentTime - lastFilledTime.get()) * count / 1000);
         &#125;
     &#125;

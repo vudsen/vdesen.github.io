@@ -276,7 +276,7 @@
 <li>迭代的时候可以rehash，但是不能进行删除等操作(字典只读)，通过<code>fingerprint</code>字段来判断字典是否发生变动</li>
 </ul>
 <h2 id="3-2-间接遍历"><a href="#3-2-间接遍历" class="headerlink" title="3.2 间接遍历"></a>3.2 间接遍历</h2><p>使用<code>scan</code>命令可以间接遍历，这个命令每次会返回一个下一个需要遍历的索引值：</p>
-<pre><code class="shell">redis 127.0.0.1:6379&gt; scan 0
+<pre><code class="shell">redis 127.0.0.1:6379&amp;gt; scan 0
 1) &quot;17&quot;
 2)  1) &quot;key:12&quot;
     2) &quot;key:8&quot;
@@ -289,7 +289,7 @@
     9) &quot;key:3&quot;
    10) &quot;key:7&quot;
    11) &quot;key:1&quot;
-redis 127.0.0.1:6379&gt; scan 17
+redis 127.0.0.1:6379&amp;gt; scan 17
 1) &quot;0&quot;
 2) 1) &quot;key:5&quot;
    2) &quot;key:18&quot;
@@ -312,9 +312,9 @@ redis 127.0.0.1:6379&gt; scan 17
 </ul>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/ldw201510803006/article/details/124052245">redis scan 命令底层原理（为什么会重复扫描？）_redis scan命令原理_柏油的博客-CSDN博客</a></p>
 <p>这里第一次看可能会有这个疑问，我们打个比方：</p>
-<p>遍历顺序：00 -&gt; 10 -&gt; 01 -&gt; 11</p>
+<p>遍历顺序：00 -&amp;gt; 10 -&amp;gt; 01 -&amp;gt; 11</p>
 <p>若正好遍历到10时扩容完毕了，则新顺序为：</p>
-<p>000 -&gt; 100 -&gt; 010 -&gt; 110 -&gt; 001 -&gt; 101 -&gt; 011 -&gt; 111</p>
+<p>000 -&amp;gt; 100 -&amp;gt; 010 -&amp;gt; 110 -&amp;gt; 001 -&amp;gt; 101 -&amp;gt; 011 -&amp;gt; 111</p>
 <p>此时我们在第三个位置，即010那里。</p>
 <p>这时候可能就有疑问了：<font color=red>100那里不就遍历不到了吗？这不是丢数据了吗？</font></p>
 <p>但这样其实是想多了，我们来看000和100，假如哈希表长度为4时，这两个索引下的元素会落到哪个哈希表下？</p>
@@ -358,17 +358,17 @@ redis 127.0.0.1:6379&gt; scan 17
 <li><p><code>encoding</code>：编码</p>
 <ul>
 <li><p>以string来说，就有三种：<code>int</code> , <code>embstr</code> , <code>raw</code>：</p>
-<pre><code class="shell">127.0.0.1:6379&gt; SET counter 1
+<pre><code class="shell">127.0.0.1:6379&amp;gt; SET counter 1
 OK
-127.0.0.1:6379&gt; OBJECT ENCODING counter
+127.0.0.1:6379&amp;gt; OBJECT ENCODING counter
 &quot;int&quot;
-127.0.0.1:6379&gt; SET name &quot;Tom&quot;
+127.0.0.1:6379&amp;gt; SET name &quot;Tom&quot;
 OK
-127.0.0.1:6379&gt; OBJECT ENCODING name
+127.0.0.1:6379&amp;gt; OBJECT ENCODING name
 &quot;embstr&quot;
-127.0.0.1:6379&gt; SETBIT bits 1 1
+127.0.0.1:6379&amp;gt; SETBIT bits 1 1
 (integer) 0
-127.0.0.1:6379&gt; OBJECT ENCODING bits
+127.0.0.1:6379&amp;gt; OBJECT ENCODING bits
 &quot;raw&quot;
 </code></pre>
 </li>
@@ -447,7 +447,7 @@ struct __attribute__ ((__packed__)) sdshdr64 &#123;
 <li>当hash中的数据项的数目超过512的时候，也就是ziplist数据项超过1024的时候</li>
 <li>当hash中插入的任意一个value的长度超过了64的时候</li>
 </ul>
-<pre><code class="text">area        |&lt;---- ziplist header ----&gt;|&lt;----------- entries -------------&gt;|&lt;-end-&gt;|
+<pre><code class="text">area        |&amp;lt;---- ziplist header ----&amp;gt;|&amp;lt;----------- entries -------------&amp;gt;|&amp;lt;-end-&amp;gt;|
 
 size          4 bytes  4 bytes  2 bytes    ?        ?        ?        ?     1 byte
             +---------+--------+-------+--------+--------+--------+--------+-------+
@@ -666,10 +666,10 @@ sadd animals &quot;lion&quot;
     if (counter == 255) return 255;
     double r = (double)rand()/RAND_MAX;
     double baseval = counter - LFU_INIT_VAL;
-    if (baseval &lt; 0) baseval = 0;
+    if (baseval &amp;lt; 0) baseval = 0;
     // 访问次数越多，加一的概率越小
     double p = 1.0/(baseval*server.lfu_log_factor+1);
-    if (r &lt; p) counter++;
+    if (r &amp;lt; p) counter++;
     return counter;
 &#125;
 </code></pre>

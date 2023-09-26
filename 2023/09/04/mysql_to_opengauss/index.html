@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>Eureka | IceOfSummerの博客</title>
+        <title>MySQL迁移到高斯数据库 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="用来用去还是自己搭的博客靠谱" />
         <meta name="keywords" content="" />
@@ -167,22 +167,22 @@
 
                 <div class="article">
     <div>
-        <h1>Eureka</h1>
+        <h1>MySQL迁移到高斯数据库</h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2023/3/4
+            2023/9/4
         </span>
         
         <span class="category">
-            <a href="/2023/03/04/SpringCloud/">
+            <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%81%E7%A7%BB/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
-                SpringCloud
+                数据库迁移
             </a>
         </span>
         
@@ -191,76 +191,115 @@
     
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
-        <p><a target="_blank" rel="noopener" href="https://www.consul.io/">Consul by HashiCorp</a></p>
-<p>Consul是一套开源的分布式服务发现和配置管理系统，由HashiCorp公司用Go语言开发。</p>
-<p>下载：<a target="_blank" rel="noopener" href="https://www.consul.io/downloads">Downloads | Consul by HashiCorp</a></p>
-<p>下载后是一个exe，在控制台中打开即可。</p>
-<h2 id="1-服务提供者"><a href="#1-服务提供者" class="headerlink" title="1. 服务提供者"></a>1. 服务提供者</h2><p>使用如下指令启动：</p>
-<pre><code class="bash">consul agent -dev
-</code></pre>
-<p>启动后可以通过<a href="http://localhost:8500来访问首页">http://localhost:8500来访问首页</a></p>
-<h3 id="1-1-导入依赖"><a href="#1-1-导入依赖" class="headerlink" title="1.1 导入依赖"></a>1.1 导入依赖</h3><pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-starter-consul-discovery&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
-</code></pre>
-<h3 id="1-2-添加配置"><a href="#1-2-添加配置" class="headerlink" title="1.2 添加配置"></a>1.2 添加配置</h3><pre><code class="yaml">application:
-    name: consul-provider-payment
-spring:
-    cloud:
-        consul:
-            host: localhost
-            port: 8500
-            discovery:
-                service-name: $&#123;spring.application.name&#125;
-</code></pre>
-<p>主类添加<code>@EnableDiscoveryClient</code>注解</p>
-<h3 id="1-3-控制器"><a href="#1-3-控制器" class="headerlink" title="1.3 控制器"></a>1.3 控制器</h3><pre><code class="java">@RestController
-@Slf4j
-public class PaymentController &#123;
+        <h1 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h1><p>公司要求项目去适配高斯数据库，看了一下，高斯数据库就可以当做postgresql用，有啥问题把高斯换成postgresql来查就行。<br>其实整个项目没有太大的变动，只是几个函数需要改一下，如果用mybatis就更简单了：</p>
+<pre><code class="java">@Bean
+public VendorDatabaseIdProvider vendorDatabaseIdProvider() &#123;
+    VendorDatabaseIdProvider vendorDatabaseIdProvider = new VendorDatabaseIdProvider();
+    Properties properties = new Properties();
+    properties.put(&quot;MySQL&quot;, &quot;mysql&quot;);
+    properties.put(&quot;Oracle&quot;, &quot;oracle&quot;);
+    properties.put(&quot;PostgreSQL&quot;, &quot;pgsql&quot;);
+    properties.put(&quot;DM DBMS&quot;, &quot;dm&quot;);
+    vendorDatabaseIdProvider.setProperties(properties);
+    return vendorDatabaseIdProvider;
+&#125;
 
-    @Value(&quot;$&#123;server.port&#125;&quot;)
-    private String serverPort;
-
-    @RequestMapping(&quot;/payment/consul&quot;)
-    public String paymentConsul() &#123;
-        return &quot;springcloud with consul: &quot; + serverPort + &quot;\\t&quot; + UUID.randomUUID();
-    &#125;
-
+@Bean
+public SqlSessionFactoryBean sqlSessionFactoryBean(@Qualifier(&quot;dataSource&quot;) DataSource dataSource) throws Exception &#123;
+    SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
+    factoryBean.setDataSource(dataSource);
+    factoryBean.setDatabaseIdProvider(databaseIdProvider());
+    factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(mapperLocations));
+    return factoryBean;
 &#125;
 </code></pre>
-<h2 id="2-服务消费者"><a href="#2-服务消费者" class="headerlink" title="2. 服务消费者"></a>2. 服务消费者</h2><p>消费者的依赖和提供者一致，主类也一样要提供<code>@EnableDiscoveryClient</code>注解。</p>
-<p>跟zookeeper一样，先写一个配置类：</p>
-<pre><code class="java">@Configuration
-public class ApplicationConextConfig &#123;
-
-    @Bean
-    @LoadBalanced
-    public RestTemplate restTemplate() &#123;
-        return new RestTemplate();
-    &#125;
-
-&#125;
+<p>添加上面配置后，碰到不兼容的函数可以这样处理：</p>
+<pre><code class="xml">&amp;lt;select id=&quot;maxid&quot; databaseId=&quot;pgsql&quot; resultType=&quot;int&quot;&amp;gt;
+    select another_max(power_id) from tb_xx
+&amp;lt;/select&amp;gt;
+&amp;lt;!-- 给一个默认的 --&amp;gt;
+&amp;lt;select id=&quot;maxid&quot; resultType=&quot;int&quot;&amp;gt;
+    select max(power_id) from tb_xx
+&amp;lt;/select&amp;gt;
 </code></pre>
-<h3 id="2-1-远程调用"><a href="#2-1-远程调用" class="headerlink" title="2.1 远程调用"></a>2.1 远程调用</h3><pre><code class="java">@RestController
-public class OrderConsulController &#123;
-
-    public static final String URL = &quot;&amp;lt;http://consul-provider-payment&amp;gt;&quot;;
-
-    private RestTemplate restTemplate;
-
-    @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) &#123;
-        this.restTemplate = restTemplate;
-    &#125;
-
-    @GetMapping(&quot;/consumer/payment/consul&quot;)
-    public String getOrder() &#123;
-        return restTemplate.getForObject(URL + &quot;/payment/consul&quot;, String.class);
-    &#125;
-
-&#125;
+<p>这样idea会爆红，可能看着有点不舒服。</p>
+<p>也可以考虑这样写：</p>
+<pre><code class="xml">&amp;lt;choose&amp;gt;
+    &amp;lt;when test=&quot;_databaseId == &#39;oracle&#39;&quot;&amp;gt;
+        xxx
+    &amp;lt;/when&amp;gt;
+    &amp;lt;when test=&quot;_databaseId == &#39;dm&#39;&quot;&amp;gt;
+        xxx
+    &amp;lt;/when&amp;gt;
+    &amp;lt;when test=&quot;_databaseId == &#39;mysql&#39;&quot;&amp;gt;
+        xxx
+    &amp;lt;/when&amp;gt;
+    &amp;lt;when test=&quot;_databaseId == &#39;informix&#39; or _databaseId == &#39;gbase8s&#39;&quot;&amp;gt;
+        xxx
+    &amp;lt;/when&amp;gt;
+    &amp;lt;otherwise&amp;gt;
+        xxx
+    &amp;lt;/otherwise&amp;gt;
+&amp;lt;/choose&amp;gt;
 </code></pre>
+<p>两种都可以，如果太复杂了建议用第一种。</p>
+<hr>
+<p>本来到这，已经完事大吉了，就去mapper里面去检查一下有没有哪个函数是高斯没有的，然后改一下就行。</p>
+<p>结果，万万没想到，项目里面有拿StringBuilder搞SQL拼串的代码，结果写的全是坑，这玩意狠狠折磨了我好几个星期！</p>
+<h1 id="2-别名问题"><a href="#2-别名问题" class="headerlink" title="2. 别名问题"></a>2. 别名问题</h1><pre><code class="sql">SELECT id AS userId FROM user
+</code></pre>
+<p>上面这个SQL很简单，就是查用户id，然后起个别名叫<code>userId</code>，乍一看好像没什么，下面我放个图，大家来找不同：</p>
+<p><img lazy="https://xds.asia/public/2023-9/Snipaste_2023-09-26_10-45-53.webp" alt="找不同"></p>
+<p>发现了吗？仔细看一下userId，有没有发现查出来全部变成小写了？</p>
+<p>在我们项目代码里，直接从结果集里面拿userId，结果拿不到爆空指针！</p>
+<p>原本我以为是配置问题，把大小写搞得不敏感了，结果去网上搜了一下，结果只有表名能修改大小写敏感。</p>
+<p>所以要怎么改呢，其实只需要在别名的左右加上双引号就行了：</p>
+<pre><code class="sql">SELECT id AS &quot;userId&quot; FROM user
+</code></pre>
+<p>这个操作同样兼容mysql。</p>
+<h1 id="3-COUNT"><a href="#3-COUNT" class="headerlink" title="3. COUNT(*)"></a>3. COUNT(*)</h1><pre><code class="sql">SELECT COUNT(*) FROM userId
+</code></pre>
+<p>又是一个非常简单的SQL，然后咱们又来找不同：</p>
+<p>高斯的结果：</p>
+<p><img lazy="https://xds.asia/public/2023-9/gs-count.webp" alt="gs-count"></p>
+<p>mysql的结果：</p>
+<p><img lazy="https://xds.asia/public/2023-9/mysql-count.webp" alt="mysql-count"></p>
+<p>相信一眼就能看出来，mysql拿需要用<code>COUNT(*)</code>，而高斯则需要用<code>count</code>拿。</p>
+<p>这里最好的解决办法就只有取别名了，全部都叫同一个就行了。</p>
+<h1 id="不兼容的函数-语法"><a href="#不兼容的函数-语法" class="headerlink" title="不兼容的函数&#x2F;语法"></a>不兼容的函数&#x2F;语法</h1><table>
+<thead>
+<tr>
+<th align="center">MySql函数名</th>
+<th align="center">高斯函数名</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">LIMIT offset, size</td>
+<td align="center">LIMIT size OFFSET offset</td>
+<td align="center">高斯不支持mysql的语法，Mysql支持高斯的语法，更换时注意offset和size的位置需要交换</td>
+</tr>
+<tr>
+<td align="center">group_concat(col)</td>
+<td align="center">array_to_string(array_agg(col), ‘,’)</td>
+<td align="center">group_concat</td>
+</tr>
+<tr>
+<td align="center">date_format(col, ‘%Y-%m-%d’)</td>
+<td align="center">to_char(col, ‘yyyy-mm-dd’)</td>
+<td align="center">日期转字符串</td>
+</tr>
+<tr>
+<td align="center">delete from tb1, tb2</td>
+<td align="center">不兼容，推荐使用子查询</td>
+<td align="center">mysql 删除时选择两张表，高斯不支持</td>
+</tr>
+<tr>
+<td align="center">IFNULL(xx, fallback)</td>
+<td align="center">COALESCE(xx, fallback)</td>
+<td align="center">当列为空时使用默认值</td>
+</tr>
+</tbody></table>
 
     </div>
     

@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/service-degradation" style="color: #ff7d73">服务降级</a>
+                <a href="/SpringCloud/service-degradation" style="color: #03a9f4">服务降级</a>
             </span>
             
         </span>
@@ -208,18 +208,18 @@
 <p><a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/releases">Releases · alibaba&#x2F;Sentinel (github.com)</a></p>
 <h1 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h1><p>首先安装Sentinel Dashboard然后启动。</p>
 <p>导入依赖：</p>
-<pre><code class="xml">&lt;dependency&gt;
-    &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;com.alibaba.csp&lt;/groupId&gt;
-    &lt;artifactId&gt;sentinel-datasource-nacos&lt;/artifactId&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-cloud-starter-alibaba-sentinel&lt;/artifactId&gt;
-&lt;/dependency&gt;
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;com.alibaba.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-alibaba-nacos-discovery&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;com.alibaba.csp&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;sentinel-datasource-nacos&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;com.alibaba.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-alibaba-sentinel&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
 </code></pre>
 <p>添加配置：</p>
 <pre><code class="yaml">server:
@@ -315,10 +315,10 @@ public String dealTestHotkey(String p1, String p2, BlockException e) &#123;
 <h1 id="SentinelResource"><a href="#SentinelResource" class="headerlink" title="@SentinelResource"></a>@SentinelResource</h1><p><a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/wiki/%E6%B3%A8%E8%A7%A3%E6%94%AF%E6%8C%81">注解支持 · alibaba&#x2F;Sentinel Wiki (github.com)</a></p>
 <h1 id="规则持久化"><a href="#规则持久化" class="headerlink" title="规则持久化"></a>规则持久化</h1><p><a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/wiki/%E5%9C%A8%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E4%B8%AD%E4%BD%BF%E7%94%A8-Sentinel">在生产环境中使用 Sentinel · alibaba&#x2F;Sentinel Wiki (github.com)</a></p>
 <p>导入依赖：</p>
-<pre><code class="xml">&lt;dependency&gt;
-    &lt;groupId&gt;com.alibaba.csp&lt;/groupId&gt;
-    &lt;artifactId&gt;sentinel-datasource-nacos&lt;/artifactId&gt;
-&lt;/dependency&gt;
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;com.alibaba.csp&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;sentinel-datasource-nacos&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
 </code></pre>
 <p>添加配置：</p>
 <pre><code class="yaml">spring:
@@ -342,12 +342,12 @@ public String dealTestHotkey(String p1, String p2, BlockException e) &#123;
 <pre><code class="java">// 原来的
 @Autowired
 @Qualifier(&quot;flowRuleDefaultPublisher&quot;)
-private DynamicRulePublisher&lt;List&lt;FlowRuleEntity&gt;&gt; rulePublisher;
+private DynamicRulePublisher&amp;lt;List&amp;lt;FlowRuleEntity&amp;gt;&amp;gt; rulePublisher;
 
 // 改为
 @Autowired
 @Qualifier(&quot;flowRuleNacosPublisher&quot;)
-private DynamicRulePublisher&lt;List&lt;FlowRuleEntity&gt;&gt; rulePublisher;
+private DynamicRulePublisher&amp;lt;List&amp;lt;FlowRuleEntity&amp;gt;&amp;gt; rulePublisher;
 </code></pre>
 
     </div>

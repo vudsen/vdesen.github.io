@@ -249,7 +249,7 @@ System.out.println(a + &quot; &quot; + b);
 </ol>
 <p>特殊情况：</p>
 <ul>
-<li>当某个对象循环超过指定次数后，会被放到老年代，默认为15次，可以通过<code>-XX:MaxTenuringThreshold=&lt;N&gt;</code>设置</li>
+<li>当某个对象循环超过指定次数后，会被放到老年代，默认为15次，可以通过<code>-XX:MaxTenuringThreshold=&amp;lt;N&amp;gt;</code>设置</li>
 <li>如果在垃圾回收后仍然无法在Eden区给对象分配内存，那么对象会直接升级到老年代，如果老年代空间也不足，并且通过Full GC也不足，则会抛出OOM异常</li>
 <li>由Eden区、from区向to区复制时，对象大小大于To Space可用内存，则把该对象转存到老年代，且老年代的可用内存小于该对象大小</li>
 </ul>

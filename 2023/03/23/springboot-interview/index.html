@@ -248,9 +248,9 @@ public class ExampleConfiguration &#123;
 <h2 id="1-7-Spring怎么解决循环依赖问题"><a href="#1-7-Spring怎么解决循环依赖问题" class="headerlink" title="1.7 Spring怎么解决循环依赖问题"></a>1.7 Spring怎么解决循环依赖问题</h2><p>对于构造器注入的循环依赖：Spring处理不了，直接抛出<code>BeanCurrentlylnCreationException</code>异常。</p>
 <p>非单例循环依赖：无法处理。</p>
 <p>单例模式下属性注入的循环依赖会通过三级缓存处理循环依赖：</p>
-<p><code>singletonObjects</code>：完成了初始化的单例对象map，bean name –&gt; bean instance</p>
-<p><code>earlySingletonObjects</code>：完成实例化未初始化的单例对象map，bean name –&gt; bean instance</p>
-<p><code>singletonFactories</code>： 单例对象工厂map，bean name –&gt; ObjectFactory，存放 bean 工厂对象</p>
+<p><code>singletonObjects</code>：完成了初始化的单例对象map，bean name –&amp;gt; bean instance</p>
+<p><code>earlySingletonObjects</code>：完成实例化未初始化的单例对象map，bean name –&amp;gt; bean instance</p>
+<p><code>singletonFactories</code>： 单例对象工厂map，bean name –&amp;gt; ObjectFactory，存放 bean 工厂对象</p>
 <p>具体的执行逻辑可以在<code>DefaultSingletonBeanRegistry</code>中看到，这里贴出核心方法：</p>
 <pre><code class="java">protected Object getSingleton(String beanName, boolean allowEarlyReference) &#123;
     Object singletonObject = this.singletonObjects.get(beanName);
@@ -262,7 +262,7 @@ public class ExampleConfiguration &#123;
                 if (singletonObject == null) &#123;
                     singletonObject = this.earlySingletonObjects.get(beanName);
                     if (singletonObject == null) &#123;
-                        ObjectFactory&lt;?&gt; singletonFactory = (ObjectFactory)this.singletonFactories.get(beanName);
+                        ObjectFactory&amp;lt;?&amp;gt; singletonFactory = (ObjectFactory)this.singletonFactories.get(beanName);
                         if (singletonFactory != null) &#123;
                             singletonObject = singletonFactory.getObject();
                             this.earlySingletonObjects.put(beanName, singletonObject);

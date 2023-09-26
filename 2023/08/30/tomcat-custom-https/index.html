@@ -265,8 +265,8 @@ public class EncryptedHttp11Protocol extends Http11NioProtocol &#123;
 <p>我们只需要找到一个方法在配置ssl前修改配置，提供密码即可。</p>
 <p>你别说，还真被我找到了，在启动类添加下面的代码：</p>
 <pre><code class="java">@Bean
-public WebServerFactoryCustomizer&lt;UndertowServletWebServerFactory&gt; webServerFactoryCustomizer() &#123;
-    return factory -&gt; &#123;
+public WebServerFactoryCustomizer&amp;lt;UndertowServletWebServerFactory&amp;gt; webServerFactoryCustomizer() &#123;
+    return factory -&amp;gt; &#123;
         Ssl ssl = factory.getSsl();
         if (ssl == null || !ssl.isEnabled()) &#123;
             return;
@@ -296,7 +296,7 @@ java.io.IOException: parseAlgParameters failed: ObjectIdentifier() -- data isn&#
         at sun.security.tools.keytool.Main.run(Main.java:366)
         at sun.security.tools.keytool.Main.main(Main.java:359)
 Caused by: java.io.IOException: ObjectIdentifier() -- data isn&#39;t an object ID (tag = 48)
-        at sun.security.util.ObjectIdentifier.&lt;init&gt;(ObjectIdentifier.java:257)
+        at sun.security.util.ObjectIdentifier.&amp;lt;init&amp;gt;(ObjectIdentifier.java:257)
         at sun.security.util.DerInputStream.getOID(DerInputStream.java:314)
         at com.sun.crypto.provider.PBES2Parameters.engineInit(PBES2Parameters.java:267)
         at java.security.AlgorithmParameters.init(AlgorithmParameters.java:293)

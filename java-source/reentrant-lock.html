@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#Java" style="color: #ffa2c4">Java</a>
+                <a href="/2023/03/05/java-source#Java" style="color: #00bcd4">Java</a>
             </span>
             
         </span>
@@ -251,7 +251,7 @@ protected final boolean tryAcquire(int acquires) &#123;
     &#125;
     else if (current == getExclusiveOwnerThread()) &#123;
         int nextc = c + acquires;
-        if (nextc &lt; 0)
+        if (nextc &amp;lt; 0)
             throw new Error(&quot;Maximum lock count exceeded&quot;);
         setState(nextc);
         return true;
@@ -297,7 +297,7 @@ final boolean nonfairTryAcquire(int acquires) &#123;
     else if (current == getExclusiveOwnerThread()) &#123;
         // 该值用来配合锁的重入，同一个线程每lock一次，该值加一
         int nextc = c + acquires;
-        if (nextc &lt; 0) // overflow
+        if (nextc &amp;lt; 0) // overflow
             throw new Error(&quot;Maximum lock count exceeded&quot;);
         setState(nextc);
         return true;
@@ -369,14 +369,14 @@ private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) &#123;
          * to signal it, so it can safely park.
          */
         return true;
-    if (ws &gt; 0) &#123;
+    if (ws &amp;gt; 0) &#123;
         /*
          * Predecessor was cancelled. Skip over predecessors and
          * indicate retry.
          */
         do &#123;
             node.prev = pred = pred.prev;
-        &#125; while (pred.waitStatus &gt; 0);
+        &#125; while (pred.waitStatus &amp;gt; 0);
         pred.next = node;
     &#125; else &#123;
         /*
@@ -456,7 +456,7 @@ private void unparkSuccessor(Node node) &#123;
      */
     int ws = node.waitStatus;
     // 将waitStatus设置为0(该值大于0一般表示线程被中断了)
-    if (ws &lt; 0)
+    if (ws &amp;lt; 0)
         node.compareAndSetWaitStatus(ws, 0);
 
     /*
@@ -467,11 +467,11 @@ private void unparkSuccessor(Node node) &#123;
      */
     Node s = node.next;
     // 判断当前节点是否为空，或是是否已经被取消
-    if (s == null || s.waitStatus &gt; 0) &#123;
+    if (s == null || s.waitStatus &amp;gt; 0) &#123;
         s = null;
         // 从尾部遍历，获取可用被唤醒的线程
         for (Node p = tail; p != node &amp;&amp; p != null; p = p.prev)
-            if (p.waitStatus &lt;= 0)
+            if (p.waitStatus &amp;lt;= 0)
                 s = p;
     &#125;
     if (s != null)
@@ -491,7 +491,7 @@ private void unparkSuccessor(Node node) &#123;
 
     // Skip cancelled predecessors.
     Node pred = node.prev;
-    while (pred.waitStatus &gt; 0)
+    while (pred.waitStatus &amp;gt; 0)
         node.prev = pred = pred.prev;
 
     // predNext is the apparent node to unsplice. CASes below will
@@ -518,10 +518,10 @@ private void unparkSuccessor(Node node) &#123;
         // 尝试删除处于链表中间的节点
         if (pred != head &amp;&amp;
             ((ws = pred.waitStatus) == Node.SIGNAL ||
-             (ws &lt;= 0 &amp;&amp; pred.compareAndSetWaitStatus(ws, Node.SIGNAL))) &amp;&amp;
+             (ws &amp;lt;= 0 &amp;&amp; pred.compareAndSetWaitStatus(ws, Node.SIGNAL))) &amp;&amp;
             pred.thread != null) &#123;
             Node next = node.next;
-            if (next != null &amp;&amp; next.waitStatus &lt;= 0)
+            if (next != null &amp;&amp; next.waitStatus &amp;lt;= 0)
                 pred.compareAndSetNext(predNext, next);
         &#125; else &#123;
             // 如果删除失败，则唤醒当前节点的后一个没有被取消的节点
@@ -540,7 +540,7 @@ private void unparkSuccessor(Node node) &#123;
          * fails or if status is changed by waiting thread.
          */
     int ws = node.waitStatus;
-    if (ws &lt; 0)
+    if (ws &amp;lt; 0)
         node.compareAndSetWaitStatus(ws, 0);
 
     /*
@@ -551,10 +551,10 @@ private void unparkSuccessor(Node node) &#123;
          */
     Node s = node.next;
     // 找到下一个waitStatus小于等于0的节点并唤醒
-    if (s == null || s.waitStatus &gt; 0) &#123;
+    if (s == null || s.waitStatus &amp;gt; 0) &#123;
         s = null;
         for (Node p = tail; p != node &amp;&amp; p != null; p = p.prev)
-            if (p.waitStatus &lt;= 0)
+            if (p.waitStatus &amp;lt;= 0)
                 s = p;
     &#125;
     if (s != null)
@@ -565,10 +565,10 @@ private void unparkSuccessor(Node node) &#123;
 <pre><code class="java">int ws;
 if (pred != head &amp;&amp;
     ((ws = pred.waitStatus) == Node.SIGNAL ||
-     (ws &lt;= 0 &amp;&amp; pred.compareAndSetWaitStatus(ws, Node.SIGNAL))) &amp;&amp;
+     (ws &amp;lt;= 0 &amp;&amp; pred.compareAndSetWaitStatus(ws, Node.SIGNAL))) &amp;&amp;
     pred.thread != null) &#123;
     Node next = node.next;
-    if (next != null &amp;&amp; next.waitStatus &lt;= 0)
+    if (next != null &amp;&amp; next.waitStatus &amp;lt;= 0)
         // 如果这里执行失败？
         pred.compareAndSetNext(predNext, next);
 &#125; else &#123;
@@ -713,7 +713,7 @@ final boolean transferForSignal(Node node) &#123;
     
     Node p = enq(node);
     int ws = p.waitStatus;
-    if (ws &gt; 0 || !p.compareAndSetWaitStatus(ws, Node.SIGNAL))
+    if (ws &amp;gt; 0 || !p.compareAndSetWaitStatus(ws, Node.SIGNAL))
         LockSupport.unpark(node.thread);
     return true;
 &#125;
