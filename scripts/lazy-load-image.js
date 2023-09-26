@@ -5,9 +5,7 @@
 // const IMAGE_URL_FILED = 'lazy'
 
 // hexo.extend.filter.register('after_post_render', function(data){
-//     if (data.content && data.content.replaceAll) {
-//         data.content = data.content.replaceAll(SEARCH_REGX, `<img ${IMAGE_URL_FILED}=`)
-//     }
+//     // console.log(data)
 //     return data;
 // });
 
