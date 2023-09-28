@@ -7,48 +7,47 @@ categories: 线上问题排查
 
 # 1. 安装arthas
 
-如果没有用docker，直接从官网下载然后丢服务器就行了，如果用的是docker那么就麻烦一点，这里我整了一个脚本来一键安装：
+如果没有用docker，直接从官网下载然后丢服务器就行了，如果用的是docker那么就麻烦一点，这里我整了一个脚本来一键安装/启动：
 ```sh
-if [ -z $1 ];then
-	echo -e "\e[32m用法: install-arthas.sh [容器名|容器ID] [用户名(可选，默认xxx，必须和启动tomcat的用户一致)]\e[0m"
-        exit 0
+#!/bin/bash
+workdir="/opt/arthas-dev"
+user=user
+container=$1
+if [ -z $container ];then
+	echo -e "\e[32m用法: arthas-launcher.sh [容器名|容器ID] [用户名(可选，必须和启动应用的用户一致)]\e[0m"
+	exit 0
 fi
-if [ -z $2 ];then
-	$user=xxx
-else
-	$user=$2
-fi
-
-echo "installing arthas..."
-# 这里把jdk换成你自己的，因为docker里面可能装的jre，如果装的jdk则可以不塞jdk进去
-docker cp jdk-8u381-linux-x64.tar.gz $1:/opt/jdk.tar.gz
-docker cp arthas-packaging-3.7.1-bin.zip $1:/opt/arthas.zip
-# 用root用户给所有人权限
-docker exec -it -u root $1 chmod 777 /opt/jdk.tar.gz
-docker exec -it -u root $1 chmod 777 /opt/arthas.zip
-# 这里一定不要让root用户解压，不然会没权限
-docker exec -it -u $user $1 tar zxvf /opt/jdk.tar.gz
-docker exec -it -u root $1 mkdir /opt/arthas
-docker exec -it -u root $1 chown hcs /opt/arthas
-docker exec -it -u $user $1 unzip /opt/arthas.zip -d /opt/arthas
-docker exec -it -u $user $1 echo "/opt/jdk/jdk1.8.0_381/bin/java -jar /opt/arthas/arthas-boot.jar" > /opt/arthas.sh
-docker exec -it -u $user $1 chmod 777 /opt/arthas.sh
-echo "install arthas success!"
-```
-
-也可以在外面创建一个启动脚本：
-```sh
-if [ -z $1 ];then
-	echo -e "\e[32m用法: arthas.sh [容器名|容器ID] [用户名(可选，默认hcs，必须和启动tomcat的用户一致)]\e[0m"
-        exit 0
+if [ ! -z $2 ];then
+	user=$2
 fi
 
-if [ -z $2 ];then
-	$user=hcs
-else
-	$user=$2
+function installArthas() {
+	echo "开始安装arthas..."
+	docker exec -u $user $container mkdir $workdir/arthas
+	docker cp jdk-8u381-linux-x64.tar.gz $container:$workdir/jdk.tar.gz
+	docker cp arthas-packaging-3.7.1-bin.zip $container:$workdir/arthas/arthas.zip
+	docker exec -u root $container chmod 777 $workdir/jdk.tar.gz
+	docker exec -u root $container chmod 777 $workdir/arthas/arthas.zip
+	docker exec -u $user $container tar zxvf $workdir/jdk.tar.gz -C $workdir
+	docker exec -u $user $container unzip $workdir/arthas/arthas.zip -d $workdir/arthas
+	docker exec -u $user $container touch $workdir/installedMark
+	echo "安装成功!"
+}
+# --------------main--------------
+docker exec -u $user $container test -d $workdir
+if [ ! $? -eq 0 ];then
+	docker exec -u root $container mkdir $workdir
+	docker exec -u root $container chown $user $workdir
+	installArthas
 fi
-docker exec -it -u $user $1 /opt/jdk/jdk1.8.0_381/bin/java -jar /opt/arthas/arthas-boot.jar
+
+docker exec -u $user $container test -e $workdir/installedMark
+if [ $? -eq 0 ];then
+	docker exec -it -u $user $container $workdir/jdk1.8.0_381/bin/java -jar $workdir/arthas/arthas-boot.jar
+else 
+	echo "文件完整性校验失败! 重新尝试安装arthas."
+	installArthas
+fi
 ```
 
 # 2. watch
