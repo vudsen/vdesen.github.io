@@ -25,7 +25,7 @@ tags:
 
 # 1. 基本内容
 
-![类继承图](https://xds.asia/public/java-source/2023-2-3-12046ac9-cd7f-4b31-9c43-6f398f6a86a3.webp)
+![类继承图](https://selfb.asia/public/java-source/2023-2-3-12046ac9-cd7f-4b31-9c43-6f398f6a86a3.webp)
 
 对于`ReentrantLock`，你需要知道它里面有一个<font color="red">等待队列，也就是AQS</font>(`AbstractQueuedSynchronizer`)，<font color="red">这个队列只有“头部的节点”才有资格抢到锁！但这并不代表其它节点对应的线程不会被唤醒，这些线程只是没有抢锁的资格，在获取资格前抢锁永远失败。在这里需要注意：**没有资格抢锁 != 没有机会被唤醒**。</font>
 
@@ -452,7 +452,7 @@ if (pred != head &&
 
 最后用一张图总结一下吧：
 
-![总结](https://xds.asia/public/java-source/2023-2-3-aa7d1ca2-677d-4c91-b6b4-411036b452c2.webp)
+![总结](https://selfb.asia/public/java-source/2023-2-3-aa7d1ca2-677d-4c91-b6b4-411036b452c2.webp)
 
 # 2. Condition
 

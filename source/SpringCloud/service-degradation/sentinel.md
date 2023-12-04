@@ -69,7 +69,7 @@ management:
 
 # 流控规则
 
-![添加流控规则](https://xds.asia/public/SpringCloud/2023-2-6-49f558a5-65bc-4017-8058-89e2e6a932fa.webp)
+![添加流控规则](https://selfb.asia/public/SpringCloud/2023-2-6-49f558a5-65bc-4017-8058-89e2e6a932fa.webp)
 
 - 资源名：唯一名称，默认请求路径
 

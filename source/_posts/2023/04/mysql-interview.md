@@ -23,7 +23,7 @@ B树和B+树的区别：
 
 在InnoDB中，索引默认使用的数据结构为B+树，而B+树里的每个节点都是一个页，默认的页大小为`16KB`。
 
-![page](https://xds.asia/public/post/2023-3-0-fed73c7c-b6fb-40e4-9b27-1a95fccd77c8.webp)
+![page](https://selfb.asia/public/post/2023-3-0-fed73c7c-b6fb-40e4-9b27-1a95fccd77c8.webp)
 
 # 3. 简单说一下InnoDB事务实现原理
 
@@ -60,7 +60,7 @@ B树和B+树的区别：
 
 然后我在官方文档里查了一下：
 
-![每条SQL都是一个单独的事务](https://xds.asia/public/interview/2023-2-0-bd1f976d-ac67-49a3-979b-1b9cd4fa2c6d.webp)
+![每条SQL都是一个单独的事务](https://selfb.asia/public/interview/2023-2-0-bd1f976d-ac67-49a3-979b-1b9cd4fa2c6d.webp)
 
 [MySQL :: MySQL 5.7 Reference Manual :: 14.7.2.2 autocommit, Commit, and Rollback](https://dev.mysql.com/doc/refman/5.7/en/innodb-autocommit-commit-rollback.html)
 
@@ -133,7 +133,7 @@ select * from test where id = 1;
 
 这里我画了一个流程图方便理解：
 
-![流程图](https://xds.asia/public/interview/2023-2-1-7f41e3a0-6d4e-42e8-b44e-d85eecdbd465.webp)
+![流程图](https://selfb.asia/public/interview/2023-2-1-7f41e3a0-6d4e-42e8-b44e-d85eecdbd465.webp)
 
 ~~图画的可能不太好，不过应该能看懂~~
 

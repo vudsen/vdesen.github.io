@@ -48,7 +48,7 @@ public Process exec(String command, String[] envp, File dir)
 `StringTokenizer`可能大家没见过，但是如果你用java写算法，并且了解过输入优化，你就会知到这玩意是干嘛的。简单点来说它的效果和`Scanner`一样，但是效率更高(如果你写过算法就知道这玩意速度吊打`Scanner`)，`Scanner`就不多讲了，感觉是个人就用过。。。
 
 如果你还看不懂，没事，我直接给你上图：
-![debug](https://xds.asia/public/2023-9/Snipaste_2023-11-10_16-06-22.webp)
+![debug](https://selfb.asia/public/2023-9/Snipaste_2023-11-10_16-06-22.webp)
 
 可以发现我们后面用双引号包裹起来的参数被分开了，实际传到mysql那里就会导致执行失败。
 

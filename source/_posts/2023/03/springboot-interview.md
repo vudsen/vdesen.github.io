@@ -232,4 +232,4 @@ CGLIB的优势：
 
 ​	将数据库输出转换为 `Map`，`List`或自定义的类型
 
-![](https://xds.asia/public/post/2023-3-2-ca9cc3cd-cb95-4437-8182-2476f326260d.webp)
+![](https://selfb.asia/public/post/2023-3-2-ca9cc3cd-cb95-4437-8182-2476f326260d.webp)
