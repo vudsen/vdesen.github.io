@@ -144,7 +144,7 @@ public <T> ServiceInstance choose(String serviceId, Request<T> request) {
 }
 ```
 
-![实现类](https://xds.asia/public/SpringCloud/2023-2-1-2c6ce8dd-954a-4c32-8fa6-beb3892a95fd.webp)
+![实现类](https://selfb.asia/public/SpringCloud/2023-2-1-2c6ce8dd-954a-4c32-8fa6-beb3892a95fd.webp)
 
 可以发现有两个实现类
 

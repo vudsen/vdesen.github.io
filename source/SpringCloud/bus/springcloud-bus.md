@@ -9,7 +9,7 @@ tags:
     - { name: "服务总线", path: "/SpringCloud/bus"}
 ---
 
-![原理图](https://xds.asia/public/SpringCloud/2023-2-5-f88c2338-89d9-40e7-bea8-d927ad536f34.webp)
+![原理图](https://selfb.asia/public/SpringCloud/2023-2-5-f88c2338-89d9-40e7-bea8-d927ad536f34.webp)
 
 在第三步中，只需要通知一个APP，就可以自动通过总线通知其它APP进行更新。<font color=red>实际上也可以去通知配置中心，然后再由配置中心发送通知</font>。
 

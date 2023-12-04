@@ -1,7 +1,7 @@
 const fs = require("fs")
 
 const oldCdn = 'https://xds.asia'
-const newCdn = ''
+const newCdn = 'https://selfb.asia'
 const blackDirectory = new Set()
 
 blackDirectory.add('node_modules')
@@ -9,16 +9,16 @@ blackDirectory.add('node_modules')
 
 function replaceFile(path) {
     const content = fs.readFileSync(path, {encoding: 'utf8'})
-    fs.writeFileSync(path, content.replaceAll(oldCdn, newCdn), {encoding:true})
+    fs.writeFileSync(path, content.replaceAll(oldCdn, newCdn), {encoding:'utf8'})
 }
 
 function replaceDir(path) {
     const files = fs.readdirSync(path, {withFileTypes: true})
     files.forEach((val) => {
         if (val.isDirectory()) {
-            replaceDir(val.path)
+            replaceDir(path + '/' + val.name)
         } else {
-            replaceFile(val.path)
+            replaceFile(path + '/' + val.name)
         }
     })
 }

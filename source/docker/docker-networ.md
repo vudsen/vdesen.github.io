@@ -55,5 +55,5 @@ Dokcer的网络模式有如下几种：
 
 ## 1.1 bridge
 
-![bride](https://xds.asia/public/docker/2023-3-3-06313489-0426-4ddd-905e-909d6f44bcf1.webp)
+![bride](https://selfb.asia/public/docker/2023-3-3-06313489-0426-4ddd-905e-909d6f44bcf1.webp)
 

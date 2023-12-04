@@ -20,7 +20,7 @@ SpringCloud Stream是一个构建消息驱动微服务的框架。
 
 例如有些时候，系统使用了RabbitMQ和Kafaka这两种消息中间件，这些中间件的差异性导致我们实际项目开发给我们造成了一定的困扰，我们如果用了两个消息队列的其中一种，后面的业务需求，我想往另外一种消息队列进行迁移，这时候无疑就是一个灾难性的，<font color=red>一大堆东西都要重新推倒重新做</font>，因为它跟我们的系统耦合了，这时候SpringCloud Stream给我们提供了—种解耦合的方式。
 
-![原理图](https://xds.asia/public/SpringCloud/2023-2-5-5cd6b4a3-9c77-4f90-bdf9-fe668bc030fa.webp)
+![原理图](https://selfb.asia/public/SpringCloud/2023-2-5-5cd6b4a3-9c77-4f90-bdf9-fe668bc030fa.webp)
 
 通过定义绑定区Binder作为中间层，实现了应用程序与消息中间件细节之间的隔离。
 
@@ -62,7 +62,7 @@ public class ReceiveMessageController {
 
 启动之后查看RabbitMQ上的交换机：
 
-![交换机列表](https://xds.asia/public/SpringCloud/2023-2-6-130e3b65-2843-4b38-b1f2-c5a381c75d06.webp)
+![交换机列表](https://selfb.asia/public/SpringCloud/2023-2-6-130e3b65-2843-4b38-b1f2-c5a381c75d06.webp)
 
 可以发现多出了一个`sendMsg-in-0`交换机，同时该主题下同时也拥有一个匿名队列，里面有一个消费者，就是我们刚才启动的消费者。
 
@@ -117,7 +117,7 @@ spring:
 
 重启之后登录RabbitMQ控制台查看：
 
-![控制台](https://xds.asia/public/SpringCloud/2023-2-6-fdfb00cf-1328-44d3-aadc-05d77230677c.webp)
+![控制台](https://selfb.asia/public/SpringCloud/2023-2-6-fdfb00cf-1328-44d3-aadc-05d77230677c.webp)
 
 可以发现两个消费者都成功地放在了同一个队列里。
 
