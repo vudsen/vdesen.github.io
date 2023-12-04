@@ -10,7 +10,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
         <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
 <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
-<link rel="stylesheet" href="https://xds.asia/static/particlex/static/fonts.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
 <script>
   const mixins = {};
   const h = (arg1, arg2, arg3) => {
@@ -194,7 +194,7 @@
 </ul>
 <h1 id="2-高度为3的B-树能存多少条数据"><a href="#2-高度为3的B-树能存多少条数据" class="headerlink" title="2. 高度为3的B+树能存多少条数据"></a>2. 高度为3的B+树能存多少条数据</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6974225353371975693">MySQL系列（4）— InnoDB数据页结构 - 掘金 (juejin.cn)</a></p>
 <p>在InnoDB中，索引默认使用的数据结构为B+树，而B+树里的每个节点都是一个页，默认的页大小为<code>16KB</code>。</p>
-<p><img lazy="https://xds.asia/public/post/2023-3-0-fed73c7c-b6fb-40e4-9b27-1a95fccd77c8.webp" alt="page"></p>
+<p><img lazy="https://selfb.asia/public/post/2023-3-0-fed73c7c-b6fb-40e4-9b27-1a95fccd77c8.webp" alt="page"></p>
 <h1 id="3-简单说一下InnoDB事务实现原理"><a href="#3-简单说一下InnoDB事务实现原理" class="headerlink" title="3. 简单说一下InnoDB事务实现原理"></a>3. 简单说一下InnoDB事务实现原理</h1><p>事务ACID：</p>
 <table>
 <thead>
@@ -235,7 +235,7 @@
 <p>这里其实有个问题，如果我只是单独的一条查询语句，没有开启事务，那么怎么去快照读呢？</p>
 <p>这个我自己查了一下，众所周知，MySql里有一个autocommit属性，对于单条SQL，这个值一定是true，那么是不是说明我们每条SQL都会被认作是一个事务呢？</p>
 <p>然后我在官方文档里查了一下：</p>
-<p><img lazy="https://xds.asia/public/interview/2023-2-0-bd1f976d-ac67-49a3-979b-1b9cd4fa2c6d.webp" alt="每条SQL都是一个单独的事务"></p>
+<p><img lazy="https://selfb.asia/public/interview/2023-2-0-bd1f976d-ac67-49a3-979b-1b9cd4fa2c6d.webp" alt="每条SQL都是一个单独的事务"></p>
 <p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/innodb-autocommit-commit-rollback.html">MySQL :: MySQL 5.7 Reference Manual :: 14.7.2.2 autocommit, Commit, and Rollback</a></p>
 <p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/innodb-autocommit-commit-rollback.html">MySQL :: MySQL 8.0 Reference Manual :: 15.7.2.2 autocommit, Commit, and Rollback</a></p>
 <p>不管是8.0还是5.7，都是这样写的，那么就可以说的通了。每次执行单条SQL都会拿到一个事务id，然后再去进行快照读。</p>
@@ -275,7 +275,7 @@ select * from test where id = 1;
 <p>这次执行后，<font color=red>发现两次查询的结果都是一样的</font>，而且在事务A执行更新后且没有提交时，B再去读，<font color=red>并没有发生阻塞，因为在修改数据的时候会加排它锁，在读的时候要么是当前读要么是快照读，</font>如果是当前读，那么读操作会堵塞，说明在B这里是快照读，是创建了ReadView的，通过ReadView有效地避免了不可重复读。</p>
 <p>我们再用同样的方式去验证ReadCommited级别的读，发现同样是快照读，那么凭什么RepeatableRead不会读到新值，而ReadCommited会呢？</p>
 <p>这里我画了一个流程图方便理解：</p>
-<p><img lazy="https://xds.asia/public/interview/2023-2-1-7f41e3a0-6d4e-42e8-b44e-d85eecdbd465.webp" alt="流程图"></p>
+<p><img lazy="https://selfb.asia/public/interview/2023-2-1-7f41e3a0-6d4e-42e8-b44e-d85eecdbd465.webp" alt="流程图"></p>
 <p><del>图画的可能不太好，不过应该能看懂</del></p>
 <p>网上大部分人讲的都是以ReadCommited级别为例子的，即m_ids里的事务提交后可读，但其实在RepeatableRead隔离级别下是读不了的，只能走undo_log进行回滚。</p>
 <hr>

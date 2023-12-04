@@ -10,7 +10,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
         <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
 <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
-<link rel="stylesheet" href="https://xds.asia/static/particlex/static/fonts.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
 <script>
   const mixins = {};
   const h = (arg1, arg2, arg3) => {
@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#Java" style="color: #00bcd4">Java</a>
+                <a href="/2023/03/05/java-source#Java" style="color: #00a596">Java</a>
             </span>
             
         </span>
@@ -212,7 +212,7 @@
 <p>提供了一个框架，去帮助开发者实现一个依赖于先进先出(FIFO)等待队列的同步锁或相关同步器(事件、信号量等)</p>
 </blockquote>
 <p>如果谈理解的话，用这一句开头就会很舒服、</p>
-<h1 id="1-基本内容"><a href="#1-基本内容" class="headerlink" title="1. 基本内容"></a>1. 基本内容</h1><p><img lazy="https://xds.asia/public/java-source/2023-2-3-12046ac9-cd7f-4b31-9c43-6f398f6a86a3.webp" alt="类继承图"></p>
+<h1 id="1-基本内容"><a href="#1-基本内容" class="headerlink" title="1. 基本内容"></a>1. 基本内容</h1><p><img lazy="https://selfb.asia/public/java-source/2023-2-3-12046ac9-cd7f-4b31-9c43-6f398f6a86a3.webp" alt="类继承图"></p>
 <p>对于<code>ReentrantLock</code>，你需要知道它里面有一个<font color="red">等待队列，也就是AQS</font>(<code>AbstractQueuedSynchronizer</code>)，<font color="red">这个队列只有“头部的节点”才有资格抢到锁！但这并不代表其它节点对应的线程不会被唤醒，这些线程只是没有抢锁的资格，在获取资格前抢锁永远失败。在这里需要注意：<strong>没有资格抢锁 !&#x3D; 没有机会被唤醒</strong>。</font></p>
 <p>上面对<font color="skyblue">头部的节点</font>打了引号，是因为在AQS中，头部的节点对应的线程并不是资格抢锁的线程线程，而是头结点的下一个节点对应的线程才具有抢锁的资格。至于为什么，相信把源码看完你也就能理解了。</p>
 <p>另外线程在入队之前也会尝试抢锁，如果抢到了就不会入队了，这就是公平锁和非公平锁的相关实现了，即只有非公平锁才能这么干，公平锁永远只能先入队，再抢锁。</p>
@@ -578,7 +578,7 @@ if (pred != head &amp;&amp;
 <p>如果这一行if执行失败，那么我们的链表节点不就是没删掉吗？</p>
 <p>其实这里是想多了，还记得我们之前的<code>shouldParkAfterFailedAcquire</code>方法吗，这个方法就会去检查某个节点前面的节点是否被取消，如果被取消了，它就会负责去删除，我们在这里CAS失败，说明节点早就已经被删掉了。</p>
 <h2 id="1-5-总结"><a href="#1-5-总结" class="headerlink" title="1.5 总结"></a>1.5 总结</h2><p>最后用一张图总结一下吧：</p>
-<p><img lazy="https://xds.asia/public/java-source/2023-2-3-aa7d1ca2-677d-4c91-b6b4-411036b452c2.webp" alt="总结"></p>
+<p><img lazy="https://selfb.asia/public/java-source/2023-2-3-aa7d1ca2-677d-4c91-b6b4-411036b452c2.webp" alt="总结"></p>
 <h1 id="2-Condition"><a href="#2-Condition" class="headerlink" title="2. Condition"></a>2. Condition</h1><pre><code class="java">ReentrantLock reentrantLock = new ReentrantLock();
 # newCondition是AQS提供的方法
 Condition condition = reentrantLock.newCondition();

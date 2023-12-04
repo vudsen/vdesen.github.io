@@ -10,7 +10,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
         <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
 <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
-<link rel="stylesheet" href="https://xds.asia/static/particlex/static/fonts.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
 <script>
   const mixins = {};
   const h = (arg1, arg2, arg3) => {
@@ -164,7 +164,7 @@
 </nav>
 
                 <div id="home-head">
-    <div id="home-background" ref="homeBackground" data-image="https://xds.asia/public/2023-2-6-8d14e464-2200-4e54-af81-0d9f25f55b3e.webp,https://xds.asia/public/2023-2-0-017e03b0-992c-4844-b28f-869799d32b96.webp,https://xds.asia/public/2023-2-0-66a241f4-eca3-45f3-b590-05aeed688f60.webp,https://xds.asia/public/2023-2-0-481f472f-e980-4cee-8ab8-ca66f5fd370a.webp,https://xds.asia/public/2023-2-2-2adf4d48-496a-49a4-8ca3-f64e035d8835.webp"></div>
+    <div id="home-background" ref="homeBackground" data-image="https://selfb.asia/public/2023-2-6-8d14e464-2200-4e54-af81-0d9f25f55b3e.webp,https://selfb.asia/public/2023-2-0-017e03b0-992c-4844-b28f-869799d32b96.webp,https://selfb.asia/public/2023-2-0-66a241f4-eca3-45f3-b590-05aeed688f60.webp,https://selfb.asia/public/2023-2-0-481f472f-e980-4cee-8ab8-ca66f5fd370a.webp,https://selfb.asia/public/2023-2-2-2adf4d48-496a-49a4-8ca3-f64e035d8835.webp"></div>
     
     <div id="home-info" @click="homeClick">
         <span class="loop"></span>
@@ -185,6 +185,157 @@
     <div id="home-posts">
         <div id="posts">
             
+
+<div class="post post-partial-show">
+    <a href="/2023/08/30/tomcat-custom-https/">
+        <h2 class="post-title">通过环境变量传递Tomcat https证书密码</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/8/30
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <h1 id="1-起因"><a href="#1-起因" class="headerlink" title="1. 起因"></a>1. 起因</h1><p>由于最近公司要求给tomcat配置https，本来以为只是简单的塞个证书和私钥就行了：</p>
+<pre><code class="xml">&amp;lt;Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot; SSLEnabled=&quot;true&quot; &amp;gt;
+    &amp;lt;SSLHostConfig protocols=&quot;TLSv1.2&quot; sslProtocol=&quot;TLS&quot;&amp;gt;
+        &amp;lt;Certificate certificateKeyFile=&quot;conf/server.key&quot;
+                    certificateFile=&quot;conf/server.crt&quot;
+                    type=&quot;RSA&quot;/&amp;gt;
+    &amp;lt;/SSLHostConfig&amp;gt;
+&amp;lt;/Connector&amp;gt;
+</code></pre>
+<p>结果要求用jks证书文件，彳亍：</p>
+<pre><code class="xml">&amp;lt;Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot; 
+    sslProtocol=&quot;TLS&quot; 
+    protocols=&quot;TLSv1.2&quot;
+    SSLEnabled=&quot;true&quot;
+    keystoreFile=&quot;conf/server.keystore&quot;
+    keystorePass=&quot;xxxx&quot;/&amp;gt;
+</code></pre>
+<p>本以为万事大吉，结果甲方爸爸因为密码是直接写的明文，要求我们必须把密码穿成加密的🥲。</p>
+<p>不过还好顺带也给了我份博客：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/suncoolcat/p/3292252.html">tomcat安全配置之证书密码加密存储</a></p>
+<h1 id="2-tomcat配置https"><a href="#2-tomcat配置https" class="headerlink" title="2. tomcat配置https"></a>2. tomcat配置https</h1><h2 id="2-1-编写实现类"><a href="#2-1-编写实现类" class="headerlink" title="2.1 编写实现类"></a>2.1 编写实现类</h2><p>其实这份博客已经说的很清楚了，只需要继承<code>Http11NioProtocol</code>这个类就可以了</p>
+<blockquote>
+<p>博客里用的<code>Http11Protocol</code>，这个类已经被标记为<code>@Deprecated</code>的了，所以我们直接用它的父类，效果是一样的。</p>
+</blockquote>
+<p>但是这个博客还是不太完整，这个类怎么打jar包？<code>Http11Protocol</code>从哪里来？打了的jar包丢在哪里？博客里都没有说明。</p>
+<p>这里我自己研究了一下，首先创建一个maven项目，pom.xml添加依赖：</p>
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.apache.tomcat&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;tomcat-coyote&amp;lt;/artifactId&amp;gt;
+    &amp;lt;version&amp;gt;8.5.87&amp;lt;/version&amp;gt;
+    &amp;lt;scope&amp;gt;provided&amp;lt;/scope&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
+<p>注意scope是provided。</p>
+<p>之后就可以直接写代码了：</p>
+<pre><code class="java">import org.apache.coyote.http11.Http11NioProtocol;
+
+public class EncryptedHttp11Protocol extends Http11NioProtocol &#123;
+
+    @Override
+    public void init() throws Exception &#123;
+        // 进行你自己的密码获取逻辑
+        setKeystorePass(&quot;xxx&quot;);
+        super.init();
+    &#125;
+
+&#125;
+</code></pre>
+<p>写完直接用maven打包：</p>
+<pre><code class="shell">mvn package -DskipTests
+</code></pre>
+<p>然后丢到tomcat目录的lib文件夹里就可以了。</p>
+<p>最后配置server.xml：</p>
+<pre><code class="xml"> &amp;lt;Connector port=&quot;8443&quot; protocol=&quot;xxxxxxx.EncryptedHttp11Protocol&quot; SSLEnabled=&quot;true&quot;
+    keystoreFile=&quot;conf/server.keystore&quot;
+    sslProtocol=&quot;TLS&quot;&amp;gt;
+&amp;lt;/Connector&amp;gt;
+</code></pre>
+<p><strong>注意protocol属性要改成你自己的实现类</strong></p>
+<h2 id="2-2-设置环境变量"><a href="#2-2-设置环境变量" class="headerlink" title="2.2 设置环境变量"></a>2.2 设置环境变量</h2><p>由于jks被加密，需要提供密码，因此推荐的方法是通过系统环境变量来提供（这里直接根据自己的机器设置即可）。<br>在java代码里这样获取系统环境变量：</p>
+<pre><code class="java">String value = System.getenv(key);
+</code></pre>
+<h2 id="2-3-设置命令行参数"><a href="#2-3-设置命令行参数" class="headerlink" title="2.3 设置命令行参数"></a>2.3 设置命令行参数</h2><p>也可以通过设置tomcat命令行参数来传输秘钥，<br>在tomcat的bin目录下创建setenv.bat(windows) &#x2F; setenv.sh (linux)文件，并且配置相关参数即可。</p>
+<p>windows: </p>
+<pre><code class="bat">set &quot;JAVA_OPTS=-DsecretKey=xxxx -DsercretKey2=xxxx&quot;
+</code></pre>
+<p>linux:</p>
+<pre><code class="shell">JAVA_OPTS=&quot;-DsecretKey=xxxx -DsercretKey2=xxxx&quot;
+</code></pre>
+<p>之后在代码中这样获取：</p>
+<pre><code class="java">String value = System.getProperty(key);
+</code></pre>
+<h1 id="3-SpringBoot内嵌tomcat配置https"><a href="#3-SpringBoot内嵌tomcat配置https" class="headerlink" title="3. SpringBoot内嵌tomcat配置https"></a>3. SpringBoot内嵌tomcat配置https</h1><p>你说的对，但是我是SpringBoot内嵌tomcat！</p>
+<p>公司的众多模块中，偏偏就是有一个SpringBoot项目，这玩意用的内嵌tomcat，上面的方法都用不了👎👎👎。</p>
+<p>首先我们要知道SpringBoot项目怎么开启https：</p>
+<pre><code class="yaml">server:
+    ssl:
+        enabled: true
+        key-store: classpath:server.keystore
+        key-store-password: xxxxxx
+</code></pre>
+<p>我们只需要找到一个方法在配置ssl前修改配置，提供密码即可。</p>
+<p>你别说，还真被我找到了，在启动类添加下面的代码：</p>
+<pre><code class="java">@Bean
+public WebServerFactoryCustomizer&amp;lt;UndertowServletWebServerFactory&amp;gt; webServerFactoryCustomizer() &#123;
+    return factory -&amp;gt; &#123;
+        Ssl ssl = factory.getSsl();
+        if (ssl == null || !ssl.isEnabled()) &#123;
+            return;
+        &#125;
+        
+        // ... 获取秘钥
+
+        ssl.setKeyStorePassword(&quot;xxxx&quot;);
+    &#125;;
+&#125;
+</code></pre>
+<p>甚至你在这里还可以引用刚才为tomcat准备的jar包，直接使用里面的秘钥获取逻辑，就不用再写一遍了√。</p>
+<h1 id="4-其它：由证书和私钥生成jks文件"><a href="#4-其它：由证书和私钥生成jks文件" class="headerlink" title="4. 其它：由证书和私钥生成jks文件"></a>4. 其它：由证书和私钥生成jks文件</h1><p>首先执行命令生成p12文件（输入后会要求输入密码，直接填上你要的密码就行）：</p>
+<pre><code class="shell">openssl pkcs12 -export -in server.crt -inkey server.key -out server.p12
+</code></pre>
+<p>输完后执行：</p>
+<pre><code class="shell">keytool -importkeystore -v -srckeystore server.p12 -srcstoretype pkcs12 -srcstorepass 上面的密码 -destkeystore server.keystore -destoretype jks -deststorepass 上面的密码
+</code></pre>
+<p>这里如果jdk版本过低会报错：</p>
+<pre><code class="java">keytool 错误: java.io.IOException: parseAlgParameters failed: ObjectIdentifier() -- data isn&#39;t an object ID (tag = 48)
+java.io.IOException: parseAlgParameters failed: ObjectIdentifier() -- data isn&#39;t an object ID (tag = 48)
+        at sun.security.pkcs12.PKCS12KeyStore.parseAlgParameters(PKCS12KeyStore.java:816)
+        at sun.security.pkcs12.PKCS12KeyStore.engineLoad(PKCS12KeyStore.java:2018)
+        at java.security.KeyStore.load(KeyStore.java:1445)
+        at sun.security.tools.keytool.Main.loadSourceKeyStore(Main.java:2040)
+        at sun.security.tools.keytool.Main.doCommands(Main.java:1067)
+        at sun.security.tools.keytool.Main.run(Main.java:366)
+        at sun.security.tools.keytool.Main.main(Main.java:359)
+Caused by: java.io.IOException: ObjectIdentifier() -- data isn&#39;t an object ID (tag = 48)
+        at sun.security.util.ObjectIdentifier.&amp;lt;init&amp;gt;(ObjectIdentifier.java:257)
+        at sun.security.util.DerInputStream.getOID(DerInputStream.java:314)
+        at com.sun.crypto.provider.PBES2Parameters.engineInit(PBES2Parameters.java:267)
+        at java.security.AlgorithmParameters.init(AlgorithmParameters.java:293)
+        at sun.security.pkcs12.PKCS12KeyStore.parseAlgParameters(PKCS12KeyStore.java:812)
+        ... 6 more
+</code></pre>
+<p>这里用的jdk1.8.0_241导致的报错，换成jdk-11.0.18可以正常执行，其它版本暂未测试。</p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/08/30/tomcat-custom-https/" class="go-post">阅读全文</a>
+</div>
 
 <div class="post post-partial-show">
     <a href="/2023/05/04/svn/">
@@ -210,15 +361,15 @@
 <h1 id="2-创建仓库"><a href="#2-创建仓库" class="headerlink" title="2. 创建仓库"></a>2. 创建仓库</h1><p>SVN不支持离线操作，也就是说你想要创建一个仓库，你必须先去服务器支棱一个起来，这里我们直接用码云（<a target="_blank" rel="noopener" href="https://gitee.com/">工作台 - Gitee.com</a>）就好了。</p>
 <p>随便创建一个项目，点击管理 -&amp;gt; 功能设置 -&amp;gt; 启用SVN访问。</p>
 <p>之后克隆项目，记得要选SVN的协议：</p>
-<p><img lazy="https://xds.asia/public/svn/2023-4-4-f7e03d78-69bd-4d0e-99dd-7f795e9bb813.webp" alt="克隆地址"></p>
+<p><img lazy="https://selfb.asia/public/svn/2023-4-4-f7e03d78-69bd-4d0e-99dd-7f795e9bb813.webp" alt="克隆地址"></p>
 <p>之后进入任意文件夹，鼠标右键，点击<code>Checkout</code>，之后会弹出来这个：</p>
-<p><img lazy="https://xds.asia/public/svn/2023-4-4-4c484952-5b77-4b8f-a1e0-d608c149731d.webp" alt="Checkout"></p>
+<p><img lazy="https://selfb.asia/public/svn/2023-4-4-4c484952-5b77-4b8f-a1e0-d608c149731d.webp" alt="Checkout"></p>
 <p>第一个表单就是我们的仓库地址，第二个就是我们要将项目拉到的地方，第三<code>Checkout Depth</code>就是你克隆的深度，你可以选择全部复制（Fully recursive），也可以选择部分，一般配合下面的<code>Choose items</code>按钮使用。</p>
 <p>Omit externals表示忽略外部设备，目前不是很清楚有什么用。</p>
 <p>最后一个框（Revision）就是版本信息选择了，你可以直接选择最新分支（HEAD revision），也可以通过<code>Show log</code>选择历史分支来进行克隆。</p>
 <p>选好后点击OK进行克隆。</p>
 <h1 id="3-提交修改"><a href="#3-提交修改" class="headerlink" title="3. 提交修改"></a>3. 提交修改</h1><p>我们在本地进行任意修改，修改完后在任意子目录或者根目录鼠标右键，在<code>TortoiseSVN</code>选项下找到<code>Commit</code>选项，点开会出现这个：</p>
-<p><img lazy="https://xds.asia/public/svn/2023-4-4-f6b3b8a9-a01e-4918-8f6d-5febeaba9268.webp" alt="Commit"></p>
+<p><img lazy="https://selfb.asia/public/svn/2023-4-4-f6b3b8a9-a01e-4918-8f6d-5febeaba9268.webp" alt="Commit"></p>
 <p>最上面的<code>Message</code>就是提交信息，没有什么好说的。</p>
 <p>下面那个框就是选择你需要提交的文件。</p>
 <p><font color=red><strong>注意：SVN的Commit会直接提交到服务器，它不是跟Git一样本地提交！！！千万不要乱提交。</strong></font></p>
@@ -228,12 +379,12 @@
 </ul>
 <p>其它的暂时用不上，我们选好后，直接提交，然后再去码云上看，就可以看到提交结果了。</p>
 <h1 id="4-解决冲突"><a href="#4-解决冲突" class="headerlink" title="4. 解决冲突"></a>4. 解决冲突</h1><p>这里我们先在码云上修改一下，然后也在本地修改同样的文件，然后在本地提交：</p>
-<p><img lazy="https://xds.asia/public/svn/2023-4-4-be381ad9-6523-406d-9d22-494a2fc9dc81.webp" alt="Commit failed"></p>
+<p><img lazy="https://selfb.asia/public/svn/2023-4-4-be381ad9-6523-406d-9d22-494a2fc9dc81.webp" alt="Commit failed"></p>
 <p>提交失败了，可以发现它让我们去更新：</p>
 <pre><code class="text">You have to update your working copy first
 </code></pre>
 <p>那我们就更新，直接项目目录下右键，点击<code>Update</code>，结果又报错了：</p>
-<p><img lazy="https://xds.asia/public/svn/2023-4-4-f69a5b86-d6c6-42d8-a8e4-ba19423d7380.webp" alt="Update failed"></p>
+<p><img lazy="https://selfb.asia/public/svn/2023-4-4-f69a5b86-d6c6-42d8-a8e4-ba19423d7380.webp" alt="Update failed"></p>
 <p>可以发现是因为出现了文件冲突，和Git一样，我们需要先解决冲突后再提交。</p>
 <p>这里是我本地的文件内容：</p>
 <pre><code class="text">hello world
@@ -310,7 +461,7 @@ hello world
 123312312&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt; .r4
 </code></pre>
 <p>这特么谁看得懂，别急，还记得之前我说过SVN有丰富的图形客户端吗？这里就还真有解决冲突用的玩意：</p>
-<p><img lazy="https://xds.asia/public/svn/2023-4-4-bd001ea3-fca1-4b2d-9950-64f0e52cc430.webp" alt="Edit conflicts"></p>
+<p><img lazy="https://selfb.asia/public/svn/2023-4-4-bd001ea3-fca1-4b2d-9950-64f0e52cc430.webp" alt="Edit conflicts"></p>
 <p>打开后就非常直观了，这里就不放图了，修改完后点击左上角的<code>Save</code>保存，这时它会问你冲突是否已经解决完毕了，如果选择解决完了（Mark as resolved），就可以直接提交了。当然如果又冲突了，就又需要重复上述过程。</p>
 <h1 id="5-代码暂存"><a href="#5-代码暂存" class="headerlink" title="5. 代码暂存"></a>5. 代码暂存</h1><p>待补坑。</p>
 
@@ -496,7 +647,7 @@ while (byteBuffer.hasRemaining()) &#123;
 </ul>
 <h1 id="2-高度为3的B-树能存多少条数据"><a href="#2-高度为3的B-树能存多少条数据" class="headerlink" title="2. 高度为3的B+树能存多少条数据"></a>2. 高度为3的B+树能存多少条数据</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6974225353371975693">MySQL系列（4）— InnoDB数据页结构 - 掘金 (juejin.cn)</a></p>
 <p>在InnoDB中，索引默认使用的数据结构为B+树，而B+树里的每个节点都是一个页，默认的页大小为<code>16KB</code>。</p>
-<p><img lazy="https://xds.asia/public/post/2023-3-0-fed73c7c-b6fb-40e4-9b27-1a95fccd77c8.webp" alt="page"></p>
+<p><img lazy="https://selfb.asia/public/post/2023-3-0-fed73c7c-b6fb-40e4-9b27-1a95fccd77c8.webp" alt="page"></p>
 <h1 id="3-简单说一下InnoDB事务实现原理"><a href="#3-简单说一下InnoDB事务实现原理" class="headerlink" title="3. 简单说一下InnoDB事务实现原理"></a>3. 简单说一下InnoDB事务实现原理</h1><p>事务ACID：</p>
 <table>
 <thead>
@@ -537,7 +688,7 @@ while (byteBuffer.hasRemaining()) &#123;
 <p>这里其实有个问题，如果我只是单独的一条查询语句，没有开启事务，那么怎么去快照读呢？</p>
 <p>这个我自己查了一下，众所周知，MySql里有一个autocommit属性，对于单条SQL，这个值一定是true，那么是不是说明我们每条SQL都会被认作是一个事务呢？</p>
 <p>然后我在官方文档里查了一下：</p>
-<p><img lazy="https://xds.asia/public/interview/2023-2-0-bd1f976d-ac67-49a3-979b-1b9cd4fa2c6d.webp" alt="每条SQL都是一个单独的事务"></p>
+<p><img lazy="https://selfb.asia/public/interview/2023-2-0-bd1f976d-ac67-49a3-979b-1b9cd4fa2c6d.webp" alt="每条SQL都是一个单独的事务"></p>
 <p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/innodb-autocommit-commit-rollback.html">MySQL :: MySQL 5.7 Reference Manual :: 14.7.2.2 autocommit, Commit, and Rollback</a></p>
 <p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/innodb-autocommit-commit-rollback.html">MySQL :: MySQL 8.0 Reference Manual :: 15.7.2.2 autocommit, Commit, and Rollback</a></p>
 <p>不管是8.0还是5.7，都是这样写的，那么就可以说的通了。每次执行单条SQL都会拿到一个事务id，然后再去进行快照读。</p>
@@ -577,7 +728,7 @@ select * from test where id = 1;
 <p>这次执行后，<font color=red>发现两次查询的结果都是一样的</font>，而且在事务A执行更新后且没有提交时，B再去读，<font color=red>并没有发生阻塞，因为在修改数据的时候会加排它锁，在读的时候要么是当前读要么是快照读，</font>如果是当前读，那么读操作会堵塞，说明在B这里是快照读，是创建了ReadView的，通过ReadView有效地避免了不可重复读。</p>
 <p>我们再用同样的方式去验证ReadCommited级别的读，发现同样是快照读，那么凭什么RepeatableRead不会读到新值，而ReadCommited会呢？</p>
 <p>这里我画了一个流程图方便理解：</p>
-<p><img lazy="https://xds.asia/public/interview/2023-2-1-7f41e3a0-6d4e-42e8-b44e-d85eecdbd465.webp" alt="流程图"></p>
+<p><img lazy="https://selfb.asia/public/interview/2023-2-1-7f41e3a0-6d4e-42e8-b44e-d85eecdbd465.webp" alt="流程图"></p>
 <p><del>图画的可能不太好，不过应该能看懂</del></p>
 <p>网上大部分人讲的都是以ReadCommited级别为例子的，即m_ids里的事务提交后可读，但其实在RepeatableRead隔离级别下是读不了的，只能走undo_log进行回滚。</p>
 <hr>
@@ -657,7 +808,7 @@ select * from test where id = 1;
     int iterators; /* number of iterators currently running */
 &#125; dict;
 </code></pre>
-<p><img lazy="https://xds.asia/public/post/2023-2-3-0c4958ca-7128-481d-807c-0c95384937ec.webp" alt="总览"></p>
+<p><img lazy="https://selfb.asia/public/post/2023-2-3-0c4958ca-7128-481d-807c-0c95384937ec.webp" alt="总览"></p>
 <h1 id="2-Redis扩容与缩容"><a href="#2-Redis扩容与缩容" class="headerlink" title="2. Redis扩容与缩容"></a>2. Redis扩容与缩容</h1><p>我们用<code>ht[0].used/ht[0].size</code>表示负载因子</p>
 <h2 id="2-1-扩容"><a href="#2-1-扩容" class="headerlink" title="2.1 扩容"></a>2.1 扩容</h2><ul>
 <li><p>如果没有<strong>fork</strong>子进程在执行<strong>RDB</strong>或者<strong>AOF</strong>的持久化，一旦满足<strong>负载因子大于等于1</strong>，此时触发扩容；</p>
@@ -976,7 +1127,7 @@ address                                |                          |        |
 <li>节点的长度大于等64(server.zset_max_ziplist_value)</li>
 </ul>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/wangxuelei036/article/details/106272680">Redis 跳跃表skiplist(深入理解,面试再也不用怕)_redis skiplist_妖四灵.Shuen的博客-CSDN博客</a></p>
-<p><img lazy="https://xds.asia/public/interview/2023-2-4-70e28030-df93-4d4d-9043-9e3afd7b975b.webp" alt="跳表"></p>
+<p><img lazy="https://selfb.asia/public/interview/2023-2-4-70e28030-df93-4d4d-9043-9e3afd7b975b.webp" alt="跳表"></p>
 <ul>
 <li>header：指向跳跃表的表头节点</li>
 <li>tail：指向跳跃表的表尾节点</li>
@@ -1182,178 +1333,6 @@ sadd animals &quot;lion&quot;
     <a href="/2023/03/28/redis-interview/" class="go-post">阅读全文</a>
 </div>
 
-<div class="post post-partial-show">
-    <a href="/2023/03/23/springboot-interview/">
-        <h2 class="post-title">springboot源码</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2023/3/23
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <h1 id="1-基础"><a href="#1-基础" class="headerlink" title="1. 基础"></a>1. 基础</h1><p>通过<code>AnnotationConfigApplicationContext</code>可以创建一个Spring容器：</p>
-<pre><code class="java">public class MySpringApplication &#123;
-
-    public static void main(String[] args) &#123;
-        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
-
-        UserService userService = (UserService) applicationContext.getBean(&quot;userService&quot;);
-        userService.test();
-    &#125;
-
-&#125;
-
-@ComponentScan(&quot;pers.xds.springboot&quot;)
-public class AppConfig &#123;
-&#125;
-</code></pre>
-<h2 id="1-1-生命周期"><a href="#1-1-生命周期" class="headerlink" title="1.1 生命周期"></a>1.1 生命周期</h2><p>可以在<code>AbstractAutowireCapableBeanFactory#doCreateBean</code>中看到完整的bean生成流程。</p>
-<p>大致分为如下过程：</p>
-<p>1.对Bean进行实例化</p>
-<p>2.依赖注入</p>
-<p>3.如果Bean实现了<code>BeanNameAware</code>接口，Spring将调用<code>setBeanName()</code>，设置 <code>Bean</code>的 id（xml文件中bean标签的id）</p>
-<p>4.如果Bean实现了<code>BeanFactoryAware</code>接口，Spring将调用<code>setBeanFactory()</code></p>
-<p>5.如果Bean实现了<code>ApplicationContextAware</code>接口，Spring容器将调用<code>setApplicationContext()</code></p>
-<p>6.如果存在<code>BeanPostProcessor</code>，Spring将调用它们的<code>postProcessBeforeInitialization</code>（预初始化）方法，在Bean初始化前对其进行处理</p>
-<p>7.如果Bean实现了<code>InitializingBean</code>接口，Spring将调用它的<code>afterPropertiesSet</code>方法，然后调用xml定义的 init-method方法(初始化)，两个方法作用类似，都是在初始化 bean 的时候执行</p>
-<p>8.如果存在<code>BeanPostProcessor</code>，Spring将调用它们的<code>postProcessAfterInitialization</code>（后初始化）方法，在Bean初始化后对其进行处理</p>
-<p>9.Bean初始化完成，供应用使用，直到应用被销毁</p>
-<p>10.如果Bean实现了<code>DisposableBean</code>接口，Spring将调用它的<code>destory</code>方法，然后调用在xml中定义的 <code>destory-method</code>方法，这两个方法作用类似，都是在Bean实例销毁前执行。</p>
-<h2 id="1-2-BeanFactory和FactoryBean的区别"><a href="#1-2-BeanFactory和FactoryBean的区别" class="headerlink" title="1.2 BeanFactory和FactoryBean的区别"></a>1.2 BeanFactory和FactoryBean的区别</h2><p><code>BeanFactory</code>：管理Bean的容器，Spring中生成的Bean都是由这个接口的实现来管理的。</p>
-<p><code>FactoryBean</code>：让开发者以编程的方式来创建一个bean，一般用于创建比较复杂的bean。</p>
-<h2 id="1-3-Bean注入容器有哪些方式"><a href="#1-3-Bean注入容器有哪些方式" class="headerlink" title="1.3 Bean注入容器有哪些方式"></a>1.3 Bean注入容器有哪些方式</h2><p>1、使用<code>@Configuration</code>与<code>@Bean</code>注解</p>
-<p>2、使用<code>@Controller</code>、<code>@Service</code>、<code>@Repository</code>、<code>@Component</code> 注解标注该类，然后启用<code>@ComponentScan</code>自动扫描</p>
-<p>3、使用<code>@Import</code> 方法，使用@Import注解把bean导入到当前容器中。</p>
-<h2 id="1-4-Bean的作用域"><a href="#1-4-Bean的作用域" class="headerlink" title="1.4 Bean的作用域"></a>1.4 Bean的作用域</h2><p>1、singleton：单例，Spring中的bean默认都是单例的。</p>
-<p>2、prototype：每次请求都会创建一个新的bean实例。</p>
-<p>3、request：每一次HTTP请求都会产生一个新的bean，该bean仅在当前HTTP request内有效。</p>
-<p>4、session：每一次HTTP请求都会产生一个新的bean，该bean仅在当前HTTP session内有效。</p>
-<p>5、application：限定一个Bean的作用域为<code>ServletContext</code>的生命周期。该作用域仅适用于web的Spring WebApplicationContext环境。</p>
-<h2 id="1-5-自动装配的方式"><a href="#1-5-自动装配的方式" class="headerlink" title="1.5 自动装配的方式"></a>1.5 自动装配的方式</h2><p><code>@Autowired</code>注解会优先根据类型来注入，当有多个bean时，会尝试根据变量名来注入(byname)，如果没有找到就抛出异常。</p>
-<p>可以通过<code>@Qualifier</code>来指定要注入的bean的名称。</p>
-<p><code>@Resource</code>注解会优先byname，找不到再byType。</p>
-<h2 id="1-6-Bean和-Component的区别"><a href="#1-6-Bean和-Component的区别" class="headerlink" title="1.6 @Bean和@Component的区别"></a>1.6 @Bean和@Component的区别</h2><p><code>@Bean</code>只能作用于方法上，表示这个方法会返回一个Bean，一般需要配合<code>@Configuration</code>使用。</p>
-<p><code>@Component</code>只能作用于类型上，表示这个类会作为组件类，并告诉Spring要为这个类创建bean。</p>
-<h3 id="1-6-1-Bean必须在-Configuration里使用吗"><a href="#1-6-1-Bean必须在-Configuration里使用吗" class="headerlink" title="1.6.1 @Bean必须在@Configuration里使用吗?"></a>1.6.1 @Bean必须在@Configuration里使用吗?</h3><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/40256702/spring-bean-can-still-work-without-configuration">Spring: @Bean can still work without @Configuration - Stack Overflow</a></p>
-<p><code>@Bean</code>在<code>@Configuration</code>表示的类里使用时，Spring会为其自动创建一个动态代理对象，在同一个配置类中可以直接调用方法来获取Bean：</p>
-<pre><code class="java">@Configuration
-public class ExampleConfiguration &#123;
-    
-    @Bean
-    public Datasource datasource() &#123;
-        BasicDatasource datasource = new BasicDatasource();
-        // ...
-        return datasource;
-    &#125;
-    
-    public PlatformTransactionManager transactionManager() &#123;
-          // 注意这里是直接调用了方法，每次调用都会返回同一个bean，并不会多次创建
-        return new DataSourceTransactionManager(datasource());
-    &#125;
-    
-&#125;
-</code></pre>
-<p>而在非<code>@Configuration</code>下定义的<code>@Bean</code>会以Lite Mode运作，在该模式下调用其它<code>@Bean</code>方法时，则是普通的方法调用(没有代理对象去拦截调用)。</p>
-<h2 id="1-7-Spring怎么解决循环依赖问题"><a href="#1-7-Spring怎么解决循环依赖问题" class="headerlink" title="1.7 Spring怎么解决循环依赖问题"></a>1.7 Spring怎么解决循环依赖问题</h2><p>对于构造器注入的循环依赖：Spring处理不了，直接抛出<code>BeanCurrentlylnCreationException</code>异常。</p>
-<p>非单例循环依赖：无法处理。</p>
-<p>单例模式下属性注入的循环依赖会通过三级缓存处理循环依赖：</p>
-<p><code>singletonObjects</code>：完成了初始化的单例对象map，bean name –&amp;gt; bean instance</p>
-<p><code>earlySingletonObjects</code>：完成实例化未初始化的单例对象map，bean name –&amp;gt; bean instance</p>
-<p><code>singletonFactories</code>： 单例对象工厂map，bean name –&amp;gt; ObjectFactory，存放 bean 工厂对象</p>
-<p>具体的执行逻辑可以在<code>DefaultSingletonBeanRegistry</code>中看到，这里贴出核心方法：</p>
-<pre><code class="java">protected Object getSingleton(String beanName, boolean allowEarlyReference) &#123;
-    Object singletonObject = this.singletonObjects.get(beanName);
-    if (singletonObject == null &amp;&amp; this.isSingletonCurrentlyInCreation(beanName)) &#123;
-        singletonObject = this.earlySingletonObjects.get(beanName);
-        if (singletonObject == null &amp;&amp; allowEarlyReference) &#123;
-            synchronized(this.singletonObjects) &#123;
-                singletonObject = this.singletonObjects.get(beanName);
-                if (singletonObject == null) &#123;
-                    singletonObject = this.earlySingletonObjects.get(beanName);
-                    if (singletonObject == null) &#123;
-                        ObjectFactory&amp;lt;?&amp;gt; singletonFactory = (ObjectFactory)this.singletonFactories.get(beanName);
-                        if (singletonFactory != null) &#123;
-                            singletonObject = singletonFactory.getObject();
-                            this.earlySingletonObjects.put(beanName, singletonObject);
-                            this.singletonFactories.remove(beanName);
-                        &#125;
-                    &#125;
-                &#125;
-            &#125;
-        &#125;
-    &#125;
-
-    return singletonObject;
-&#125;
-</code></pre>
-<h2 id="1-8-Spring的单例Bean是否有线程安全问题"><a href="#1-8-Spring的单例Bean是否有线程安全问题" class="headerlink" title="1.8 Spring的单例Bean是否有线程安全问题"></a>1.8 Spring的单例Bean是否有线程安全问题</h2><p>当多个用户同时请求一个服务时，容器会给每一个请求分配一个线程，这时多个线程会并发执行该请求对应的业务逻辑，如果业务逻辑有对单例状态的修改（体现为此单例的成员属性），则必须考虑线程安全问题。</p>
-<p>若每个线程中对全局变量、静态变量只有读操作，而无写操作，那么不会有线程安全问题；若有多个线程同时执行写操作，一般都需要考虑线程同步，否则就可能影响线程安全。</p>
-<p><strong>无状态bean和有状态bean</strong></p>
-<ul>
-<li>有实例变量的bean，可以保存数据，是非线程安全的。</li>
-<li>没有实例变量的对象。不能保存数据，是线程安全的。</li>
-</ul>
-<p>在Spring中无状态的Bean适合用单例模式，这样可以共享实例提高性能。有状态的Bean在多线程环境下不安全，一般用Prototype模式或者使用ThreadLocal解决线程安全问题。</p>
-<h2 id="1-9-Spring容器的启动过程"><a href="#1-9-Spring容器的启动过程" class="headerlink" title="1.9 Spring容器的启动过程"></a>1.9 Spring容器的启动过程</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_35190492/article/details/110383213">阿里面试真题：Spring容器启动流程_spring启动流程面试题_敖 丙的博客-CSDN博客</a></p>
-<h1 id="2-AOP"><a href="#2-AOP" class="headerlink" title="2. AOP"></a>2. AOP</h1><p>常见的动态代理有两种：</p>
-<ul>
-<li><p>JDK动态代理：基于Java反射机制实现，必须要实现了接口的业务类才生成代理对象。</p>
-</li>
-<li><p>CGLIB动态代理：基于ASM机制实现，通过生成业务类的子类作为代理类。</p>
-</li>
-</ul>
-<p>JDK Proxy的优势：</p>
-<p>​	最小化依赖关系、代码实现简单、简化开发和维护、JDK原生支持，比CGLIB更加可靠，随JDK版本平滑升级。而字节码类库通常需要进行更新以保证在新版Java上能够使用。</p>
-<p>CGLIB的优势：</p>
-<p>​	无需实现接口，达到代理类无侵入，只操作关心的类，而不必为其他相关类增加工作量。高性能。</p>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/115744594">Java动态代理之一CGLIB详解 - 知乎 (zhihu.com)</a></p>
-<h1 id="3-Spring事务"><a href="#3-Spring事务" class="headerlink" title="3. Spring事务"></a>3. Spring事务</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903608224333838">可能是最漂亮的Spring事务管理详解 - 掘金 (juejin.cn)</a></p>
-<h1 id="4-MyBatis工作原理"><a href="#4-MyBatis工作原理" class="headerlink" title="4. MyBatis工作原理"></a>4. MyBatis工作原理</h1><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6993253212853633055#heading-8">一文搞懂Mybatis架构与工作原理 - 掘金 (juejin.cn)</a></p>
-<ol>
-<li><p>加载映射文件(通过动态代理和xml为接口生成对应的代理类)</p>
-</li>
-<li><p>构造会话工程(SqlSessionFactory)</p>
-</li>
-<li><p>创建会话对象(SqlSession)</p>
-<pre><code class="java">try (SqlSession session = sqlSessionFactory.openSession()) &#123;
-  BlogMapper mapper = session.getMapper(BlogMapper.class);
-  Blog blog = mapper.selectBlog(101);
-&#125;
-</code></pre>
-</li>
-<li><p>Executor执行器</p>
-<p>Mybatis会通过Executor去执行SQL语句。一般这里面会有缓存的实现。</p>
-</li>
-<li><p>MappedStatement对象</p>
-<p>对映射信息的封装，它存储了一个SQL对应的所有信息。Mybatis 通过解析 XML 和 mapper 接口上的注解，生成 sql 对应的 MappedStatement 实例</p>
-</li>
-<li><p>输入参数映射</p>
-</li>
-<li><p>输出参数映射</p>
-</li>
-</ol>
-<p>​	将数据库输出转换为 <code>Map</code>，<code>List</code>或自定义的类型</p>
-<p><img lazy="https://xds.asia/public/post/2023-3-2-ca9cc3cd-cb95-4437-8182-2476f326260d.webp"></p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/2023/03/23/springboot-interview/" class="go-post">阅读全文</a>
-</div>
-
 
             <div class="page-current">
     <div class="prev">
@@ -1376,6 +1355,8 @@ public class ExampleConfiguration &#123;
         <span>
             <a class="page-num" href="/page/3/">3</a>
             
+            <a class="page-num" href="/page/4">4</a>
+            
             
         </span>
         
@@ -1396,7 +1377,7 @@ public class ExampleConfiguration &#123;
         <div id="card-div">
     <div class="card-style" style="width: 300px">
         <div class="avatar">
-            <img src="https://xds.asia/avatar/1.webp" alt="avatar" />
+            <img src="https://selfb.asia/avatar/1.webp" alt="avatar" />
         </div>
         <div class="name">IceOfSummer</div>
         <div class="description">

@@ -10,7 +10,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
         <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
 <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
-<link rel="stylesheet" href="https://xds.asia/static/particlex/static/fonts.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
 <script>
   const mixins = {};
   const h = (arg1, arg2, arg3) => {
@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#JVM" style="color: #00bcd4">JVM</a>
+                <a href="/2023/03/05/java-source#JVM" style="color: #ffa2c4">JVM</a>
             </span>
             
         </span>
@@ -208,7 +208,7 @@
 <p>其中偏向锁在java15中移除，原因是CAS等无锁操作的运用，导致偏向锁带来的收益已不如过去那么明显，而且在当下多线程应用越来越普遍的情况下，偏向锁带来的锁升级操作反而会影响应用的性能。</p>
 <p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/374">JEP 374: Deprecate and Disable Biased Locking (openjdk.org)</a></p>
 <p>这里就分别讲一下这四种锁。</p>
-<p><img lazy="https://xds.asia/public/java-source/2023-2-2-de291360-1965-4703-9a79-4d02de57fb6e.webp" alt="对象内存布局"></p>
+<p><img lazy="https://selfb.asia/public/java-source/2023-2-2-de291360-1965-4703-9a79-4d02de57fb6e.webp" alt="对象内存布局"></p>
 <h1 id="1-四种锁"><a href="#1-四种锁" class="headerlink" title="1.四种锁"></a>1.四种锁</h1><h2 id="1-1-无锁态"><a href="#1-1-无锁态" class="headerlink" title="1.1 无锁态"></a>1.1 无锁态</h2><p>首先这里需要注意一点：<font color=red>无锁态只能升级为轻量级锁，不能升级为偏向锁</font>。</p>
 <p>听起来很扯淡，不过我们用代码验证一下。</p>
 <p>我们都知道Java会默认在4秒后启动偏向锁，这个可以用<code>BiasedLockingStartupDelay</code>参数控制，那么在4秒前的锁，在释放后，一定会是无锁态，这时候我们再尝试加锁，看看结果会怎样：</p>

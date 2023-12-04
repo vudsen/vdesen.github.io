@@ -10,7 +10,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
         <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
 <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
-<link rel="stylesheet" href="https://xds.asia/static/particlex/static/fonts.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
 <script>
   const mixins = {};
   const h = (arg1, arg2, arg3) => {
@@ -164,7 +164,7 @@
 </nav>
 
                 <div id="home-head">
-    <div id="home-background" ref="homeBackground" data-image="https://xds.asia/public/2023-2-6-8d14e464-2200-4e54-af81-0d9f25f55b3e.webp,https://xds.asia/public/2023-2-0-017e03b0-992c-4844-b28f-869799d32b96.webp,https://xds.asia/public/2023-2-0-66a241f4-eca3-45f3-b590-05aeed688f60.webp,https://xds.asia/public/2023-2-0-481f472f-e980-4cee-8ab8-ca66f5fd370a.webp,https://xds.asia/public/2023-2-2-2adf4d48-496a-49a4-8ca3-f64e035d8835.webp"></div>
+    <div id="home-background" ref="homeBackground" data-image="https://selfb.asia/public/2023-2-6-8d14e464-2200-4e54-af81-0d9f25f55b3e.webp,https://selfb.asia/public/2023-2-0-017e03b0-992c-4844-b28f-869799d32b96.webp,https://selfb.asia/public/2023-2-0-66a241f4-eca3-45f3-b590-05aeed688f60.webp,https://selfb.asia/public/2023-2-0-481f472f-e980-4cee-8ab8-ca66f5fd370a.webp,https://selfb.asia/public/2023-2-2-2adf4d48-496a-49a4-8ca3-f64e035d8835.webp"></div>
     
     <div id="home-info" @click="homeClick">
         <span class="loop"></span>
@@ -185,6 +185,89 @@
     <div id="home-posts">
         <div id="posts">
             
+
+<div class="post post-partial-show">
+    <a href="/2023/11/27/ts-feature/">
+        <h2 class="post-title">TypeScript骚操作</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="category">
+            <a href="/categories/%E5%89%8D%E7%AB%AF/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                前端
+            </a>
+        </span>
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/11/27
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <h1 id="可变参数"><a href="#可变参数" class="headerlink" title="可变参数"></a>可变参数</h1><p>写过ReactNative的都知道，ReactNavigation库里面有一个非常牛逼的类型声明，它可以根据你传入的参数，来判断是否需要第二个参数。</p>
+<p>例如下面的定义：</p>
+<pre><code class="typescript">interface RouteDef &#123;
+    home: undefined
+    shop: &#123;
+        time: number
+    &#125;
+&#125;
+</code></pre>
+<p>那么它的路由方法就变得很牛逼了：</p>
+<pre><code class="typescript">// 实际的泛型肯定不是这么传的，因为我写的时候没用RN了，所有忘了咋用的了
+const nav = useNavigation&amp;lt;RouteDef&amp;gt;()
+
+// 正确
+nav(&#39;home&#39;)
+
+// 错误: ts提示这里只需要一个参数 
+nav(&#39;home&#39;, undefined)
+
+// 错误，ts提示这里需要两个参数
+nav(&#39;shop&#39;)
+
+// 正确
+nav(&#39;shop&#39;, &#123; time: Date.now() &#125;)
+
+// 错误: 第二个参数需要&#123; time: number &#125;类型，而提供的是number
+nav(&#39;shop&#39;, Date.now())
+</code></pre>
+<p>很牛逼啊有没有，连参数的数量都给你变了！而且还能根据属性的定义来决定参数。</p>
+<p>那么这玩意具体是咋写的呢？我仔细研究了一下，研究完后，仿佛开启了新大门！</p>
+<p>我这里直接写一个Demo来看：</p>
+<pre><code class="typescript">type EmitFuncArgs&amp;lt;Events, Key extends keyof Events&amp;gt; = void extends Events[Key]
+  ? [evt: Key]
+  : [evt: Key, data: Events[Key]]
+
+type EmitFunc&amp;lt;Events&amp;gt; = &amp;lt;T extends keyof Events&amp;gt; (...args: EmitFuncArgs&amp;lt;Events, T&amp;gt;) =&amp;gt; string
+
+export interface AppEvents &#123;
+  ON_LOGOUT: string
+  ON_LOGIN: void
+&#125;
+</code></pre>
+<p>先来看下面的<code>EmitFunc</code>定义，首先这玩意的泛型接收一个Events类型(直接把它看成下面的AppEvents接口就行)，然后它的参数是<code>EmitFuncArgs</code><br>决定的。</p>
+<p>来看<code>EmitFuncArgs</code>，可以发现这玩意居然返回了一个数组，并且还用上了三目运算符。</p>
+<p>到了这里，大伙都应该可以理解是怎么玩的了，就是首先判断值是不是void，如果是，则返回一个长度为1的数组，反之则返回长度为2的数组，其中的第二个<br>参数为接口定义的类型。</p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/11/27/ts-feature/" class="go-post">阅读全文</a>
+</div>
 
 <div class="post post-partial-show">
     <a href="/2023/11/13/user-permissions/">
@@ -358,7 +441,7 @@ runtime.exec(&quot;docker exec mysql-test2 mysql -ubim -pxx -h11.11.11.11 -P3306
 &#125;
 </code></pre>
 <p><code>StringTokenizer</code>可能大家没见过，但是如果你用java写算法，并且了解过输入优化，你就会知到这玩意是干嘛的。简单点来说它的效果和<code>Scanner</code>一样，但是效率更高(如果你写过算法就知道这玩意速度吊打<code>Scanner</code>)，<code>Scanner</code>就不多讲了，感觉是个人就用过。。。</p>
-<p>如果你还看不懂，没事，我直接给你上图：<br><img lazy="https://xds.asia/public/2023-9/Snipaste_2023-11-10_16-06-22.webp" alt="debug"></p>
+<p>如果你还看不懂，没事，我直接给你上图：<br><img lazy="https://selfb.asia/public/2023-9/Snipaste_2023-11-10_16-06-22.webp" alt="debug"></p>
 <p>可以发现我们后面用双引号包裹起来的参数被分开了，实际传到mysql那里就会导致执行失败。</p>
 <p>但是这玩意在windows上能执行成功也是很离谱的。</p>
 <p>知到原因后，直接改用<code>ProcessBuilder</code>手动控制参数：</p>
@@ -630,7 +713,7 @@ public SqlSessionFactoryBean sqlSessionFactoryBean(@Qualifier(&quot;dataSource&q
 <h1 id="2-别名问题"><a href="#2-别名问题" class="headerlink" title="2. 别名问题"></a>2. 别名问题</h1><pre><code class="sql">SELECT id AS userId FROM user
 </code></pre>
 <p>上面这个SQL很简单，就是查用户id，然后起个别名叫<code>userId</code>，乍一看好像没什么，下面我放个图，大家来找不同：</p>
-<p><img lazy="https://xds.asia/public/2023-9/Snipaste_2023-09-26_10-45-53.webp" alt="找不同"></p>
+<p><img lazy="https://selfb.asia/public/2023-9/Snipaste_2023-09-26_10-45-53.webp" alt="找不同"></p>
 <p>发现了吗？仔细看一下userId，有没有发现查出来全部变成小写了？</p>
 <p>在我们项目代码里，直接从结果集里面拿userId，结果拿不到爆空指针！</p>
 <p>原本我以为是配置问题，把大小写搞得不敏感了，结果去网上搜了一下，结果只有表名能修改大小写敏感。</p>
@@ -642,9 +725,9 @@ public SqlSessionFactoryBean sqlSessionFactoryBean(@Qualifier(&quot;dataSource&q
 </code></pre>
 <p>又是一个非常简单的SQL，然后咱们又来找不同：</p>
 <p>高斯的结果：</p>
-<p><img lazy="https://xds.asia/public/2023-9/gs-count.webp" alt="gs-count"></p>
+<p><img lazy="https://selfb.asia/public/2023-9/gs-count.webp" alt="gs-count"></p>
 <p>mysql的结果：</p>
-<p><img lazy="https://xds.asia/public/2023-9/mysql-count.webp" alt="mysql-count"></p>
+<p><img lazy="https://selfb.asia/public/2023-9/mysql-count.webp" alt="mysql-count"></p>
 <p>相信一眼就能看出来，mysql拿需要用<code>COUNT(*)</code>，而高斯则需要用<code>count</code>拿。</p>
 <p>这里最好的解决办法就只有取别名了，全部都叫同一个就行了。</p>
 <h1 id="不兼容的函数-语法"><a href="#不兼容的函数-语法" class="headerlink" title="不兼容的函数&#x2F;语法"></a>不兼容的函数&#x2F;语法</h1><table>
@@ -692,157 +775,6 @@ public SqlSessionFactoryBean sqlSessionFactoryBean(@Qualifier(&quot;dataSource&q
     <a href="/2023/09/04/mysql_to_opengauss/" class="go-post">阅读全文</a>
 </div>
 
-<div class="post post-partial-show">
-    <a href="/2023/08/30/tomcat-custom-https/">
-        <h2 class="post-title">通过环境变量传递Tomcat https证书密码</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2023/8/30
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <h1 id="1-起因"><a href="#1-起因" class="headerlink" title="1. 起因"></a>1. 起因</h1><p>由于最近公司要求给tomcat配置https，本来以为只是简单的塞个证书和私钥就行了：</p>
-<pre><code class="xml">&amp;lt;Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot; SSLEnabled=&quot;true&quot; &amp;gt;
-    &amp;lt;SSLHostConfig protocols=&quot;TLSv1.2&quot; sslProtocol=&quot;TLS&quot;&amp;gt;
-        &amp;lt;Certificate certificateKeyFile=&quot;conf/server.key&quot;
-                    certificateFile=&quot;conf/server.crt&quot;
-                    type=&quot;RSA&quot;/&amp;gt;
-    &amp;lt;/SSLHostConfig&amp;gt;
-&amp;lt;/Connector&amp;gt;
-</code></pre>
-<p>结果要求用jks证书文件，彳亍：</p>
-<pre><code class="xml">&amp;lt;Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot; 
-    sslProtocol=&quot;TLS&quot; 
-    protocols=&quot;TLSv1.2&quot;
-    SSLEnabled=&quot;true&quot;
-    keystoreFile=&quot;conf/server.keystore&quot;
-    keystorePass=&quot;xxxx&quot;/&amp;gt;
-</code></pre>
-<p>本以为万事大吉，结果甲方爸爸因为密码是直接写的明文，要求我们必须把密码穿成加密的🥲。</p>
-<p>不过还好顺带也给了我份博客：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/suncoolcat/p/3292252.html">tomcat安全配置之证书密码加密存储</a></p>
-<h1 id="2-tomcat配置https"><a href="#2-tomcat配置https" class="headerlink" title="2. tomcat配置https"></a>2. tomcat配置https</h1><h2 id="2-1-编写实现类"><a href="#2-1-编写实现类" class="headerlink" title="2.1 编写实现类"></a>2.1 编写实现类</h2><p>其实这份博客已经说的很清楚了，只需要继承<code>Http11NioProtocol</code>这个类就可以了</p>
-<blockquote>
-<p>博客里用的<code>Http11Protocol</code>，这个类已经被标记为<code>@Deprecated</code>的了，所以我们直接用它的父类，效果是一样的。</p>
-</blockquote>
-<p>但是这个博客还是不太完整，这个类怎么打jar包？<code>Http11Protocol</code>从哪里来？打了的jar包丢在哪里？博客里都没有说明。</p>
-<p>这里我自己研究了一下，首先创建一个maven项目，pom.xml添加依赖：</p>
-<pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.apache.tomcat&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;tomcat-coyote&amp;lt;/artifactId&amp;gt;
-    &amp;lt;version&amp;gt;8.5.87&amp;lt;/version&amp;gt;
-    &amp;lt;scope&amp;gt;provided&amp;lt;/scope&amp;gt;
-&amp;lt;/dependency&amp;gt;
-</code></pre>
-<p>注意scope是provided。</p>
-<p>之后就可以直接写代码了：</p>
-<pre><code class="java">import org.apache.coyote.http11.Http11NioProtocol;
-
-public class EncryptedHttp11Protocol extends Http11NioProtocol &#123;
-
-    @Override
-    public void init() throws Exception &#123;
-        // 进行你自己的密码获取逻辑
-        setKeystorePass(&quot;xxx&quot;);
-        super.init();
-    &#125;
-
-&#125;
-</code></pre>
-<p>写完直接用maven打包：</p>
-<pre><code class="shell">mvn package -DskipTests
-</code></pre>
-<p>然后丢到tomcat目录的lib文件夹里就可以了。</p>
-<p>最后配置server.xml：</p>
-<pre><code class="xml"> &amp;lt;Connector port=&quot;8443&quot; protocol=&quot;xxxxxxx.EncryptedHttp11Protocol&quot; SSLEnabled=&quot;true&quot;
-    keystoreFile=&quot;conf/server.keystore&quot;
-    sslProtocol=&quot;TLS&quot;&amp;gt;
-&amp;lt;/Connector&amp;gt;
-</code></pre>
-<p><strong>注意protocol属性要改成你自己的实现类</strong></p>
-<h2 id="2-2-设置环境变量"><a href="#2-2-设置环境变量" class="headerlink" title="2.2 设置环境变量"></a>2.2 设置环境变量</h2><p>由于jks被加密，需要提供密码，因此推荐的方法是通过系统环境变量来提供（这里直接根据自己的机器设置即可）。<br>在java代码里这样获取系统环境变量：</p>
-<pre><code class="java">String value = System.getenv(key);
-</code></pre>
-<h2 id="2-3-设置命令行参数"><a href="#2-3-设置命令行参数" class="headerlink" title="2.3 设置命令行参数"></a>2.3 设置命令行参数</h2><p>也可以通过设置tomcat命令行参数来传输秘钥，<br>在tomcat的bin目录下创建setenv.bat(windows) &#x2F; setenv.sh (linux)文件，并且配置相关参数即可。</p>
-<p>windows: </p>
-<pre><code class="bat">set &quot;JAVA_OPTS=-DsecretKey=xxxx -DsercretKey2=xxxx&quot;
-</code></pre>
-<p>linux:</p>
-<pre><code class="shell">JAVA_OPTS=&quot;-DsecretKey=xxxx -DsercretKey2=xxxx&quot;
-</code></pre>
-<p>之后在代码中这样获取：</p>
-<pre><code class="java">String value = System.getProperty(key);
-</code></pre>
-<h1 id="3-SpringBoot内嵌tomcat配置https"><a href="#3-SpringBoot内嵌tomcat配置https" class="headerlink" title="3. SpringBoot内嵌tomcat配置https"></a>3. SpringBoot内嵌tomcat配置https</h1><p>你说的对，但是我是SpringBoot内嵌tomcat！</p>
-<p>公司的众多模块中，偏偏就是有一个SpringBoot项目，这玩意用的内嵌tomcat，上面的方法都用不了👎👎👎。</p>
-<p>首先我们要知道SpringBoot项目怎么开启https：</p>
-<pre><code class="yaml">server:
-    ssl:
-        enabled: true
-        key-store: classpath:server.keystore
-        key-store-password: xxxxxx
-</code></pre>
-<p>我们只需要找到一个方法在配置ssl前修改配置，提供密码即可。</p>
-<p>你别说，还真被我找到了，在启动类添加下面的代码：</p>
-<pre><code class="java">@Bean
-public WebServerFactoryCustomizer&amp;lt;UndertowServletWebServerFactory&amp;gt; webServerFactoryCustomizer() &#123;
-    return factory -&amp;gt; &#123;
-        Ssl ssl = factory.getSsl();
-        if (ssl == null || !ssl.isEnabled()) &#123;
-            return;
-        &#125;
-        
-        // ... 获取秘钥
-
-        ssl.setKeyStorePassword(&quot;xxxx&quot;);
-    &#125;;
-&#125;
-</code></pre>
-<p>甚至你在这里还可以引用刚才为tomcat准备的jar包，直接使用里面的秘钥获取逻辑，就不用再写一遍了√。</p>
-<h1 id="4-其它：由证书和私钥生成jks文件"><a href="#4-其它：由证书和私钥生成jks文件" class="headerlink" title="4. 其它：由证书和私钥生成jks文件"></a>4. 其它：由证书和私钥生成jks文件</h1><p>首先执行命令生成p12文件（输入后会要求输入密码，直接填上你要的密码就行）：</p>
-<pre><code class="shell">openssl pkcs12 -export -in server.crt -inkey server.key -out server.p12
-</code></pre>
-<p>输完后执行：</p>
-<pre><code class="shell">keytool -importkeystore -v -srckeystore server.p12 -srcstoretype pkcs12 -srcstorepass 上面的密码 -destkeystore server.keystore -destoretype jks -deststorepass 上面的密码
-</code></pre>
-<p>这里如果jdk版本过低会报错：</p>
-<pre><code class="java">keytool 错误: java.io.IOException: parseAlgParameters failed: ObjectIdentifier() -- data isn&#39;t an object ID (tag = 48)
-java.io.IOException: parseAlgParameters failed: ObjectIdentifier() -- data isn&#39;t an object ID (tag = 48)
-        at sun.security.pkcs12.PKCS12KeyStore.parseAlgParameters(PKCS12KeyStore.java:816)
-        at sun.security.pkcs12.PKCS12KeyStore.engineLoad(PKCS12KeyStore.java:2018)
-        at java.security.KeyStore.load(KeyStore.java:1445)
-        at sun.security.tools.keytool.Main.loadSourceKeyStore(Main.java:2040)
-        at sun.security.tools.keytool.Main.doCommands(Main.java:1067)
-        at sun.security.tools.keytool.Main.run(Main.java:366)
-        at sun.security.tools.keytool.Main.main(Main.java:359)
-Caused by: java.io.IOException: ObjectIdentifier() -- data isn&#39;t an object ID (tag = 48)
-        at sun.security.util.ObjectIdentifier.&amp;lt;init&amp;gt;(ObjectIdentifier.java:257)
-        at sun.security.util.DerInputStream.getOID(DerInputStream.java:314)
-        at com.sun.crypto.provider.PBES2Parameters.engineInit(PBES2Parameters.java:267)
-        at java.security.AlgorithmParameters.init(AlgorithmParameters.java:293)
-        at sun.security.pkcs12.PKCS12KeyStore.parseAlgParameters(PKCS12KeyStore.java:812)
-        ... 6 more
-</code></pre>
-<p>这里用的jdk1.8.0_241导致的报错，换成jdk-11.0.18可以正常执行，其它版本暂未测试。</p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/2023/08/30/tomcat-custom-https/" class="go-post">阅读全文</a>
-</div>
-
 
             <div class="page-current">
     <div class="prev">
@@ -857,6 +789,9 @@ Caused by: java.io.IOException: ObjectIdentifier() -- data isn&#39;t an object I
             
             <a class="page-num" href="/page/3">3</a>
             
+            
+            <span class="page-omit">...</span>
+            <a class="page-num" href="/page/4">4</a>
             
         </span>
         
@@ -877,7 +812,7 @@ Caused by: java.io.IOException: ObjectIdentifier() -- data isn&#39;t an object I
         <div id="card-div">
     <div class="card-style" style="width: 300px">
         <div class="avatar">
-            <img src="https://xds.asia/avatar/1.webp" alt="avatar" />
+            <img src="https://selfb.asia/avatar/1.webp" alt="avatar" />
         </div>
         <div class="name">IceOfSummer</div>
         <div class="description">
