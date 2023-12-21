@@ -1,0 +1,477 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Rust基础 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="用来用去还是自己搭的博客靠谱" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 6.3.0"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>Rust基础</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/12/4
+        </span>
+        
+        <span class="category">
+            <a href="/2023/12/04/Rust/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                Rust
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="数值类型"><a href="#数值类型" class="headerlink" title="数值类型"></a>数值类型</h1><table>
+<thead>
+<tr>
+<th>长度</th>
+<th>有符号类型</th>
+<th>无符号类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>8位</td>
+<td>i8</td>
+<td>u8</td>
+</tr>
+<tr>
+<td>16位</td>
+<td>i16</td>
+<td>u16</td>
+</tr>
+<tr>
+<td>32位</td>
+<td>i32</td>
+<td>u32</td>
+</tr>
+<tr>
+<td>64位</td>
+<td>i64</td>
+<td>u64</td>
+</tr>
+<tr>
+<td>128位</td>
+<td>i128</td>
+<td>u128</td>
+</tr>
+<tr>
+<td>视架构而定</td>
+<td>isize</td>
+<td>usize</td>
+</tr>
+</tbody></table>
+<p>声明数值类型时，如果不提供类型，整型默认使用<code>i32</code></p>
+<h2 id="整型溢出"><a href="#整型溢出" class="headerlink" title="整型溢出"></a>整型溢出</h2><p>在 debug 模式编译时，Rust 会检查整型溢出，若存在这些问题，则使程序在编译时崩溃。在当使用 <code>--release</code> 参数进行 release 模式构建时，Rust 不检测溢出。当检测到整型溢出时，Rust 会按照补码循环溢出的规则处理。</p>
+<p>要显式处理可能的溢出，可以使用标准库针对原始数字类型提供的这些方法：</p>
+<ul>
+<li>使用 <code>wrapping_*</code> 方法在所有模式下都按照补码循环溢出规则处理，例如 <code>wrapping_add</code></li>
+<li>如果使用 <code>checked_*</code> 方法时发生溢出，则返回 <code>None</code> 值</li>
+<li>使用 <code>overflowing_*</code> 方法返回该值和一个指示是否存在溢出的布尔值</li>
+<li>使用 <code>saturating_*</code> 方法使值达到最小值或最大值</li>
+</ul>
+<h1 id="浮点类型"><a href="#浮点类型" class="headerlink" title="浮点类型"></a>浮点类型</h1><p>rust只有两种浮点类型：<code>f32</code>和<code>f64</code>，默认是<code>f64</code>。</p>
+<p>应该尽量避免比较浮点型：</p>
+<pre><code class="rust">fn main() &#123;
+  // 断言0.1 + 0.2与0.3相等
+  assert!(0.1 + 0.2 == 0.3);
+&#125;
+</code></pre>
+<p>该代码的断言为否，会导致程序失败。</p>
+<p>若需要比较，可以考虑使用如下方式：</p>
+<pre><code class="rust">fn main() &#123;
+  assert!((0.1_f64 + 0.2 - 0.3).abs() &amp;lt; 0.00001);
+&#125;
+</code></pre>
+<h2 id="NaN"><a href="#NaN" class="headerlink" title="NaN"></a>NaN</h2><p>Rust 的浮点数类型使用 <code>NaN</code> (not a number)来处理数学上未定义的结果。</p>
+<p>**所有跟 <code>NaN</code> 交互的操作，都会返回一个 <code>NaN</code>**，而且 <code>NaN</code> 不能用来比较。</p>
+<p>可以使用<code>is_nan()</code>方法来判断一个数值是否为nan：</p>
+<pre><code class="rust">fn main() &#123;
+    let x = (-42.0_f32).sqrt();
+    if x.is_nan() &#123;
+        println!(&quot;未定义的数学行为&quot;)
+    &#125;
+&#125;
+</code></pre>
+<h1 id="字符、布尔、单元类型"><a href="#字符、布尔、单元类型" class="headerlink" title="字符、布尔、单元类型"></a>字符、布尔、单元类型</h1><pre><code class="rust">// 字符
+let c = &#39;z&#39;;
+let z = &#39;ℤ&#39;;
+let g = &#39;国&#39;;
+let heart_eyed_cat = &#39;😻&#39;;
+
+// 布尔
+let t = true;
+let f: bool = false;
+</code></pre>
+<p>单元类型就是 <code>()</code>，可以理解为<code>void</code>，例如main函数的返回值就是单元类型<code>()</code>，单元类型的优势是它完全不占用任何内存，可以当做一个占位符使用。</p>
+<h1 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h1><p>基本格式：</p>
+<pre><code class="rust">fn add(i: i32, j: i32) -&amp;gt; i32 &#123;
+  // 这里没有用分号结尾。
+  i + j
+&#125;
+
+fn add(i: i32, j: i32) -&amp;gt; i32 &#123;
+  return i + j;
+&#125;
+</code></pre>
+<ul>
+<li>函数名和变量名使用蛇形命名法(snake case)，例如 fn add_two() -&amp;gt; {}</li>
+<li>函数的位置可以随便放，Rust 不关心我们在哪里定义了函数，只要有定义即可</li>
+<li>每个函数参数都需要标注类型</li>
+</ul>
+<h2 id="发散函数"><a href="#发散函数" class="headerlink" title="发散函数"></a>发散函数</h2><p>当用 ! 作函数返回类型的时候，表示该函数永不返回( diverge function )，特别的，这种语法往往用做会导致程序崩溃的函数：</p>
+<pre><code class="rust">fn main() &#123;
+    println!(&quot;Hello, world!&quot;);
+    dead_end();
+&#125;
+
+fn dead_end() -&amp;gt; i32 &#123;
+  panic!(&quot;你已经到了穷途末路，崩溃吧！&quot;);
+&#125;
+</code></pre>
+<p>可以注意到这里我们函数返回值是<code>i32</code>，但实际上函数并没有返回一个<code>i32</code>，<br>与之类似的还有<code>todo!()</code>，比如这个函数暂时只需要一个声明，就可以用<code>todo!()</code>来临时顶替。</p>
+<h1 id="所有权和借用"><a href="#所有权和借用" class="headerlink" title="所有权和借用"></a>所有权和借用</h1><blockquote>
+<p>Rust 中每一个值都被一个变量所拥有，该变量被称为值的所有者<p/><br>一个值同时只能被一个变量所拥有，或者说一个值只能拥有一个所有者<p/><br>当所有者(变量)离开作用域范围时，这个值将被丢弃(drop)</p>
+</blockquote>
+<p>例如如下代码会报错：</p>
+<pre><code class="rust">let s1 = String::from(&quot;hello&quot;);
+let s2 = s1;
+
+println!(&quot;&#123;&#125;, world!&quot;, s1);
+</code></pre>
+<p>原因是s1所指向的字符串已经转移(移动)给给了s2，s1此时将不再可用。</p>
+<h2 id="函数传值与返回"><a href="#函数传值与返回" class="headerlink" title="函数传值与返回"></a>函数传值与返回</h2><p>将值传递给函数，一样会发生<code>移动</code>或者<code>复制</code>:</p>
+<pre><code class="rust">fn main() &#123;
+    let s = String::from(&quot;hello&quot;);  // s 进入作用域
+
+    takes_ownership(s);             // s 的值移动到函数里 ...
+                                    // ... 所以到这里不再有效
+
+    let x = 5;                      // x 进入作用域
+
+    makes_copy(x);                  // x 应该移动函数里，
+                                    // 但 i32 是 Copy 的，所以在后面可继续使用 x
+
+&#125; // 这里, x 先移出了作用域，然后是 s。但因为 s 的值已被移走，
+  // 所以不会有特殊操作
+
+fn takes_ownership(some_string: String) &#123; // some_string 进入作用域
+    println!(&quot;&#123;&#125;&quot;, some_string);
+&#125; // 这里，some_string 移出作用域并调用 `drop` 方法。占用的内存被释放
+
+fn makes_copy(some_integer: i32) &#123; // some_integer 进入作用域
+    println!(&quot;&#123;&#125;&quot;, some_integer);
+&#125; // 这里，some_integer 移出作用域。不会有特殊操作
+</code></pre>
+<p>同样的，函数返回值也有所有权，例如:</p>
+<pre><code class="rust">fn main() &#123;
+    let s1 = gives_ownership();         // gives_ownership 将返回值
+                                        // 移给 s1
+
+    let s2 = String::from(&quot;hello&quot;);     // s2 进入作用域
+
+    let s3 = takes_and_gives_back(s2);  // s2 被移动到
+                                        // takes_and_gives_back 中,
+                                        // 它也将返回值移给 s3
+&#125; // 这里, s3 移出作用域并被丢弃。s2 也移出作用域，但已被移走，
+  // 所以什么也不会发生。s1 移出作用域并被丢弃
+
+fn gives_ownership() -&amp;gt; String &#123;             // gives_ownership 将返回值移动给
+                                             // 调用它的函数
+
+    let some_string = String::from(&quot;hello&quot;); // some_string 进入作用域.
+
+    some_string                              // 返回 some_string 并移出给调用的函数
+&#125;
+
+// takes_and_gives_back 将传入字符串并返回该值
+fn takes_and_gives_back(a_string: String) -&amp;gt; String &#123; // a_string 进入作用域
+
+    a_string  // 返回 a_string 并移出给调用的函数
+&#125;
+</code></pre>
+<h1 id="引用与借用"><a href="#引用与借用" class="headerlink" title="引用与借用"></a>引用与借用</h1><p>如果一个人拥有某样东西，你可以从他那里借来，当使用完毕后，也必须要物归原主。</p>
+<p>Rust 通过<code>借用(Borrowing)</code>这个概念来达成上述的目的。</p>
+<p>常规引用是一个指针类型，指向了对象存储的内存地址。在下面代码中，我们创建一个 i32 值的引用 y，然后使用解引用运算符来解出 y 所使用的值</p>
+<pre><code class="rust">fn main() &#123;
+    let x: i32 = 5;
+    let y: &amp;i32 = &amp;x;
+
+    assert_eq!(5, x);
+    assert_eq!(5, *y);
+&#125;
+</code></pre>
+<p>这里，&amp; 符号即是引用，它们允许你使用值，但是不获取所有权，即无法对原始的值进行改变。</p>
+<h2 id="可变引用"><a href="#可变引用" class="headerlink" title="可变引用"></a>可变引用</h2><p>可变引用允许我们去修改原始的值</p>
+<pre><code class="rust">fn main() &#123;
+  // 注意这里必须加mut
+  let mut s = 123;
+
+  change(&amp;mut s);
+  assert_eq!(125, s);
+&#125;
+
+fn change(val: &amp;mut i32) &#123;
+  // 解引用
+  *val += 2;
+&#125;
+</code></pre>
+<p>可变引用同时只能存在一个，如果创建多个，编译时则会报错：</p>
+<pre><code class="rust">let mut s = String::from(&quot;hello&quot;);
+
+// first mutable borrow occurs here
+let r1 = &amp;mut s;
+// second mutable borrow occurs here
+let r2 = &amp;mut s;
+
+// first borrow later used here
+println!(&quot;&#123;&#125;, &#123;&#125;&quot;, r1, r2);
+</code></pre>
+<p>可变引用与不可变引用不能同时存在：</p>
+<pre><code class="rust">let mut s = String::from(&quot;hello&quot;);
+
+let r1 = &amp;s; // 没问题
+let r2 = &amp;s; // 没问题
+let r3 = &amp;mut s; // 大问题
+
+println!(&quot;&#123;&#125;, &#123;&#125;, and &#123;&#125;&quot;, r1, r2, r3);
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2023 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;IceOfSummer
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>
