@@ -5,6 +5,11 @@ categories: 线上问题排查
   
 ---
 
+# 0. Links
+
+- [ognl特殊用法](https://github.com/alibaba/arthas/issues/71)
+- [获取SpringContext](https://github.com/alibaba/arthas/issues/482)
+
 # 1. 安装arthas
 
 如果没有用docker，直接从官网下载然后丢服务器就行了，如果用的是docker那么就麻烦一点，这里我整了一个脚本来一键安装/启动：
