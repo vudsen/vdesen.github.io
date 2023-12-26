@@ -9,3 +9,4 @@ categories: Rust
 ---
 
 - [Rust基础](/rust/basic)
+- [复合类型](/rust/composite-type)
