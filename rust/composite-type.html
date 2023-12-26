@@ -1,0 +1,778 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>复合类型 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="用来用去还是自己搭的博客靠谱" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 6.3.0"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>复合类型</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/12/19
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="1-字符串"><a href="#1-字符串" class="headerlink" title="1. 字符串"></a>1. 字符串</h1><h2 id="1-1-切片"><a href="#1-1-切片" class="headerlink" title="1.1 切片"></a>1.1 切片</h2><p>切片可以让我们引用集合中部分连续的元素序列，而不是引用整个集合。</p>
+<p>对于字符串而言，切片就是对<code>String</code>类型中某一部分的引用：</p>
+<pre><code class="rust">let s = String::from(&quot;hello world&quot;);
+
+let hello = &amp;s[0..5];
+let world = &amp;s[6..11];
+</code></pre>
+<p>对于一个切片，它并没有实际地去拷贝集合中的东西：</p>
+<p><img lazy="https://selfb.asia/blog/v2-69da917741b2c610732d8526a9cc86f5_1440w.jpg" alt="slice"></p>
+<p>如果想从某个位置到结尾或者开头，可以这样写：</p>
+<pre><code class="rust">let s = String::from(&quot;hello&quot;);
+
+// 开头到索引为2的位置
+let slice = &amp;s[..2];
+
+// 索引为4到结尾
+let slice = &amp;s[4..];
+
+// 甚至全部切片。。
+let slice = &amp;s[..];
+</code></pre>
+<p>对字符串使用切片时，如果索引没有落到边界位置，代码则会导致崩溃。</p>
+<p>例如汉字在UTF-8中占三个字节，下面的代码会导致崩溃:</p>
+<pre><code class="rust">let s = &quot;中国人&quot;;
+// 在这里就报错了，并没有走到后面的打印语句
+let a = &amp;s[0..2];
+println!(&quot;&#123;&#125;&quot;,a);
+</code></pre>
+<p>报错信息：</p>
+<pre><code class="log">byte index 2 is not a char boundary; it is inside &#39;中&#39; (bytes 0..3) of `中国人`
+stack backtrace:
+
+...
+</code></pre>
+<h2 id="1-2-str和String以及-str"><a href="#1-2-str和String以及-str" class="headerlink" title="1.2 str和String以及&amp;str"></a>1.2 str和String以及&amp;str</h2><p>str只是类型级别的东西，它只能用来在类型级别上发挥作用，它是动态大小类型，因此str占用的大小在编译时无法确定，只能在<br>运行时才能确定，所以无法将其存储在变量中:</p>
+<pre><code class="rust">let s = &quot;hello&quot;.to_string();
+
+let b = s[..];
+
+let a = b;
+</code></pre>
+<p>报错：</p>
+<pre><code class="log">  |
+6 |     let a = b;
+  |         ^ doesn&#39;t have a size known at compile-time
+  |
+</code></pre>
+<p>str代表u8字节的一个数组，而且保证其形成有效的UTF-8，但是不知道其大小，它会被硬编码进可执行文件，也无法被修改。</p>
+<p>可以理解为String内容有一个str并且拥有其所有权，而&amp;str只有一个可读引用。</p>
+<blockquote>
+<p>其实这里我当初也没明白，我都用双引号来给字符串了，而且又是UTF-8，长度怎么就不明白呢？</p>
+<p>到后面查了很多资料才明白了，首先是因为<code>str</code>类型的字符串它没有保存长度，而<code>&amp;str</code>保存了长度，具体为什么不保存长度我也不知道，网上也没有搜到相关内容，个人猜测是为了字符串复用？然后我们知道Rust的GC是自动的，变量退出作用域自动被回收，但是回收的前提是你需要知道这个变量在内存的什么位置，以及它的大小，而<code>str</code>类型是没有保存大小的，如果直接放到变量中使用，是无法进行内存回收的，因为不知道其具体大小，例如下面的代码：</p>
+<pre><code class="rust">fn test(val: str) &#123;
+  // xxx   
+&#125;
+</code></pre>
+<p>我们在这里获取了<code>str</code>的所有权，在函数结束时就需要将其回收，而在这里无法确定str的大小，因此无法进行回收。</p>
+</blockquote>
+<h2 id="1-3-字符串索引"><a href="#1-3-字符串索引" class="headerlink" title="1.3 字符串索引"></a>1.3 字符串索引</h2><p>在rust中，使用索引访问字符串的某个字符会导致报错：</p>
+<pre><code class="rust">let s1 = String::from(&quot;hello&quot;);
+let h = s1[0];
+</code></pre>
+<p>报错：</p>
+<pre><code class="log">3 |     let h = s1[0];
+  |             ^^^^^ `String` cannot be indexed by `&#123;integer&#125;`
+  |
+  = help: the trait `Index&amp;lt;&#123;integer&#125;&amp;gt;` is not implemented for `String`
+</code></pre>
+<p>在字符串底层的数据存储格式实际上是一个<code>u8</code>数组，而UTF-8中，每种类型的字符所占的字节都不一样，所以无法使用<br>索引来取值。</p>
+<h2 id="1-4-字符串操作"><a href="#1-4-字符串操作" class="headerlink" title="1.4 字符串操作"></a>1.4 字符串操作</h2><h3 id="1-4-1-追加"><a href="#1-4-1-追加" class="headerlink" title="1.4.1 追加"></a>1.4.1 追加</h3><ul>
+<li><code>push()</code>: 追加字符<code>char</code></li>
+<li><code>push_str()</code>：追加字符串字面量</li>
+</ul>
+<p>追加要求被修改的字符串必须是可变的，所以对应的变量必须被mut修饰：</p>
+<pre><code class="rust">fn main() &#123;
+    let mut s = String::from(&quot;Hello &quot;);
+
+    s.push_str(&quot;rust&quot;);
+    println!(&quot;追加字符串 push_str() -&amp;gt; &#123;&#125;&quot;, s);
+
+    s.push(&#39;!&#39;);
+    println!(&quot;追加字符 push() -&amp;gt; &#123;&#125;&quot;, s);
+&#125;
+</code></pre>
+<h3 id="1-4-2-插入"><a href="#1-4-2-插入" class="headerlink" title="1.4.2 插入"></a>1.4.2 插入</h3><ul>
+<li><code>insert()</code>：插入单个字符<code>char</code></li>
+<li><code>insert_str()</code>：插入字符串字面量</li>
+</ul>
+<p>插入方法同时需要提供插入的索引，并且也需要保证插入位置在字符的边界:</p>
+<pre><code class="rust">fn main() &#123;
+    let mut s = String::from(&quot;Hello rust!&quot;);
+    s.insert(5, &#39;,&#39;);
+    println!(&quot;插入字符 insert() -&amp;gt; &#123;&#125;&quot;, s);
+    s.insert_str(6, &quot; I like&quot;);
+    println!(&quot;插入字符串 insert_str() -&amp;gt; &#123;&#125;&quot;, s);
+&#125;
+</code></pre>
+<h3 id="1-4-3-替换"><a href="#1-4-3-替换" class="headerlink" title="1.4.3 替换"></a>1.4.3 替换</h3><ul>
+<li><code>replace()</code>：可同时用在<code>&amp;str</code>和<code>String</code>类型上，会替换掉所有满足的字符串。</li>
+<li><code>replacen()</code>：可同时用在<code>&amp;str</code>和<code>String</code>类型上，接收三个参数，前两个参数与 replace() 方法一样，第三个参数则表示替换的个数。</li>
+<li><code>replace_range()</code>：只能在<code>String</code>上使用，表示替换一定范围内的字符串。</li>
+</ul>
+<p><strong>上面的方法都会返回一个新的字符串，而不是操作原来的字符串。</strong></p>
+<pre><code class="rust">let string_replace = String::from(&quot;I like rust. Learning rust is my favorite!&quot;);
+// &quot;I like RUST. Learning RUST is my favorite!&quot;
+let new_string_replace = string_replace.replace(&quot;rust&quot;, &quot;RUST&quot;);
+
+
+let string_replace = &quot;I like rust. Learning rust is my favorite!&quot;;
+// I like RUST. Learning rust is my favorite!
+let new_string_replacen = string_replace.replacen(&quot;rust&quot;, &quot;RUST&quot;, 1);
+dbg!(new_string_replacen);
+
+let mut string_replace_range = String::from(&quot;I like rust!&quot;);
+// I like Rust!
+string_replace_range.replace_range(7..8, &quot;R&quot;);
+</code></pre>
+<h3 id="1-4-4-删除"><a href="#1-4-4-删除" class="headerlink" title="1.4.4 删除"></a>1.4.4 删除</h3><p>删除相关的方法都只适用于<code>String</code>，并且都会改变原来的字符串。</p>
+<ul>
+<li><code>pop()</code>：删除并返回字符串的最后一个字符</li>
+<li><code>remove()</code>：删除并返回字符串中指定位置的字符，使用时需要保证索引在字符边界的起始位置</li>
+<li><code>truncate()</code>：删除字符串中从指定位置开始到结尾的全部字符，需要保证索引在字符的结束位置</li>
+<li><code>clear()</code>：清空字符串，类似于<code>truncate(0)</code></li>
+</ul>
+<pre><code class="rust">let mut string_pop = String::from(&quot;rust pop 中文&quot;);
+// &#39;文&#39;
+let p1 = string_pop.pop();
+
+let mut string_remove = String::from(&quot;测试remove方法&quot;);
+ // 删除第一个汉字
+string_remove.remove(0);
+// 下面代码会发生错误
+// string_remove.remove(1);
+// 直接删除第二个汉字
+// string_remove.remove(3);
+
+
+let mut string_truncate = String::from(&quot;测试truncate&quot;);
+// &quot;测&quot;
+string_truncate.truncate(3);
+</code></pre>
+<h3 id="1-4-5-连接"><a href="#1-4-5-连接" class="headerlink" title="1.4.5 连接"></a>1.4.5 连接</h3><h4 id="使用-连接字符串"><a href="#使用-连接字符串" class="headerlink" title="使用+连接字符串"></a>使用<code>+</code>连接字符串</h4><p>可以使用<code>+</code>或者<code>+=</code>连接字符串，要求右边的参数必须为字符串的切片引用类型。<code>+</code>返回的是一个新的字符串，操作时可以不需要<code>mut</code>关键字。</p>
+<pre><code class="rust">fn main() &#123;
+    let string_append = String::from(&quot;hello &quot;);
+    let string_rust = String::from(&quot;rust&quot;);
+    // &amp;string_rust会自动解引用为&amp;str
+    let result = string_append + &amp;string_rust;
+    let mut result = result + &quot;!&quot;; // `result + &quot;!&quot;` 中的 `result` 是不可变的
+    result += &quot;!!!&quot;;
+
+    // 连接字符串 + -&amp;gt; hello rust!!!!
+    println!(&quot;连接字符串 + -&amp;gt; &#123;&#125;&quot;, result);
+&#125;
+</code></pre>
+<p>对于以下代码会导致报错：</p>
+<pre><code class="rust">fn main() &#123;
+    let s1 = String::from(&quot;hello,&quot;);
+    let s2 = String::from(&quot;world!&quot;);
+    // 在下句中，s1的所有权被转移走了，因此后面不能再使用s1
+    let s3 = s1 + &amp;s2;
+    assert_eq!(s3,&quot;hello,world!&quot;);
+    // 下面的语句如果去掉注释，就会报错
+    // println!(&quot;&#123;&#125;&quot;,s1);
+&#125;
+</code></pre>
+<p>看起来很难理解，其实换一下就知道了，<code>add</code>的类型定义为：</p>
+<pre><code class="rust">fn add(self, s: &amp;str) -&amp;gt; String &#123;&#125;
+</code></pre>
+<p>我们换成add来看：</p>
+<pre><code class="rust">let a = &quot;ss&quot;.to_string();
+
+let b = a.add(&quot;eee&quot;);
+// 报错，a已经转移给b
+println!(&quot;&#123;&#125;&quot;, a);
+</code></pre>
+<p>这里我们就可以理解为调用<code>add</code>方法后，变量<code>a</code>返回了它自己。</p>
+<h4 id="使用format-连接字符串"><a href="#使用format-连接字符串" class="headerlink" title="使用format!连接字符串"></a>使用<code>format!</code>连接字符串</h4><p>format! 这种方式适用于 String 和 &amp;str 。format! 的用法与 print! 的用法类似，详见<a target="_blank" rel="noopener" href="https://course.rs/basic/formatted-output.html#printprintlnformat">格式化输出</a>。</p>
+<pre><code class="rust">fn main() &#123;
+    let s1 = &quot;hello&quot;;
+    let s2 = String::from(&quot;rust&quot;);
+    let s = format!(&quot;&#123;&#125; &#123;&#125;!&quot;, s1, s2);
+
+    // hello rust!
+    println!(&quot;&#123;&#125;&quot;, s);
+&#125;
+</code></pre>
+<h2 id="1-5-字符串转义"><a href="#1-5-字符串转义" class="headerlink" title="1.5 字符串转义"></a>1.5 字符串转义</h2><p>可以通过转义(<code>\</code>)的方式输出 ASCII 和 Unicode 字符。</p>
+<pre><code class="rust">fn main() &#123;
+    // 通过 \ + 字符的十六进制表示，转义输出一个字符
+    let byte_escape = &quot;I&#39;m writing \x52\x75\x73\x74!&quot;;
+    println!(&quot;What are you doing\x3F (\\x3F means ?) &#123;&#125;&quot;, byte_escape);
+
+    // \u 可以输出一个 unicode 字符
+    let unicode_codepoint = &quot;\u&#123;211D&#125;&quot;;
+    let character_name = &quot;\&quot;DOUBLE-STRUCK CAPITAL R\&quot;&quot;;
+
+    println!(
+        &quot;Unicode character &#123;&#125; (U+211D) is called &#123;&#125;&quot;,
+        unicode_codepoint, character_name
+    );
+
+    // 换行了也会保持之前的字符串格式
+    // 使用\忽略换行符
+    let long_string = &quot;String literals
+                        can span multiple lines.
+                        The linebreak and indentation here -&amp;gt;\
+                        &amp;lt;- can be escaped too!&quot;;
+    println!(&quot;&#123;&#125;&quot;, long_string);
+&#125;
+</code></pre>
+<p>特殊的转义符：</p>
+<pre><code class="rust">fn main() &#123;
+    println!(&quot;&#123;&#125;&quot;, &quot;hello \\x52\\x75\\x73\\x74&quot;);
+    let raw_str = r&quot;Escapes don&#39;t work here: \x3F \u&#123;211D&#125;&quot;;
+    println!(&quot;&#123;&#125;&quot;, raw_str);
+
+    // 如果字符串包含双引号，可以在开头和结尾加 #
+    let quotes = r#&quot;And then I said: &quot;There is no escape!&quot;&quot;#;
+    println!(&quot;&#123;&#125;&quot;, quotes);
+
+    // 如果还是有歧义，可以继续增加，没有限制
+    let longer_delimiter = r###&quot;A string with &quot;# in it. And even &quot;##!&quot;###;
+    println!(&quot;&#123;&#125;&quot;, longer_delimiter);
+&#125;
+</code></pre>
+<h2 id="1-6-操作-UTF-8-字符串"><a href="#1-6-操作-UTF-8-字符串" class="headerlink" title="1.6 操作 UTF-8 字符串"></a>1.6 操作 UTF-8 字符串</h2><p>以 Unicode 字符的方式遍历字符串：</p>
+<pre><code class="rust">for c in &quot;中国人&quot;.chars() &#123;
+    println!(&quot;&#123;&#125;&quot;, c);
+&#125;
+</code></pre>
+<p>输出：</p>
+<pre><code class="log">中
+国
+人
+</code></pre>
+<p>以字节的方式遍历：</p>
+<pre><code class="rust">for b in &quot;中国人&quot;.bytes() &#123;
+    println!(&quot;&#123;&#125;&quot;, b);
+&#125;
+</code></pre>
+<p>输出：</p>
+<pre><code class="log">228
+184
+173
+229
+155
+189
+228
+186
+186
+</code></pre>
+<p>如果需要精准的从UTF-8字符串中获取子串，可能需要借助其它的标准库，例如：<a target="_blank" rel="noopener" href="https://crates.io/crates/utf8_slice">utf8_slice</a></p>
+<h1 id="2-元组"><a href="#2-元组" class="headerlink" title="2. 元组"></a>2. 元组</h1><p>元组是由多种类型组合到一起形成的，因此它是复合类型，元组的长度是固定的，元组中元素的顺序也是固定的：</p>
+<pre><code class="rust">fn main() &#123;
+    let tup: (i32, f64, u8) = (500, 6.4, 1);
+&#125;
+</code></pre>
+<p>获取元组的值：</p>
+<pre><code class="rust">fn main() &#123;
+    let tup = (500, 6.4, 1);
+
+    let (x, y, z) = tup;
+
+    println!(&quot;The value of y is: &#123;&#125;&quot;, y);
+
+    let five_hundred = x.0;
+
+    let six_point_four = x.1;
+
+    let one = x.2;
+&#125;
+</code></pre>
+<h1 id="3-结构体"><a href="#3-结构体" class="headerlink" title="3. 结构体"></a>3. 结构体</h1><p>结构体由<code>struct</code>定义，它由不同的字段组成：</p>
+<pre><code class="rust">struct User &#123;
+    active: bool,
+    username: String,
+    email: String,
+    sign_in_count: u64,
+&#125;
+</code></pre>
+<p>该结构体名称是 User，拥有 4 个字段，且每个字段都有对应的字段名及类型声明，例如 username 代表了用户名，是一个可变的 String 类型。</p>
+<p>创建一个结构体实例：</p>
+<pre><code class="rust">let user1 = User &#123;
+    email: String::from(&quot;someone@example.com&quot;),
+    username: String::from(&quot;someusername123&quot;),
+    active: true,
+    sign_in_count: 1,
+&#125;;
+</code></pre>
+<p>有几点值得注意:</p>
+<ol>
+<li>初始化实例时，<strong>每个字段</strong>都需要进行初始化</li>
+<li>初始化时的字段顺序<strong>不需要</strong>和结构体定义时的顺序一致</li>
+</ol>
+<p>通过<code>.</code>即可访问&#x2F;操作结构体字段：</p>
+<pre><code class="rust">let mut user1 = User &#123;
+    email: String::from(&quot;someone@example.com&quot;),
+    username: String::from(&quot;someusername123&quot;),
+    active: true,
+    sign_in_count: 1,
+&#125;;
+
+user1.email = String::from(&quot;anotheremail@example.com&quot;);
+</code></pre>
+<p>只有将结构体声明为可变的才能修改其字段，rust不允许结构体部分字段可变。</p>
+<hr>
+<p>rust支持跟TypeScript一样的简化操作：</p>
+<pre><code class="rust">fn build_user(email: String, username: String) -&amp;gt; User &#123;
+    User &#123;
+        // email: email,
+        email,
+        // username: username
+        username,
+        active: true,
+        sign_in_count: 1,
+    &#125;
+&#125;
+</code></pre>
+<p>也可以类似与ts解构一个对象(注意这里是两个点，ts是三个点)：</p>
+<pre><code class="rust">let user2 = User &#123;
+    email: String::from(&quot;another@example.com&quot;),
+    ..user1
+&#125;;
+</code></pre>
+<p>当结构体部分字段所有权被转移时，该结构体将不可用，但是其它字段仍然可用：</p>
+<pre><code class="rust">let user1 = User &#123;
+    email: String::from(&quot;someone@example.com&quot;),
+    username: String::from(&quot;someusername123&quot;),
+    active: true,
+    sign_in_count: 1,
+&#125;;
+let user2 = User &#123;
+    active: user1.active,
+    username: user1.username,
+    email: String::from(&quot;another@example.com&quot;),
+    sign_in_count: user1.sign_in_count,
+&#125;;
+println!(&quot;&#123;&#125;&quot;, user1.active);
+// 下面这行会报错
+println!(&quot;&#123;:?&#125;&quot;, user1);
+</code></pre>
+<h2 id="3-1-内存体的结构排序"><a href="#3-1-内存体的结构排序" class="headerlink" title="3.1 内存体的结构排序"></a>3.1 内存体的结构排序</h2><p>如下的结构体：</p>
+<pre><code class="rust">#[derive(Debug)]
+struct File &#123;
+    name: String,
+    data: Vec&amp;lt;u8&amp;gt;,
+&#125;
+</code></pre>
+<p>在内存中的结构为：<br><img lazy="https://selfb.asia/blog/v2-8cc4ed8cd06d60f974d06ca2199b8df5_1440w.png" alt="File内存结构"></p>
+<p>从图中可以清晰地看出 File 结构体两个字段 name 和 data 分别拥有底层两个 [u8] 数组的所有权，通过 ptr 指针指向底层数组的内存地址，这里你可以把 ptr 指针理解为 Rust 中的引用类型。</p>
+<p>该图片也侧面印证了：<strong>把结构体中具有所有权的字段转移出去后，将无法再访问该字段，但是可以正常访问其它的字段</strong>。</p>
+<h2 id="3-2-元组结构体"><a href="#3-2-元组结构体" class="headerlink" title="3.2 元组结构体"></a>3.2 元组结构体</h2><p>结构体必须要有名称，但是结构体的字段可以没有名称，这种结构体长得很像元组，因此被称为元组结构体，例如：</p>
+<pre><code class="rust">struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+
+let black = Color(0, 0, 0);
+let origin = Point(0, 0, 0);
+</code></pre>
+<p>元组结构体在你希望有一个整体名称，但是又不关心里面字段的名称时将非常有用。例如上面的 Point 元组结构体，众所周知 3D 点是 (x, y, z) 形式的坐标点，因此我们无需再为内部的字段逐一命名为：x, y, z。</p>
+<p>注意在解构时需要加上类型：</p>
+<pre><code class="rust">let black = Color(0, 0, 0);
+
+// error
+let (r, g, b) = black;
+
+let Color(r, g, b) = black;
+</code></pre>
+<h1 id="4-枚举"><a href="#4-枚举" class="headerlink" title="4. 枚举"></a>4. 枚举</h1><p>枚举(enum 或 enumeration)允许你通过列举可能的成员来定义一个枚举类型，例如扑克牌花色：</p>
+<pre><code class="rust">enum PokerSuit &#123;
+  Clubs,
+  Spades,
+  Diamonds,
+  Hearts,
+&#125;
+</code></pre>
+<p>使用枚举值：</p>
+<pre><code class="rust">let heart = PokerSuit::Hearts;
+let diamond = PokerSuit::Diamonds;
+</code></pre>
+<p>在函数中使用：</p>
+<pre><code class="rust">fn main() &#123;
+    let heart = PokerSuit::Hearts;
+    let diamond = PokerSuit::Diamonds;
+
+    print_suit(heart);
+    print_suit(diamond);
+&#125;
+
+fn print_suit(card: PokerSuit) &#123;
+    // 需要在定义 enum PokerSuit 的上面添加上 #[derive(Debug)]，否则会报 card 没有实现 Debug
+    println!(&quot;&#123;:?&#125;&quot;,card);
+&#125;
+</code></pre>
+<hr>
+<p>枚举也可以提供固定的值，但是只能使用<code>isize</code>类型的整型，例如：</p>
+<pre><code class="rust">enum RankScore &#123;
+    FIRST = 100,
+    SECOND = 90,
+    THIRD = 80,
+    // FOURTH会以上面的基础 + 1
+    FOURTH
+&#125;
+
+fn main() &#123;
+    // 使用时必须使用as强转为isize或者其它整型
+    // THIRD = 80, FOURTH = 81
+    println!(&quot;THIRD = &#123;&#125;, FOURTH = &#123;&#125;&quot;, RankScore::THIRD as isize, RankScore::FOURTH as isize)
+&#125; 
+</code></pre>
+<p><strong>如果没有指定明确的值，则以0开始递增</strong>。</p>
+<hr>
+<p>在rust中可以给枚举带上类型，例如这样：</p>
+<pre><code class="rust">enum PokerCard &#123;
+    Clubs(u8),
+    Spades(u8),
+    Diamonds(u8),
+    Hearts(u8),
+&#125;
+
+fn main() &#123;
+   let c1 = PokerCard::Spades(5);
+   let c2 = PokerCard::Diamonds(13);
+&#125;
+</code></pre>
+<p>例如标准库中的例子：</p>
+<pre><code class="rust">struct Ipv4Addr &#123;
+    // --snip--
+&#125;
+
+struct Ipv6Addr &#123;
+    // --snip--
+&#125;
+
+enum IpAddr &#123;
+    V4(Ipv4Addr),
+    V6(Ipv6Addr),
+&#125;
+</code></pre>
+<p>在实际使用中，每种枚举字段的类型可以不一样：</p>
+<pre><code class="rust">enum Message &#123;
+    Quit,
+    Move &#123; x: i32, y: i32 &#125;,
+    Write(String),
+    ChangeColor(i32, i32, i32),
+&#125;
+
+fn main() &#123;
+    let m1 = Message::Quit;
+    let m2 = Message::Move&#123;x:1,y:1&#125;;
+    let m3 = Message::ChangeColor(255,255,0);
+&#125;
+</code></pre>
+<h2 id="4-1-访问枚举值"><a href="#4-1-访问枚举值" class="headerlink" title="4.1 访问枚举值"></a>4.1 访问枚举值</h2><p>如果枚举值自带了类型，访问时则需要使用匹配模式来访问：</p>
+<pre><code class="rust">fn main() &#123;
+    let msg = Message::Move&#123;x: 1, y: 2&#125;;
+
+    if let Message::Move&#123;x: a, y: b&#125; = msg &#123;
+        // use data from Message::Move
+        assert_eq!(a, b);
+    &#125; else &#123;
+        // not Message::Move
+    &#125;
+&#125; 
+</code></pre>
+<p>在这里无法对<code>msg</code>变量被视作了<code>Message</code>类型，即使创建时使用了<code>Message::Move</code>。如果尝试将<code>msg</code>使用<code>as</code>强转为<code>Message::Move</code>，则会报错：</p>
+<pre><code class="log">   |
+11 |     let Message::Move &#123; x, y &#125; = msg as Message::Move;
+   |                                         ^^^^^^^^^^^^^
+   |                                         |
+   |                                         not a type
+   |                                         help: try using the variant&#39;s enum: `crate::Message`
+</code></pre>
+<h2 id="4-2-空值"><a href="#4-2-空值" class="headerlink" title="4.2 空值"></a>4.2 空值</h2><p>在Java或其它语言中，<code>null</code>表示一个空值，它可以被赋给任何对象，如果尝试访问一个空对象的任何属性或方法，则会造成空指针异常导致程序崩溃。</p>
+<p><strong>因此rust舍弃了空值，而改为使用<code>Option</code>枚举变量来表述这种结果</strong>：</p>
+<pre><code class="rust">enum Option&amp;lt;T&amp;gt; &#123;
+    Some(T),
+    None,
+&#125;
+</code></pre>
+<p>其中 T 是泛型参数，Some(T)表示该枚举成员的数据类型是 T，换句话说，Some 可以包含任何类型的数据。</p>
+<p><code>Option</code>是被默认导入的(被包含在了rust标准库<code>prelude</code>中)，即不需要显式导入即可使用：</p>
+<pre><code class="rust">let some_number = Some(5);
+let some_string = Some(&quot;a string&quot;);
+
+let absent_number: Option&amp;lt;i32&amp;gt; = None;
+</code></pre>
+<h1 id="5-数组"><a href="#5-数组" class="headerlink" title="5. 数组"></a>5. 数组</h1><p>在 Rust 中，最常用的数组有两种，第一种是速度很快但是长度固定的 <code>array</code>，第二种是可动态增长的但是有性能损耗的 <code>Vector</code>。</p>
+<h2 id="5-1-创建数组"><a href="#5-1-创建数组" class="headerlink" title="5.1 创建数组"></a>5.1 创建数组</h2><p>创建一个数组:</p>
+<pre><code class="rust">fn main() &#123;
+    let a = [1, 2, 3, 4, 5];
+
+    // 效果同上
+    let a: [i32; 5] = [1, 2, 3, 4, 5];
+
+    // 初始化某个值出现N次的数组, [类型; 长度]，只有类型支持Copy的才能使用
+    // 长度必须在编译时就已知，不能为动态值
+    let a = [3; 5];
+
+&#125;
+</code></pre>
+<h2 id="5-2-访问数组"><a href="#5-2-访问数组" class="headerlink" title="5.2 访问数组"></a>5.2 访问数组</h2><p>数组访问和其它语言一样，使用下标索引访问：</p>
+<pre><code class="rust">fn main() &#123;
+    let a = [9, 8, 7, 6, 5];
+
+    let first = a[0]; // 获取a数组第一个元素
+    let second = a[1]; // 获取第二个元素
+
+    // 获取数组长度
+    let len = a.len();
+&#125;
+</code></pre>
+<p>如果出现数组越界异常，则会导致程序崩溃，崩溃是在运行时崩溃，而不是编译期。</p>
+<h2 id="5-3-数组切片"><a href="#5-3-数组切片" class="headerlink" title="5.3 数组切片"></a>5.3 数组切片</h2><p>数组切片允许你引用集合中的部分连续片段，而不是整个集合：</p>
+<pre><code class="rust">let a: [i32; 5] = [1, 2, 3, 4, 5];
+
+let slice: &amp;[i32] = &amp;a[1..3];
+
+assert_eq!(slice, &amp;[2, 3]);
+</code></pre>
+<ul>
+<li>切片的长度可以与数组不同，并不是固定的，而是取决于你使用时指定的起始和结束位置</li>
+<li>创建切片的代价非常小，因为切片只是针对底层数组的一个引用</li>
+<li>切片类型[T]拥有不固定的大小，而切片引用类型&amp;[T]则具有固定的大小，因为 Rust 很多时候都需要固定大小数据类型，因此&amp;[T]更有用,&amp;str字符串切片也同理</li>
+</ul>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2023 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;IceOfSummer
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>
