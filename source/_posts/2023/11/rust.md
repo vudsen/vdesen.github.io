@@ -10,3 +10,6 @@ categories: Rust
 
 - [Rust基础](/rust/basic)
 - [复合类型](/rust/composite-type)
+- [流程控制](/rust/flow-control)
+- [方法](/rust/method)
+- [泛型和特征](/rust/generics_and_trait)

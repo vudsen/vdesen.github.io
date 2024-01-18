@@ -2,8 +2,9 @@
 
 title: 复合类型
 date: 2023-12-19 21:06:12
-tags:
-
+categories:
+  data:
+    - { name: "Rust", path: "/2023/12/04/Rust/" }
 ---
 
 
