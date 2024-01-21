@@ -25,8 +25,7 @@ yarn add typescript ts-loader ts-node tsconfig-paths --dev
 yarn add webpack webpack-cli source-map-support --dev
 ```
 
-之后在`package.json`里添加`"type": "module"`的属性，这样就可以直接在项目里直接使用ESModules了，
-这个东西在webpack里天生支持按需导入，不需要额外配置(要了解更多的话可以去搜`Tree Sharking`)。
+之后在`package.json`里添加`"type": "module"`的属性，这样就可以直接在项目里直接使用ESModules了，这个东西在webpack里天生支持按需导入，不需要额外配置(要了解更多的话可以去搜`Tree Sharking`)。
 
 
 # 2. 配置eslint
@@ -122,11 +121,9 @@ import util from './util.js'
 console.log(util)
 ```
 
-首先不说这个**丑的一批**，而且我后面还发现这玩意还会导致另外一个bug：在用webpack打包的时候，如果你加了`js`后缀，
-webpack会直接提醒你找不到`xx/src/util.js`，坑爹呢这不是！
+首先不说这个**丑的一批**，而且我后面还发现这玩意还会导致另外一个bug：在用webpack打包的时候，如果你加了`js`后缀，webpack会直接提醒你找不到`xx/src/util.js`，坑爹呢这不是！
 
-所以肯定是不能加后缀的，然后我也是在网上翻了好久，才找到这个参数：`experimentalSpecifierResolution`，虽然前面带了个`experimental`，
-但其实已经很稳定了，直接在`tsconfig.json`中添加配置：
+所以肯定是不能加后缀的，然后我也是在网上翻了好久，才找到这个参数：`experimentalSpecifierResolution`，虽然前面带了个`experimental`，但其实已经很稳定了，直接在`tsconfig.json`中添加配置：
 ```json
 {
     // ...
@@ -171,9 +168,6 @@ import StringUtils from '~/util/StringUtils'
 
 这个功能其实可有可无，但是我就是有强迫症，就是不想用相对路径！
 
-> 这玩意是个大坑，byd恶心死我了，查了半天才找到解决方案。
-
----
 
 首先啥都不加，直接ts-node运行，居然还报错了：
 ```shell
@@ -292,8 +286,7 @@ module.exports = function (env, args) {
 
 在 Webpack 添加配置`devtool: 'inline-source-map'`。
 
-还没完，也要在`tsconfig.json`里面添加`"sourceMap": true`的配置，如果少了这一步，最终生成的 sourcemap 行数会对不上，因为这个时候 Webpack 只会对编译
-后的 js 文件来构建索引，而 ts 编译后的文件中，空行(一行什么内容都没有的)会被删除，因此导致行数对不上。
+还没完，也要在`tsconfig.json`里面添加`"sourceMap": true`的配置，如果少了这一步，最终生成的 sourcemap 行数会对不上，因为这个时候 Webpack 只会对编译后的 js 文件来构建索引，而 ts 编译后的文件中，空行(一行什么内容都没有的)会被删除，因此导致行数对不上。
 
 最后在代码入口添加加载的代码：
 ```typescript
@@ -339,5 +332,107 @@ module.exports = {
 }
 ```
 
-加上上面的配置，就可以做到把`node_modules`里面的代码全部打到`libs.cjs`中，而我们的业务代码全部打到`main.cjs`中，
-同时配置我们的`SourceMapDevToolPlugin`不为`libs.cjs`生成 sourcemap。
+加上上面的配置，就可以做到把`node_modules`里面的代码全部打到`libs.cjs`中，而我们的业务代码全部打到`main.cjs`中，同时配置我们的`SourceMapDevToolPlugin`不为`libs.cjs`生成 sourcemap。
+
+
+# DLC：node20版本
+
+之前导入模块我们为了省略后缀，在配置中添加了`experimentalSpecifierResolution: node`参数，在node20上，这个参数仍然可用，但是已经有了更好的替代。
+
+文档：[Loaders](https://nodejs.org/api/esm.html#loaders)
+
+并且官方也给了一个样例来代替上面的启动参数：[commonjs-extension-resolution-loader](https://github.com/nodejs/loaders-test/tree/main/commonjs-extension-resolution-loader)。
+
+这里直接摆上我用的代码：
+```javascript
+// extension-loader.js
+/**
+ * 处理ts-node导入时必须加后缀
+ */
+// https://github.com/nodejs/loaders-test/blob/main/commonjs-extension-resolution-loader/loader.js
+import { isBuiltin } from 'node:module'
+import { dirname } from 'node:path'
+import { cwd } from 'node:process'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+import { promisify } from 'node:util'
+
+import resolveCallback from 'resolve/async.js'
+
+const resolveAsync = promisify(resolveCallback)
+
+const baseURL = pathToFileURL(cwd() + '/').href
+
+
+export async function resolve(specifier, context, next) {
+  const { parentURL = baseURL } = context
+
+  if (isBuiltin(specifier)) {
+    return next(specifier, context)
+  }
+
+  // `resolveAsync` works with paths, not URLs
+  if (specifier.startsWith('file://')) {
+    specifier = fileURLToPath(specifier)
+  }
+  const parentPath = fileURLToPath(parentURL)
+
+  let url
+  try {
+    const resolution = await resolveAsync(specifier, {
+      basedir: dirname(parentPath),
+      // For whatever reason, --experimental-specifier-resolution=node doesn't search for .mjs extensions
+      // but it does search for index.mjs files within directories
+      extensions: ['.js', '.json', '.node', '.mjs', '.ts'],
+    })
+    url = pathToFileURL(resolution).href
+  } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') {
+      // Match Node's error code
+      error.code = 'ERR_MODULE_NOT_FOUND'
+    }
+    throw error
+  }
+
+  return next(url, context)
+}
+```
+
+```javascript
+// path-loader.js
+/**
+ * 处理ts路径别名报错
+ */
+import { resolve as resolveTs } from 'ts-node/esm'
+import * as tsConfigPaths from 'tsconfig-paths'
+import { pathToFileURL } from 'url'
+
+const { absoluteBaseUrl, paths } = tsConfigPaths.loadConfig()
+const matchPath = tsConfigPaths.createMatchPath(absoluteBaseUrl, paths)
+
+export async function resolve (specifier, ctx, defaultResolve) {
+  const match = matchPath(specifier)
+  let realPath
+  if (match) {
+    realPath = pathToFileURL(`${match}`).href
+  } else {
+    realPath = specifier
+  }
+  const r = await defaultResolve(realPath, ctx)
+  return resolveTs(r.url, ctx, defaultResolve)
+}
+
+export { load, transformSource } from 'ts-node/esm'
+```
+
+```javascript
+// register-hooks.js
+import { register } from 'node:module'
+
+register('./extension-loader.js', import.meta.url)
+register('./path-loader.js', import.meta.url)
+
+```
+
+然后把我们的启动命令换成：`node --import register-hooks.js src/index.ts`。
+
+移除掉`tsconfig.json`里的`experimentalSpecifierResolution`，然后就可以正常启动了。
