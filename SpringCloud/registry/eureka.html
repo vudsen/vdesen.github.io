@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -199,9 +199,8 @@
 <h2 id="Eureka的两个组件"><a href="#Eureka的两个组件" class="headerlink" title="Eureka的两个组件"></a>Eureka的两个组件</h2><h3 id="Eureka-Server"><a href="#Eureka-Server" class="headerlink" title="Eureka Server"></a>Eureka Server</h3><p>Eureka Server 提供服务注册服务。各个微服务节点通过配置启动后，会在EurekaServer中进行注册，这样 EurekaServer 中的服务注册将会存储所有可用服务节点的信息，服务节点的信息可用在界面中直观地看到</p>
 <h3 id="Eureka-Client"><a href="#Eureka-Client" class="headerlink" title="Eureka Client"></a>Eureka Client</h3><p>EurekaClient通过注册中心进行访问。EurekaClient是一个Java客户端，用于简化与 Eureka Server 的交互，客户端同时也具备一个内置的、使用轮询（round-robin）负载算法的负载均衡器。在启动应用后，将会向 Eureka Server 发送心跳（默认周期为30秒）。如果 Eureka Server 在多个心跳周期内没有收到某个节点的心跳，EurekaServer将会从服务注册表中把这个服务节点移除</p>
 <h2 id="构建Eureka"><a href="#构建Eureka" class="headerlink" title="构建Eureka"></a>构建Eureka</h2><p><a target="_blank" rel="noopener" href="https://www.notion.so/Eureka-26db79932eb64e48922a80d0cef5296b">https://www.notion.so/Eureka-26db79932eb64e48922a80d0cef5296b</a></p>
-<h2 id="服务发现Discovery"><a href="#服务发现Discovery" class="headerlink" title="服务发现Discovery"></a>服务发现Discovery</h2><pre><code class="java">@AutoWired
-private DiscoveryClient discoveryClinet;
-</code></pre>
+<h2 id="服务发现Discovery"><a href="#服务发现Discovery" class="headerlink" title="服务发现Discovery"></a>服务发现Discovery</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@AutoWired</span></span><br><span class="line"><span class="keyword">private</span> DiscoveryClient discoveryClinet;</span><br></pre></td></tr></table></figure>
+
 <p>可以使用 DiscoveryClient 来查看已经注册的服务信息，在使用前还需要给主类添加 <code>@EnableDiscoveryClient</code>注解</p>
 
     </div>

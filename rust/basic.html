@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -241,171 +241,59 @@
 </ul>
 <h1 id="浮点类型"><a href="#浮点类型" class="headerlink" title="浮点类型"></a>浮点类型</h1><p>rust只有两种浮点类型：<code>f32</code>和<code>f64</code>，默认是<code>f64</code>。</p>
 <p>应该尽量避免比较浮点型：</p>
-<pre><code class="rust">fn main() &#123;
-  // 断言0.1 + 0.2与0.3相等
-  assert!(0.1 + 0.2 == 0.3);
-&#125;
-</code></pre>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">  <span class="comment">// 断言0.1 + 0.2与0.3相等</span></span><br><span class="line">  <span class="built_in">assert!</span>(<span class="number">0.1</span> + <span class="number">0.2</span> == <span class="number">0.3</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>该代码的断言为否，会导致程序失败。</p>
 <p>若需要比较，可以考虑使用如下方式：</p>
-<pre><code class="rust">fn main() &#123;
-  assert!((0.1_f64 + 0.2 - 0.3).abs() &amp;lt; 0.00001);
-&#125;
-</code></pre>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">  <span class="built_in">assert!</span>((<span class="number">0.1_f64</span> + <span class="number">0.2</span> - <span class="number">0.3</span>).<span class="title function_ invoke__">abs</span>() &amp;lt; <span class="number">0.00001</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <h2 id="NaN"><a href="#NaN" class="headerlink" title="NaN"></a>NaN</h2><p>Rust 的浮点数类型使用 <code>NaN</code> (not a number)来处理数学上未定义的结果。</p>
 <p>**所有跟 <code>NaN</code> 交互的操作，都会返回一个 <code>NaN</code>**，而且 <code>NaN</code> 不能用来比较。</p>
 <p>可以使用<code>is_nan()</code>方法来判断一个数值是否为nan：</p>
-<pre><code class="rust">fn main() &#123;
-    let x = (-42.0_f32).sqrt();
-    if x.is_nan() &#123;
-        println!(&quot;未定义的数学行为&quot;)
-    &#125;
-&#125;
-</code></pre>
-<h1 id="字符、布尔、单元类型"><a href="#字符、布尔、单元类型" class="headerlink" title="字符、布尔、单元类型"></a>字符、布尔、单元类型</h1><pre><code class="rust">// 字符
-let c = &#39;z&#39;;
-let z = &#39;ℤ&#39;;
-let g = &#39;国&#39;;
-let heart_eyed_cat = &#39;😻&#39;;
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">x</span> = (-<span class="number">42.0_f32</span>).<span class="title function_ invoke__">sqrt</span>();</span><br><span class="line">    <span class="keyword">if</span> x.<span class="title function_ invoke__">is_nan</span>() &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;未定义的数学行为&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-// 布尔
-let t = true;
-let f: bool = false;
-</code></pre>
+<h1 id="字符、布尔、单元类型"><a href="#字符、布尔、单元类型" class="headerlink" title="字符、布尔、单元类型"></a>字符、布尔、单元类型</h1><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 字符</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">c</span> = <span class="string">&#x27;z&#x27;</span>;</span><br><span class="line"><span class="keyword">let</span> <span class="variable">z</span> = <span class="string">&#x27;ℤ&#x27;</span>;</span><br><span class="line"><span class="keyword">let</span> <span class="variable">g</span> = <span class="string">&#x27;国&#x27;</span>;</span><br><span class="line"><span class="keyword">let</span> <span class="variable">heart_eyed_cat</span> = &#x27;😻&#x27;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 布尔</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">t</span> = <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">let</span> <span class="variable">f</span>: <span class="type">bool</span> = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure>
+
+
+
 <p>单元类型就是 <code>()</code>，可以理解为<code>void</code>，例如main函数的返回值就是单元类型<code>()</code>，单元类型的优势是它完全不占用任何内存，可以当做一个占位符使用。</p>
 <h1 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h1><p>基本格式：</p>
-<pre><code class="rust">fn add(i: i32, j: i32) -&amp;gt; i32 &#123;
-  // 这里没有用分号结尾。
-  i + j
-&#125;
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">add</span>(i: <span class="type">i32</span>, j: <span class="type">i32</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">  <span class="comment">// 这里没有用分号结尾。</span></span><br><span class="line">  i + j</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">add</span>(i: <span class="type">i32</span>, j: <span class="type">i32</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> i + j;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-fn add(i: i32, j: i32) -&amp;gt; i32 &#123;
-  return i + j;
-&#125;
-</code></pre>
 <ul>
 <li>函数名和变量名使用蛇形命名法(snake case)，例如 fn add_two() -&amp;gt; {}</li>
 <li>函数的位置可以随便放，Rust 不关心我们在哪里定义了函数，只要有定义即可</li>
 <li>每个函数参数都需要标注类型</li>
 </ul>
 <h2 id="发散函数"><a href="#发散函数" class="headerlink" title="发散函数"></a>发散函数</h2><p>当用 ! 作函数返回类型的时候，表示该函数永不返回( diverge function )，特别的，这种语法往往用做会导致程序崩溃的函数：</p>
-<pre><code class="rust">fn main() &#123;
-    println!(&quot;Hello, world!&quot;);
-    dead_end();
-&#125;
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;Hello, world!&quot;</span>);</span><br><span class="line">    <span class="title function_ invoke__">dead_end</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">dead_end</span>() <span class="punctuation">-&amp;gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">  <span class="built_in">panic!</span>(<span class="string">&quot;你已经到了穷途末路，崩溃吧！&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-fn dead_end() -&amp;gt; i32 &#123;
-  panic!(&quot;你已经到了穷途末路，崩溃吧！&quot;);
-&#125;
-</code></pre>
 <p>可以注意到这里我们函数返回值是<code>i32</code>，但实际上函数并没有返回一个<code>i32</code>，<br>与之类似的还有<code>todo!()</code>，比如这个函数暂时只需要一个声明，就可以用<code>todo!()</code>来临时顶替。</p>
 <h1 id="所有权和借用"><a href="#所有权和借用" class="headerlink" title="所有权和借用"></a>所有权和借用</h1><blockquote>
 <p>Rust 中每一个值都被一个变量所拥有，该变量被称为值的所有者<p/><br>一个值同时只能被一个变量所拥有，或者说一个值只能拥有一个所有者<p/><br>当所有者(变量)离开作用域范围时，这个值将被丢弃(drop)</p>
 </blockquote>
 <p>例如如下代码会报错：</p>
-<pre><code class="rust">let s1 = String::from(&quot;hello&quot;);
-let s2 = s1;
-
-println!(&quot;&#123;&#125;, world!&quot;, s1);
-</code></pre>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="variable">s1</span> = <span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line"><span class="keyword">let</span> <span class="variable">s2</span> = s1;</span><br><span class="line"></span><br><span class="line"><span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;, world!&quot;</span>, s1);</span><br></pre></td></tr></table></figure>
 <p>原因是s1所指向的字符串已经转移(移动)给给了s2，s1此时将不再可用。</p>
 <h2 id="函数传值与返回"><a href="#函数传值与返回" class="headerlink" title="函数传值与返回"></a>函数传值与返回</h2><p>将值传递给函数，一样会发生<code>移动</code>或者<code>复制</code>:</p>
-<pre><code class="rust">fn main() &#123;
-    let s = String::from(&quot;hello&quot;);  // s 进入作用域
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">s</span> = <span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;hello&quot;</span>);  <span class="comment">// s 进入作用域</span></span><br><span class="line"></span><br><span class="line">    <span class="title function_ invoke__">takes_ownership</span>(s);             <span class="comment">// s 的值移动到函数里 ...</span></span><br><span class="line">                                    <span class="comment">// ... 所以到这里不再有效</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">x</span> = <span class="number">5</span>;                      <span class="comment">// x 进入作用域</span></span><br><span class="line"></span><br><span class="line">    <span class="title function_ invoke__">makes_copy</span>(x);                  <span class="comment">// x 应该移动函数里，</span></span><br><span class="line">                                    <span class="comment">// 但 i32 是 Copy 的，所以在后面可继续使用 x</span></span><br><span class="line"></span><br><span class="line">&#125; <span class="comment">// 这里, x 先移出了作用域，然后是 s。但因为 s 的值已被移走，</span></span><br><span class="line">  <span class="comment">// 所以不会有特殊操作</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">takes_ownership</span>(some_string: <span class="type">String</span>) &#123; <span class="comment">// some_string 进入作用域</span></span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>, some_string);</span><br><span class="line">&#125; <span class="comment">// 这里，some_string 移出作用域并调用 `drop` 方法。占用的内存被释放</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">makes_copy</span>(some_integer: <span class="type">i32</span>) &#123; <span class="comment">// some_integer 进入作用域</span></span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>, some_integer);</span><br><span class="line">&#125; <span class="comment">// 这里，some_integer 移出作用域。不会有特殊操作</span></span><br></pre></td></tr></table></figure>
 
-    takes_ownership(s);             // s 的值移动到函数里 ...
-                                    // ... 所以到这里不再有效
-
-    let x = 5;                      // x 进入作用域
-
-    makes_copy(x);                  // x 应该移动函数里，
-                                    // 但 i32 是 Copy 的，所以在后面可继续使用 x
-
-&#125; // 这里, x 先移出了作用域，然后是 s。但因为 s 的值已被移走，
-  // 所以不会有特殊操作
-
-fn takes_ownership(some_string: String) &#123; // some_string 进入作用域
-    println!(&quot;&#123;&#125;&quot;, some_string);
-&#125; // 这里，some_string 移出作用域并调用 `drop` 方法。占用的内存被释放
-
-fn makes_copy(some_integer: i32) &#123; // some_integer 进入作用域
-    println!(&quot;&#123;&#125;&quot;, some_integer);
-&#125; // 这里，some_integer 移出作用域。不会有特殊操作
-</code></pre>
 <p>同样的，函数返回值也有所有权，例如:</p>
-<pre><code class="rust">fn main() &#123;
-    let s1 = gives_ownership();         // gives_ownership 将返回值
-                                        // 移给 s1
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">s1</span> = <span class="title function_ invoke__">gives_ownership</span>();         <span class="comment">// gives_ownership 将返回值</span></span><br><span class="line">                                        <span class="comment">// 移给 s1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">s2</span> = <span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;hello&quot;</span>);     <span class="comment">// s2 进入作用域</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">s3</span> = <span class="title function_ invoke__">takes_and_gives_back</span>(s2);  <span class="comment">// s2 被移动到</span></span><br><span class="line">                                        <span class="comment">// takes_and_gives_back 中,</span></span><br><span class="line">                                        <span class="comment">// 它也将返回值移给 s3</span></span><br><span class="line">&#125; <span class="comment">// 这里, s3 移出作用域并被丢弃。s2 也移出作用域，但已被移走，</span></span><br><span class="line">  <span class="comment">// 所以什么也不会发生。s1 移出作用域并被丢弃</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">gives_ownership</span>() <span class="punctuation">-&amp;gt;</span> <span class="type">String</span> &#123;             <span class="comment">// gives_ownership 将返回值移动给</span></span><br><span class="line">                                             <span class="comment">// 调用它的函数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">some_string</span> = <span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;hello&quot;</span>); <span class="comment">// some_string 进入作用域.</span></span><br><span class="line"></span><br><span class="line">    some_string                              <span class="comment">// 返回 some_string 并移出给调用的函数</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// takes_and_gives_back 将传入字符串并返回该值</span></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">takes_and_gives_back</span>(a_string: <span class="type">String</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">String</span> &#123; <span class="comment">// a_string 进入作用域</span></span><br><span class="line"></span><br><span class="line">    a_string  <span class="comment">// 返回 a_string 并移出给调用的函数</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    let s2 = String::from(&quot;hello&quot;);     // s2 进入作用域
-
-    let s3 = takes_and_gives_back(s2);  // s2 被移动到
-                                        // takes_and_gives_back 中,
-                                        // 它也将返回值移给 s3
-&#125; // 这里, s3 移出作用域并被丢弃。s2 也移出作用域，但已被移走，
-  // 所以什么也不会发生。s1 移出作用域并被丢弃
-
-fn gives_ownership() -&amp;gt; String &#123;             // gives_ownership 将返回值移动给
-                                             // 调用它的函数
-
-    let some_string = String::from(&quot;hello&quot;); // some_string 进入作用域.
-
-    some_string                              // 返回 some_string 并移出给调用的函数
-&#125;
-
-// takes_and_gives_back 将传入字符串并返回该值
-fn takes_and_gives_back(a_string: String) -&amp;gt; String &#123; // a_string 进入作用域
-
-    a_string  // 返回 a_string 并移出给调用的函数
-&#125;
-</code></pre>
 <h1 id="引用与借用"><a href="#引用与借用" class="headerlink" title="引用与借用"></a>引用与借用</h1><p>如果一个人拥有某样东西，你可以从他那里借来，当使用完毕后，也必须要物归原主。</p>
 <p>Rust 通过<code>借用(Borrowing)</code>这个概念来达成上述的目的。</p>
 <p>常规引用是一个指针类型，指向了对象存储的内存地址。在下面代码中，我们创建一个 i32 值的引用 y，然后使用解引用运算符来解出 y 所使用的值</p>
-<pre><code class="rust">fn main() &#123;
-    let x: i32 = 5;
-    let y: &amp;i32 = &amp;x;
-
-    assert_eq!(5, x);
-    assert_eq!(5, *y);
-&#125;
-</code></pre>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">x</span>: <span class="type">i32</span> = <span class="number">5</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">y</span>: &amp;<span class="type">i32</span> = &amp;x;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">assert_eq!</span>(<span class="number">5</span>, x);</span><br><span class="line">    <span class="built_in">assert_eq!</span>(<span class="number">5</span>, *y);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这里，&amp; 符号即是引用，它们允许你使用值，但是不获取所有权，即无法对原始的值进行改变。</p>
 <h2 id="可变引用"><a href="#可变引用" class="headerlink" title="可变引用"></a>可变引用</h2><p>可变引用允许我们去修改原始的值</p>
-<pre><code class="rust">fn main() &#123;
-  // 注意这里必须加mut
-  let mut s = 123;
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">  <span class="comment">// 注意这里必须加mut</span></span><br><span class="line">  <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">s</span> = <span class="number">123</span>;</span><br><span class="line"></span><br><span class="line">  <span class="title function_ invoke__">change</span>(&amp;<span class="keyword">mut</span> s);</span><br><span class="line">  <span class="built_in">assert_eq!</span>(<span class="number">125</span>, s);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">change</span>(val: &amp;<span class="keyword">mut</span> <span class="type">i32</span>) &#123;</span><br><span class="line">  <span class="comment">// 解引用</span></span><br><span class="line">  *val += <span class="number">2</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-  change(&amp;mut s);
-  assert_eq!(125, s);
-&#125;
-
-fn change(val: &amp;mut i32) &#123;
-  // 解引用
-  *val += 2;
-&#125;
-</code></pre>
 <p>可变引用同时只能存在一个，如果创建多个，编译时则会报错：</p>
-<pre><code class="rust">let mut s = String::from(&quot;hello&quot;);
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">s</span> = <span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// first mutable borrow occurs here</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">r1</span> = &amp;<span class="keyword">mut</span> s;</span><br><span class="line"><span class="comment">// second mutable borrow occurs here</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">r2</span> = &amp;<span class="keyword">mut</span> s;</span><br><span class="line"></span><br><span class="line"><span class="comment">// first borrow later used here</span></span><br><span class="line"><span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;, &#123;&#125;&quot;</span>, r1, r2);</span><br></pre></td></tr></table></figure>
 
-// first mutable borrow occurs here
-let r1 = &amp;mut s;
-// second mutable borrow occurs here
-let r2 = &amp;mut s;
-
-// first borrow later used here
-println!(&quot;&#123;&#125;, &#123;&#125;&quot;, r1, r2);
-</code></pre>
 <p>可变引用与不可变引用不能同时存在：</p>
-<pre><code class="rust">let mut s = String::from(&quot;hello&quot;);
-
-let r1 = &amp;s; // 没问题
-let r2 = &amp;s; // 没问题
-let r3 = &amp;mut s; // 大问题
-
-println!(&quot;&#123;&#125;, &#123;&#125;, and &#123;&#125;&quot;, r1, r2, r3);
-</code></pre>
-
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">s</span> = <span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="variable">r1</span> = &amp;s; <span class="comment">// 没问题</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">r2</span> = &amp;s; <span class="comment">// 没问题</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">r3</span> = &amp;<span class="keyword">mut</span> s; <span class="comment">// 大问题</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;, &#123;&#125;, and &#123;&#125;&quot;</span>, r1, r2, r3);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
     </div>
     
     

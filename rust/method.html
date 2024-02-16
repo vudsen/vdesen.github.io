@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -192,52 +192,12 @@
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
         <h1 id="1-定义方法"><a href="#1-定义方法" class="headerlink" title="1. 定义方法"></a>1. 定义方法</h1><p>Rust 使用 impl 来定义方法，例如以下代码：</p>
-<pre><code class="rust">struct Circle &#123;
-    x: f64,
-    y: f64,
-    radius: f64,
-&#125;
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Circle</span> &#123;</span><br><span class="line">    x: <span class="type">f64</span>,</span><br><span class="line">    y: <span class="type">f64</span>,</span><br><span class="line">    radius: <span class="type">f64</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Circle</span> &#123;</span><br><span class="line">    <span class="comment">// new是Circle的关联函数，因为它的第一个参数不是self，且new并不是关键字</span></span><br><span class="line">    <span class="comment">// 这种方法往往用于初始化当前结构体的实例</span></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">new</span>(x: <span class="type">f64</span>, y: <span class="type">f64</span>, radius: <span class="type">f64</span>) <span class="punctuation">-&amp;gt;</span> Circle &#123;</span><br><span class="line">        Circle &#123;</span><br><span class="line">            x: x,</span><br><span class="line">            y: y,</span><br><span class="line">            radius: radius,</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Circle的方法，&amp;self表示借用当前的Circle结构体</span></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">area</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">f64</span> &#123;</span><br><span class="line">        std::<span class="type">f64</span>::consts::PI * (<span class="keyword">self</span>.radius * <span class="keyword">self</span>.radius)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-impl Circle &#123;
-    // new是Circle的关联函数，因为它的第一个参数不是self，且new并不是关键字
-    // 这种方法往往用于初始化当前结构体的实例
-    fn new(x: f64, y: f64, radius: f64) -&amp;gt; Circle &#123;
-        Circle &#123;
-            x: x,
-            y: y,
-            radius: radius,
-        &#125;
-    &#125;
-
-    // Circle的方法，&amp;self表示借用当前的Circle结构体
-    fn area(&amp;self) -&amp;gt; f64 &#123;
-        std::f64::consts::PI * (self.radius * self.radius)
-    &#125;
-&#125;
-</code></pre>
 <p>Rust和其它语言，例如Java中的类不同的是，<code>impl</code>只能用来定义方法，里面不能包括属性，而Java中的类既可以有方法，也可以有属性。<br>如果需要使用属性，需要搭配结构体使用。</p>
 <p>如果<code>impl</code>和<code>struct</code>的名称相同，则两者会被视作同一个：</p>
-<pre><code class="rust">#[derive(Debug)]
-struct Rectangle &#123;
-    width: u32,
-    height: u32,
-&#125;
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[derive(Debug)]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Rectangle</span> &#123;</span><br><span class="line">    width: <span class="type">u32</span>,</span><br><span class="line">    height: <span class="type">u32</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Rectangle</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">area</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">u32</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.width * <span class="keyword">self</span>.height</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">rect1</span> = Rectangle &#123; width: <span class="number">30</span>, height: <span class="number">50</span> &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">println!</span>(</span><br><span class="line">        <span class="string">&quot;The area of the rectangle is &#123;&#125; square pixels.&quot;</span>,</span><br><span class="line">        rect1.<span class="title function_ invoke__">area</span>()</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-impl Rectangle &#123;
-    fn area(&amp;self) -&amp;gt; u32 &#123;
-        self.width * self.height
-    &#125;
-&#125;
-
-fn main() &#123;
-    let rect1 = Rectangle &#123; width: 30, height: 50 &#125;;
-
-    println!(
-        &quot;The area of the rectangle is &#123;&#125; square pixels.&quot;,
-        rect1.area()
-    );
-&#125;
-</code></pre>
 <h2 id="self、-self和-mut-self"><a href="#self、-self和-mut-self" class="headerlink" title="self、&amp;self和&amp;mut self"></a>self、&amp;self和&amp;mut self</h2><p>在上面 <code>area`` 的签名中，我们使用 </code>&amp;self<code>替代</code>rectangle: &amp;Rectangle<code>，</code>&amp;self<code>其实是</code>self: &amp;Self<code>的简写（注意大小写）。在一个</code>impl<code> 块内，</code>Self<code> 指代被实现方法的结构体类型，</code>self<code> 指代此类型的实例，换句话说，</code>self<code>指代的是</code>Rectangle<code>结构体实例，这样的写法会让我们的代码简洁很多，而且非常便于理解：我们为哪个结构体实现方法，那么</code>self&#96; 就是指代哪个结构体的实例。</p>
 <p>需要注意的是，self 依然有所有权的概念：</p>
 <ul>
@@ -246,47 +206,15 @@ fn main() &#123;
 <li>&amp;mut self 表示可变借用</li>
 </ul>
 <h1 id="2-关联函数"><a href="#2-关联函数" class="headerlink" title="2. 关联函数"></a>2. 关联函数</h1><p>参数中不包含 <code>self</code> 的函数就是关联函数，注意是函数而不是方法。</p>
-<pre><code class="rust">impl Rectangle &#123;
-    fn new(w: u32, h: u32) -&amp;gt; Rectangle &#123;
-        Rectangle &#123; width: w, height: h &#125;
-    &#125;
-&#125;
-</code></pre>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span> <span class="title class_">Rectangle</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">new</span>(w: <span class="type">u32</span>, h: <span class="type">u32</span>) <span class="punctuation">-&amp;gt;</span> Rectangle &#123;</span><br><span class="line">        Rectangle &#123; width: w, height: h &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>在Rust中，并没有构造器的概念，也就是说构造一个对象并不一定需要调用<code>new</code>方法，而<code>new</code>方法在语法层面也并不代表构造器，只是一个<br>约定俗成的规则，Rust里使用new作为构造器的名称。</p>
 <p>因为是函数，所以不能用<code>.</code>来调用，只能通过<code>::</code>来调用，例如<code>String::from</code>。</p>
 <h1 id="3-多个impl定义"><a href="#3-多个impl定义" class="headerlink" title="3. 多个impl定义"></a>3. 多个impl定义</h1><p>Rust 允许我们为一个结构体定义多个 impl 块，目的是提供更多的灵活性和代码组织性，例如当方法多了后，可以把相关的方法组织在同一个 impl 块中，那么就可以形成多个 impl 块，各自完成一块儿目标：</p>
-<pre><code class="rust">impl Rectangle &#123;
-    fn area(&amp;self) -&amp;gt; u32 &#123;
-        self.width * self.height
-    &#125;
-&#125;
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span> <span class="title class_">Rectangle</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">area</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">u32</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.width * <span class="keyword">self</span>.height</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Rectangle</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">can_hold</span>(&amp;<span class="keyword">self</span>, other: &amp;Rectangle) <span class="punctuation">-&amp;gt;</span> <span class="type">bool</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.width &amp;gt; other.width &amp;&amp; <span class="keyword">self</span>.height &amp;gt; other.height</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-impl Rectangle &#123;
-    fn can_hold(&amp;self, other: &amp;Rectangle) -&amp;gt; bool &#123;
-        self.width &amp;gt; other.width &amp;&amp; self.height &amp;gt; other.height
-    &#125;
-&#125;
-</code></pre>
 <h1 id="4-为枚举实现方法"><a href="#4-为枚举实现方法" class="headerlink" title="4. 为枚举实现方法"></a>4. 为枚举实现方法</h1><p>枚举类型之所以强大，不仅仅在于它好用、可以同一化类型，还在于，我们可以像结构体一样，为枚举实现方法：</p>
-<pre><code class="rust">#![allow(unused)]
-enum Message &#123;
-    Quit,
-    Move &#123; x: i32, y: i32 &#125;,
-    Write(String),
-    ChangeColor(i32, i32, i32),
-&#125;
-
-impl Message &#123;
-    fn call(&amp;self) &#123;
-        // 在这里定义方法体
-    &#125;
-&#125;
-
-fn main() &#123;
-    let m = Message::Write(String::from(&quot;hello&quot;));
-    m.call();
-&#125;
-</code></pre>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#![allow(unused)]</span></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">Message</span> &#123;</span><br><span class="line">    Quit,</span><br><span class="line">    Move &#123; x: <span class="type">i32</span>, y: <span class="type">i32</span> &#125;,</span><br><span class="line">    <span class="title function_ invoke__">Write</span>(<span class="type">String</span>),</span><br><span class="line">    <span class="title function_ invoke__">ChangeColor</span>(<span class="type">i32</span>, <span class="type">i32</span>, <span class="type">i32</span>),</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Message</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">call</span>(&amp;<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="comment">// 在这里定义方法体</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">m</span> = Message::<span class="title function_ invoke__">Write</span>(<span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;hello&quot;</span>));</span><br><span class="line">    m.<span class="title function_ invoke__">call</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
     </div>
     

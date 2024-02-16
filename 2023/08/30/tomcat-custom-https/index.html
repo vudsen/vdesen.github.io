@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -183,22 +183,10 @@
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
         <h1 id="1-起因"><a href="#1-起因" class="headerlink" title="1. 起因"></a>1. 起因</h1><p>由于最近公司要求给tomcat配置https，本来以为只是简单的塞个证书和私钥就行了：</p>
-<pre><code class="xml">&amp;lt;Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot; SSLEnabled=&quot;true&quot; &amp;gt;
-    &amp;lt;SSLHostConfig protocols=&quot;TLSv1.2&quot; sslProtocol=&quot;TLS&quot;&amp;gt;
-        &amp;lt;Certificate certificateKeyFile=&quot;conf/server.key&quot;
-                    certificateFile=&quot;conf/server.crt&quot;
-                    type=&quot;RSA&quot;/&amp;gt;
-    &amp;lt;/SSLHostConfig&amp;gt;
-&amp;lt;/Connector&amp;gt;
-</code></pre>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">&amp;lt;</span>Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot; SSLEnabled=&quot;true&quot; <span class="symbol">&amp;gt;</span></span><br><span class="line">    <span class="symbol">&amp;lt;</span>SSLHostConfig protocols=&quot;TLSv1.2&quot; sslProtocol=&quot;TLS&quot;<span class="symbol">&amp;gt;</span></span><br><span class="line">        <span class="symbol">&amp;lt;</span>Certificate certificateKeyFile=&quot;conf/server.key&quot;</span><br><span class="line">                    certificateFile=&quot;conf/server.crt&quot;</span><br><span class="line">                    type=&quot;RSA&quot;/<span class="symbol">&amp;gt;</span></span><br><span class="line">    <span class="symbol">&amp;lt;</span>/SSLHostConfig<span class="symbol">&amp;gt;</span></span><br><span class="line"><span class="symbol">&amp;lt;</span>/Connector<span class="symbol">&amp;gt;</span></span><br></pre></td></tr></table></figure>
+
 <p>结果要求用jks证书文件，彳亍：</p>
-<pre><code class="xml">&amp;lt;Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot; 
-    sslProtocol=&quot;TLS&quot; 
-    protocols=&quot;TLSv1.2&quot;
-    SSLEnabled=&quot;true&quot;
-    keystoreFile=&quot;conf/server.keystore&quot;
-    keystorePass=&quot;xxxx&quot;/&amp;gt;
-</code></pre>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">&amp;lt;</span>Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot; </span><br><span class="line">    sslProtocol=&quot;TLS&quot; </span><br><span class="line">    protocols=&quot;TLSv1.2&quot;</span><br><span class="line">    SSLEnabled=&quot;true&quot;</span><br><span class="line">    keystoreFile=&quot;conf/server.keystore&quot;</span><br><span class="line">    keystorePass=&quot;xxxx&quot;/<span class="symbol">&amp;gt;</span></span><br></pre></td></tr></table></figure>
 <p>本以为万事大吉，结果甲方爸爸因为密码是直接写的明文，要求我们必须把密码穿成加密的🥲。</p>
 <p>不过还好顺带也给了我份博客：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/suncoolcat/p/3292252.html">tomcat安全配置之证书密码加密存储</a></p>
 <h1 id="2-tomcat配置https"><a href="#2-tomcat配置https" class="headerlink" title="2. tomcat配置https"></a>2. tomcat配置https</h1><h2 id="2-1-编写实现类"><a href="#2-1-编写实现类" class="headerlink" title="2.1 编写实现类"></a>2.1 编写实现类</h2><p>其实这份博客已经说的很清楚了，只需要继承<code>Http11NioProtocol</code>这个类就可以了</p>
@@ -207,102 +195,49 @@
 </blockquote>
 <p>但是这个博客还是不太完整，这个类怎么打jar包？<code>Http11Protocol</code>从哪里来？打了的jar包丢在哪里？博客里都没有说明。</p>
 <p>这里我自己研究了一下，首先创建一个maven项目，pom.xml添加依赖：</p>
-<pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.apache.tomcat&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;tomcat-coyote&amp;lt;/artifactId&amp;gt;
-    &amp;lt;version&amp;gt;8.5.87&amp;lt;/version&amp;gt;
-    &amp;lt;scope&amp;gt;provided&amp;lt;/scope&amp;gt;
-&amp;lt;/dependency&amp;gt;
-</code></pre>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">&amp;lt;</span>dependency<span class="symbol">&amp;gt;</span></span><br><span class="line">    <span class="symbol">&amp;lt;</span>groupId<span class="symbol">&amp;gt;</span>org.apache.tomcat<span class="symbol">&amp;lt;</span>/groupId<span class="symbol">&amp;gt;</span></span><br><span class="line">    <span class="symbol">&amp;lt;</span>artifactId<span class="symbol">&amp;gt;</span>tomcat-coyote<span class="symbol">&amp;lt;</span>/artifactId<span class="symbol">&amp;gt;</span></span><br><span class="line">    <span class="symbol">&amp;lt;</span>version<span class="symbol">&amp;gt;</span>8.5.87<span class="symbol">&amp;lt;</span>/version<span class="symbol">&amp;gt;</span></span><br><span class="line">    <span class="symbol">&amp;lt;</span>scope<span class="symbol">&amp;gt;</span>provided<span class="symbol">&amp;lt;</span>/scope<span class="symbol">&amp;gt;</span></span><br><span class="line"><span class="symbol">&amp;lt;</span>/dependency<span class="symbol">&amp;gt;</span></span><br></pre></td></tr></table></figure>
 <p>注意scope是provided。</p>
 <p>之后就可以直接写代码了：</p>
-<pre><code class="java">import org.apache.coyote.http11.Http11NioProtocol;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.coyote.http11.Http11NioProtocol;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EncryptedHttp11Protocol</span> <span class="keyword">extends</span> <span class="title class_">Http11NioProtocol</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 进行你自己的密码获取逻辑</span></span><br><span class="line">        setKeystorePass(<span class="string">&quot;xxx&quot;</span>);</span><br><span class="line">        <span class="built_in">super</span>.init();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-public class EncryptedHttp11Protocol extends Http11NioProtocol &#123;
-
-    @Override
-    public void init() throws Exception &#123;
-        // 进行你自己的密码获取逻辑
-        setKeystorePass(&quot;xxx&quot;);
-        super.init();
-    &#125;
-
-&#125;
-</code></pre>
 <p>写完直接用maven打包：</p>
-<pre><code class="shell">mvn package -DskipTests
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn package -DskipTests</span><br></pre></td></tr></table></figure>
+
 <p>然后丢到tomcat目录的lib文件夹里就可以了。</p>
 <p>最后配置server.xml：</p>
-<pre><code class="xml"> &amp;lt;Connector port=&quot;8443&quot; protocol=&quot;xxxxxxx.EncryptedHttp11Protocol&quot; SSLEnabled=&quot;true&quot;
-    keystoreFile=&quot;conf/server.keystore&quot;
-    sslProtocol=&quot;TLS&quot;&amp;gt;
-&amp;lt;/Connector&amp;gt;
-</code></pre>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="symbol">&amp;lt;</span>Connector port=&quot;8443&quot; protocol=&quot;xxxxxxx.EncryptedHttp11Protocol&quot; SSLEnabled=&quot;true&quot;</span><br><span class="line">    keystoreFile=&quot;conf/server.keystore&quot;</span><br><span class="line">    sslProtocol=&quot;TLS&quot;<span class="symbol">&amp;gt;</span></span><br><span class="line"><span class="symbol">&amp;lt;</span>/Connector<span class="symbol">&amp;gt;</span></span><br></pre></td></tr></table></figure>
 <p><strong>注意protocol属性要改成你自己的实现类</strong></p>
 <h2 id="2-2-设置环境变量"><a href="#2-2-设置环境变量" class="headerlink" title="2.2 设置环境变量"></a>2.2 设置环境变量</h2><p>由于jks被加密，需要提供密码，因此推荐的方法是通过系统环境变量来提供（这里直接根据自己的机器设置即可）。<br>在java代码里这样获取系统环境变量：</p>
-<pre><code class="java">String value = System.getenv(key);
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> System.getenv(key);</span><br></pre></td></tr></table></figure>
+
 <h2 id="2-3-设置命令行参数"><a href="#2-3-设置命令行参数" class="headerlink" title="2.3 设置命令行参数"></a>2.3 设置命令行参数</h2><p>也可以通过设置tomcat命令行参数来传输秘钥，<br>在tomcat的bin目录下创建setenv.bat(windows) &#x2F; setenv.sh (linux)文件，并且配置相关参数即可。</p>
 <p>windows: </p>
-<pre><code class="bat">set &quot;JAVA_OPTS=-DsecretKey=xxxx -DsercretKey2=xxxx&quot;
-</code></pre>
+<figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">set</span> &quot;JAVA_OPTS=-DsecretKey=xxxx -DsercretKey2=xxxx&quot;</span><br></pre></td></tr></table></figure>
+
 <p>linux:</p>
-<pre><code class="shell">JAVA_OPTS=&quot;-DsecretKey=xxxx -DsercretKey2=xxxx&quot;
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JAVA_OPTS=&quot;-DsecretKey=xxxx -DsercretKey2=xxxx&quot;</span><br></pre></td></tr></table></figure>
+
 <p>之后在代码中这样获取：</p>
-<pre><code class="java">String value = System.getProperty(key);
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> System.getProperty(key);</span><br></pre></td></tr></table></figure>
+
 <h1 id="3-SpringBoot内嵌tomcat配置https"><a href="#3-SpringBoot内嵌tomcat配置https" class="headerlink" title="3. SpringBoot内嵌tomcat配置https"></a>3. SpringBoot内嵌tomcat配置https</h1><p>你说的对，但是我是SpringBoot内嵌tomcat！</p>
 <p>公司的众多模块中，偏偏就是有一个SpringBoot项目，这玩意用的内嵌tomcat，上面的方法都用不了👎👎👎。</p>
 <p>首先我们要知道SpringBoot项目怎么开启https：</p>
-<pre><code class="yaml">server:
-    ssl:
-        enabled: true
-        key-store: classpath:server.keystore
-        key-store-password: xxxxxx
-</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">    <span class="attr">ssl:</span></span><br><span class="line">        <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">        <span class="attr">key-store:</span> <span class="string">classpath:server.keystore</span></span><br><span class="line">        <span class="attr">key-store-password:</span> <span class="string">xxxxxx</span></span><br></pre></td></tr></table></figure>
+
 <p>我们只需要找到一个方法在配置ssl前修改配置，提供密码即可。</p>
 <p>你别说，还真被我找到了，在启动类添加下面的代码：</p>
-<pre><code class="java">@Bean
-public WebServerFactoryCustomizer&amp;lt;UndertowServletWebServerFactory&amp;gt; webServerFactoryCustomizer() &#123;
-    return factory -&amp;gt; &#123;
-        Ssl ssl = factory.getSsl();
-        if (ssl == null || !ssl.isEnabled()) &#123;
-            return;
-        &#125;
-        
-        // ... 获取秘钥
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="keyword">public</span> WebServerFactoryCustomizer&amp;lt;UndertowServletWebServerFactory&amp;gt; <span class="title function_">webServerFactoryCustomizer</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> factory -&amp;gt; &#123;</span><br><span class="line">        <span class="type">Ssl</span> <span class="variable">ssl</span> <span class="operator">=</span> factory.getSsl();</span><br><span class="line">        <span class="keyword">if</span> (ssl == <span class="literal">null</span> || !ssl.isEnabled()) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// ... 获取秘钥</span></span><br><span class="line"></span><br><span class="line">        ssl.setKeyStorePassword(<span class="string">&quot;xxxx&quot;</span>);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-        ssl.setKeyStorePassword(&quot;xxxx&quot;);
-    &#125;;
-&#125;
-</code></pre>
 <p>甚至你在这里还可以引用刚才为tomcat准备的jar包，直接使用里面的秘钥获取逻辑，就不用再写一遍了√。</p>
 <h1 id="4-其它：由证书和私钥生成jks文件"><a href="#4-其它：由证书和私钥生成jks文件" class="headerlink" title="4. 其它：由证书和私钥生成jks文件"></a>4. 其它：由证书和私钥生成jks文件</h1><p>首先执行命令生成p12文件（输入后会要求输入密码，直接填上你要的密码就行）：</p>
-<pre><code class="shell">openssl pkcs12 -export -in server.crt -inkey server.key -out server.p12
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl pkcs12 -export -in server.crt -inkey server.key -out server.p12</span><br></pre></td></tr></table></figure>
+
 <p>输完后执行：</p>
-<pre><code class="shell">keytool -importkeystore -v -srckeystore server.p12 -srcstoretype pkcs12 -srcstorepass 上面的密码 -destkeystore server.keystore -destoretype jks -deststorepass 上面的密码
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keytool -importkeystore -v -srckeystore server.p12 -srcstoretype pkcs12 -srcstorepass 上面的密码 -destkeystore server.keystore -destoretype jks -deststorepass 上面的密码</span><br></pre></td></tr></table></figure>
+
 <p>这里如果jdk版本过低会报错：</p>
-<pre><code class="java">keytool 错误: java.io.IOException: parseAlgParameters failed: ObjectIdentifier() -- data isn&#39;t an object ID (tag = 48)
-java.io.IOException: parseAlgParameters failed: ObjectIdentifier() -- data isn&#39;t an object ID (tag = 48)
-        at sun.security.pkcs12.PKCS12KeyStore.parseAlgParameters(PKCS12KeyStore.java:816)
-        at sun.security.pkcs12.PKCS12KeyStore.engineLoad(PKCS12KeyStore.java:2018)
-        at java.security.KeyStore.load(KeyStore.java:1445)
-        at sun.security.tools.keytool.Main.loadSourceKeyStore(Main.java:2040)
-        at sun.security.tools.keytool.Main.doCommands(Main.java:1067)
-        at sun.security.tools.keytool.Main.run(Main.java:366)
-        at sun.security.tools.keytool.Main.main(Main.java:359)
-Caused by: java.io.IOException: ObjectIdentifier() -- data isn&#39;t an object ID (tag = 48)
-        at sun.security.util.ObjectIdentifier.&amp;lt;init&amp;gt;(ObjectIdentifier.java:257)
-        at sun.security.util.DerInputStream.getOID(DerInputStream.java:314)
-        at com.sun.crypto.provider.PBES2Parameters.engineInit(PBES2Parameters.java:267)
-        at java.security.AlgorithmParameters.init(AlgorithmParameters.java:293)
-        at sun.security.pkcs12.PKCS12KeyStore.parseAlgParameters(PKCS12KeyStore.java:812)
-        ... 6 more
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">keytool 错误: java.io.IOException: parseAlgParameters failed: ObjectIdentifier() -- data isn<span class="string">&#x27;t an object ID (tag = 48)</span></span><br><span class="line"><span class="string">java.io.IOException: parseAlgParameters failed: ObjectIdentifier() -- data isn&#x27;</span>t an object <span class="title function_">ID</span> <span class="params">(tag = <span class="number">48</span>)</span></span><br><span class="line">        at sun.security.pkcs12.PKCS12KeyStore.parseAlgParameters(PKCS12KeyStore.java:<span class="number">816</span>)</span><br><span class="line">        at sun.security.pkcs12.PKCS12KeyStore.engineLoad(PKCS12KeyStore.java:<span class="number">2018</span>)</span><br><span class="line">        at java.security.KeyStore.load(KeyStore.java:<span class="number">1445</span>)</span><br><span class="line">        at sun.security.tools.keytool.Main.loadSourceKeyStore(Main.java:<span class="number">2040</span>)</span><br><span class="line">        at sun.security.tools.keytool.Main.doCommands(Main.java:<span class="number">1067</span>)</span><br><span class="line">        at sun.security.tools.keytool.Main.run(Main.java:<span class="number">366</span>)</span><br><span class="line">        at sun.security.tools.keytool.Main.main(Main.java:<span class="number">359</span>)</span><br><span class="line">Caused by: java.io.IOException: ObjectIdentifier() -- data isn<span class="string">&#x27;t an object ID (tag = 48)</span></span><br><span class="line"><span class="string">        at sun.security.util.ObjectIdentifier.&amp;lt;init&amp;gt;(ObjectIdentifier.java:257)</span></span><br><span class="line"><span class="string">        at sun.security.util.DerInputStream.getOID(DerInputStream.java:314)</span></span><br><span class="line"><span class="string">        at com.sun.crypto.provider.PBES2Parameters.engineInit(PBES2Parameters.java:267)</span></span><br><span class="line"><span class="string">        at java.security.AlgorithmParameters.init(AlgorithmParameters.java:293)</span></span><br><span class="line"><span class="string">        at sun.security.pkcs12.PKCS12KeyStore.parseAlgParameters(PKCS12KeyStore.java:812)</span></span><br><span class="line"><span class="string">        ... 6 more</span></span><br></pre></td></tr></table></figure>
 <p>这里用的jdk1.8.0_241导致的报错，换成jdk-11.0.18可以正常执行，其它版本暂未测试。</p>
 
     </div>

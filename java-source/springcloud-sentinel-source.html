@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -246,50 +246,14 @@
 </tr>
 </tbody></table>
 <p>有些写的很模糊，但是别急，我们先来看<code>syncToken</code>方法，这个方法是由<code>canPass</code>调用的：</p>
-<pre><code class="java">protected void syncToken(long passQps) &#123;
-    // 获取当前时间
-    long currentTime = TimeUtil.currentTimeMillis();
-    // 将毫秒位设置为0
-    currentTime = currentTime - currentTime % 1000;
-    // 获取上一次填充令牌桶的时间
-    long oldLastFillTime = lastFilledTime.get();
-    // 如果已经被别人改过了，就直接退出
-    if (currentTime &amp;lt;= oldLastFillTime) &#123;
-        return;
-    &#125;
-    // 获取现有的令牌数量
-    long oldValue = storedTokens.get();
-    // 计算新的令牌数量
-    long newValue = coolDownTokens(currentTime, passQps);
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">syncToken</span><span class="params">(<span class="type">long</span> passQps)</span> &#123;</span><br><span class="line">    <span class="comment">// 获取当前时间</span></span><br><span class="line">    <span class="type">long</span> <span class="variable">currentTime</span> <span class="operator">=</span> TimeUtil.currentTimeMillis();</span><br><span class="line">    <span class="comment">// 将毫秒位设置为0</span></span><br><span class="line">    currentTime = currentTime - currentTime % <span class="number">1000</span>;</span><br><span class="line">    <span class="comment">// 获取上一次填充令牌桶的时间</span></span><br><span class="line">    <span class="type">long</span> <span class="variable">oldLastFillTime</span> <span class="operator">=</span> lastFilledTime.get();</span><br><span class="line">    <span class="comment">// 如果已经被别人改过了，就直接退出</span></span><br><span class="line">    <span class="keyword">if</span> (currentTime &amp;lt;= oldLastFillTime) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">// 获取现有的令牌数量</span></span><br><span class="line">    <span class="type">long</span> <span class="variable">oldValue</span> <span class="operator">=</span> storedTokens.get();</span><br><span class="line">    <span class="comment">// 计算新的令牌数量</span></span><br><span class="line">    <span class="type">long</span> <span class="variable">newValue</span> <span class="operator">=</span> coolDownTokens(currentTime, passQps);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (storedTokens.compareAndSet(oldValue, newValue)) &#123;</span><br><span class="line">        <span class="type">long</span> <span class="variable">currentValue</span> <span class="operator">=</span> storedTokens.addAndGet(<span class="number">0</span> - passQps);</span><br><span class="line">        <span class="keyword">if</span> (currentValue &amp;lt; <span class="number">0</span>) &#123;</span><br><span class="line">            storedTokens.set(<span class="number">0L</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        lastFilledTime.set(currentTime);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="type">long</span> <span class="title function_">coolDownTokens</span><span class="params">(<span class="type">long</span> currentTime, <span class="type">long</span> passQps)</span> &#123;</span><br><span class="line">    <span class="comment">// 获取现有的令牌数量</span></span><br><span class="line">    <span class="type">long</span> <span class="variable">oldValue</span> <span class="operator">=</span> storedTokens.get();</span><br><span class="line">    <span class="type">long</span> <span class="variable">newValue</span> <span class="operator">=</span> oldValue;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当令牌的消耗程度远远低于警戒线的时候</span></span><br><span class="line">    <span class="comment">// newValue = (已有令牌数量 + (时间间隔多少毫秒) * 每毫秒产生令牌的数量)</span></span><br><span class="line">    <span class="keyword">if</span> (oldValue &amp;lt; warningToken) &#123;</span><br><span class="line">        newValue = (<span class="type">long</span>)(oldValue + (currentTime - lastFilledTime.get()) * count / <span class="number">1000</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (oldValue &amp;gt; warningToken) &#123;</span><br><span class="line">        <span class="comment">// 到这里，说明还是冷启动阶段</span></span><br><span class="line">        <span class="keyword">if</span> (passQps &amp;lt; (<span class="type">int</span>)count / coldFactor) &#123;</span><br><span class="line">            newValue = (<span class="type">long</span>)(oldValue + (currentTime - lastFilledTime.get()) * count / <span class="number">1000</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> Math.min(newValue, maxToken);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    if (storedTokens.compareAndSet(oldValue, newValue)) &#123;
-        long currentValue = storedTokens.addAndGet(0 - passQps);
-        if (currentValue &amp;lt; 0) &#123;
-            storedTokens.set(0L);
-        &#125;
-        lastFilledTime.set(currentTime);
-    &#125;
 
-&#125;
 
-private long coolDownTokens(long currentTime, long passQps) &#123;
-    // 获取现有的令牌数量
-    long oldValue = storedTokens.get();
-    long newValue = oldValue;
 
-    // 当令牌的消耗程度远远低于警戒线的时候
-    // newValue = (已有令牌数量 + (时间间隔多少毫秒) * 每毫秒产生令牌的数量)
-    if (oldValue &amp;lt; warningToken) &#123;
-        newValue = (long)(oldValue + (currentTime - lastFilledTime.get()) * count / 1000);
-    &#125; else if (oldValue &amp;gt; warningToken) &#123;
-        // 到这里，说明还是冷启动阶段
-        if (passQps &amp;lt; (int)count / coldFactor) &#123;
-            newValue = (long)(oldValue + (currentTime - lastFilledTime.get()) * count / 1000);
-        &#125;
-    &#125;
-    return Math.min(newValue, maxToken);
-&#125;
-</code></pre>
+
+
+
 
     </div>
     

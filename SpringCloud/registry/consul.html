@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -196,72 +196,21 @@
 <p>下载：<a target="_blank" rel="noopener" href="https://www.consul.io/downloads">Downloads | Consul by HashiCorp</a></p>
 <p>下载后是一个exe，在控制台中打开即可。</p>
 <h2 id="1-服务提供者"><a href="#1-服务提供者" class="headerlink" title="1. 服务提供者"></a>1. 服务提供者</h2><p>使用如下指令启动：</p>
-<pre><code class="bash">consul agent -dev
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">consul agent -dev</span><br></pre></td></tr></table></figure>
+
 <p>启动后可以通过<a href="http://localhost:8500来访问首页">http://localhost:8500来访问首页</a></p>
-<h3 id="1-1-导入依赖"><a href="#1-1-导入依赖" class="headerlink" title="1.1 导入依赖"></a>1.1 导入依赖</h3><pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-starter-consul-discovery&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
-</code></pre>
-<h3 id="1-2-添加配置"><a href="#1-2-添加配置" class="headerlink" title="1.2 添加配置"></a>1.2 添加配置</h3><pre><code class="yaml">application:
-    name: consul-provider-payment
-spring:
-    cloud:
-        consul:
-            host: localhost
-            port: 8500
-            discovery:
-                service-name: $&#123;spring.application.name&#125;
-</code></pre>
+<h3 id="1-1-导入依赖"><a href="#1-1-导入依赖" class="headerlink" title="1.1 导入依赖"></a>1.1 导入依赖</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-consul-discovery<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-添加配置"><a href="#1-2-添加配置" class="headerlink" title="1.2 添加配置"></a>1.2 添加配置</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">application:</span></span><br><span class="line">	<span class="attr">name:</span> <span class="string">consul-provider-payment</span></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">	<span class="attr">cloud:</span></span><br><span class="line">		<span class="attr">consul:</span></span><br><span class="line">			<span class="attr">host:</span> <span class="string">localhost</span></span><br><span class="line">			<span class="attr">port:</span> <span class="number">8500</span></span><br><span class="line">			<span class="attr">discovery:</span></span><br><span class="line">				<span class="attr">service-name:</span> <span class="string">$&#123;spring.application.name&#125;</span></span><br></pre></td></tr></table></figure>
+
 <p>主类添加<code>@EnableDiscoveryClient</code>注解</p>
-<h3 id="1-3-控制器"><a href="#1-3-控制器" class="headerlink" title="1.3 控制器"></a>1.3 控制器</h3><pre><code class="java">@RestController
-@Slf4j
-public class PaymentController &#123;
+<h3 id="1-3-控制器"><a href="#1-3-控制器" class="headerlink" title="1.3 控制器"></a>1.3 控制器</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PaymentController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;server.port&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String serverPort;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/payment/consul&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">paymentConsul</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;springcloud with consul: &quot;</span> + serverPort + <span class="string">&quot;\\t&quot;</span> + UUID.randomUUID();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    @Value(&quot;$&#123;server.port&#125;&quot;)
-    private String serverPort;
-
-    @RequestMapping(&quot;/payment/consul&quot;)
-    public String paymentConsul() &#123;
-        return &quot;springcloud with consul: &quot; + serverPort + &quot;\\t&quot; + UUID.randomUUID();
-    &#125;
-
-&#125;
-</code></pre>
 <h2 id="2-服务消费者"><a href="#2-服务消费者" class="headerlink" title="2. 服务消费者"></a>2. 服务消费者</h2><p>消费者的依赖和提供者一致，主类也一样要提供<code>@EnableDiscoveryClient</code>注解。</p>
 <p>跟zookeeper一样，先写一个配置类：</p>
-<pre><code class="java">@Configuration
-public class ApplicationConextConfig &#123;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ApplicationConextConfig</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="meta">@LoadBalanced</span></span><br><span class="line">    <span class="keyword">public</span> RestTemplate <span class="title function_">restTemplate</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">RestTemplate</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    @Bean
-    @LoadBalanced
-    public RestTemplate restTemplate() &#123;
-        return new RestTemplate();
-    &#125;
-
-&#125;
-</code></pre>
-<h3 id="2-1-远程调用"><a href="#2-1-远程调用" class="headerlink" title="2.1 远程调用"></a>2.1 远程调用</h3><pre><code class="java">@RestController
-public class OrderConsulController &#123;
-
-    public static final String URL = &quot;&amp;lt;http://consul-provider-payment&amp;gt;&quot;;
-
-    private RestTemplate restTemplate;
-
-    @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) &#123;
-        this.restTemplate = restTemplate;
-    &#125;
-
-    @GetMapping(&quot;/consumer/payment/consul&quot;)
-    public String getOrder() &#123;
-        return restTemplate.getForObject(URL + &quot;/payment/consul&quot;, String.class);
-    &#125;
-
-&#125;
-</code></pre>
-
+<h3 id="2-1-远程调用"><a href="#2-1-远程调用" class="headerlink" title="2.1 远程调用"></a>2.1 远程调用</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">OrderConsulController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">URL</span> <span class="operator">=</span> <span class="string">&quot;&amp;lt;http://consul-provider-payment&amp;gt;&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> RestTemplate restTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setRestTemplate</span><span class="params">(RestTemplate restTemplate)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.restTemplate = restTemplate;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/consumer/payment/consul&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getOrder</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> restTemplate.getForObject(URL + <span class="string">&quot;/payment/consul&quot;</span>, String.class);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
     </div>
     
     

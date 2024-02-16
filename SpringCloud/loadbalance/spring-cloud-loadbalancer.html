@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/loadbalance" style="color: #03a9f4">负载均衡</a>
+                <a href="/SpringCloud/loadbalance" style="color: #00a596">负载均衡</a>
             </span>
             
         </span>
@@ -205,107 +205,26 @@
     <div class="content" v-pre id="main-content">
         <p>Spring Cloud 2020版本以后，默认移除了对Netflix的依赖，其中就包括<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=Ribbon&spm=1001.2101.3001.7020">Ribbon</a>，官方默认推荐使用Spring Cloud Loadbalancer正式替换Ribbon，并成为了Spring Cloud负载均衡器的唯一实现。</p>
 <h1 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h1><p>导入依赖:</p>
-<pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-starter-loadbalancer&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
-</code></pre>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-loadbalancer<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
+
 <p>添加配置类：</p>
-<pre><code class="java">@Configuration
-public class ApplicationContextConfig &#123;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ApplicationContextConfig</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="meta">@LoadBalanced</span></span><br><span class="line">    <span class="keyword">public</span> RestTemplate <span class="title function_">restTemplate</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">RestTemplate</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    @Bean
-    @LoadBalanced
-    public RestTemplate restTemplate() &#123;
-        return new RestTemplate();
-    &#125;
-
-&#125;
-</code></pre>
 <h1 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h1><p>其基本原理如下：</p>
 <h3 id="1-RestTemplate"><a href="#1-RestTemplate" class="headerlink" title="1. RestTemplate"></a>1. RestTemplate</h3><p><code>RestTemplate</code>提供了一个<code>setInterceptors</code>方法，用于设置拦截器。</p>
-<pre><code class="JAVA">/**
- * Set the request interceptors that this accessor should use.
- * &amp;lt;p&amp;gt;The interceptors will get immediately sorted according to their
- * &#123;@linkplain AnnotationAwareOrderComparator#sort(List) order&#125;.
- * @see #getRequestFactory()
- * @see AnnotationAwareOrderComparator
- */
-public void setInterceptors(List&amp;lt;ClientHttpRequestInterceptor&amp;gt; interceptors) &#123;
-    Assert.noNullElements(interceptors, &quot;&#39;interceptors&#39; must not contain null elements&quot;);
-    // Take getInterceptors() List as-is when passed in here
-    if (this.interceptors != interceptors) &#123;
-        this.interceptors.clear();
-        this.interceptors.addAll(interceptors);
-        AnnotationAwareOrderComparator.sort(this.interceptors);
-    &#125;
-&#125;
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Set the request interceptors that this accessor should use.</span></span><br><span class="line"><span class="comment"> * &amp;lt;p&amp;gt;The interceptors will get immediately sorted according to their</span></span><br><span class="line"><span class="comment"> * &#123;<span class="doctag">@linkplain</span> AnnotationAwareOrderComparator#sort(List) order&#125;.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> #getRequestFactory()</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> AnnotationAwareOrderComparator</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setInterceptors</span><span class="params">(List&amp;lt;ClientHttpRequestInterceptor&amp;gt; interceptors)</span> &#123;</span><br><span class="line">    Assert.noNullElements(interceptors, <span class="string">&quot;&#x27;interceptors&#x27; must not contain null elements&quot;</span>);</span><br><span class="line">    <span class="comment">// Take getInterceptors() List as-is when passed in here</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">this</span>.interceptors != interceptors) &#123;</span><br><span class="line">        <span class="built_in">this</span>.interceptors.clear();</span><br><span class="line">        <span class="built_in">this</span>.interceptors.addAll(interceptors);</span><br><span class="line">        AnnotationAwareOrderComparator.sort(<span class="built_in">this</span>.interceptors);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <h3 id="2-LoadBalancerAutoConfiguration"><a href="#2-LoadBalancerAutoConfiguration" class="headerlink" title="2. LoadBalancerAutoConfiguration"></a>2. LoadBalancerAutoConfiguration</h3><p>在这里进行拦截器的注入：</p>
-<pre><code class="java">@Configuration(proxyBeanMethods = false)
-@Conditional(RetryMissingOrDisabledCondition.class)
-static class LoadBalancerInterceptorConfig &#123;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration(proxyBeanMethods = false)</span></span><br><span class="line"><span class="meta">@Conditional(RetryMissingOrDisabledCondition.class)</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">LoadBalancerInterceptorConfig</span> &#123;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@Bean</span></span><br><span class="line">   <span class="comment">// LoadBalancerInterceptor是实现了ClientHttpRequestInterceptor接口的实现类</span></span><br><span class="line">   <span class="keyword">public</span> LoadBalancerInterceptor <span class="title function_">loadBalancerInterceptor</span><span class="params">(LoadBalancerClient loadBalancerClient,</span></span><br><span class="line"><span class="params">         LoadBalancerRequestFactory requestFactory)</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">LoadBalancerInterceptor</span>(loadBalancerClient, requestFactory);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@Bean</span></span><br><span class="line">   <span class="meta">@ConditionalOnMissingBean</span></span><br><span class="line">   <span class="keyword">public</span> RestTemplateCustomizer <span class="title function_">restTemplateCustomizer</span><span class="params">(<span class="keyword">final</span> LoadBalancerInterceptor loadBalancerInterceptor)</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> restTemplate -&amp;gt; &#123;</span><br><span class="line">         List&amp;lt;ClientHttpRequestInterceptor&amp;gt; list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&amp;lt;&amp;gt;(restTemplate.getInterceptors());</span><br><span class="line">         list.add(loadBalancerInterceptor);</span><br><span class="line">         restTemplate.setInterceptors(list);</span><br><span class="line">      &#125;;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-   @Bean
-   // LoadBalancerInterceptor是实现了ClientHttpRequestInterceptor接口的实现类
-   public LoadBalancerInterceptor loadBalancerInterceptor(LoadBalancerClient loadBalancerClient,
-         LoadBalancerRequestFactory requestFactory) &#123;
-      return new LoadBalancerInterceptor(loadBalancerClient, requestFactory);
-   &#125;
-
-   @Bean
-   @ConditionalOnMissingBean
-   public RestTemplateCustomizer restTemplateCustomizer(final LoadBalancerInterceptor loadBalancerInterceptor) &#123;
-      return restTemplate -&amp;gt; &#123;
-         List&amp;lt;ClientHttpRequestInterceptor&amp;gt; list = new ArrayList&amp;lt;&amp;gt;(restTemplate.getInterceptors());
-         list.add(loadBalancerInterceptor);
-         restTemplate.setInterceptors(list);
-      &#125;;
-   &#125;
-
-&#125;
-</code></pre>
 <p>其中<code>LoadBalancerInterceptor</code>是实现了<code>ClientHttpRequestInterceptor</code>接口的实现类，主要由该类进行请求的负载均衡</p>
 <p>其中这个类在实例化时需要提供一个<code>LoadBalancerClient</code>，表示负载均衡客户端，用于处理负载均衡的具体逻辑，Spring只提供了一个<code>BlockingLoadBalancerClient</code>类。</p>
 <h2 id="3-LoadBalancerClient"><a href="#3-LoadBalancerClient" class="headerlink" title="3. LoadBalancerClient"></a>3. LoadBalancerClient</h2><p>这是<code>BlockingLoadBalancerClient</code>实现的接口，它还继承了<code>ServiceInstanceChooser</code></p>
-<pre><code class="java">public interface LoadBalancerClient extends ServiceInstanceChooser &#123;
-    
-    // 执行请求
-    &amp;lt;T&amp;gt; T execute(String serviceId, LoadBalancerRequest&amp;lt;T&amp;gt; request) throws IOException;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">LoadBalancerClient</span> <span class="keyword">extends</span> <span class="title class_">ServiceInstanceChooser</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 执行请求</span></span><br><span class="line">	&amp;lt;T&amp;gt; T <span class="title function_">execute</span><span class="params">(String serviceId, LoadBalancerRequest&amp;lt;T&amp;gt; request)</span> <span class="keyword">throws</span> IOException;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 执行请求</span></span><br><span class="line">	&amp;lt;T&amp;gt; T <span class="title function_">execute</span><span class="params">(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest&amp;lt;T&amp;gt; request)</span> <span class="keyword">throws</span> IOException;</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// 这里方法主要是将我们的服务名替换为域名</span></span><br><span class="line">	URI <span class="title function_">reconstructURI</span><span class="params">(ServiceInstance instance, URI original)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ServiceInstanceChooser</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 从服务中选择一个服务实例</span></span><br><span class="line">	ServiceInstance <span class="title function_">choose</span><span class="params">(String serviceId)</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 从服务中为指定的request选择一个服务实例</span></span><br><span class="line">	&amp;lt;T&amp;gt; ServiceInstance <span class="title function_">choose</span><span class="params">(String serviceId, Request&amp;lt;T&amp;gt; request)</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    // 执行请求
-    &amp;lt;T&amp;gt; T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest&amp;lt;T&amp;gt; request) throws IOException;
-    
-    // 这里方法主要是将我们的服务名替换为域名
-    URI reconstructURI(ServiceInstance instance, URI original);
-&#125;
-
-public interface ServiceInstanceChooser &#123;
-
-    // 从服务中选择一个服务实例
-    ServiceInstance choose(String serviceId);
-
-    // 从服务中为指定的request选择一个服务实例
-    &amp;lt;T&amp;gt; ServiceInstance choose(String serviceId, Request&amp;lt;T&amp;gt; request);
-
-&#125;
-</code></pre>
 <p>从<code>BlockingLoadBalancerClient</code>的<code>execute</code>方法进来，一路追到<code>choose</code>方法发现它最终是调用<code>ReactiveLoadBalancer</code>的实现类来实现复杂均衡算法的。</p>
-<pre><code class="java">@Override
-public &amp;lt;T&amp;gt; ServiceInstance choose(String serviceId, Request&amp;lt;T&amp;gt; request) &#123;
-    // 获取负载均衡算法
-    ReactiveLoadBalancer&amp;lt;ServiceInstance&amp;gt; loadBalancer = loadBalancerClientFactory.getInstance(serviceId);
-    if (loadBalancer == null) &#123;
-        return null;
-    &#125;
-    // 调用choose方法进行负载均衡
-    Response&amp;lt;ServiceInstance&amp;gt; loadBalancerResponse = Mono.from(loadBalancer.choose(request)).block();
-    if (loadBalancerResponse == null) &#123;
-        return null;
-    &#125;
-    return loadBalancerResponse.getServer();
-&#125;
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> &amp;lt;T&amp;gt; ServiceInstance <span class="title function_">choose</span><span class="params">(String serviceId, Request&amp;lt;T&amp;gt; request)</span> &#123;</span><br><span class="line">    <span class="comment">// 获取负载均衡算法</span></span><br><span class="line">    ReactiveLoadBalancer&amp;lt;ServiceInstance&amp;gt; loadBalancer = loadBalancerClientFactory.getInstance(serviceId);</span><br><span class="line">    <span class="keyword">if</span> (loadBalancer == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 调用choose方法进行负载均衡</span></span><br><span class="line">    Response&amp;lt;ServiceInstance&amp;gt; loadBalancerResponse = Mono.from(loadBalancer.choose(request)).block();</span><br><span class="line">    <span class="keyword">if</span> (loadBalancerResponse == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> loadBalancerResponse.getServer();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p><img lazy="https://selfb.asia/public/SpringCloud/2023-2-1-2c6ce8dd-954a-4c32-8fa6-beb3892a95fd.webp" alt="实现类"></p>
 <p>可以发现有两个实现类</p>
 <ul>
@@ -313,24 +232,8 @@ public &amp;lt;T&amp;gt; ServiceInstance choose(String serviceId, Request&amp;lt
 <li>RoundRobinLoadBalancer：轮询</li>
 </ul>
 <p>来看一下<code>getInstance</code>的具体实现：</p>
-<pre><code class="java">// LoadBalancerClientFactory
-@Override
-public ReactiveLoadBalancer&amp;lt;ServiceInstance&amp;gt; getInstance(String serviceId) &#123;
-    return getInstance(serviceId, ReactorServiceInstanceLoadBalancer.class);
-&#125;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// LoadBalancerClientFactory</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> ReactiveLoadBalancer&amp;lt;ServiceInstance&amp;gt; <span class="title function_">getInstance</span><span class="params">(String serviceId)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> getInstance(serviceId, ReactorServiceInstanceLoadBalancer.class);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// NamendContextFactory</span></span><br><span class="line"><span class="comment">// getInstance：根据名称和类型获取bean</span></span><br><span class="line"><span class="keyword">public</span> &amp;lt;T&amp;gt; T <span class="title function_">getInstance</span><span class="params">(String name, Class&amp;lt;T&amp;gt; type)</span> &#123;</span><br><span class="line">    <span class="type">AnnotationConfigApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> <span class="built_in">this</span>.getContext(name);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> context.getBean(type);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (NoSuchBeanDefinitionException var5) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-// NamendContextFactory
-// getInstance：根据名称和类型获取bean
-public &amp;lt;T&amp;gt; T getInstance(String name, Class&amp;lt;T&amp;gt; type) &#123;
-    AnnotationConfigApplicationContext context = this.getContext(name);
-
-    try &#123;
-        return context.getBean(type);
-    &#125; catch (NoSuchBeanDefinitionException var5) &#123;
-        return null;
-    &#125;
-&#125;
-</code></pre>
 <p>如果要了解更多，请先查阅：<a href="/java-source/named-context-factory">NamendContextFactory的使用与源码</a></p>
 <h1 id="自定义负载均衡配置"><a href="#自定义负载均衡配置" class="headerlink" title="自定义负载均衡配置"></a>自定义负载均衡配置</h1><p>只需要通过注解<code>@LoadBalancerClient</code>或<code>@LoadBalancerClients</code>就可以轻松实现配置不同的负载均衡策略。</p>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/501631014">Spring Cloud Loadbalancer源码解析和自定义负载均衡策略实现 - 知乎 (zhihu.com)</a></p>

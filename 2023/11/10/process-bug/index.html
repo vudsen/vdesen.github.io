@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -192,9 +192,8 @@
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
         <p>首先来看一段代码(Java17, Java8同样也有这个问题)：</p>
-<pre><code class="java">Runtime runtime = Runtime.getRuntime();
-runtime.exec(&quot;docker exec mysql-test2 mysql -ubim -pxx -h11.11.11.11 -P3306 bim -e \&quot;use bim;source bim.sql;\&quot;&quot;);
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Runtime</span> <span class="variable">runtime</span> <span class="operator">=</span> Runtime.getRuntime();</span><br><span class="line">runtime.exec(<span class="string">&quot;docker exec mysql-test2 mysql -ubim -pxx -h11.11.11.11 -P3306 bim -e \&quot;use bim;source bim.sql;\&quot;&quot;</span>);</span><br></pre></td></tr></table></figure>
+
 <p>这段代码是用来执行mysqldump备份出来的mysql文件，咋一看好像没问题。</p>
 <p>运行后，byd好像也确实没什么问题👿👿👿</p>
 <p>如果真的没问题就好了，那么也不会有这篇博客了。</p>
@@ -205,34 +204,14 @@ runtime.exec(&quot;docker exec mysql-test2 mysql -ubim -pxx -h11.11.11.11 -P3306
 <p>如果大家去搜java怎么去执行命令行指令的时候，可能会得到两个结果，一种就是用<code>Runtime</code>，另外一个就是用<code>ProcessBuilder</code>，大部分人可能都会用<code>Runtime</code>，因为这玩意给<code>ProcessBuilder</code>封装了一层，用起来方便，直接一个exec把指令丢进去就可以了。</p>
 <p>也就是因为这个，突然想起来之前在python里面，想要执行shell命令必须要把指令以数组的形式传进去(其实也可以使用<code>shell=True</code>参数)，而<code>ProcessBuilder</code>也是这样，你直接丢一个字符串进去是执行不了的，必须要传数组进去。</p>
 <p>到这里就怀疑<code>Runtime</code>是不是直接暴力调用了<code>split(&quot; &quot;)</code>，然后把参数丢给<code>ProcessBuilder</code>，结果看了下源码，还真是这样：</p>
-<pre><code class="java">public Process exec(String command, String[] envp, File dir)
-    throws IOException &#123;
-    if (command.isEmpty())
-        throw new IllegalArgumentException(&quot;Empty command&quot;);
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Process <span class="title function_">exec</span><span class="params">(String command, String[] envp, File dir)</span></span><br><span class="line">    <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="keyword">if</span> (command.isEmpty())</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;Empty command&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">StringTokenizer</span> <span class="variable">st</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringTokenizer</span>(command);</span><br><span class="line">    String[] cmdarray = <span class="keyword">new</span> <span class="title class_">String</span>[st.countTokens()];</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; st.hasMoreTokens(); i++)</span><br><span class="line">        cmdarray[i] = st.nextToken();</span><br><span class="line">    <span class="keyword">return</span> exec(cmdarray, envp, dir);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    StringTokenizer st = new StringTokenizer(command);
-    String[] cmdarray = new String[st.countTokens()];
-    for (int i = 0; st.hasMoreTokens(); i++)
-        cmdarray[i] = st.nextToken();
-    return exec(cmdarray, envp, dir);
-&#125;
-</code></pre>
 <p><code>StringTokenizer</code>可能大家没见过，但是如果你用java写算法，并且了解过输入优化，你就会知到这玩意是干嘛的。简单点来说它的效果和<code>Scanner</code>一样，但是效率更高(如果你写过算法就知道这玩意速度吊打<code>Scanner</code>)，<code>Scanner</code>就不多讲了，感觉是个人就用过。。。</p>
 <p>如果你还看不懂，没事，我直接给你上图：<br><img lazy="https://selfb.asia/public/2023-9/Snipaste_2023-11-10_16-06-22.webp" alt="debug"></p>
 <p>可以发现我们后面用双引号包裹起来的参数被分开了，实际传到mysql那里就会导致执行失败。</p>
 <p>但是这玩意在windows上能执行成功也是很离谱的。</p>
 <p>知到原因后，直接改用<code>ProcessBuilder</code>手动控制参数：</p>
-<pre><code class="java">Process process = new ProcessBuilder(backupConfig.getMysqlPath(),
-                    &quot;-u&quot; + backupConfig.getUsername(),
-                    &quot;-p&quot; + backupConfig.getPassword(),
-                    &quot;-h&quot; + backupConfig.getHost(),
-                    &quot;-P&quot; + backupConfig.getPort(),
-                    &quot;-e&quot;,
-                    String.format(&quot;\&quot;use %s;source %s;\&quot;&quot;, ignore, ignore))
-                    // 标准错误流重定向到标准输出，方便拿错误信息
-                    .redirectErrorStream(true)
-                    .start();
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ProcessBuilder</span>(backupConfig.getMysqlPath(),</span><br><span class="line">                    <span class="string">&quot;-u&quot;</span> + backupConfig.getUsername(),</span><br><span class="line">                    <span class="string">&quot;-p&quot;</span> + backupConfig.getPassword(),</span><br><span class="line">                    <span class="string">&quot;-h&quot;</span> + backupConfig.getHost(),</span><br><span class="line">                    <span class="string">&quot;-P&quot;</span> + backupConfig.getPort(),</span><br><span class="line">                    <span class="string">&quot;-e&quot;</span>,</span><br><span class="line">                    String.format(<span class="string">&quot;\&quot;use %s;source %s;\&quot;&quot;</span>, ignore, ignore))</span><br><span class="line">                    <span class="comment">// 标准错误流重定向到标准输出，方便拿错误信息</span></span><br><span class="line">                    .redirectErrorStream(<span class="literal">true</span>)</span><br><span class="line">                    .start();</span><br></pre></td></tr></table></figure>
 <p>看到我的String.format没，我这里用引号包起来了好让他们是一个整体。</p>
 <p>完？。。</p>
 <hr>

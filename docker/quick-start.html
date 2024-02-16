@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -193,12 +193,12 @@
     <div class="content" v-pre id="main-content">
         <h1 id="1-安装和启动"><a href="#1-安装和启动" class="headerlink" title="1. 安装和启动"></a>1. 安装和启动</h1><p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/install/">Install Docker Engine | Docker Documentation</a></p>
 <p>启动命令：</p>
-<pre><code class="shell">systemctl start docker
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start docker</span><br></pre></td></tr></table></figure>
+
 <p>这个指令类似于启动了一个windows上的后台服务。</p>
 <p>关闭命令：</p>
-<pre><code class="shell">systemctl stop docker
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop docker</span><br></pre></td></tr></table></figure>
+
 <h1 id="2-常用命令"><a href="#2-常用命令" class="headerlink" title="2. 常用命令"></a>2. 常用命令</h1><h2 id="2-1-帮助启动类命令"><a href="#2-1-帮助启动类命令" class="headerlink" title="2.1 帮助启动类命令"></a>2.1 帮助启动类命令</h2><ul>
 <li><p>启动：<code>systemctl start docker</code></p>
 </li>
@@ -215,8 +215,8 @@
 <li><p>查看帮助文档：<code>docker --help</code></p>
 </li>
 </ul>
-<h2 id="2-2-镜像命令"><a href="#2-2-镜像命令" class="headerlink" title="2.2 镜像命令"></a>2.2 镜像命令</h2><h3 id="2-2-1-列出本地主机上的镜像"><a href="#2-2-1-列出本地主机上的镜像" class="headerlink" title="2.2.1 列出本地主机上的镜像"></a>2.2.1 列出本地主机上的镜像</h3><pre><code class="shell">docker images
-</code></pre>
+<h2 id="2-2-镜像命令"><a href="#2-2-镜像命令" class="headerlink" title="2.2 镜像命令"></a>2.2 镜像命令</h2><h3 id="2-2-1-列出本地主机上的镜像"><a href="#2-2-1-列出本地主机上的镜像" class="headerlink" title="2.2.1 列出本地主机上的镜像"></a>2.2.1 列出本地主机上的镜像</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker images</span><br></pre></td></tr></table></figure>
+
 <p>该命令第一行为5个固定值：</p>
 <ul>
 <li>REPOSITORY：镜像的仓库源</li>
@@ -243,8 +243,8 @@
 <li><p><font color=red>删除所有镜像</font>：<code>docker rmi -f $(docker images -q)</code></p>
 </li>
 </ul>
-<h2 id="2-3-容器命令"><a href="#2-3-容器命令" class="headerlink" title="2.3 容器命令"></a>2.3 容器命令</h2><h3 id="2-3-1-启动容器"><a href="#2-3-1-启动容器" class="headerlink" title="2.3.1 启动容器"></a>2.3.1 启动容器</h3><pre><code class="shell">docker run [OPTIONS] IMAGE [COMMAND][ARG...]
-</code></pre>
+<h2 id="2-3-容器命令"><a href="#2-3-容器命令" class="headerlink" title="2.3 容器命令"></a>2.3 容器命令</h2><h3 id="2-3-1-启动容器"><a href="#2-3-1-启动容器" class="headerlink" title="2.3.1 启动容器"></a>2.3.1 启动容器</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run [OPTIONS] IMAGE [COMMAND][ARG...]</span><br></pre></td></tr></table></figure>
+
 <p>常用OPTIONS：</p>
 <ul>
 <li><p>指定容器名称：<code>--name=[NAME]</code></p>
@@ -259,26 +259,26 @@
 </li>
 </ul>
 <p>例如运行一个Ubuntu：</p>
-<pre><code class="shell">docker run -it ubuntu /bin/bash
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it ubuntu /bin/bash</span><br></pre></td></tr></table></figure>
+
 <p>启动一个已经停止运行的容器：</p>
-<pre><code class="shell">docker start [容器ID]
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker start [容器ID]</span><br></pre></td></tr></table></figure>
+
 <p>重启容器：</p>
-<pre><code class="shell">docker restart [容器ID]
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart [容器ID]</span><br></pre></td></tr></table></figure>
+
 <p>停止容器：</p>
-<pre><code class="shell">docker stop [容器ID]
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stop [容器ID]</span><br></pre></td></tr></table></figure>
+
 <p>强制停止容器：</p>
-<pre><code class="shell">docker kill [容器ID]
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker kill [容器ID]</span><br></pre></td></tr></table></figure>
+
 <p>删除已经停止的容器：</p>
-<pre><code class="shell">docker rm [容器ID]
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rm [容器ID]</span><br></pre></td></tr></table></figure>
+
 <h3 id="2-3-2-列出容器"><a href="#2-3-2-列出容器" class="headerlink" title="2.3.2 列出容器"></a>2.3.2 列出容器</h3><p>查看正在运行的容器：</p>
-<pre><code class="shell">docker ps
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps</span><br></pre></td></tr></table></figure>
+
 <p>可用参数：</p>
 <ul>
 <li>列出所有正在运行的以及历史运行过的容器：<code>-a</code></li>
@@ -316,48 +316,35 @@
 <h2 id="3-1-联合文件系统"><a href="#3-1-联合文件系统" class="headerlink" title="3.1 联合文件系统"></a>3.1 联合文件系统</h2><p>UnionFS（联合文件系统)：Union文件系统（UnionFS）是一种分层、轻量级并且高性能的文件系统，它支持对<font color=red>文件系统的修改作为一次提交来一层层的叠加</font>，同时可以将不同目录挂载到同一个虚拟文件系统下(unite several directories into a single virtual filesystem)。Union文件系统是Docker镜像的基础。镜像可以通过分层来进行继承，基于基础镜像（毅有父镜像)，可以制作各种具体的应用镜像。</p>
 <p>特性：一次同时加载多个文件系统，但是从外面看起来，只能看到一个文件系统，联合加载会把各层文件系统叠加起来，这样最终的文件系统会包含所有底层的文件和目录。</p>
 <h2 id="3-2-制作镜像"><a href="#3-2-制作镜像" class="headerlink" title="3.2 制作镜像"></a>3.2 制作镜像</h2><p>提交一个容器副本：</p>
-<pre><code class="shell">docker commit -m=[描述信息] -a=[作者] [容器ID] [要创建的镜像名]:[TAG]
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker commit -m=[描述信息] -a=[作者] [容器ID] [要创建的镜像名]:[TAG]</span><br></pre></td></tr></table></figure>
+
 <p>这个命令会基于某个镜像的基础上创建一个副本。</p>
 <p>例如在Ubuntu镜像上安装vim后并制作镜像：</p>
-<pre><code class="shell"># 更新包管理工具
-$container: apt-get update
-# 安装vim
-$container: apt-get -y install vim
-# 提交
-$docker: docker commit -m=&quot;add vim cmd&quot; -a=&quot;xds&quot; 5838857cbbc3 myubuntu:1.1
-# 查看制作的镜像
-$docker: docker images
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新包管理工具</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">container: apt-get update</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装vim</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">container: apt-get -y install vim</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">提交</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">docker: docker commit -m=<span class="string">&quot;add vim cmd&quot;</span> -a=<span class="string">&quot;xds&quot;</span> 5838857cbbc3 myubuntu:1.1</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看制作的镜像</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">docker: docker images</span></span><br></pre></td></tr></table></figure>
+
 <h1 id="4-容器数据卷"><a href="#4-容器数据卷" class="headerlink" title="4. 容器数据卷"></a>4. 容器数据卷</h1><p>容器数据卷类似于让容器将数据保存到宿主机，以防止容器内的数据丢失（例如容器被误删除）。</p>
 <p>卷就是目录或文件，存在于一个或多个容器中，由docker挂载到容器，但不属于联合文件系统，因此能够绕过Union File System提供一些用于持续存储或共享数据的特性:</p>
 <p>卷的设计目的就是<font color=red>数据的持久化</font>，完全独立于容器的生存周期，因此Docker不会在容器删除时删除其挂载的数据卷</p>
 <p>使用容器数据卷：</p>
-<pre><code class="shell">docker run -it --privileged=true -v /宿主机绝对路径目录:/容器内目录 镜像名
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --privileged=true -v /宿主机绝对路径目录:/容器内目录 镜像名</span><br></pre></td></tr></table></figure>
+
 <p>之后在该目录下的修改就能够相互同步。</p>
 <p>使用如下指令可以查看具体设置的容器数据卷：</p>
-<pre><code class="shell"># docker inspect会显示容器详细信息
-docker inspect [容器ID] | grep -A 9 Mounts
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">docker inspect会显示容器详细信息</span></span><br><span class="line">docker inspect [容器ID] | grep -A 9 Mounts</span><br></pre></td></tr></table></figure>
+
 <h2 id="4-1-权限控制"><a href="#4-1-权限控制" class="headerlink" title="4.1 权限控制"></a>4.1 权限控制</h2><p>默认情况下，容器对共享目录下可读可写，但是在某些情况下容器只能读不能写，所以需要权限控制：</p>
-<pre><code class="shell">docker run -it --privileged=true -v /宿主机绝对路径目录:/容器内目录:ro 镜像名
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --privileged=true -v /宿主机绝对路径目录:/容器内目录:ro 镜像名</span><br></pre></td></tr></table></figure>
+
 <p>在<code>-v</code>后面添加<code>:ro</code>即可让容器对共享目录只读，如果使用<code>rw</code>表示可读可写，默认为<code>rw</code></p>
 <h2 id="4-2-卷的继承和共享"><a href="#4-2-卷的继承和共享" class="headerlink" title="4.2 卷的继承和共享"></a>4.2 卷的继承和共享</h2><p>使用如下指令可以继承某个卷：</p>
-<pre><code class="shell">docker run -it --privileged=true --volumes-from [父容器NAME/容器ID] [容器ID]
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --privileged=true --volumes-from [父容器NAME/容器ID] [容器ID]</span><br></pre></td></tr></table></figure>
+
 <p>即使父容器被关闭或者被删除了，子容器也仍然能够使用这个卷。</p>
 <h1 id="5-其它"><a href="#5-其它" class="headerlink" title="5. 其它"></a>5. 其它</h1><h2 id="5-1-安装MySql"><a href="#5-1-安装MySql" class="headerlink" title="5.1 安装MySql"></a>5.1 安装MySql</h2><p>运行指令：</p>
-<pre><code class="shell">docker run -d -p 3306:3306 --privileged=true -v /var/log/mysql:/var/log/mysql -v /var/lib/mysql -v /etc/mysql/conf.d:/ect/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name mysql mysql
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 3306:3306 --privileged=true -v /var/log/mysql:/var/log/mysql -v /var/lib/mysql -v /etc/mysql/conf.d:/ect/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name mysql mysql</span><br></pre></td></tr></table></figure>
+
 <p>进入配置文件夹夹（&#x2F;var&#x2F;mysql&#x2F;conf.d），添加配置文件（xxx.cnf）：</p>
-<pre><code class="text">[client]
-default_character_set=utf8
-[mysqld]
-collation_server=utf8_general_ci
-character_set_server=utf8
-</code></pre>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[client]</span><br><span class="line">default_character_set=utf8</span><br><span class="line">[mysqld]</span><br><span class="line">collation_server=utf8_general_ci</span><br><span class="line">character_set_server=utf8</span><br></pre></td></tr></table></figure>
 
     </div>
     

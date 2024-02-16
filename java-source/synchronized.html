@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#JVM" style="color: #03a9f4">JVM</a>
+                <a href="/2023/03/05/java-source#JVM" style="color: #00bcd4">JVM</a>
             </span>
             
         </span>
@@ -212,31 +212,8 @@
 <h1 id="1-四种锁"><a href="#1-四种锁" class="headerlink" title="1.四种锁"></a>1.四种锁</h1><h2 id="1-1-无锁态"><a href="#1-1-无锁态" class="headerlink" title="1.1 无锁态"></a>1.1 无锁态</h2><p>首先这里需要注意一点：<font color=red>无锁态只能升级为轻量级锁，不能升级为偏向锁</font>。</p>
 <p>听起来很扯淡，不过我们用代码验证一下。</p>
 <p>我们都知道Java会默认在4秒后启动偏向锁，这个可以用<code>BiasedLockingStartupDelay</code>参数控制，那么在4秒前的锁，在释放后，一定会是无锁态，这时候我们再尝试加锁，看看结果会怎样：</p>
-<pre><code class="java">public class JavaObjectDemo &#123;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JavaObjectDemo</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Object</span> <span class="variable">lock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Object</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&amp;gt; &#123;</span><br><span class="line">           <span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">               System.out.println(ClassLayout.parseInstance(lock).toPrintable());</span><br><span class="line">               System.out.println(<span class="string">&quot;hello&quot;</span>);</span><br><span class="line">           &#125;</span><br><span class="line">           System.out.println(ClassLayout.parseInstance(lock).toPrintable());</span><br><span class="line">        &#125;).start();</span><br><span class="line"></span><br><span class="line">        Thread.sleep(<span class="number">10000</span>);</span><br><span class="line">		</span><br><span class="line">        <span class="comment">// 因为有锁批量重偏向，如果偏向锁还有用，在第20次获取锁时就会进行批量重偏向，偏向后指向main线程</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &amp;lt; <span class="number">40</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">                System.out.println(ClassLayout.parseInstance(lock).toPrintable());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    static final Object lock = new Object();
-
-    public static void main(String[] args) throws InterruptedException &#123;
-        new Thread(() -&amp;gt; &#123;
-           synchronized (lock) &#123;
-               System.out.println(ClassLayout.parseInstance(lock).toPrintable());
-               System.out.println(&quot;hello&quot;);
-           &#125;
-           System.out.println(ClassLayout.parseInstance(lock).toPrintable());
-        &#125;).start();
-
-        Thread.sleep(10000);
-        
-        // 因为有锁批量重偏向，如果偏向锁还有用，在第20次获取锁时就会进行批量重偏向，偏向后指向main线程
-        for (int i = 0; i &amp;lt; 40; i++) &#123;
-            synchronized (lock) &#123;
-                System.out.println(ClassLayout.parseInstance(lock).toPrintable());
-            &#125;
-        &#125;
-    &#125;
-
-&#125;
-</code></pre>
 <p>运行后查看输出，可以发现全部都是轻量级锁，并没有发送锁的重偏向(重偏向在后面讲，这里只需要知道偏向锁若升级次数过多就会偏向为另外一个新线程)。</p>
 <h2 id="1-2-偏向锁"><a href="#1-2-偏向锁" class="headerlink" title="1.2 偏向锁"></a>1.2 偏向锁</h2><p>偏向锁就很简单了，当偏向锁的执向不是当前线程时，锁就会升级为轻量级锁。</p>
 <p>具体可以看我的这篇笔记，里面有介绍了批量重偏向和批量撤销：<a target="_blank" rel="noopener" href="https://www.notion.so/Synchronized-7b9e882385ae43a8b8cd5b7d512ba0a1?pvs=4">https://www.notion.so/Synchronized-7b9e882385ae43a8b8cd5b7d512ba0a1?pvs=4</a></p>

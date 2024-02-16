@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -193,46 +193,16 @@
     <div class="content" v-pre id="main-content">
         <h1 id="可变参数"><a href="#可变参数" class="headerlink" title="可变参数"></a>可变参数</h1><p>写过ReactNative的都知道，ReactNavigation库里面有一个非常牛逼的类型声明，它可以根据你传入的参数，来判断是否需要第二个参数。</p>
 <p>例如下面的定义：</p>
-<pre><code class="typescript">interface RouteDef &#123;
-    home: undefined
-    shop: &#123;
-        time: number
-    &#125;
-&#125;
-</code></pre>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">RouteDef</span> &#123;</span><br><span class="line">    <span class="attr">home</span>: <span class="literal">undefined</span></span><br><span class="line">    <span class="attr">shop</span>: &#123;</span><br><span class="line">        <span class="attr">time</span>: <span class="built_in">number</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>那么它的路由方法就变得很牛逼了：</p>
-<pre><code class="typescript">// 实际的泛型肯定不是这么传的，因为我写的时候没用RN了，所有忘了咋用的了
-const nav = useNavigation&amp;lt;RouteDef&amp;gt;()
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 实际的泛型肯定不是这么传的，因为我写的时候没用RN了，所有忘了咋用的了</span></span><br><span class="line"><span class="keyword">const</span> nav = useNavigation&amp;lt;<span class="title class_">RouteDef</span>&amp;gt;()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 正确</span></span><br><span class="line"><span class="title function_">nav</span>(<span class="string">&#x27;home&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 错误: ts提示这里只需要一个参数 </span></span><br><span class="line"><span class="title function_">nav</span>(<span class="string">&#x27;home&#x27;</span>, <span class="literal">undefined</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 错误，ts提示这里需要两个参数</span></span><br><span class="line"><span class="title function_">nav</span>(<span class="string">&#x27;shop&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 正确</span></span><br><span class="line"><span class="title function_">nav</span>(<span class="string">&#x27;shop&#x27;</span>, &#123; <span class="attr">time</span>: <span class="title class_">Date</span>.<span class="title function_">now</span>() &#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 错误: 第二个参数需要&#123; time: number &#125;类型，而提供的是number</span></span><br><span class="line"><span class="title function_">nav</span>(<span class="string">&#x27;shop&#x27;</span>, <span class="title class_">Date</span>.<span class="title function_">now</span>())</span><br></pre></td></tr></table></figure>
 
-// 正确
-nav(&#39;home&#39;)
-
-// 错误: ts提示这里只需要一个参数 
-nav(&#39;home&#39;, undefined)
-
-// 错误，ts提示这里需要两个参数
-nav(&#39;shop&#39;)
-
-// 正确
-nav(&#39;shop&#39;, &#123; time: Date.now() &#125;)
-
-// 错误: 第二个参数需要&#123; time: number &#125;类型，而提供的是number
-nav(&#39;shop&#39;, Date.now())
-</code></pre>
 <p>很牛逼啊有没有，连参数的数量都给你变了！而且还能根据属性的定义来决定参数。</p>
 <p>那么这玩意具体是咋写的呢？我仔细研究了一下，研究完后，仿佛开启了新大门！</p>
 <p>我这里直接写一个Demo来看：</p>
-<pre><code class="typescript">type EmitFuncArgs&amp;lt;Events, Key extends keyof Events&amp;gt; = void extends Events[Key]
-  ? [evt: Key]
-  : [evt: Key, data: Events[Key]]
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">EmitFuncArgs</span>&amp;lt;<span class="title class_">Events</span>, <span class="title class_">Key</span> <span class="keyword">extends</span> keyof <span class="title class_">Events</span>&amp;gt; = <span class="built_in">void</span> <span class="keyword">extends</span> <span class="title class_">Events</span>[<span class="title class_">Key</span>]</span><br><span class="line">  ? [<span class="attr">evt</span>: <span class="title class_">Key</span>]</span><br><span class="line">  : [<span class="attr">evt</span>: <span class="title class_">Key</span>, <span class="attr">data</span>: <span class="title class_">Events</span>[<span class="title class_">Key</span>]]</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">EmitFunc</span>&amp;lt;<span class="title class_">Events</span>&amp;gt; = &amp;lt;T <span class="keyword">extends</span> keyof <span class="title class_">Events</span>&amp;gt; <span class="function">(<span class="params">...args: EmitFuncArgs&amp;lt;Events, T&amp;gt;</span>) =&amp;gt;</span> <span class="built_in">string</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">interface</span> <span class="title class_">AppEvents</span> &#123;</span><br><span class="line">  <span class="attr">ON_LOGOUT</span>: <span class="built_in">string</span></span><br><span class="line">  <span class="attr">ON_LOGIN</span>: <span class="built_in">void</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-type EmitFunc&amp;lt;Events&amp;gt; = &amp;lt;T extends keyof Events&amp;gt; (...args: EmitFuncArgs&amp;lt;Events, T&amp;gt;) =&amp;gt; string
-
-export interface AppEvents &#123;
-  ON_LOGOUT: string
-  ON_LOGIN: void
-&#125;
-</code></pre>
 <p>先来看下面的<code>EmitFunc</code>定义，首先这玩意的泛型接收一个Events类型(直接把它看成下面的AppEvents接口就行)，然后它的参数是<code>EmitFuncArgs</code><br>决定的。</p>
 <p>来看<code>EmitFuncArgs</code>，可以发现这玩意居然返回了一个数组，并且还用上了三目运算符。</p>
 <p>到了这里，大伙都应该可以理解是怎么玩的了，就是首先判断值是不是void，如果是，则返回一个长度为1的数组，反之则返回长度为2的数组，其中的第二个<br>参数为接口定义的类型。</p>

@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -196,55 +196,17 @@
 <li><a target="_blank" rel="noopener" href="https://github.com/alibaba/arthas/issues/482">获取SpringContext</a></li>
 </ul>
 <h1 id="1-安装arthas"><a href="#1-安装arthas" class="headerlink" title="1. 安装arthas"></a>1. 安装arthas</h1><p>如果没有用docker，直接从官网下载然后丢服务器就行了，如果用的是docker那么就麻烦一点，这里我整了一个脚本来一键安装&#x2F;启动：</p>
-<pre><code class="sh">#!/bin/bash
-workdir=&quot;/opt/arthas-dev&quot;
-user=user
-container=$1
-if [ -z $container ];then
-    echo -e &quot;\e[32m用法: arthas-launcher.sh [容器名|容器ID] [用户名(可选，必须和启动应用的用户一致)]\e[0m&quot;
-    exit 0
-fi
-if [ ! -z $2 ];then
-    user=$2
-fi
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">workdir=<span class="string">&quot;/opt/arthas-dev&quot;</span></span><br><span class="line">user=user</span><br><span class="line">container=<span class="variable">$1</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="variable">$container</span> ];<span class="keyword">then</span></span><br><span class="line">	<span class="built_in">echo</span> -e <span class="string">&quot;\e[32m用法: arthas-launcher.sh [容器名|容器ID] [用户名(可选，必须和启动应用的用户一致)]\e[0m&quot;</span></span><br><span class="line">	<span class="built_in">exit</span> 0</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="keyword">if</span> [ ! -z <span class="variable">$2</span> ];<span class="keyword">then</span></span><br><span class="line">	user=<span class="variable">$2</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">installArthas</span></span>() &#123;</span><br><span class="line">	<span class="built_in">echo</span> <span class="string">&quot;开始安装arthas...&quot;</span></span><br><span class="line">	docker <span class="built_in">exec</span> -u <span class="variable">$user</span> <span class="variable">$container</span> <span class="built_in">mkdir</span> <span class="variable">$workdir</span>/arthas</span><br><span class="line">	docker <span class="built_in">cp</span> jdk-8u381-linux-x64.tar.gz <span class="variable">$container</span>:<span class="variable">$workdir</span>/jdk.tar.gz</span><br><span class="line">	docker <span class="built_in">cp</span> arthas-packaging-3.7.1-bin.zip <span class="variable">$container</span>:<span class="variable">$workdir</span>/arthas/arthas.zip</span><br><span class="line">	docker <span class="built_in">exec</span> -u root <span class="variable">$container</span> <span class="built_in">chmod</span> 777 <span class="variable">$workdir</span>/jdk.tar.gz</span><br><span class="line">	docker <span class="built_in">exec</span> -u root <span class="variable">$container</span> <span class="built_in">chmod</span> 777 <span class="variable">$workdir</span>/arthas/arthas.zip</span><br><span class="line">	docker <span class="built_in">exec</span> -u <span class="variable">$user</span> <span class="variable">$container</span> tar zxvf <span class="variable">$workdir</span>/jdk.tar.gz -C <span class="variable">$workdir</span></span><br><span class="line">	docker <span class="built_in">exec</span> -u <span class="variable">$user</span> <span class="variable">$container</span> unzip <span class="variable">$workdir</span>/arthas/arthas.zip -d <span class="variable">$workdir</span>/arthas</span><br><span class="line">	docker <span class="built_in">exec</span> -u <span class="variable">$user</span> <span class="variable">$container</span> <span class="built_in">touch</span> <span class="variable">$workdir</span>/installedMark</span><br><span class="line">	<span class="built_in">echo</span> <span class="string">&quot;安装成功!&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># --------------main--------------</span></span><br><span class="line">docker <span class="built_in">exec</span> -u <span class="variable">$user</span> <span class="variable">$container</span> <span class="built_in">test</span> -d <span class="variable">$workdir</span></span><br><span class="line"><span class="keyword">if</span> [ ! $? -eq 0 ];<span class="keyword">then</span></span><br><span class="line">	docker <span class="built_in">exec</span> -u root <span class="variable">$container</span> <span class="built_in">mkdir</span> <span class="variable">$workdir</span></span><br><span class="line">	docker <span class="built_in">exec</span> -u root <span class="variable">$container</span> <span class="built_in">chown</span> <span class="variable">$user</span> <span class="variable">$workdir</span></span><br><span class="line">	installArthas</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">docker <span class="built_in">exec</span> -u <span class="variable">$user</span> <span class="variable">$container</span> <span class="built_in">test</span> -e <span class="variable">$workdir</span>/installedMark</span><br><span class="line"><span class="keyword">if</span> [ $? -eq 0 ];<span class="keyword">then</span></span><br><span class="line">	docker <span class="built_in">exec</span> -it -u <span class="variable">$user</span> <span class="variable">$container</span> <span class="variable">$workdir</span>/jdk1.8.0_381/bin/java -jar <span class="variable">$workdir</span>/arthas/arthas-boot.jar</span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line">	<span class="built_in">echo</span> <span class="string">&quot;文件完整性校验失败! 重新尝试安装arthas.&quot;</span></span><br><span class="line">	installArthas</span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
 
-function installArthas() &#123;
-    echo &quot;开始安装arthas...&quot;
-    docker exec -u $user $container mkdir $workdir/arthas
-    docker cp jdk-8u381-linux-x64.tar.gz $container:$workdir/jdk.tar.gz
-    docker cp arthas-packaging-3.7.1-bin.zip $container:$workdir/arthas/arthas.zip
-    docker exec -u root $container chmod 777 $workdir/jdk.tar.gz
-    docker exec -u root $container chmod 777 $workdir/arthas/arthas.zip
-    docker exec -u $user $container tar zxvf $workdir/jdk.tar.gz -C $workdir
-    docker exec -u $user $container unzip $workdir/arthas/arthas.zip -d $workdir/arthas
-    docker exec -u $user $container touch $workdir/installedMark
-    echo &quot;安装成功!&quot;
-&#125;
-# --------------main--------------
-docker exec -u $user $container test -d $workdir
-if [ ! $? -eq 0 ];then
-    docker exec -u root $container mkdir $workdir
-    docker exec -u root $container chown $user $workdir
-    installArthas
-fi
-
-docker exec -u $user $container test -e $workdir/installedMark
-if [ $? -eq 0 ];then
-    docker exec -it -u $user $container $workdir/jdk1.8.0_381/bin/java -jar $workdir/arthas/arthas-boot.jar
-else 
-    echo &quot;文件完整性校验失败! 重新尝试安装arthas.&quot;
-    installArthas
-fi
-</code></pre>
 <h1 id="2-watch"><a href="#2-watch" class="headerlink" title="2. watch"></a>2. watch</h1><h2 id="2-1-基本使用"><a href="#2-1-基本使用" class="headerlink" title="2.1 基本使用"></a>2.1 基本使用</h2><p>例如有一个Encoder的encrypt方法我们想要观察，但是由于每次请求这个方法都会被调用很多次，如果不加限制，每次会爆出很多不相干的信息。</p>
 <p>watch提供了一个condition-express选项来帮助我们过滤输出：</p>
-<pre><code class="sh">watch xxx.Encoder encrypt &#123;returnObj&#125; &#39;params[0]==&quot;P@ssw0rd&quot;&#39;
-</code></pre>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">watch xxx.Encoder encrypt &#123;returnObj&#125; <span class="string">&#x27;params[0]==&quot;P@ssw0rd&quot;&#x27;</span></span><br></pre></td></tr></table></figure>
+
 <p>上面这条指令则是让arthas在第一个参数是<code>P@ssw0rd</code>的时候输出调用的返回值</p>
 <h2 id="2-2-观察异常抛出"><a href="#2-2-观察异常抛出" class="headerlink" title="2.2 观察异常抛出"></a>2.2 观察异常抛出</h2><p>有些时候，代码抛出了异常，但是又被另外一个异常包了一层抛出去了，例如<code>throw new RuntimeException(e)</code>，甚至有的时候<br>没有被抛出：<code>log.error(e.getMessage())</code>，导致我们不能看到我们想要的调用栈。</p>
 <p>而watch也提供了观察异常抛出的功能。假如有一个Encoder的encrypt方法抛出了一个ExceptionA，但是没有打印栈信息，我们可以用<br>如下指令：</p>
-<pre><code class="sh">watch xxx.Encoder encrypt &#123;throwExp&#125; -e -x 2
-</code></pre>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">watch xxx.Encoder encrypt &#123;throwExp&#125; -e -x 2</span><br></pre></td></tr></table></figure>
+
 <p><code>-e</code>表示抛出异常才触发。<br><code>-x</code>表示输出属性的遍历深度，这个是啥意思呢，例如-x的值为1的时候，watch输出的结果可能就只是对象的toString，而-x的值为2的时候，watch也会输出这个对象里面属性的toString，如果等于3，则是对象里面的属性的属性的toString…</p>
 <hr>
 <p>随缘更新。。</p>

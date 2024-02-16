@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -200,93 +200,16 @@
 <p>所以，我们只需要让这四个点的值相同，那么这四个点在旋转时，值一定是相同的。</p>
 <p>这里的问题是要怎么去遍历这四个点，咱们思路有，但是写不出来。</p>
 <p>这时候可以考数组”打表”的方式来处理：</p>
-<pre><code class="c++">const int POINTER_CNT = 4;
-// 左上 右上 右下 左下
-int MOVE[][2] = &#123;&#123;0, 1&#125;, &#123;1, 0&#125;, &#123;0, -1&#125;, &#123;-1, 0&#125;&#125;;
-int pointer[POINTER_CNT][2];
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">int</span> POINTER_CNT = <span class="number">4</span>;</span><br><span class="line"><span class="comment">// 左上 右上 右下 左下</span></span><br><span class="line"><span class="type">int</span> MOVE[][<span class="number">2</span>] = &#123;&#123;<span class="number">0</span>, <span class="number">1</span>&#125;, &#123;<span class="number">1</span>, <span class="number">0</span>&#125;, &#123;<span class="number">0</span>, <span class="number">-1</span>&#125;, &#123;<span class="number">-1</span>, <span class="number">0</span>&#125;&#125;;</span><br><span class="line"><span class="type">int</span> pointer[POINTER_CNT][<span class="number">2</span>];</span><br></pre></td></tr></table></figure>
+
 <p>其中<code>pointer</code>包括了我们四个点的位置，数组第二维保存了坐标，在遍历完成一次后这样对点进行移动：</p>
-<pre><code class="c++">for (int j = 0; j &amp;lt; POINTER_CNT; ++j) &#123;
-    pointer[j][0] += MOVE[j][0];
-    pointer[j][1] += MOVE[j][1];
-&#125;
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &amp;lt; POINTER_CNT; ++j) &#123;</span><br><span class="line">    pointer[j][<span class="number">0</span>] += MOVE[j][<span class="number">0</span>];</span><br><span class="line">    pointer[j][<span class="number">1</span>] += MOVE[j][<span class="number">1</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>遍历处理完了，现在我们需要处理边界问题。</p>
 <p>不难发现，对于长度为<code>n</code>的矩阵，第一次遍历需要<code>n - 1</code>次，第二次遍历则是<code>n - 1 - 2</code>次，第三次则是<code>n - 1 - 2 - 2</code>次…</p>
 <p>有这个思路这道题就解出来了：</p>
-<pre><code class="c++">#include &amp;lt;iostream&amp;gt;
-#define ll long long
-inline int read()
-&#123;
-    int x=0,f=1;char ch=getchar();
-    while (ch&amp;lt;&#39;0&#39;||ch&amp;gt;&#39;9&#39;)&#123;if (ch==&#39;-&#39;) f=-1;ch=getchar();&#125;
-    while (ch&amp;gt;=&#39;0&#39;&amp;&amp;ch&amp;lt;=&#39;9&#39;)&#123;x=x*10+ch-48;ch=getchar();&#125;
-    return x*f;
-&#125;
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&amp;lt;iostream&amp;gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ll long long</span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">int</span> <span class="title">read</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> x=<span class="number">0</span>,f=<span class="number">1</span>;<span class="type">char</span> ch=<span class="built_in">getchar</span>();</span><br><span class="line">    <span class="keyword">while</span> (ch&amp;lt;<span class="string">&#x27;0&#x27;</span>||ch&amp;gt;<span class="string">&#x27;9&#x27;</span>)&#123;<span class="keyword">if</span> (ch==<span class="string">&#x27;-&#x27;</span>) f=<span class="number">-1</span>;ch=<span class="built_in">getchar</span>();&#125;</span><br><span class="line">    <span class="keyword">while</span> (ch&amp;gt;=<span class="string">&#x27;0&#x27;</span>&amp;&amp;ch&amp;lt;=<span class="string">&#x27;9&#x27;</span>)&#123;x=x*<span class="number">10</span>+ch<span class="number">-48</span>;ch=<span class="built_in">getchar</span>();&#125;</span><br><span class="line">    <span class="keyword">return</span> x*f;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">template</span>&amp;lt;<span class="keyword">typename</span> T&amp;gt; T <span class="title">max</span><span class="params">(T a, T b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a &amp;gt; b ? a : b;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">template</span>&amp;lt;<span class="keyword">typename</span> T&amp;gt; T <span class="title">max4</span><span class="params">(T a, T b, T c, T d)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">max</span>(<span class="built_in">max</span>(a, b), <span class="built_in">max</span>(c, d));</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">template</span>&amp;lt;<span class="keyword">typename</span> T&amp;gt; T <span class="title">min</span><span class="params">(T a, T b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a &amp;lt; b ? a : b;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> MAX_N = <span class="number">102</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> POINTER_CNT = <span class="number">4</span>;</span><br><span class="line"><span class="type">int</span> matrix[MAX_N][MAX_N];</span><br><span class="line"><span class="comment">// 左上 右上 右下 左下</span></span><br><span class="line"><span class="type">int</span> MOVE[][<span class="number">2</span>] = &#123;&#123;<span class="number">0</span>, <span class="number">1</span>&#125;, &#123;<span class="number">1</span>, <span class="number">0</span>&#125;, &#123;<span class="number">0</span>, <span class="number">-1</span>&#125;, &#123;<span class="number">-1</span>, <span class="number">0</span>&#125;&#125;;</span><br><span class="line"><span class="type">int</span> pointer[POINTER_CNT][<span class="number">2</span>];</span><br><span class="line"><span class="type">int</span> n;</span><br><span class="line"><span class="comment">// 根据遍历了多少次，我们可以得到每个点的起始坐标。</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">reinit</span><span class="params">(<span class="type">int</span> offset)</span> </span>&#123;</span><br><span class="line">    pointer[<span class="number">0</span>][<span class="number">0</span>] = <span class="number">1</span> + offset;</span><br><span class="line">    pointer[<span class="number">0</span>][<span class="number">1</span>] = <span class="number">1</span> + offset;</span><br><span class="line">    pointer[<span class="number">1</span>][<span class="number">0</span>] = <span class="number">1</span> + offset;</span><br><span class="line">    pointer[<span class="number">1</span>][<span class="number">1</span>] = n - offset;</span><br><span class="line">    pointer[<span class="number">2</span>][<span class="number">0</span>] = n - offset;</span><br><span class="line">    pointer[<span class="number">2</span>][<span class="number">1</span>] = n - offset;</span><br><span class="line">    pointer[<span class="number">3</span>][<span class="number">0</span>] = n - offset;</span><br><span class="line">    pointer[<span class="number">3</span>][<span class="number">1</span>] = <span class="number">1</span> + offset;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    n = <span class="built_in">read</span>();</span><br><span class="line">    <span class="comment">// 8 + 6 + 6 + 2 + 2 + 4</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &amp;lt;= n; ++i) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &amp;lt;= n; ++j) &#123;</span><br><span class="line">            matrix[i][j] = <span class="built_in">read</span>();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">reinit</span>(<span class="number">0</span>);</span><br><span class="line">    ll ans = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> len = n;</span><br><span class="line">    <span class="type">int</span> offset = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">// 这里也可以用len是否小于等于0判断</span></span><br><span class="line">    <span class="keyword">while</span> (pointer[<span class="number">0</span>][<span class="number">0</span>] &amp;lt; pointer[<span class="number">2</span>][<span class="number">0</span>] &amp;&amp; pointer[<span class="number">0</span>][<span class="number">1</span>] &amp;lt; pointer[<span class="number">2</span>][<span class="number">1</span>]) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &amp;lt; len; ++i) &#123;</span><br><span class="line">            <span class="type">int</span> x1 = pointer[<span class="number">0</span>][<span class="number">0</span>], y1 = pointer[<span class="number">0</span>][<span class="number">1</span>];</span><br><span class="line">            <span class="type">int</span> x2 = pointer[<span class="number">1</span>][<span class="number">0</span>], y2 = pointer[<span class="number">1</span>][<span class="number">1</span>];</span><br><span class="line">            <span class="type">int</span> x3 = pointer[<span class="number">2</span>][<span class="number">0</span>], y3 = pointer[<span class="number">2</span>][<span class="number">1</span>];</span><br><span class="line">            <span class="type">int</span> x4 = pointer[<span class="number">3</span>][<span class="number">0</span>], y4 = pointer[<span class="number">3</span>][<span class="number">1</span>];</span><br><span class="line">            <span class="type">int</span> val1 = matrix[x1][y1], val2 = matrix[x2][y2], val3 = matrix[x3][y3], val4 = matrix[x4][y4];</span><br><span class="line">            <span class="type">int</span> mx = <span class="built_in">max4</span>(val1, val2, val3, val4);</span><br><span class="line">            ans += (mx - val1) + (mx - val2) + (mx - val3) + (mx - val4);</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &amp;lt; POINTER_CNT; ++j) &#123;</span><br><span class="line">                pointer[j][<span class="number">0</span>] += MOVE[j][<span class="number">0</span>];</span><br><span class="line">                pointer[j][<span class="number">1</span>] += MOVE[j][<span class="number">1</span>];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        len -= <span class="number">2</span>;</span><br><span class="line">        offset++;</span><br><span class="line">        <span class="built_in">reinit</span>(offset);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%lld&quot;</span>, ans);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-template&amp;lt;typename T&amp;gt; T max(T a, T b) &#123;
-    return a &amp;gt; b ? a : b;
-&#125;
-template&amp;lt;typename T&amp;gt; T max4(T a, T b, T c, T d) &#123;
-    return max(max(a, b), max(c, d));
-&#125;
-template&amp;lt;typename T&amp;gt; T min(T a, T b) &#123;
-    return a &amp;lt; b ? a : b;
-&#125;
-const int MAX_N = 102;
-const int POINTER_CNT = 4;
-int matrix[MAX_N][MAX_N];
-// 左上 右上 右下 左下
-int MOVE[][2] = &#123;&#123;0, 1&#125;, &#123;1, 0&#125;, &#123;0, -1&#125;, &#123;-1, 0&#125;&#125;;
-int pointer[POINTER_CNT][2];
-int n;
-// 根据遍历了多少次，我们可以得到每个点的起始坐标。
-void reinit(int offset) &#123;
-    pointer[0][0] = 1 + offset;
-    pointer[0][1] = 1 + offset;
-    pointer[1][0] = 1 + offset;
-    pointer[1][1] = n - offset;
-    pointer[2][0] = n - offset;
-    pointer[2][1] = n - offset;
-    pointer[3][0] = n - offset;
-    pointer[3][1] = 1 + offset;
-&#125;
-
-int main()&#123;
-    n = read();
-    // 8 + 6 + 6 + 2 + 2 + 4
-    for (int i = 1; i &amp;lt;= n; ++i) &#123;
-        for (int j = 1; j &amp;lt;= n; ++j) &#123;
-            matrix[i][j] = read();
-        &#125;
-    &#125;
-    reinit(0);
-    ll ans = 0;
-    int len = n;
-    int offset = 0;
-    // 这里也可以用len是否小于等于0判断
-    while (pointer[0][0] &amp;lt; pointer[2][0] &amp;&amp; pointer[0][1] &amp;lt; pointer[2][1]) &#123;
-        for (int i = 1; i &amp;lt; len; ++i) &#123;
-            int x1 = pointer[0][0], y1 = pointer[0][1];
-            int x2 = pointer[1][0], y2 = pointer[1][1];
-            int x3 = pointer[2][0], y3 = pointer[2][1];
-            int x4 = pointer[3][0], y4 = pointer[3][1];
-            int val1 = matrix[x1][y1], val2 = matrix[x2][y2], val3 = matrix[x3][y3], val4 = matrix[x4][y4];
-            int mx = max4(val1, val2, val3, val4);
-            ans += (mx - val1) + (mx - val2) + (mx - val3) + (mx - val4);
-            for (int j = 0; j &amp;lt; POINTER_CNT; ++j) &#123;
-                pointer[j][0] += MOVE[j][0];
-                pointer[j][1] += MOVE[j][1];
-            &#125;
-        &#125;
-        len -= 2;
-        offset++;
-        reinit(offset);
-    &#125;
-    printf(&quot;%lld&quot;, ans);
-    return 0;
-&#125;
-</code></pre>
 
     </div>
     

@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#Java" style="color: #00bcd4">Java</a>
+                <a href="/2023/03/05/java-source#Java" style="color: #ffa2c4">Java</a>
             </span>
             
         </span>
@@ -207,28 +207,8 @@
 <p>本篇基于Java11</p>
 </blockquote>
 <h1 id="1-构造器"><a href="#1-构造器" class="headerlink" title="1. 构造器"></a>1. 构造器</h1><p>线程池的构造器很多，我们直接看参数最多的那一个：</p>
-<pre><code class="java">public ThreadPoolExecutor(int corePoolSize,
-                              int maximumPoolSize,
-                              long keepAliveTime,
-                              TimeUnit unit,
-                              BlockingQueue&amp;lt;Runnable&amp;gt; workQueue,
-                              ThreadFactory threadFactory,
-                              RejectedExecutionHandler handler) &#123;
-    if (corePoolSize &amp;lt; 0 ||
-        maximumPoolSize &amp;lt;= 0 ||
-        maximumPoolSize &amp;lt; corePoolSize ||
-        keepAliveTime &amp;lt; 0)
-        throw new IllegalArgumentException();
-    if (workQueue == null || threadFactory == null || handler == null)
-        throw new NullPointerException();
-    this.corePoolSize = corePoolSize;
-    this.maximumPoolSize = maximumPoolSize;
-    this.workQueue = workQueue;
-    this.keepAliveTime = unit.toNanos(keepAliveTime);
-    this.threadFactory = threadFactory;
-    this.handler = handler;
-&#125;
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">ThreadPoolExecutor</span><span class="params">(<span class="type">int</span> corePoolSize,</span></span><br><span class="line"><span class="params">                              <span class="type">int</span> maximumPoolSize,</span></span><br><span class="line"><span class="params">                              <span class="type">long</span> keepAliveTime,</span></span><br><span class="line"><span class="params">                              TimeUnit unit,</span></span><br><span class="line"><span class="params">                              BlockingQueue&amp;lt;Runnable&amp;gt; workQueue,</span></span><br><span class="line"><span class="params">                              ThreadFactory threadFactory,</span></span><br><span class="line"><span class="params">                              RejectedExecutionHandler handler)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (corePoolSize &amp;lt; <span class="number">0</span> ||</span><br><span class="line">        maximumPoolSize &amp;lt;= <span class="number">0</span> ||</span><br><span class="line">        maximumPoolSize &amp;lt; corePoolSize ||</span><br><span class="line">        keepAliveTime &amp;lt; <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>();</span><br><span class="line">    <span class="keyword">if</span> (workQueue == <span class="literal">null</span> || threadFactory == <span class="literal">null</span> || handler == <span class="literal">null</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>();</span><br><span class="line">    <span class="built_in">this</span>.corePoolSize = corePoolSize;</span><br><span class="line">    <span class="built_in">this</span>.maximumPoolSize = maximumPoolSize;</span><br><span class="line">    <span class="built_in">this</span>.workQueue = workQueue;</span><br><span class="line">    <span class="built_in">this</span>.keepAliveTime = unit.toNanos(keepAliveTime);</span><br><span class="line">    <span class="built_in">this</span>.threadFactory = threadFactory;</span><br><span class="line">    <span class="built_in">this</span>.handler = handler;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <ul>
 <li><p><code>corePoolSize</code>：线程池保存在线程池中的最低线程数，即使空闲也要保存这么多</p>
 </li>
@@ -268,8 +248,8 @@
 <li><code>PriorityBlockingQueue</code>：一个具有优先级的无限阻塞队列。</li>
 </ul>
 <h1 id="2-ctl"><a href="#2-ctl" class="headerlink" title="2. ctl"></a>2. ctl</h1><p><code>ctl</code>是一个表示线程当前状态的原子整型：</p>
-<pre><code class="java">private final AtomicInteger ctl = new AtomicInteger(ctlOf(RUNNING, 0));
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="type">AtomicInteger</span> <span class="variable">ctl</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AtomicInteger</span>(ctlOf(RUNNING, <span class="number">0</span>));</span><br></pre></td></tr></table></figure>
+
 <p>它的低29位为当前正在运行的线程数，高3位表示线程池的状态：</p>
 <table>
 <thead>
@@ -315,134 +295,16 @@
 <p>COUNT_BITS &#x3D; Integer.SIZE - 3;</p>
 </blockquote>
 <p>关闭线程池可以通过<code>shutdown()</code>或者<code>shutdownNow()</code>来分别进入<code>SHUTDOWN</code>或<code>STOP</code>状态</p>
-<h1 id="3-执行任务"><a href="#3-执行任务" class="headerlink" title="3. 执行任务"></a>3. 执行任务</h1><h2 id="3-1-addWorker"><a href="#3-1-addWorker" class="headerlink" title="3.1 addWorker"></a>3.1 addWorker</h2><pre><code class="java">private boolean addWorker(Runnable firstTask, boolean core) &#123;
-    retry:
-    for (int c = ctl.get();;) &#123;
-        // 检查ctl是否大于等于SHUTDOWN(常量，为0)，即判断是否进入了关闭状态
-        if (runStateAtLeast(c, SHUTDOWN)
-            // 检查ctl是否大于等于STOP(常量，1&amp;lt;&amp;lt;29)，大于等于STOP时时不再接收新任务
-            &amp;&amp; (runStateAtLeast(c, STOP)
-                || firstTask != null
-                || workQueue.isEmpty()))
-            // 表示添加失败
-            return false;
+<h1 id="3-执行任务"><a href="#3-执行任务" class="headerlink" title="3. 执行任务"></a>3. 执行任务</h1><h2 id="3-1-addWorker"><a href="#3-1-addWorker" class="headerlink" title="3.1 addWorker"></a>3.1 addWorker</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">addWorker</span><span class="params">(Runnable firstTask, <span class="type">boolean</span> core)</span> &#123;</span><br><span class="line">    retry:</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">c</span> <span class="operator">=</span> ctl.get();;) &#123;</span><br><span class="line">        <span class="comment">// 检查ctl是否大于等于SHUTDOWN(常量，为0)，即判断是否进入了关闭状态</span></span><br><span class="line">        <span class="keyword">if</span> (runStateAtLeast(c, SHUTDOWN)</span><br><span class="line">            <span class="comment">// 检查ctl是否大于等于STOP(常量，1&amp;lt;&amp;lt;29)，大于等于STOP时时不再接收新任务</span></span><br><span class="line">            &amp;&amp; (runStateAtLeast(c, STOP)</span><br><span class="line">                || firstTask != <span class="literal">null</span></span><br><span class="line">                || workQueue.isEmpty()))</span><br><span class="line">            <span class="comment">// 表示添加失败</span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            <span class="comment">// 判断当前正在工作的线程是否超出限制</span></span><br><span class="line">            <span class="keyword">if</span> (workerCountOf(c)</span><br><span class="line">                &amp;gt;= ((core ? corePoolSize : maximumPoolSize) &amp; COUNT_MASK))</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            <span class="comment">// 将ctl自增，如果成功则结束最外层循环</span></span><br><span class="line">            <span class="keyword">if</span> (compareAndIncrementWorkerCount(c))</span><br><span class="line">                <span class="keyword">break</span> retry;</span><br><span class="line">            c = ctl.get();  <span class="comment">// Re-read ctl</span></span><br><span class="line">            <span class="comment">// 原子自增失败，判断是否进入关闭状态</span></span><br><span class="line">            <span class="keyword">if</span> (runStateAtLeast(c, SHUTDOWN))</span><br><span class="line">                <span class="comment">// 回到外层循环</span></span><br><span class="line">                <span class="keyword">continue</span> retry;</span><br><span class="line">            <span class="comment">// else CAS failed due to workerCount change; retry inner loop</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">boolean</span> <span class="variable">workerStarted</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="type">boolean</span> <span class="variable">workerAdded</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="type">Worker</span> <span class="variable">w</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        w = <span class="keyword">new</span> <span class="title class_">Worker</span>(firstTask);</span><br><span class="line">        <span class="comment">// 这个Thread是根据ThreadFactory获取的</span></span><br><span class="line">        <span class="keyword">final</span> <span class="type">Thread</span> <span class="variable">t</span> <span class="operator">=</span> w.thread;</span><br><span class="line">        <span class="keyword">if</span> (t != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 加锁</span></span><br><span class="line">            <span class="keyword">final</span> <span class="type">ReentrantLock</span> <span class="variable">mainLock</span> <span class="operator">=</span> <span class="built_in">this</span>.mainLock;</span><br><span class="line">            mainLock.lock();</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// Recheck while holding lock.</span></span><br><span class="line">                <span class="comment">// Back out on ThreadFactory failure or if</span></span><br><span class="line">                <span class="comment">// shut down before lock acquired.</span></span><br><span class="line">                <span class="type">int</span> <span class="variable">c</span> <span class="operator">=</span> ctl.get();</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (isRunning(c) ||</span><br><span class="line">                    <span class="comment">// 判断当前状态是否为SHUTDOWN，并且任务为空</span></span><br><span class="line">                    (runStateLessThan(c, STOP) &amp;&amp; firstTask == <span class="literal">null</span>)) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (t.getState() != Thread.State.NEW)</span><br><span class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalThreadStateException</span>();</span><br><span class="line">                    <span class="comment">// 存到工作线程Set集合里</span></span><br><span class="line">                    workers.add(w);</span><br><span class="line">                    workerAdded = <span class="literal">true</span>;</span><br><span class="line">                    <span class="type">int</span> <span class="variable">s</span> <span class="operator">=</span> workers.size();</span><br><span class="line">                    <span class="keyword">if</span> (s &amp;gt; largestPoolSize)</span><br><span class="line">                        largestPoolSize = s;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                mainLock.unlock();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (workerAdded) &#123;</span><br><span class="line">                <span class="comment">// 启动任务</span></span><br><span class="line">                t.start();</span><br><span class="line">                workerStarted = <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (! workerStarted)</span><br><span class="line">            addWorkerFailed(w);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> workerStarted;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-        for (;;) &#123;
-            // 判断当前正在工作的线程是否超出限制
-            if (workerCountOf(c)
-                &amp;gt;= ((core ? corePoolSize : maximumPoolSize) &amp; COUNT_MASK))
-                return false;
-            // 将ctl自增，如果成功则结束最外层循环
-            if (compareAndIncrementWorkerCount(c))
-                break retry;
-            c = ctl.get();  // Re-read ctl
-            // 原子自增失败，判断是否进入关闭状态
-            if (runStateAtLeast(c, SHUTDOWN))
-                // 回到外层循环
-                continue retry;
-            // else CAS failed due to workerCount change; retry inner loop
-        &#125;
-    &#125;
+<h2 id="3-2-execute"><a href="#3-2-execute" class="headerlink" title="3.2 execute"></a>3.2 execute</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(Runnable command)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (command == <span class="literal">null</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>();</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// ctl是一个原子整型，前3位为运行状态，后29位为运行中的线程数</span></span><br><span class="line">    <span class="type">int</span> <span class="variable">c</span> <span class="operator">=</span> ctl.get();</span><br><span class="line">    <span class="comment">// workerCountOf就是获取后29位</span></span><br><span class="line">    <span class="keyword">if</span> (workerCountOf(c) &amp;lt; corePoolSize) &#123;</span><br><span class="line">        <span class="keyword">if</span> (addWorker(command, <span class="literal">true</span>))</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        c = ctl.get();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 走到这里，说明addWorker执行失败了，或者工作线程数大于等于了corePoolSize</span></span><br><span class="line">    <span class="comment">// 如果线程池还在运行，将任务添加到队列里</span></span><br><span class="line">    <span class="keyword">if</span> (isRunning(c) &amp;&amp; workQueue.offer(command)) &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">recheck</span> <span class="operator">=</span> ctl.get();</span><br><span class="line">        <span class="comment">// 重新判断线程数是否停止了，如果是则移除这个任务</span></span><br><span class="line">        <span class="keyword">if</span> (!isRunning(recheck) &amp;&amp; remove(command))</span><br><span class="line">            reject(command);</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (workerCountOf(recheck) == <span class="number">0</span>)</span><br><span class="line">            addWorker(<span class="literal">null</span>, <span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 再次尝试添加</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (!addWorker(command, <span class="literal">false</span>))</span><br><span class="line">        reject(command);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    boolean workerStarted = false;
-    boolean workerAdded = false;
-    Worker w = null;
-    try &#123;
-        w = new Worker(firstTask);
-        // 这个Thread是根据ThreadFactory获取的
-        final Thread t = w.thread;
-        if (t != null) &#123;
-            // 加锁
-            final ReentrantLock mainLock = this.mainLock;
-            mainLock.lock();
-            try &#123;
-                // Recheck while holding lock.
-                // Back out on ThreadFactory failure or if
-                // shut down before lock acquired.
-                int c = ctl.get();
-
-                if (isRunning(c) ||
-                    // 判断当前状态是否为SHUTDOWN，并且任务为空
-                    (runStateLessThan(c, STOP) &amp;&amp; firstTask == null)) &#123;
-                    if (t.getState() != Thread.State.NEW)
-                        throw new IllegalThreadStateException();
-                    // 存到工作线程Set集合里
-                    workers.add(w);
-                    workerAdded = true;
-                    int s = workers.size();
-                    if (s &amp;gt; largestPoolSize)
-                        largestPoolSize = s;
-                &#125;
-            &#125; finally &#123;
-                mainLock.unlock();
-            &#125;
-            if (workerAdded) &#123;
-                // 启动任务
-                t.start();
-                workerStarted = true;
-            &#125;
-        &#125;
-    &#125; finally &#123;
-        if (! workerStarted)
-            addWorkerFailed(w);
-    &#125;
-    return workerStarted;
-&#125;
-</code></pre>
-<h2 id="3-2-execute"><a href="#3-2-execute" class="headerlink" title="3.2 execute"></a>3.2 execute</h2><pre><code class="java">public void execute(Runnable command) &#123;
-    if (command == null)
-        throw new NullPointerException();
-    
-    // ctl是一个原子整型，前3位为运行状态，后29位为运行中的线程数
-    int c = ctl.get();
-    // workerCountOf就是获取后29位
-    if (workerCountOf(c) &amp;lt; corePoolSize) &#123;
-        if (addWorker(command, true))
-            return;
-        c = ctl.get();
-    &#125;
-    // 走到这里，说明addWorker执行失败了，或者工作线程数大于等于了corePoolSize
-    // 如果线程池还在运行，将任务添加到队列里
-    if (isRunning(c) &amp;&amp; workQueue.offer(command)) &#123;
-        int recheck = ctl.get();
-        // 重新判断线程数是否停止了，如果是则移除这个任务
-        if (!isRunning(recheck) &amp;&amp; remove(command))
-            reject(command);
-        else if (workerCountOf(recheck) == 0)
-            addWorker(null, false);
-    &#125;
-    // 再次尝试添加
-    else if (!addWorker(command, false))
-        reject(command);
-&#125;
-</code></pre>
 <h2 id="3-3-线程池是怎么运行的"><a href="#3-3-线程池是怎么运行的" class="headerlink" title="3.3 线程池是怎么运行的"></a>3.3 线程池是怎么运行的</h2><p>其实把上面的代码看完可能还是不清楚线程池是怎么运作的，没事，还记得<code>addWorker</code>里调用了线程的<code>start</code>方法吗，我们来看一下：</p>
-<pre><code class="java">Worker w = null;
-        try &#123;
-            w = new Worker(firstTask);
-            final Thread t = w.thread;
-            ...
-       
-            t.start();
-</code></pre>
-<p>来看一下worker类：</p>
-<pre><code class="java">private final class Worker
-        extends AbstractQueuedSynchronizer
-        implements Runnable
-    &#123;
-    
-    Worker(Runnable firstTask) &#123;
-        setState(-1); // inhibit interrupts until runWorker
-        this.firstTask = firstTask;
-        this.thread = getThreadFactory().newThread(this);
-    &#125;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Worker</span> <span class="variable">w</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            w = <span class="keyword">new</span> <span class="title class_">Worker</span>(firstTask);</span><br><span class="line">            <span class="keyword">final</span> <span class="type">Thread</span> <span class="variable">t</span> <span class="operator">=</span> w.thread;</span><br><span class="line">            ...</span><br><span class="line">       </span><br><span class="line">            t.start();</span><br></pre></td></tr></table></figure>
 
-    /** Delegates main run loop to outer runWorker. */
-    public void run() &#123;
-        runWorker(this);
-    &#125;
-&#125;
-</code></pre>
+<p>来看一下worker类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Worker</span></span><br><span class="line">        <span class="keyword">extends</span> <span class="title class_">AbstractQueuedSynchronizer</span></span><br><span class="line">        <span class="keyword">implements</span> <span class="title class_">Runnable</span></span><br><span class="line">    &#123;</span><br><span class="line">    </span><br><span class="line">    Worker(Runnable firstTask) &#123;</span><br><span class="line">        setState(-<span class="number">1</span>); <span class="comment">// inhibit interrupts until runWorker</span></span><br><span class="line">        <span class="built_in">this</span>.firstTask = firstTask;</span><br><span class="line">        <span class="built_in">this</span>.thread = getThreadFactory().newThread(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/** Delegates main run loop to outer runWorker. */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">        runWorker(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>可以发现线程调用<code>start</code>方法后实则运行的是<code>runWorker</code>，在看<code>runWorker</code>前先来看一下<code>getTask</code>方法：</p>
 <p>先来看它的注释：</p>
 <blockquote>
@@ -455,159 +317,19 @@
 <li>线程池关闭，并且等待队列为空(调用<code>shutdown</code>方法)</li>
 <li>该Worker超时等待一个任务</li>
 </ul>
-<pre><code class="java">private Runnable getTask() &#123;
-    boolean timedOut = false; // Did the last poll() time out?
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> Runnable <span class="title function_">getTask</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">boolean</span> <span class="variable">timedOut</span> <span class="operator">=</span> <span class="literal">false</span>; <span class="comment">// Did the last poll() time out?</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">c</span> <span class="operator">=</span> ctl.get();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Check if queue empty only if necessary.</span></span><br><span class="line">        <span class="comment">// &amp;&amp;优先级高于||</span></span><br><span class="line">        <span class="keyword">if</span> (runStateAtLeast(c, SHUTDOWN)</span><br><span class="line">            &amp;&amp; (runStateAtLeast(c, STOP) || workQueue.isEmpty())) &#123;</span><br><span class="line">            decrementWorkerCount();</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> <span class="variable">wc</span> <span class="operator">=</span> workerCountOf(c);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Are workers subject to culling?</span></span><br><span class="line">        <span class="comment">// 允许常驻线程超时 || 线程数量是否大于核心线程数</span></span><br><span class="line">        <span class="type">boolean</span> <span class="variable">timed</span> <span class="operator">=</span> allowCoreThreadTimeOut || wc &amp;gt; corePoolSize;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 线程池线程数量超过最大值 || 当前线程开启计时并且超时</span></span><br><span class="line">        <span class="keyword">if</span> ((wc &amp;gt; maximumPoolSize || (timed &amp;&amp; timedOut))</span><br><span class="line">            &amp;&amp; (wc &amp;gt; <span class="number">1</span> || workQueue.isEmpty())) &#123;</span><br><span class="line">            <span class="comment">// 删除worker</span></span><br><span class="line">            <span class="keyword">if</span> (compareAndDecrementWorkerCount(c))</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 这里都是进行阻塞，直到workQueue弹出一个元素</span></span><br><span class="line">            <span class="type">Runnable</span> <span class="variable">r</span> <span class="operator">=</span> timed ?</span><br><span class="line">                workQueue.poll(keepAliveTime, TimeUnit.NANOSECONDS) :</span><br><span class="line">            workQueue.take();</span><br><span class="line">            <span class="keyword">if</span> (r != <span class="literal">null</span>)</span><br><span class="line">                <span class="keyword">return</span> r;</span><br><span class="line">            <span class="comment">// 标记超时</span></span><br><span class="line">            timedOut = <span class="literal">true</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException retry) &#123;</span><br><span class="line">            timedOut = <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    for (;;) &#123;
-        int c = ctl.get();
-
-        // Check if queue empty only if necessary.
-        // &amp;&amp;优先级高于||
-        if (runStateAtLeast(c, SHUTDOWN)
-            &amp;&amp; (runStateAtLeast(c, STOP) || workQueue.isEmpty())) &#123;
-            decrementWorkerCount();
-            return null;
-        &#125;
-
-        int wc = workerCountOf(c);
-
-        // Are workers subject to culling?
-        // 允许常驻线程超时 || 线程数量是否大于核心线程数
-        boolean timed = allowCoreThreadTimeOut || wc &amp;gt; corePoolSize;
-
-        // 线程池线程数量超过最大值 || 当前线程开启计时并且超时
-        if ((wc &amp;gt; maximumPoolSize || (timed &amp;&amp; timedOut))
-            &amp;&amp; (wc &amp;gt; 1 || workQueue.isEmpty())) &#123;
-            // 删除worker
-            if (compareAndDecrementWorkerCount(c))
-                return null;
-            continue;
-        &#125;
-
-        try &#123;
-            // 这里都是进行阻塞，直到workQueue弹出一个元素
-            Runnable r = timed ?
-                workQueue.poll(keepAliveTime, TimeUnit.NANOSECONDS) :
-            workQueue.take();
-            if (r != null)
-                return r;
-            // 标记超时
-            timedOut = true;
-        &#125; catch (InterruptedException retry) &#123;
-            timedOut = false;
-        &#125;
-    &#125;
-&#125;
-</code></pre>
 <p>然后再来看<code>runWorker</code>：</p>
-<pre><code class="java">final void runWorker(Worker w) &#123;
-    Thread wt = Thread.currentThread();
-    Runnable task = w.firstTask;
-    w.firstTask = null;
-    w.unlock(); // allow interrupts
-    boolean completedAbruptly = true;
-    try &#123;
-        // 在这里执行任务或者获取任务，当没有新任务时这个worker就会被删掉
-        while (task != null || (task = getTask()) != null) &#123;
-            // 加锁
-            w.lock();
-            // If pool is stopping, ensure thread is interrupted;
-            // if not, ensure thread is not interrupted.  This
-            // requires a recheck in second case to deal with
-            // shutdownNow race while clearing interrupt
-            // 上面的注释意思是：如果线程池被关闭(shutdownNow)，确保线程被中断，否则则确保没有被中断
-            if ((runStateAtLeast(ctl.get(), STOP) || 
-                 (Thread.interrupted() &amp;&amp; runStateAtLeast(ctl.get(), STOP))) &amp;&amp;
-                !wt.isInterrupted())
-                wt.interrupt();
-            try &#123;
-                // 这一步交给了子类实现
-                beforeExecute(wt, task);
-                try &#123;
-                    // 执行任务
-                    task.run();
-                    // 这一步同样交给了子类实现
-                    afterExecute(task, null);
-                &#125; catch (Throwable ex) &#123;
-                    afterExecute(task, ex);
-                    throw ex;
-                &#125;
-            &#125; finally &#123;
-                task = null;
-                w.completedTasks++;
-                w.unlock();
-            &#125;
-        &#125;
-        completedAbruptly = false;
-    &#125; finally &#123;
-        processWorkerExit(w, completedAbruptly);
-    &#125;
-&#125;
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title function_">runWorker</span><span class="params">(Worker w)</span> &#123;</span><br><span class="line">    <span class="type">Thread</span> <span class="variable">wt</span> <span class="operator">=</span> Thread.currentThread();</span><br><span class="line">    <span class="type">Runnable</span> <span class="variable">task</span> <span class="operator">=</span> w.firstTask;</span><br><span class="line">    w.firstTask = <span class="literal">null</span>;</span><br><span class="line">    w.unlock(); <span class="comment">// allow interrupts</span></span><br><span class="line">    <span class="type">boolean</span> <span class="variable">completedAbruptly</span> <span class="operator">=</span> <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 在这里执行任务或者获取任务，当没有新任务时这个worker就会被删掉</span></span><br><span class="line">        <span class="keyword">while</span> (task != <span class="literal">null</span> || (task = getTask()) != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 加锁</span></span><br><span class="line">            w.lock();</span><br><span class="line">            <span class="comment">// If pool is stopping, ensure thread is interrupted;</span></span><br><span class="line">            <span class="comment">// if not, ensure thread is not interrupted.  This</span></span><br><span class="line">            <span class="comment">// requires a recheck in second case to deal with</span></span><br><span class="line">            <span class="comment">// shutdownNow race while clearing interrupt</span></span><br><span class="line">            <span class="comment">// 上面的注释意思是：如果线程池被关闭(shutdownNow)，确保线程被中断，否则则确保没有被中断</span></span><br><span class="line">            <span class="keyword">if</span> ((runStateAtLeast(ctl.get(), STOP) || </span><br><span class="line">                 (Thread.interrupted() &amp;&amp; runStateAtLeast(ctl.get(), STOP))) &amp;&amp;</span><br><span class="line">                !wt.isInterrupted())</span><br><span class="line">                wt.interrupt();</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// 这一步交给了子类实现</span></span><br><span class="line">                beforeExecute(wt, task);</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="comment">// 执行任务</span></span><br><span class="line">                    task.run();</span><br><span class="line">                    <span class="comment">// 这一步同样交给了子类实现</span></span><br><span class="line">                    afterExecute(task, <span class="literal">null</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Throwable ex) &#123;</span><br><span class="line">                    afterExecute(task, ex);</span><br><span class="line">                    <span class="keyword">throw</span> ex;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                task = <span class="literal">null</span>;</span><br><span class="line">                w.completedTasks++;</span><br><span class="line">                w.unlock();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        completedAbruptly = <span class="literal">false</span>;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        processWorkerExit(w, completedAbruptly);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <h2 id="3-4-为什么Worker要继承AQS"><a href="#3-4-为什么Worker要继承AQS" class="headerlink" title="3.4 为什么Worker要继承AQS"></a>3.4 为什么Worker要继承AQS</h2><p>在<code>runWorker</code>里我们可以发现，我们是通过worker来加了锁的，这里为什么要加锁呢？我们一个worker不是只有一个线程吗？</p>
 <p>首先观察一下Worker的实现，可以发现它<strong>不是</strong>可重入锁，这个可以去类比<code>ReentrantLock</code>，然后我们还知道，我们调用<code>shutdown</code>时，并不会停掉还在运行中的线程，停掉的是那些正在等待任务的线程，那么我们怎么判断一个Worker正处于那种状态呢？</p>
 <p>我们先从<code>shutdown</code>入手：</p>
-<pre><code class="java">public void shutdown() &#123;
-    final ReentrantLock mainLock = this.mainLock;
-    mainLock.lock();
-    try &#123;
-        checkShutdownAccess();
-        advanceRunState(SHUTDOWN);
-        // 中断闲置的worker
-        interruptIdleWorkers();
-        onShutdown(); // hook for ScheduledThreadPoolExecutor
-    &#125; finally &#123;
-        mainLock.unlock();
-    &#125;
-    tryTerminate();
-&#125;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">shutdown</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="type">ReentrantLock</span> <span class="variable">mainLock</span> <span class="operator">=</span> <span class="built_in">this</span>.mainLock;</span><br><span class="line">    mainLock.lock();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        checkShutdownAccess();</span><br><span class="line">        advanceRunState(SHUTDOWN);</span><br><span class="line">        <span class="comment">// 中断闲置的worker</span></span><br><span class="line">        interruptIdleWorkers();</span><br><span class="line">        onShutdown(); <span class="comment">// hook for ScheduledThreadPoolExecutor</span></span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        mainLock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">    tryTerminate();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">interruptIdleWorkers</span><span class="params">()</span> &#123;</span><br><span class="line">    interruptIdleWorkers(<span class="literal">false</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">interruptIdleWorkers</span><span class="params">(<span class="type">boolean</span> onlyOne)</span> &#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="type">ReentrantLock</span> <span class="variable">mainLock</span> <span class="operator">=</span> <span class="built_in">this</span>.mainLock;</span><br><span class="line">    mainLock.lock();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (Worker w : workers) &#123;</span><br><span class="line">            <span class="type">Thread</span> <span class="variable">t</span> <span class="operator">=</span> w.thread;</span><br><span class="line">            <span class="comment">// 看到这个tryLock没，如果成功拿到锁了，说明当前线程没有执行任务</span></span><br><span class="line">            <span class="keyword">if</span> (!t.isInterrupted() &amp;&amp; w.tryLock()) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    t.interrupt();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (SecurityException ignore) &#123;</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    w.unlock();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (onlyOne)</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        mainLock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Worker</span></span><br><span class="line"><span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">tryLock</span><span class="params">()</span>  &#123; <span class="keyword">return</span> tryAcquire(<span class="number">1</span>); &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Worker</span></span><br><span class="line"><span class="keyword">protected</span> <span class="type">boolean</span> <span class="title function_">tryAcquire</span><span class="params">(<span class="type">int</span> unused)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (compareAndSetState(<span class="number">0</span>, <span class="number">1</span>)) &#123;</span><br><span class="line">        setExclusiveOwnerThread(Thread.currentThread());</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-private void interruptIdleWorkers() &#123;
-    interruptIdleWorkers(false);
-&#125;
-
-private void interruptIdleWorkers(boolean onlyOne) &#123;
-    final ReentrantLock mainLock = this.mainLock;
-    mainLock.lock();
-    try &#123;
-        for (Worker w : workers) &#123;
-            Thread t = w.thread;
-            // 看到这个tryLock没，如果成功拿到锁了，说明当前线程没有执行任务
-            if (!t.isInterrupted() &amp;&amp; w.tryLock()) &#123;
-                try &#123;
-                    t.interrupt();
-                &#125; catch (SecurityException ignore) &#123;
-                &#125; finally &#123;
-                    w.unlock();
-                &#125;
-            &#125;
-            if (onlyOne)
-                break;
-        &#125;
-    &#125; finally &#123;
-        mainLock.unlock();
-    &#125;
-&#125;
-
-// Worker
-public boolean tryLock()  &#123; return tryAcquire(1); &#125;
-
-// Worker
-protected boolean tryAcquire(int unused) &#123;
-    if (compareAndSetState(0, 1)) &#123;
-        setExclusiveOwnerThread(Thread.currentThread());
-        return true;
-    &#125;
-    return false;
-&#125;
-</code></pre>
 <p>在回到<code>Worker</code>，我们再看一眼构造器：</p>
-<pre><code class="java">Worker(Runnable firstTask) &#123;
-    setState(-1); // inhibit interrupts until runWorker 禁止中断直到worker启动，即线程启动
-    this.firstTask = firstTask;
-    this.thread = getThreadFactory().newThread(this);
-&#125;
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Worker(Runnable firstTask) &#123;</span><br><span class="line">    setState(-<span class="number">1</span>); <span class="comment">// inhibit interrupts until runWorker 禁止中断直到worker启动，即线程启动</span></span><br><span class="line">    <span class="built_in">this</span>.firstTask = firstTask;</span><br><span class="line">    <span class="built_in">this</span>.thread = getThreadFactory().newThread(<span class="built_in">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>所以说<code>Worker</code>的初始State为-1，用来禁止线程中断，在调用<code>runWorker</code>后，在最外部有一个<code>unlock</code>解锁操作用于将<code>Worker</code>状态设置为0</p>
 <h1 id="4-mainLock"><a href="#4-mainLock" class="headerlink" title="4. mainLock"></a>4. mainLock</h1><p><code>mainLock</code>的注释如下：</p>
 <blockquote>
@@ -615,40 +337,8 @@ protected boolean tryAcquire(int unused) &#123;
 </blockquote>
 <p>大致意思是：在访问Worker和一些其它计数变量时加锁。虽然可以用并发的集合来处理，但实际上使用锁更好。原因之一是<em>这些序列化的闲置线程将会避免一些无意义的中断风暴，特别是在关闭期间，另外在退出线程时将同时中断尚未中断的线程</em>((没读懂这句话，机翻的)。加锁还可以简化变量的相关记录。另外为了保证Worker的安全，应在退出时进行加锁。(<del>翻译的稀碎，有能力建议自己翻译</del>)</p>
 <h2 id="4-1-processWorkerExit"><a href="#4-1-processWorkerExit" class="headerlink" title="4.1 processWorkerExit"></a>4.1 processWorkerExit</h2><p>顾名思义，这个方法在Worker退出时会被调用</p>
-<pre><code class="java">private void processWorkerExit(Worker w, boolean completedAbruptly) &#123;
-    // 判断是否由于用户异常导致退出
-    if (completedAbruptly) // If abrupt, then workerCount wasn&#39;t adjusted
-        decrementWorkerCount();
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">processWorkerExit</span><span class="params">(Worker w, <span class="type">boolean</span> completedAbruptly)</span> &#123;</span><br><span class="line">    <span class="comment">// 判断是否由于用户异常导致退出</span></span><br><span class="line">    <span class="keyword">if</span> (completedAbruptly) <span class="comment">// If abrupt, then workerCount wasn&#x27;t adjusted</span></span><br><span class="line">        decrementWorkerCount();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> <span class="type">ReentrantLock</span> <span class="variable">mainLock</span> <span class="operator">=</span> <span class="built_in">this</span>.mainLock;</span><br><span class="line">    mainLock.lock();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        completedTaskCount += w.completedTasks;</span><br><span class="line">        <span class="comment">// 移除worker</span></span><br><span class="line">        workers.remove(w);</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        mainLock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">// 尝试将线程池从stop或shutdown转换为terminate状态</span></span><br><span class="line">    tryTerminate();</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> <span class="variable">c</span> <span class="operator">=</span> ctl.get();</span><br><span class="line">    <span class="comment">// 判断是否不处于STOP状态</span></span><br><span class="line">    <span class="keyword">if</span> (runStateLessThan(c, STOP)) &#123;</span><br><span class="line">        <span class="comment">// 如果不是由于用户异常导致</span></span><br><span class="line">        <span class="keyword">if</span> (!completedAbruptly) &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">min</span> <span class="operator">=</span> allowCoreThreadTimeOut ? <span class="number">0</span> : corePoolSize;</span><br><span class="line">            <span class="keyword">if</span> (min == <span class="number">0</span> &amp;&amp; ! workQueue.isEmpty())</span><br><span class="line">                min = <span class="number">1</span>;</span><br><span class="line">            <span class="comment">// 确保worker的数量最多有corePoolSize，超过了则不再新建</span></span><br><span class="line">            <span class="keyword">if</span> (workerCountOf(c) &amp;gt;= min)</span><br><span class="line">                <span class="keyword">return</span>; <span class="comment">// replacement not needed</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 添加一个新Worker</span></span><br><span class="line">        addWorker(<span class="literal">null</span>, <span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    final ReentrantLock mainLock = this.mainLock;
-    mainLock.lock();
-    try &#123;
-        completedTaskCount += w.completedTasks;
-        // 移除worker
-        workers.remove(w);
-    &#125; finally &#123;
-        mainLock.unlock();
-    &#125;
-    // 尝试将线程池从stop或shutdown转换为terminate状态
-    tryTerminate();
-
-    int c = ctl.get();
-    // 判断是否不处于STOP状态
-    if (runStateLessThan(c, STOP)) &#123;
-        // 如果不是由于用户异常导致
-        if (!completedAbruptly) &#123;
-            int min = allowCoreThreadTimeOut ? 0 : corePoolSize;
-            if (min == 0 &amp;&amp; ! workQueue.isEmpty())
-                min = 1;
-            // 确保worker的数量最多有corePoolSize，超过了则不再新建
-            if (workerCountOf(c) &amp;gt;= min)
-                return; // replacement not needed
-        &#125;
-        // 添加一个新Worker
-        addWorker(null, false);
-    &#125;
-&#125;
-</code></pre>
 <h1 id="5-其它"><a href="#5-其它" class="headerlink" title="5. 其它"></a>5. 其它</h1><p>与<code>ThreadPoolExecutor</code>一同作为线程池的还有<code>ForkJoinPool</code>。</p>
 <p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903870896799751">Java多线程之ThreadPoolExecutor和ForkJoinPool的用法 - 掘金 (juejin.cn)</a></p>
 

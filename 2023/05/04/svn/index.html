@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -208,85 +208,20 @@
 <h1 id="4-解决冲突"><a href="#4-解决冲突" class="headerlink" title="4. 解决冲突"></a>4. 解决冲突</h1><p>这里我们先在码云上修改一下，然后也在本地修改同样的文件，然后在本地提交：</p>
 <p><img lazy="https://selfb.asia/public/svn/2023-4-4-be381ad9-6523-406d-9d22-494a2fc9dc81.webp" alt="Commit failed"></p>
 <p>提交失败了，可以发现它让我们去更新：</p>
-<pre><code class="text">You have to update your working copy first
-</code></pre>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">You have to update your working copy first</span><br></pre></td></tr></table></figure>
+
 <p>那我们就更新，直接项目目录下右键，点击<code>Update</code>，结果又报错了：</p>
 <p><img lazy="https://selfb.asia/public/svn/2023-4-4-f69a5b86-d6c6-42d8-a8e4-ba19423d7380.webp" alt="Update failed"></p>
 <p>可以发现是因为出现了文件冲突，和Git一样，我们需要先解决冲突后再提交。</p>
 <p>这里是我本地的文件内容：</p>
-<pre><code class="text">hello world
-hello world
-hello world
-hello world
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">hello world</span><br><span class="line">hello world</span><br><span class="line">hello world</span><br><span class="line">hello world</span><br><span class="line"></span><br><span class="line">12312</span><br><span class="line">312</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
 
-12312
-312
-3
-12
-3
-12
-3
-12
-3
-hello world
-</code></pre>
 <p>这是服务器的：</p>
-<pre><code class="text">hello world
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">hello world</span><br><span class="line"></span><br><span class="line">12312</span><br><span class="line">312</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12312</span><br><span class="line">312</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">123312312</span><br></pre></td></tr></table></figure>
 
-12312
-312
-3
-12
-3
-12
-3
-12
-3
-12312
-312
-3
-12
-3
-12
-3
-12
-3
-123312312
-</code></pre>
 <p>这是发生冲突后的文件：</p>
-<pre><code class="text">hello world
-hello world
-hello world
-hello world
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">hello world</span><br><span class="line">hello world</span><br><span class="line">hello world</span><br><span class="line">hello world</span><br><span class="line"></span><br><span class="line">&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt; .mine</span><br><span class="line">hello world</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">||||||| .r3</span><br><span class="line">12312</span><br><span class="line">312</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3=======</span><br><span class="line">12312</span><br><span class="line">312</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">123312312&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt; .r4</span><br></pre></td></tr></table></figure>
 
-&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt; .mine
-hello world
-
-
-
-
-
-||||||| .r3
-12312
-312
-3
-12
-3
-12
-3
-12
-3=======
-12312
-312
-3
-12
-3
-12
-3
-12
-3
-123312312&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt; .r4
-</code></pre>
 <p>这特么谁看得懂，别急，还记得之前我说过SVN有丰富的图形客户端吗？这里就还真有解决冲突用的玩意：</p>
 <p><img lazy="https://selfb.asia/public/svn/2023-4-4-bd001ea3-fca1-4b2d-9950-64f0e52cc430.webp" alt="Edit conflicts"></p>
 <p>打开后就非常直观了，这里就不放图了，修改完后点击左上角的<code>Save</code>保存，这时它会问你冲突是否已经解决完毕了，如果选择解决完了（Mark as resolved），就可以直接提交了。当然如果又冲突了，就又需要重复上述过程。</p>

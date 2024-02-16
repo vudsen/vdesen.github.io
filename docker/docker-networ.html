@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -197,24 +197,11 @@
 <li>容器IP变动时可以通过服务名直接进行网络通信，不会造成实际的影响</li>
 </ul>
 <p>在docker启动后，会创建一个名为docker0的虚拟网桥：</p>
-<pre><code class="shell">[root@localhost ~]# ifconfig
-docker0: flags=4099&amp;lt;UP,BROADCAST,MULTICAST&amp;gt;  mtu 1500
-        inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255
-        ether 02:42:5c:ee:2d:f9  txqueuelen 0  (Ethernet)
-        RX packets 0  bytes 0 (0.0 B)
-        RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 0  bytes 0 (0.0 B)
-        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
-        
-        ...
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ifconfig</span><br><span class="line">docker0: flags=4099&amp;lt;UP,BROADCAST,MULTICAST&amp;gt;  mtu 1500</span><br><span class="line">        inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255</span><br><span class="line">        ether 02:42:5c:ee:2d:f9  txqueuelen 0  (Ethernet)</span><br><span class="line">        RX packets 0  bytes 0 (0.0 B)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 0  bytes 0 (0.0 B)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br><span class="line">        </span><br><span class="line">		...</span><br></pre></td></tr></table></figure>
+
 <p>默认会创建3大网络模式：</p>
-<pre><code class="shell">[root@localhost ~]# docker network ls
-NETWORK ID     NAME      DRIVER    SCOPE
-669ce7bca3dc   bridge    bridge    local
-488ca754e88f   host      host      local
-7a933f50d749   none      null      local
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# docker network ls</span><br><span class="line">NETWORK ID     NAME      DRIVER    SCOPE</span><br><span class="line">669ce7bca3dc   bridge    bridge    local</span><br><span class="line">488ca754e88f   host      host      local</span><br><span class="line">7a933f50d749   none      null      local</span><br></pre></td></tr></table></figure>
+
 <p>常用命令：</p>
 <ul>
 <li>查看网络：<code>docker network ls</code></li>

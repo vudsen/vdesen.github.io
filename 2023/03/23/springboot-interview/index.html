@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -183,21 +183,8 @@
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
         <h1 id="1-基础"><a href="#1-基础" class="headerlink" title="1. 基础"></a>1. 基础</h1><p>通过<code>AnnotationConfigApplicationContext</code>可以创建一个Spring容器：</p>
-<pre><code class="java">public class MySpringApplication &#123;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MySpringApplication</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">AnnotationConfigApplicationContext</span> <span class="variable">applicationContext</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AnnotationConfigApplicationContext</span>(AppConfig.class);</span><br><span class="line"></span><br><span class="line">        <span class="type">UserService</span> <span class="variable">userService</span> <span class="operator">=</span> (UserService) applicationContext.getBean(<span class="string">&quot;userService&quot;</span>);</span><br><span class="line">        userService.test();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@ComponentScan(&quot;pers.xds.springboot&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AppConfig</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-    public static void main(String[] args) &#123;
-        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
-
-        UserService userService = (UserService) applicationContext.getBean(&quot;userService&quot;);
-        userService.test();
-    &#125;
-
-&#125;
-
-@ComponentScan(&quot;pers.xds.springboot&quot;)
-public class AppConfig &#123;
-&#125;
-</code></pre>
 <h2 id="1-1-生命周期"><a href="#1-1-生命周期" class="headerlink" title="1.1 生命周期"></a>1.1 生命周期</h2><p>可以在<code>AbstractAutowireCapableBeanFactory#doCreateBean</code>中看到完整的bean生成流程。</p>
 <p>大致分为如下过程：</p>
 <p>1.对Bean进行实例化</p>
@@ -227,23 +214,8 @@ public class AppConfig &#123;
 <p><code>@Component</code>只能作用于类型上，表示这个类会作为组件类，并告诉Spring要为这个类创建bean。</p>
 <h3 id="1-6-1-Bean必须在-Configuration里使用吗"><a href="#1-6-1-Bean必须在-Configuration里使用吗" class="headerlink" title="1.6.1 @Bean必须在@Configuration里使用吗?"></a>1.6.1 @Bean必须在@Configuration里使用吗?</h3><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/40256702/spring-bean-can-still-work-without-configuration">Spring: @Bean can still work without @Configuration - Stack Overflow</a></p>
 <p><code>@Bean</code>在<code>@Configuration</code>表示的类里使用时，Spring会为其自动创建一个动态代理对象，在同一个配置类中可以直接调用方法来获取Bean：</p>
-<pre><code class="java">@Configuration
-public class ExampleConfiguration &#123;
-    
-    @Bean
-    public Datasource datasource() &#123;
-        BasicDatasource datasource = new BasicDatasource();
-        // ...
-        return datasource;
-    &#125;
-    
-    public PlatformTransactionManager transactionManager() &#123;
-          // 注意这里是直接调用了方法，每次调用都会返回同一个bean，并不会多次创建
-        return new DataSourceTransactionManager(datasource());
-    &#125;
-    
-&#125;
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ExampleConfiguration</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> Datasource <span class="title function_">datasource</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">BasicDatasource</span> <span class="variable">datasource</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BasicDatasource</span>();</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        <span class="keyword">return</span> datasource;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> PlatformTransactionManager <span class="title function_">transactionManager</span><span class="params">()</span> &#123;</span><br><span class="line">      	<span class="comment">// 注意这里是直接调用了方法，每次调用都会返回同一个bean，并不会多次创建</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">DataSourceTransactionManager</span>(datasource());</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>而在非<code>@Configuration</code>下定义的<code>@Bean</code>会以Lite Mode运作，在该模式下调用其它<code>@Bean</code>方法时，则是普通的方法调用(没有代理对象去拦截调用)。</p>
 <h2 id="1-7-Spring怎么解决循环依赖问题"><a href="#1-7-Spring怎么解决循环依赖问题" class="headerlink" title="1.7 Spring怎么解决循环依赖问题"></a>1.7 Spring怎么解决循环依赖问题</h2><p>对于构造器注入的循环依赖：Spring处理不了，直接抛出<code>BeanCurrentlylnCreationException</code>异常。</p>
 <p>非单例循环依赖：无法处理。</p>
@@ -252,31 +224,8 @@ public class ExampleConfiguration &#123;
 <p><code>earlySingletonObjects</code>：完成实例化未初始化的单例对象map，bean name –&amp;gt; bean instance</p>
 <p><code>singletonFactories</code>： 单例对象工厂map，bean name –&amp;gt; ObjectFactory，存放 bean 工厂对象</p>
 <p>具体的执行逻辑可以在<code>DefaultSingletonBeanRegistry</code>中看到，这里贴出核心方法：</p>
-<pre><code class="java">protected Object getSingleton(String beanName, boolean allowEarlyReference) &#123;
-    Object singletonObject = this.singletonObjects.get(beanName);
-    if (singletonObject == null &amp;&amp; this.isSingletonCurrentlyInCreation(beanName)) &#123;
-        singletonObject = this.earlySingletonObjects.get(beanName);
-        if (singletonObject == null &amp;&amp; allowEarlyReference) &#123;
-            synchronized(this.singletonObjects) &#123;
-                singletonObject = this.singletonObjects.get(beanName);
-                if (singletonObject == null) &#123;
-                    singletonObject = this.earlySingletonObjects.get(beanName);
-                    if (singletonObject == null) &#123;
-                        ObjectFactory&amp;lt;?&amp;gt; singletonFactory = (ObjectFactory)this.singletonFactories.get(beanName);
-                        if (singletonFactory != null) &#123;
-                            singletonObject = singletonFactory.getObject();
-                            this.earlySingletonObjects.put(beanName, singletonObject);
-                            this.singletonFactories.remove(beanName);
-                        &#125;
-                    &#125;
-                &#125;
-            &#125;
-        &#125;
-    &#125;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> Object <span class="title function_">getSingleton</span><span class="params">(String beanName, <span class="type">boolean</span> allowEarlyReference)</span> &#123;</span><br><span class="line">    <span class="type">Object</span> <span class="variable">singletonObject</span> <span class="operator">=</span> <span class="built_in">this</span>.singletonObjects.get(beanName);</span><br><span class="line">    <span class="keyword">if</span> (singletonObject == <span class="literal">null</span> &amp;&amp; <span class="built_in">this</span>.isSingletonCurrentlyInCreation(beanName)) &#123;</span><br><span class="line">        singletonObject = <span class="built_in">this</span>.earlySingletonObjects.get(beanName);</span><br><span class="line">        <span class="keyword">if</span> (singletonObject == <span class="literal">null</span> &amp;&amp; allowEarlyReference) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span>(<span class="built_in">this</span>.singletonObjects) &#123;</span><br><span class="line">                singletonObject = <span class="built_in">this</span>.singletonObjects.get(beanName);</span><br><span class="line">                <span class="keyword">if</span> (singletonObject == <span class="literal">null</span>) &#123;</span><br><span class="line">                    singletonObject = <span class="built_in">this</span>.earlySingletonObjects.get(beanName);</span><br><span class="line">                    <span class="keyword">if</span> (singletonObject == <span class="literal">null</span>) &#123;</span><br><span class="line">                        ObjectFactory&amp;lt;?&amp;gt; singletonFactory = (ObjectFactory)<span class="built_in">this</span>.singletonFactories.get(beanName);</span><br><span class="line">                        <span class="keyword">if</span> (singletonFactory != <span class="literal">null</span>) &#123;</span><br><span class="line">                            singletonObject = singletonFactory.getObject();</span><br><span class="line">                            <span class="built_in">this</span>.earlySingletonObjects.put(beanName, singletonObject);</span><br><span class="line">                            <span class="built_in">this</span>.singletonFactories.remove(beanName);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> singletonObject;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    return singletonObject;
-&#125;
-</code></pre>
 <h2 id="1-8-Spring的单例Bean是否有线程安全问题"><a href="#1-8-Spring的单例Bean是否有线程安全问题" class="headerlink" title="1.8 Spring的单例Bean是否有线程安全问题"></a>1.8 Spring的单例Bean是否有线程安全问题</h2><p>当多个用户同时请求一个服务时，容器会给每一个请求分配一个线程，这时多个线程会并发执行该请求对应的业务逻辑，如果业务逻辑有对单例状态的修改（体现为此单例的成员属性），则必须考虑线程安全问题。</p>
 <p>若每个线程中对全局变量、静态变量只有读操作，而无写操作，那么不会有线程安全问题；若有多个线程同时执行写操作，一般都需要考虑线程同步，否则就可能影响线程安全。</p>
 <p><strong>无状态bean和有状态bean</strong></p>
@@ -306,11 +255,7 @@ public class ExampleConfiguration &#123;
 <li><p>构造会话工程(SqlSessionFactory)</p>
 </li>
 <li><p>创建会话对象(SqlSession)</p>
-<pre><code class="java">try (SqlSession session = sqlSessionFactory.openSession()) &#123;
-  BlogMapper mapper = session.getMapper(BlogMapper.class);
-  Blog blog = mapper.selectBlog(101);
-&#125;
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> (<span class="type">SqlSession</span> <span class="variable">session</span> <span class="operator">=</span> sqlSessionFactory.openSession()) &#123;</span><br><span class="line">  <span class="type">BlogMapper</span> <span class="variable">mapper</span> <span class="operator">=</span> session.getMapper(BlogMapper.class);</span><br><span class="line">  <span class="type">Blog</span> <span class="variable">blog</span> <span class="operator">=</span> mapper.selectBlog(<span class="number">101</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>Executor执行器</p>
 <p>Mybatis会通过Executor去执行SQL语句。一般这里面会有缓存的实现。</p>

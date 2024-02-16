@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -192,10 +192,10 @@
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
         <p>不定时更新…</p>
-<h1 id="达梦8"><a href="#达梦8" class="headerlink" title="达梦8"></a>达梦8</h1><pre><code class="shell">docker run -d -p 5236:5236 --restart=always --name dm8_01 --privileged=true -e PAGE_SIZE=16 -e LD_LIBRARY_PATH=/opt/dmdbms/bin -e INSTANCE_NAME=dm8_01 -v /data/dm8_01:/opt/dmdbms/data dm8_single:v8.1.2.128_ent_x86_64_ctm_pack4
-</code></pre>
-<h1 id="人大金仓"><a href="#人大金仓" class="headerlink" title="人大金仓"></a>人大金仓</h1><pre><code class="shell">docker run -d -it --privileged=true -p 54321:54321 -v /opt/docker/kingbase-latest/opt/:/opt --name kingbase-latest godmeowicesun/kingbase:latest
-</code></pre>
+<h1 id="达梦8"><a href="#达梦8" class="headerlink" title="达梦8"></a>达梦8</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 5236:5236 --restart=always --name dm8_01 --privileged=true -e PAGE_SIZE=16 -e LD_LIBRARY_PATH=/opt/dmdbms/bin -e INSTANCE_NAME=dm8_01 -v /data/dm8_01:/opt/dmdbms/data dm8_single:v8.1.2.128_ent_x86_64_ctm_pack4</span><br></pre></td></tr></table></figure>
+
+<h1 id="人大金仓"><a href="#人大金仓" class="headerlink" title="人大金仓"></a>人大金仓</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -it --privileged=true -p 54321:54321 -v /opt/docker/kingbase-latest/opt/:/opt --name kingbase-latest godmeowicesun/kingbase:latest</span><br></pre></td></tr></table></figure>
+
 <ul>
 <li><p>端口: 54321</p>
 </li>
@@ -206,18 +206,16 @@
 <li><p>默认数据库: TEST</p>
 </li>
 </ul>
-<h1 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h1><pre><code class="shell">docker run --name mysql -p 3307:3306 -e MYSQL_ROOT_PASSWORD=123456 --privileged -v /home/vagrant/mysql5.7/data:/var/lib/mysql -d mysql:5.7.42
-</code></pre>
-<h1 id="opengauss5-0-0"><a href="#opengauss5-0-0" class="headerlink" title="opengauss5.0.0"></a>opengauss5.0.0</h1><pre><code class="shell">docker run --hostname=fcdea04e2440 --env=GS_PASSWORD=P@ssw0rd --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --env=EXEC_GOSU=gosu-amd64 --env=GOSU_VERSION=1.12 --env=PGDATA=/var/lib/opengauss/data --volume=/var/lib/opengauss/data:/var/lib/opengauss/data --privileged --workdir=/ -p 5432:5432 --restart=no --label=&#39;CREATE_DATE=2022-10&#39; --label=&#39;GAUSS_SERVER=openGauss-5.0.0&#39; --label=&#39;MAIL=heguofeng@huawei.com&#39; --runtime=runc -d opengauss/opengauss:5.0.0
-</code></pre>
-<h1 id="opengauss2-1-0"><a href="#opengauss2-1-0" class="headerlink" title="opengauss2.1.0"></a>opengauss2.1.0</h1><pre><code class="shell">docker run --name opengauss2.1.0 --privileged=true -d -e GS_PASSWORD=P@ssw0rd -u root -p 5432:5432 enmotech/opengauss:2.1.0
-</code></pre>
-<h1 id="oracel"><a href="#oracel" class="headerlink" title="oracel"></a>oracel</h1><pre><code class="shell">docker run -d --name oracle-db -p 1521:1521 --privileged -e ORACLE_PWD=123456 -e ORACLE_CHARACTERSET=utf8mb4 -v /opt/oracle/oradata container-registry.oracle.com/database/free:latest
-</code></pre>
-<p><a target="_blank" rel="noopener" href="https://container-registry.oracle.com/ords/f?p=113:4:13054629146525:::4:P4_REPOSITORY,AI_REPOSITORY,AI_REPOSITORY_NAME,P4_REPOSITORY_NAME,P4_EULA_ID,P4_BUSINESS_AREA_ID:1863,1863,Oracle%20Database%20Free,Oracle%20Database%20Free,1,0&cs=3AJX-e6QGdNtweUNwoM_S6Bx1QBnHxTQChj06uKkm5-wObbTXatpBsvWpkNOZlJJdiGb7W-BEXdATDDaCQn1gOw">文档</a></p>
-<h1 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h1><pre><code class="shell">docker run -d --name redis --net host --privileged=true -v /data/redis/share/redis-node-1:/data redis --requirepass 123456 --appendonly yes --port 6381
-</code></pre>
+<h1 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name mysql -p 3307:3306 -e MYSQL_ROOT_PASSWORD=123456 --privileged -v /home/vagrant/mysql5.7/data:/var/lib/mysql -d mysql:5.7.42</span><br></pre></td></tr></table></figure>
 
+<h1 id="opengauss5-0-0"><a href="#opengauss5-0-0" class="headerlink" title="opengauss5.0.0"></a>opengauss5.0.0</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --hostname=fcdea04e2440 --env=GS_PASSWORD=P@ssw0rd --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --env=EXEC_GOSU=gosu-amd64 --env=GOSU_VERSION=1.12 --env=PGDATA=/var/lib/opengauss/data --volume=/var/lib/opengauss/data:/var/lib/opengauss/data --privileged --workdir=/ -p 5432:5432 --restart=no --label=&#x27;CREATE_DATE=2022-10&#x27; --label=&#x27;GAUSS_SERVER=openGauss-5.0.0&#x27; --label=&#x27;MAIL=heguofeng@huawei.com&#x27; --runtime=runc -d opengauss/opengauss:5.0.0</span><br></pre></td></tr></table></figure>
+
+<h1 id="opengauss2-1-0"><a href="#opengauss2-1-0" class="headerlink" title="opengauss2.1.0"></a>opengauss2.1.0</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name opengauss2.1.0 --privileged=true -d -e GS_PASSWORD=P@ssw0rd -u root -p 5432:5432 enmotech/opengauss:2.1.0</span><br></pre></td></tr></table></figure>
+
+<h1 id="oracel"><a href="#oracel" class="headerlink" title="oracel"></a>oracel</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name oracle-db -p 1521:1521 --privileged -e ORACLE_PWD=123456 -e ORACLE_CHARACTERSET=utf8mb4 -v /opt/oracle/oradata container-registry.oracle.com/database/free:latest</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://container-registry.oracle.com/ords/f?p=113:4:13054629146525:::4:P4_REPOSITORY,AI_REPOSITORY,AI_REPOSITORY_NAME,P4_REPOSITORY_NAME,P4_EULA_ID,P4_BUSINESS_AREA_ID:1863,1863,Oracle%20Database%20Free,Oracle%20Database%20Free,1,0&cs=3AJX-e6QGdNtweUNwoM_S6Bx1QBnHxTQChj06uKkm5-wObbTXatpBsvWpkNOZlJJdiGb7W-BEXdATDDaCQn1gOw">文档</a></p>
+<h1 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name redis --net host --privileged=true -v /data/redis/share/redis-node-1:/data redis --requirepass 123456 --appendonly yes --port 6381</span><br></pre></td></tr></table></figure>
     </div>
     
     

@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -231,14 +231,14 @@
 <li><p>CMD：指定容器启动后要干的事情，<font color=red>若有多个CMD，则只有最后一个生效，并且CMD会被<code>docker run</code>之后的参数替换</font>。</p>
 <ul>
 <li><p>例如Tomcat配置文件的CMD命令如下：</p>
-<pre><code class="shell">CMD [&quot;catalina.sh&quot;, &quot;run&quot;]
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CMD [&quot;catalina.sh&quot;, &quot;run&quot;]</span><br></pre></td></tr></table></figure>
+
 <p>我们使用如下指令启动容器：</p>
-<pre><code class="shell">docker run -it -p 8080:8080 [TOMCAT镜像ID] /bin/bash
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it -p 8080:8080 [TOMCAT镜像ID] /bin/bash</span><br></pre></td></tr></table></figure>
+
 <p>则命令会被替换成这样：</p>
-<pre><code class="shell">CMD [&quot;/bin/bash&quot;, &quot;run&quot;]
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CMD [&quot;/bin/bash&quot;, &quot;run&quot;]</span><br></pre></td></tr></table></figure>
+
 <p>此时TOMCAT也将启动失败</p>
 </li>
 </ul>
@@ -247,65 +247,29 @@
 <p>ENTRYPOINT可以和CMD一起使用，一般是变参才会使用CMD，这里的CMD等于是在给ENTRYPOINT传参。</p>
 <p>当指定了ENTRYPOINT后，CMD的含义就发生了变化，不再是直接运行其命令，而是将CMD的内容作为参数传递给ENTRYPOINT指令。</p>
 <p>例如通过Dockerfile构建Nginx：</p>
-<pre><code class="shell">FROM nginx
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">FROM nginx</span><br><span class="line"></span><br><span class="line">ENTRYPOINT [&quot;nginx&quot;, &quot;-c&quot;]</span><br><span class="line">CMD [&quot;/etc/nginx/nginx.conf&quot;]</span><br></pre></td></tr></table></figure>
 
-ENTRYPOINT [&quot;nginx&quot;, &quot;-c&quot;]
-CMD [&quot;/etc/nginx/nginx.conf&quot;]
-</code></pre>
 <p><code>docker run nginx -c /etc/nginx/new.conf</code>最终会运行：<code>nginx -c /etc/nginx/new.conf</code></p>
 </li>
 </ul>
 <h2 id="1-3-自定义镜像案例"><a href="#1-3-自定义镜像案例" class="headerlink" title="1.3 自定义镜像案例"></a>1.3 自定义镜像案例</h2><p>自定义一个centos镜像，并且具备vim+ifconfig+jdk11。</p>
 <p>在Linux下创建一个<code>Dockerfile</code>文件：</p>
-<pre><code class="shell">vim Dockerfile
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim Dockerfile</span><br></pre></td></tr></table></figure>
+
 <p>添加内容：</p>
-<pre><code class="dockerfile">FROM centos
-MAINTAINER xds&amp;lt;2237803016@qq.com&amp;gt;
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> centos</span><br><span class="line"><span class="keyword">MAINTAINER</span> xds&amp;lt;<span class="number">2237803016</span>@qq.com&amp;gt;</span><br><span class="line"></span><br><span class="line"><span class="keyword">ENV</span> MYPATH /usr/local</span><br><span class="line"><span class="keyword">WORKDIR</span><span class="language-bash"> <span class="variable">$MYPATH</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment"># centos需要执行下面的命令，否则yum可能会报错。或者将FROM换成centos7</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> sed -i <span class="string">&#x27;s/mirrorlist/#mirrorlist/g&#x27;</span> /etc/yum.repos.d/CentOS-*</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> sed -i <span class="string">&#x27;s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g&#x27;</span> /etc/yum.repos.d/CentOS-*</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> yum makecache</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装vim</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> yum -y install vim</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装ifconfig</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> yum -y install net-tools</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装java8</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> yum -y install glibc.i686</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> <span class="built_in">mkdir</span> /usr/local/java</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加java文件，必须和Dockerfile在同一目录</span></span><br><span class="line"><span class="keyword">ADD</span><span class="language-bash"> jdk-11.0.19.tar.gz /usr/local/java</span></span><br><span class="line"><span class="comment"># 设置java环境变量</span></span><br><span class="line"><span class="comment"># 这里后面的文件名就是上面压缩包的文件名，ADD指令会自动为我们解压</span></span><br><span class="line"><span class="keyword">ENV</span> JAVA_HOME /usr/local/java/jdk-<span class="number">11.0</span>.<span class="number">19</span></span><br><span class="line"><span class="keyword">ENV</span> JRE_HOME $JAVA_HOME/jre</span><br><span class="line"><span class="keyword">ENV</span> CLASSPATH $JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar:$JRE_HOME/lib:$CLASSPATH</span><br><span class="line"><span class="keyword">ENV</span> PATH $JAVA_HOME/bin:$PATH</span><br><span class="line"></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">80</span></span><br><span class="line"><span class="keyword">CMD</span><span class="language-bash"> <span class="built_in">echo</span> <span class="variable">$MYPATH</span></span></span><br><span class="line"><span class="keyword">CMD</span><span class="language-bash"> <span class="built_in">echo</span> <span class="string">&quot;success--------ok&quot;</span></span></span><br><span class="line"><span class="keyword">CMD</span><span class="language-bash"> /bin/bash</span></span><br></pre></td></tr></table></figure>
 
-ENV MYPATH /usr/local
-WORKDIR $MYPATH
-
-# centos需要执行下面的命令，否则yum可能会报错。或者将FROM换成centos7
-RUN sed -i &#39;s/mirrorlist/#mirrorlist/g&#39; /etc/yum.repos.d/CentOS-*
-RUN sed -i &#39;s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g&#39; /etc/yum.repos.d/CentOS-*
-RUN yum makecache
-
-# 安装vim
-RUN yum -y install vim
-
-# 安装ifconfig
-RUN yum -y install net-tools
-
-# 安装java8
-RUN yum -y install glibc.i686
-RUN mkdir /usr/local/java
-
-# 添加java文件，必须和Dockerfile在同一目录
-ADD jdk-11.0.19.tar.gz /usr/local/java
-# 设置java环境变量
-# 这里后面的文件名就是上面压缩包的文件名，ADD指令会自动为我们解压
-ENV JAVA_HOME /usr/local/java/jdk-11.0.19
-ENV JRE_HOME $JAVA_HOME/jre
-ENV CLASSPATH $JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar:$JRE_HOME/lib:$CLASSPATH
-ENV PATH $JAVA_HOME/bin:$PATH
-
-EXPOSE 80
-CMD echo $MYPATH
-CMD echo &quot;success--------ok&quot;
-CMD /bin/bash
-</code></pre>
 <p>打包制作镜像（注意后面有个点）：</p>
-<pre><code class="shell">docker build -t [镜像名]:[TAG] .
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t [镜像名]:[TAG] .</span><br></pre></td></tr></table></figure>
+
 <h1 id="2-虚悬镜像"><a href="#2-虚悬镜像" class="headerlink" title="2. 虚悬镜像"></a>2. 虚悬镜像</h1><p>如果在build的时候没有指定镜像名和TAG，在build后出来的镜像名和TAG都会为<none></p>
 <p>在某些情况下由于docker的错误也会产生虚悬镜像。</p>
 <p>使用如下指令查看所有虚悬镜像：</p>
-<pre><code class="shell">docker images ls -f dangling=true
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker images ls -f dangling=true</span><br></pre></td></tr></table></figure>
+
 <p>虚悬镜像没有存在的意义，可以直接删除：</p>
-<pre><code class="shell">docker image prune
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image prune</span><br></pre></td></tr></table></figure>
+
 
     </div>
     

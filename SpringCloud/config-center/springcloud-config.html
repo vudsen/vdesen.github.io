@@ -60,7 +60,7 @@
   <script src="/js/lib/lazy-load-support.js"></script>
 
 
-    <meta name="generator" content="Hexo 6.3.0"></head>
+    <meta name="generator" content="Hexo 7.1.1"></head>
     <body>
         <div id="layout">
             <transition name="fade">
@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/config-center" style="color: #00a596">配置中心</a>
+                <a href="/SpringCloud/config-center" style="color: #ffa2c4">配置中心</a>
             </span>
             
         </span>
@@ -206,36 +206,11 @@
         <p><a target="_blank" rel="noopener" href="https://spring.io/projects/spring-cloud-config">官方文档：Spring Cloud Config</a></p>
 <p>SpringCloud Config为微服务架构中的微服务提供集中化的外部配置支持，配置服务器为<font color=red>各个不同微服务应用</font>的所有环境提供了一个<font color=red>中心化的外部配置</font>。</p>
 <h1 id="1-简单使用"><a href="#1-简单使用" class="headerlink" title="1. 简单使用"></a>1. 简单使用</h1><h2 id="1-1-服务端"><a href="#1-1-服务端" class="headerlink" title="1.1 服务端"></a>1.1 服务端</h2><p>导入配置：</p>
-<pre><code class="yaml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-config-server&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
-</code></pre>
-<p>添加配置：</p>
-<pre><code class="yaml">server:
-  port: 3344
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&amp;lt;dependency&amp;gt;</span></span><br><span class="line">    <span class="string">&amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;</span></span><br><span class="line">    <span class="string">&amp;lt;artifactId&amp;gt;spring-cloud-config-server&amp;lt;/artifactId&amp;gt;</span></span><br><span class="line"><span class="string">&amp;lt;/dependency&amp;gt;</span></span><br></pre></td></tr></table></figure>
 
-spring:
-  application:
-    name: cloud-config-center
-  cloud:
-    config:
-      server:
-        git:
-          uri: https://gitee.com/hupeng333/springcloud-config.git
-          search-paths:
-            - springcloud-config
-          default-label: master
-          # 如果是私有库则添加下面的内容
-          username: xxxxxx
-          password: xxxxxx
-          skip-ssl-validation: true
-      label: master
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:7001/eureka
-</code></pre>
+<p>添加配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">3344</span></span><br><span class="line"></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">cloud-config-center</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">config:</span></span><br><span class="line">      <span class="attr">server:</span></span><br><span class="line">        <span class="attr">git:</span></span><br><span class="line">          <span class="attr">uri:</span> <span class="string">https://gitee.com/hupeng333/springcloud-config.git</span></span><br><span class="line">          <span class="attr">search-paths:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">springcloud-config</span></span><br><span class="line">          <span class="attr">default-label:</span> <span class="string">master</span></span><br><span class="line">		  <span class="comment"># 如果是私有库则添加下面的内容</span></span><br><span class="line">          <span class="attr">username:</span> <span class="string">xxxxxx</span></span><br><span class="line">          <span class="attr">password:</span> <span class="string">xxxxxx</span></span><br><span class="line">          <span class="attr">skip-ssl-validation:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">label:</span> <span class="string">master</span></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">service-url:</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://localhost:7001/eureka</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
 <p>在启动类上添加<code>@EnableConfigServer</code>注解</p>
 <h3 id="1-1-1-配置文件读取"><a href="#1-1-1-配置文件读取" class="headerlink" title="1.1.1 配置文件读取"></a>1.1.1 配置文件读取</h3><table>
 <thead>
@@ -267,102 +242,31 @@ eureka:
 <li>profiles：环境(dev&#x2F;test&#x2F;prod)</li>
 </ul>
 <h2 id="1-2-客户端"><a href="#1-2-客户端" class="headerlink" title="1.2 客户端"></a>1.2 客户端</h2><p>添加依赖:</p>
-<pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-starter-config&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
-&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-starter-bootstrap&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
-</code></pre>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-config<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-bootstrap<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
+
 <p>添加配置文件<code>bootstrap.yml</code>。</p>
 <p><code>bootstrap.yml</code>是系统级的，优先级更高，<code>application.yaml</code>是用户级别的资源配置项。</p>
 <p>Spring Cloud会创建一个“Bootstrap Context”，作为Spring应用的Application Context的父上下文。初始化的时候，BootstrapContext负责从外部源加载配置属性并解析配置。这两个上下文共享一个从外部获取的Environment。</p>
 <p>Bootstrap’)属性有高优先级，默认情况下，它们不会被本地配置覆盖。<code>Bootstrap context</code>和<code>Application Context</code>有着不同的约定，所以新增了一个<code>bootstrap.yml</code>文件，保证&#96;&#96;Bootstrap Context<code>和</code>Application Context&#96;配置的分离。</p>
 <p>要将Client模块下的application.yml文件改为bootstrap.yml,这是很关键的，因为bootstrap.yml是比application.yml先加载的。bootstrap.yml优先级高于application.ym</p>
-<pre><code class="yaml">server:
-  port: 3355
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">3355</span></span><br><span class="line"></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">config-client</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">config:</span></span><br><span class="line">      <span class="attr">label:</span> <span class="string">master</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">config</span></span><br><span class="line">      <span class="attr">profile:</span> <span class="string">dev</span></span><br><span class="line">      <span class="attr">uri:</span> <span class="string">http://localhost:3344</span></span><br><span class="line">    <span class="comment"># 这条可能需要在application.yaml里写</span></span><br><span class="line">    <span class="attr">bootstrap:</span></span><br><span class="line">      <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">service-url:</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://localhost:7001/eureka</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-spring:
-  application:
-    name: config-client
-  cloud:
-    config:
-      label: master
-      name: config
-      profile: dev
-      uri: http://localhost:3344
-    # 这条可能需要在application.yaml里写
-    bootstrap:
-      enabled: true
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:7001/eureka
-
-
-</code></pre>
 <p>主启动类以及业务类：</p>
-<pre><code class="java">@EnableEurekaClient
-@SpringBootApplication
-public class CloudConfigClient3355 &#123;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EnableEurekaClient</span></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CloudConfigClient3355</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        SpringApplication.run(CloudConfigClient3355.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ConfigClientController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;config.info&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String configInfo;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/configInfo&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getConfigInfo</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> configInfo;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    public static void main(String[] args) &#123;
-        SpringApplication.run(CloudConfigClient3355.class, args);
-    &#125;
-&#125;
-
-@RestController
-public class ConfigClientController &#123;
-
-    @Value(&quot;$&#123;config.info&#125;&quot;)
-    private String configInfo;
-
-
-    @GetMapping(&quot;/configInfo&quot;)
-    public String getConfigInfo() &#123;
-        return configInfo;
-    &#125;
-
-&#125;
-</code></pre>
 <h3 id="1-2-1-客户端动态刷新问题"><a href="#1-2-1-客户端动态刷新问题" class="headerlink" title="1.2.1 客户端动态刷新问题"></a>1.2.1 客户端动态刷新问题</h3><p>在仓库修改配置后，配置中心能够及时的感应到变化，而在客户端则只能重启才能拿到最新的值。</p>
 <p>导入配置：</p>
-<pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.boot&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-boot-starter-actuator&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
-</code></pre>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.boot<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-boot-starter-actuator<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
+
 <p>添加配置：</p>
-<pre><code class="yaml"># 需要写在application.yaml里
-management:
-  endpoint:
-    web:
-      exposure:
-        # 暴露所有的监控指标
-        include: *
-</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 需要写在application.yaml里</span></span><br><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoint:</span></span><br><span class="line">    <span class="attr">web:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">		<span class="comment"># 暴露所有的监控指标</span></span><br><span class="line">        <span class="attr">include:</span> <span class="string">*</span></span><br></pre></td></tr></table></figure>
+
 <p>添加<code>@RefreshScope</code>注解:</p>
-<pre><code class="java">@RestController
-@RefreshScope
-public class ConfigClientController &#123;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RefreshScope</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ConfigClientController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;config.info&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String configInfo;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/configInfo&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getConfigInfo</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> configInfo;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    @Value(&quot;$&#123;config.info&#125;&quot;)
-    private String configInfo;
-
-
-    @GetMapping(&quot;/configInfo&quot;)
-    public String getConfigInfo() &#123;
-        return configInfo;
-    &#125;
-
-&#125;
-</code></pre>
 <p>之后需要往客户端发送一个POST请求，就可以手动刷新配置：</p>
-<pre><code class="shell">curl -X POST &quot;http://localhost:3355/actuator/refresh&quot;
-</code></pre>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -X POST &quot;http://localhost:3355/actuator/refresh&quot;</span><br></pre></td></tr></table></figure>
+
 
     </div>
     
