@@ -187,6 +187,49 @@
             
 
 <div class="post post-partial-show">
+    <a href="/2024/02/08/k8s/">
+        <h2 class="post-title">K8s</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="category">
+            <a href="/categories/k8s/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                k8s
+            </a>
+        </span>
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/2/8
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <h1 id="课程笔记"><a href="#课程笔记" class="headerlink" title="课程笔记"></a>课程笔记</h1><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV13Q4y1C7hS">云原生Java架构师的第一课K8s+Docker+KubeSphere+DevOps</a></p>
+<ul>
+<li><a href="/k8s/basic.md">基础</a></li>
+<li><a href="/k8s/core.md">进阶</a></li>
+</ul>
+<h1 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h1>
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2024/02/08/k8s/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post post-partial-show">
     <a href="/2024/01/19/new-node-ts-project/">
         <h2 class="post-title">从0创建一个nodejs + Typescript项目</h2>
     </a>
@@ -869,101 +912,6 @@ runtime.exec(&quot;docker exec mysql-test2 mysql -ubim -pxx -h11.11.11.11 -P3306
         
     </div>
     <a href="/2023/11/10/process-bug/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post post-partial-show">
-    <a href="/2023/09/04/arthas/">
-        <h2 class="post-title">Arthas诊断线上问题</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="category">
-            <a href="/categories/%E7%BA%BF%E4%B8%8A%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                线上问题排查
-            </a>
-        </span>
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2023/9/4
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <h1 id="0-Links"><a href="#0-Links" class="headerlink" title="0. Links"></a>0. Links</h1><ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/alibaba/arthas/issues/71">ognl特殊用法</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/alibaba/arthas/issues/482">获取SpringContext</a></li>
-</ul>
-<h1 id="1-安装arthas"><a href="#1-安装arthas" class="headerlink" title="1. 安装arthas"></a>1. 安装arthas</h1><p>如果没有用docker，直接从官网下载然后丢服务器就行了，如果用的是docker那么就麻烦一点，这里我整了一个脚本来一键安装&#x2F;启动：</p>
-<pre><code class="sh">#!/bin/bash
-workdir=&quot;/opt/arthas-dev&quot;
-user=user
-container=$1
-if [ -z $container ];then
-    echo -e &quot;\e[32m用法: arthas-launcher.sh [容器名|容器ID] [用户名(可选，必须和启动应用的用户一致)]\e[0m&quot;
-    exit 0
-fi
-if [ ! -z $2 ];then
-    user=$2
-fi
-
-function installArthas() &#123;
-    echo &quot;开始安装arthas...&quot;
-    docker exec -u $user $container mkdir $workdir/arthas
-    docker cp jdk-8u381-linux-x64.tar.gz $container:$workdir/jdk.tar.gz
-    docker cp arthas-packaging-3.7.1-bin.zip $container:$workdir/arthas/arthas.zip
-    docker exec -u root $container chmod 777 $workdir/jdk.tar.gz
-    docker exec -u root $container chmod 777 $workdir/arthas/arthas.zip
-    docker exec -u $user $container tar zxvf $workdir/jdk.tar.gz -C $workdir
-    docker exec -u $user $container unzip $workdir/arthas/arthas.zip -d $workdir/arthas
-    docker exec -u $user $container touch $workdir/installedMark
-    echo &quot;安装成功!&quot;
-&#125;
-# --------------main--------------
-docker exec -u $user $container test -d $workdir
-if [ ! $? -eq 0 ];then
-    docker exec -u root $container mkdir $workdir
-    docker exec -u root $container chown $user $workdir
-    installArthas
-fi
-
-docker exec -u $user $container test -e $workdir/installedMark
-if [ $? -eq 0 ];then
-    docker exec -it -u $user $container $workdir/jdk1.8.0_381/bin/java -jar $workdir/arthas/arthas-boot.jar
-else 
-    echo &quot;文件完整性校验失败! 重新尝试安装arthas.&quot;
-    installArthas
-fi
-</code></pre>
-<h1 id="2-watch"><a href="#2-watch" class="headerlink" title="2. watch"></a>2. watch</h1><h2 id="2-1-基本使用"><a href="#2-1-基本使用" class="headerlink" title="2.1 基本使用"></a>2.1 基本使用</h2><p>例如有一个Encoder的encrypt方法我们想要观察，但是由于每次请求这个方法都会被调用很多次，如果不加限制，每次会爆出很多不相干的信息。</p>
-<p>watch提供了一个condition-express选项来帮助我们过滤输出：</p>
-<pre><code class="sh">watch xxx.Encoder encrypt &#123;returnObj&#125; &#39;params[0]==&quot;P@ssw0rd&quot;&#39;
-</code></pre>
-<p>上面这条指令则是让arthas在第一个参数是<code>P@ssw0rd</code>的时候输出调用的返回值</p>
-<h2 id="2-2-观察异常抛出"><a href="#2-2-观察异常抛出" class="headerlink" title="2.2 观察异常抛出"></a>2.2 观察异常抛出</h2><p>有些时候，代码抛出了异常，但是又被另外一个异常包了一层抛出去了，例如<code>throw new RuntimeException(e)</code>，甚至有的时候<br>没有被抛出：<code>log.error(e.getMessage())</code>，导致我们不能看到我们想要的调用栈。</p>
-<p>而watch也提供了观察异常抛出的功能。假如有一个Encoder的encrypt方法抛出了一个ExceptionA，但是没有打印栈信息，我们可以用<br>如下指令：</p>
-<pre><code class="sh">watch xxx.Encoder encrypt &#123;throwExp&#125; -e -x 2
-</code></pre>
-<p><code>-e</code>表示抛出异常才触发。<br><code>-x</code>表示输出属性的遍历深度，这个是啥意思呢，例如-x的值为1的时候，watch输出的结果可能就只是对象的toString，而-x的值为2的时候，watch也会输出这个对象里面属性的toString，如果等于3，则是对象里面的属性的属性的toString…</p>
-<hr>
-<p>随缘更新。。</p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/2023/09/04/arthas/" class="go-post">阅读全文</a>
 </div>
 
 

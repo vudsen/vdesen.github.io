@@ -187,6 +187,101 @@
             
 
 <div class="post post-partial-show">
+    <a href="/2023/09/04/arthas/">
+        <h2 class="post-title">Arthas诊断线上问题</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="category">
+            <a href="/categories/%E7%BA%BF%E4%B8%8A%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                线上问题排查
+            </a>
+        </span>
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/9/4
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <h1 id="0-Links"><a href="#0-Links" class="headerlink" title="0. Links"></a>0. Links</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/alibaba/arthas/issues/71">ognl特殊用法</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/alibaba/arthas/issues/482">获取SpringContext</a></li>
+</ul>
+<h1 id="1-安装arthas"><a href="#1-安装arthas" class="headerlink" title="1. 安装arthas"></a>1. 安装arthas</h1><p>如果没有用docker，直接从官网下载然后丢服务器就行了，如果用的是docker那么就麻烦一点，这里我整了一个脚本来一键安装&#x2F;启动：</p>
+<pre><code class="sh">#!/bin/bash
+workdir=&quot;/opt/arthas-dev&quot;
+user=user
+container=$1
+if [ -z $container ];then
+    echo -e &quot;\e[32m用法: arthas-launcher.sh [容器名|容器ID] [用户名(可选，必须和启动应用的用户一致)]\e[0m&quot;
+    exit 0
+fi
+if [ ! -z $2 ];then
+    user=$2
+fi
+
+function installArthas() &#123;
+    echo &quot;开始安装arthas...&quot;
+    docker exec -u $user $container mkdir $workdir/arthas
+    docker cp jdk-8u381-linux-x64.tar.gz $container:$workdir/jdk.tar.gz
+    docker cp arthas-packaging-3.7.1-bin.zip $container:$workdir/arthas/arthas.zip
+    docker exec -u root $container chmod 777 $workdir/jdk.tar.gz
+    docker exec -u root $container chmod 777 $workdir/arthas/arthas.zip
+    docker exec -u $user $container tar zxvf $workdir/jdk.tar.gz -C $workdir
+    docker exec -u $user $container unzip $workdir/arthas/arthas.zip -d $workdir/arthas
+    docker exec -u $user $container touch $workdir/installedMark
+    echo &quot;安装成功!&quot;
+&#125;
+# --------------main--------------
+docker exec -u $user $container test -d $workdir
+if [ ! $? -eq 0 ];then
+    docker exec -u root $container mkdir $workdir
+    docker exec -u root $container chown $user $workdir
+    installArthas
+fi
+
+docker exec -u $user $container test -e $workdir/installedMark
+if [ $? -eq 0 ];then
+    docker exec -it -u $user $container $workdir/jdk1.8.0_381/bin/java -jar $workdir/arthas/arthas-boot.jar
+else 
+    echo &quot;文件完整性校验失败! 重新尝试安装arthas.&quot;
+    installArthas
+fi
+</code></pre>
+<h1 id="2-watch"><a href="#2-watch" class="headerlink" title="2. watch"></a>2. watch</h1><h2 id="2-1-基本使用"><a href="#2-1-基本使用" class="headerlink" title="2.1 基本使用"></a>2.1 基本使用</h2><p>例如有一个Encoder的encrypt方法我们想要观察，但是由于每次请求这个方法都会被调用很多次，如果不加限制，每次会爆出很多不相干的信息。</p>
+<p>watch提供了一个condition-express选项来帮助我们过滤输出：</p>
+<pre><code class="sh">watch xxx.Encoder encrypt &#123;returnObj&#125; &#39;params[0]==&quot;P@ssw0rd&quot;&#39;
+</code></pre>
+<p>上面这条指令则是让arthas在第一个参数是<code>P@ssw0rd</code>的时候输出调用的返回值</p>
+<h2 id="2-2-观察异常抛出"><a href="#2-2-观察异常抛出" class="headerlink" title="2.2 观察异常抛出"></a>2.2 观察异常抛出</h2><p>有些时候，代码抛出了异常，但是又被另外一个异常包了一层抛出去了，例如<code>throw new RuntimeException(e)</code>，甚至有的时候<br>没有被抛出：<code>log.error(e.getMessage())</code>，导致我们不能看到我们想要的调用栈。</p>
+<p>而watch也提供了观察异常抛出的功能。假如有一个Encoder的encrypt方法抛出了一个ExceptionA，但是没有打印栈信息，我们可以用<br>如下指令：</p>
+<pre><code class="sh">watch xxx.Encoder encrypt &#123;throwExp&#125; -e -x 2
+</code></pre>
+<p><code>-e</code>表示抛出异常才触发。<br><code>-x</code>表示输出属性的遍历深度，这个是啥意思呢，例如-x的值为1的时候，watch输出的结果可能就只是对象的toString，而-x的值为2的时候，watch也会输出这个对象里面属性的toString，如果等于3，则是对象里面的属性的属性的toString…</p>
+<hr>
+<p>随缘更新。。</p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/09/04/arthas/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post post-partial-show">
     <a href="/2023/09/04/docker-launch/">
         <h2 class="post-title">Docker常用启动参数</h2>
     </a>
@@ -716,116 +811,6 @@ hello world
         
     </div>
     <a href="/2023/04/20/docker/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post post-partial-show">
-    <a href="/2023/04/10/netty-interview/">
-        <h2 class="post-title">Netty面试题</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2023/4/10
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <h1 id="1-为什么要用Netty"><a href="#1-为什么要用Netty" class="headerlink" title="1. 为什么要用Netty"></a>1. 为什么要用Netty</h1><p>Netty是一个基于Java NIO封装的高性能网络通信框架。它主要有以下优势：</p>
-<ol>
-<li>Netty提供了比NIO更简单的API<ul>
-<li>很容易地实现Reactor模型</li>
-</ul>
-</li>
-<li>Netty在NIO的基础上做出了很多优化<ul>
-<li>内存池</li>
-<li>零拷贝</li>
-</ul>
-</li>
-<li>Netty内置了多种通信协议</li>
-</ol>
-<p>用官方的总结就是：<strong>Netty 成功地找到了一种在不妥协可维护性和性能的情况下实现易于开发，性能，稳定性和灵活性的方法。</strong></p>
-<h1 id="2-Netty零拷贝"><a href="#2-Netty零拷贝" class="headerlink" title="2. Netty零拷贝"></a>2. Netty零拷贝</h1><p>Netty零拷贝主要在五个方面：</p>
-<ol>
-<li>Netty默认情况下使用直接内存，避免了从JVM堆内存拷贝到直接内存这一次拷贝，而是直接从直接使用直接内存进行Socket读写</li>
-<li>Netty的文件传输调用了<code>FileRegion</code>包装的<code>transferTo</code>方法，可以直接将文件从缓冲区发送到目标Channel</li>
-<li>Netty提供了<code>CompositeByteBuf</code>类，可以将多个ByteBuf合并为一个逻辑上的ByteBuf，避免了多个ByteBuf的拷贝。</li>
-<li>通过<code>ByteBuf.wrap</code>方法，可以将byte[]数组、ByteBuffer包装成一个ByteBuf，从而避免了拷贝</li>
-<li><code>ByteBuf</code>支持slice操作，可以将ByteBuf分解为多个共享同一存储区域的ByteBuf，避免了内存的拷贝</li>
-</ol>
-<h1 id="3-Netty内存管理"><a href="#3-Netty内存管理" class="headerlink" title="3. Netty内存管理"></a>3. Netty内存管理</h1><p>为了减少频繁向操作系统申请内存的情况，Netty会一次性申请一块较大的内存(由ChunkSize决定，默认为16M)，这块内存被称为<code>PoolChunk</code>。</p>
-<p>而在一个<code>Chunk</code>下，又分为了一个一个页，叫做<code>Page</code>，默认为8K，即默认情况下一个Chunk有2048个页。</p>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/422289486">超详细图文详解神秘的 Netty 高性能内存管理 - 知乎 (zhihu.com)</a></p>
-<h2 id="3-1-PoolChunk如何管理Page"><a href="#3-1-PoolChunk如何管理Page" class="headerlink" title="3.1 PoolChunk如何管理Page"></a>3.1 PoolChunk如何管理Page</h2><p>PoolChunk通过一个完全二叉树来管理Page，这颗二叉树的深度为12(2^11 &#x3D; 2048)。</p>
-<p>PoolChunk会维护一个<code>memeoryMap</code>数组，这个数组对应着每个节点，它的值代表这个节点之下的第几层还存在未分配的节点。</p>
-<ul>
-<li>比如说第9层的<code>memeoryMap</code>值为9，代表这个节点下面的子节点都未被分配</li>
-<li>若第9层的<code>memeoryMap</code>为10，代表它本身不可被分配，但第10层有子节点可以被分配</li>
-<li>若第9层的<code>memeoryMap</code>为12(树的高度)，代表当前节点下的所有子节点都不可分配</li>
-</ul>
-<p>那么我们怎么分配呢？</p>
-<p>比如我们要15KB的空间，这里会先向上取8的整数，也就是16K，也就是2^1 * 8，拿到指数1，通过depth - 1 &#x3D; 12 - 1得到11，那么我们只需要去找<code>memeoryMap</code>为11的节点即可。在分配后，父节点的<code>memeoryMap</code>等于两个子节点的最小值。</p>
-<h2 id="3-2-Page的管理"><a href="#3-2-Page的管理" class="headerlink" title="3.2 Page的管理"></a>3.2 Page的管理</h2><p>一个Page有8K，一般我们的应用程序是用不了这么多的，因此每个Page下会再次分隔。但这次分隔并不是以完全二叉树的形式，因为太占空间了，而是将这8K划分为等长的n份，一般会由<code>PoolSubpage</code>管理，一般分为两类：</p>
-<ul>
-<li>tiny：用于分配小于512字节的内存，一般大小为16B，32B，…，496B，每次增长为16的倍数，共32个。</li>
-<li>small：用于分配大于等于512字节的内存，一般大小为512B、1K、2K，4K。</li>
-</ul>
-<p>对于每个块，会有一个bitMap去判断是否使用，可以理解为Java中的<code>BitSet</code></p>
-<h2 id="3-3-Chunk的管理"><a href="#3-3-Chunk的管理" class="headerlink" title="3.3 Chunk的管理"></a>3.3 Chunk的管理</h2><p>每个PoolChunk通过<code>PoolArena</code>类来管理，这些Chunk被封装在<code>PoolChunkList</code>类中，这是一个双向链表。</p>
-<p><code>PoolArena</code>有6个<code>PoolChunkList</code>：</p>
-<ul>
-<li>qInit：存储内存利用率 0-25% 的 chunk</li>
-<li>q000：存储内存利用率 1-50% 的 chunk</li>
-<li>q025：存储内存利用率 25-75% 的 chunk</li>
-<li>q050：存储内存利用率 50-100% 的 chunk</li>
-<li>q075：存储内存利用率 75-100%的 chunk</li>
-<li>q100：存储内存利用率 100%的 chunk</li>
-</ul>
-<p><code>PoolArena</code>分配内存的顺序是：q050、q025、q000、qInit、q075</p>
-<p>这样分配的好处是可以提高内存的利用率，以及减少链表的遍历次数。</p>
-<h2 id="3-4-PoolThreadCache"><a href="#3-4-PoolThreadCache" class="headerlink" title="3.4 PoolThreadCache"></a>3.4 PoolThreadCache</h2><p>PoolThreadCache利用了ThreadLocal，每次线程在申请内存时都会优先从这里面获取。</p>
-<ul>
-<li>在释放已分配的内存块时，不放回到 Chunk 中，而是缓存到 ThreadCache 中</li>
-<li>在分配内存块时，优先从 ThreadCache 获取。若无法获取到，再从 Chunk 中分配</li>
-<li>通过这样的方式，既能提高分配效率，又尽可能的避免多线程的同步和竞争</li>
-</ul>
-<h1 id="4-直接内存回收原理"><a href="#4-直接内存回收原理" class="headerlink" title="4. 直接内存回收原理"></a>4. 直接内存回收原理</h1><p>每个ByteBuf都实现了一个<code>ReferenceCounted</code>接口，netty也是直接采用了引用计数法来进行内存回收。</p>
-<h1 id="5-怎么判断ByteBuffer是否处于写模式或读模式"><a href="#5-怎么判断ByteBuffer是否处于写模式或读模式" class="headerlink" title="5. 怎么判断ByteBuffer是否处于写模式或读模式"></a>5. 怎么判断ByteBuffer是否处于写模式或读模式</h1><p><code>ByteBuffer</code>有三个重要参数：<code>position</code>、<code>limit</code>、<code>capacity</code>，而平常我们说的读模式或写模式只是用来方便我们理解的东西，真正在ByteBuffer的实现里并不存在什么读模式和写模式，也就是说你在”读模式下”仍然可以写。</p>
-<p>例如下面的代码：</p>
-<pre><code class="java">ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
-
-byte[] hello = &quot;hello&quot;.getBytes(StandardCharsets.UTF_8);
-System.out.println(Arrays.toString(hello));
-// &quot;write mode&quot;
-byteBuffer.put(hello);
-// &quot;read mode&quot;
-byteBuffer.flip();
-// write again
-byteBuffer.put(&quot;h&quot;.getBytes(StandardCharsets.UTF_8));
-
-while (byteBuffer.hasRemaining()) &#123;
-    System.out.print(byteBuffer.get() + &quot; &quot;);
-&#125;
-</code></pre>
-<p><font color=red>在”读模式”下去写的时候，并不会报错</font>，由于切换到了”读模式”，此时<code>position = 0，limit = 写模式的offset</code>，因此在写的时候，会从索引0处开始写，写完后，<code>position</code>变为1，我们再读的话也就只能从索引1读到4了。</p>
-<p>如果硬要判断是不是”读模式”或”写模式”，可以根据<code>position</code>和<code>limit</code>的值进行判断：</p>
-<ul>
-<li>如<code>limit = capacity</code>，表示当前<strong>可能</strong>为写模式</li>
-</ul>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/2023/04/10/netty-interview/" class="go-post">阅读全文</a>
 </div>
 
 
