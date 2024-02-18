@@ -6,11 +6,10 @@ theme_config:
   loading: https://selfb.asia/static/particlex/images/loading.gif
   background: 
     - https://selfb.asia/public/2023-2-6-8d14e464-2200-4e54-af81-0d9f25f55b3e.webp
-    - https://selfb.asia/public/2023-2-0-017e03b0-992c-4844-b28f-869799d32b96.webp
     - https://selfb.asia/public/2023-2-0-66a241f4-eca3-45f3-b590-05aeed688f60.webp
-    - https://selfb.asia/public/2023-2-0-481f472f-e980-4cee-8ab8-ca66f5fd370a.webp
-    - https://selfb.asia/public/2023-2-2-2adf4d48-496a-49a4-8ca3-f64e035d8835.webp
-  avatar: https://selfb.asia/avatar/1.webp
+    - https://selfb.asia/images/2024/02/wallhaven-m3go6m_2560x1080.webp
+    - https://selfb.asia/images/2024/02/wallhaven-6dgmvl_2560x1080.webp
+  avatar: https://selfb.asia/images/2024/02/avator.webp
   menu:
     Home:
         name: house
@@ -55,8 +54,8 @@ theme_config:
     
 # Site
 title: IceOfSummerの博客
-subtitle: '一时起兴搭建的博客'
-description: '用来用去还是自己搭的博客靠谱'
+subtitle: '还是自己搭的博客靠谱'
+description: '后面一辈子的博客都在这了！'
 keywords:
 author: IceOfSummer
 language: zh-CN
