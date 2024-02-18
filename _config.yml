@@ -94,6 +94,9 @@ render_drafts: false
 post_asset_folder: false
 relative_link: false
 future: true
+# v7
+syntax_highlighter: 
+# v6
 highlight:
   enable: false
   line_number: true
