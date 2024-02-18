@@ -1,7 +1,9 @@
 ---
 title: 基础
 date: 2024-02-08 17:37:52
-categories: "k8s"
+categories: 
+  data:
+    - { name: "k8s", path: "/2024/02/k8s" }
 ---
 
 # VMWare固定虚拟机Ip
