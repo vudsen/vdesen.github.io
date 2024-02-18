@@ -1,0 +1,395 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>基础 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="用来用去还是自己搭的博客靠谱" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 7.1.1"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>基础</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/2/8
+        </span>
+        
+        <span class="category">
+            <a href="/2024/02/k8s">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                k8s
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="VMWare固定虚拟机Ip"><a href="#VMWare固定虚拟机Ip" class="headerlink" title="VMWare固定虚拟机Ip"></a>VMWare固定虚拟机Ip</h1><p>因为我不想出钱买服务器，毕竟要充100才能按量扣费。。。刚好自己电脑内存是32G的，所以打算自己开虚拟机。</p>
+<p>这里固定ip是我学习的中途才开始做的，真的踩了很大的坑，没有固定Ip，电脑重启后Ip直接变了，原本我有台虚拟机的Ip是105结尾，我自己笔记本重启后，Ip居然也变成了105结尾。。。当时服务器都连不上了，排查了半天，才发现是宿主机和虚拟机ip重复了。</p>
+<hr>
+<p>VMWare -&amp;gt; 编辑 -&amp;gt; 虚拟网络编辑器。</p>
+<p>先点右下角的管理员授权，然后选中VMnet8，点击NAT设置：<br><img lazy="https://selfb.asia/images/2024/02/PixPin_2024-02-11_17-00-49.webp" alt="配置"></p>
+<p>记住里面的网关IP，其实就是外面的子网IP，但是最后一个IP位的值必须是2。</p>
+<p>比如我这里的子网IP是<code>192.168.138.0</code>，那网关的值就只能是<code>192.168.138.2</code>。</p>
+<p>之后把虚拟机关机，在设置里面选择网络适配器 -&amp;gt; 自定义 -&amp;gt; 选择上面的<code>VMnet8</code>，保存后开机。</p>
+<p>开机后，编辑<code>/etc/sysconfig/network-scripts/ifcfg-ens33</code>文件</p>
+<p><img lazy="https://selfb.asia/images/2024/02/PixPin_2024-02-11_17-12-06.webp" alt="ifcfg-ens33"></p>
+<p>记得把上面的<code>BOOTPROTO</code>从<code>dhcp</code>改为<code>static</code>。</p>
+<p>然后最下面四行，除了第一行可以自己写以外，别的是对应刚才的网络适配器里面的配置。</p>
+<p>具体配置是什么意思就不多说了，都来学k8s了，计网一定还是稍微懂一点的吧。。</p>
+<blockquote>
+<p>这里我的ip最后一位用的是 1，推荐还是换成 2 以后的值，毕竟网关用的是 2，从网关后面开始比较好。</p>
+</blockquote>
+<hr>
+<p>后面用<code>kubeadm</code>初始化主节点的时候可能会提示你ip转发功能关闭了，这里需要添加额外配置。</p>
+<p>编辑<code>/etc/sysctl.conf </code>文件，在最后一行添加：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net.ipv4.ip_forward = 1</span><br></pre></td></tr></table></figure>
+
+<p>应用配置：<code>sysctl -p</code>，之后重启网络<code>service network restart</code>。</p>
+<p>查看转发功能是否开启：<code>sysctl net.ipv4.ip_forward</code>，如果为1则为开启。</p>
+<h1 id="基础架构图"><a href="#基础架构图" class="headerlink" title="基础架构图"></a>基础架构图</h1><p><img lazy="https://selfb.asia/images/2024/02/components-of-kubernetes.svg" alt="架构图"></p>
+<ul>
+<li>API server: 秘书部</li>
+<li>Cloud controller Manager：外联部</li>
+<li>Controller manager：决策者</li>
+<li>etcd：资料库(高可用、高一致性数据库)</li>
+<li>kubelet：厂长</li>
+<li>kube-proxy：门卫</li>
+<li>Scheduler：调度者（应用去哪个节点部署）</li>
+<li>Control plane：k8s主节点</li>
+<li>Node：k8s节点</li>
+</ul>
+<h1 id="搭建K8s集群"><a href="#搭建K8s集群" class="headerlink" title="搭建K8s集群"></a>搭建K8s集群</h1><p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/install/centos/">安装Docker</a></p>
+<h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#各个机器设置自己的域名</span></span><br><span class="line">hostnamectl set-hostname xxxx</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将 SELinux 设置为 permissive 模式（相当于将其禁用）</span></span><br><span class="line">sudo setenforce 0</span><br><span class="line">sudo sed -i <span class="string">&#x27;s/^SELINUX=enforcing$/SELINUX=permissive/&#x27;</span> /etc/selinux/config</span><br><span class="line"></span><br><span class="line"><span class="comment">#关闭swap</span></span><br><span class="line">swapoff -a  </span><br><span class="line">sed -ri <span class="string">&#x27;s/.*swap.*/#&amp;/&#x27;</span> /etc/fstab</span><br><span class="line"></span><br><span class="line"><span class="comment">#允许 iptables 检查桥接流量</span></span><br><span class="line"><span class="built_in">cat</span> &amp;lt;&amp;lt;<span class="string">EOF | sudo tee /etc/modules-load.d/k8s.conf</span></span><br><span class="line"><span class="string">br_netfilter</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> &amp;lt;&amp;lt;<span class="string">EOF | sudo tee /etc/sysctl.d/k8s.conf</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-ip6tables = 1</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-iptables = 1</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line">sudo sysctl --system</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装三大组件"><a href="#安装三大组件" class="headerlink" title="安装三大组件"></a>安装三大组件</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/install-kubeadm/">官方文档</a></p>
+<p>查看最新版本：<a target="_blank" rel="noopener" href="https://dl.k8s.io/release/stable.txt">https://dl.k8s.io/release/stable.txt</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> &amp;lt;&amp;lt; <span class="string">EOF &amp;gt; /etc/yum.repos.d/kubernetes.repo </span></span><br><span class="line"><span class="string">&amp;gt; [kubernetes]</span></span><br><span class="line"><span class="string">&amp;gt; name=Kubernetes</span></span><br><span class="line"><span class="string">&amp;gt; baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/</span></span><br><span class="line"><span class="string">&amp;gt; enabled=1</span></span><br><span class="line"><span class="string">&amp;gt; gpgcheck=1</span></span><br><span class="line"><span class="string">&amp;gt; repo_gpgcheck=1</span></span><br><span class="line"><span class="string">&amp;gt; gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span></span><br><span class="line"><span class="string">&amp;gt; EOF</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes</span><br><span class="line"></span><br><span class="line">sudo systemctl <span class="built_in">enable</span> --now kubelet</span><br></pre></td></tr></table></figure>
+
+<p>提示找不到软件包的话可用清理一下缓存：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum clean all</span><br><span class="line">yum makecache</span><br></pre></td></tr></table></figure>
+
+<h2 id="初始化主节点"><a href="#初始化主节点" class="headerlink" title="初始化主节点"></a>初始化主节点</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/">官方文档</a></p>
+<p>需要把版本号替换为对应的。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">kubeadm init \</span><br><span class="line">--apiserver-advertise-address=192.168.1.105 \</span><br><span class="line">--control-plane-endpoint=cluster-endpoint \</span><br><span class="line">--kubernetes-version v1.28.2 \</span><br><span class="line">--image-repository registry.aliyuncs.com/google_containers \</span><br><span class="line">--service-cidr=10.96.0.0/16 \</span><br><span class="line">--pod-network-cidr=10.97.0.0/16</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>apiserver-advertise-address：主节点ip</li>
+<li>image-repository: 设置镜像仓库</li>
+<li>service-cidr：service网段</li>
+<li>pod-network-cidr：pod网段</li>
+</ul>
+<h3 id="CRI-v1-runtime-API-is-not-implemented"><a href="#CRI-v1-runtime-API-is-not-implemented" class="headerlink" title="CRI v1 runtime API is not implemented"></a>CRI v1 runtime API is not implemented</h3><p>启动后可能会报错：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[ERROR CRI]: container runtime is not running: output: time=&quot;2024-02-08T20:28:24+08:00&quot; level=fatal msg=&quot;validate service connection: CRI v1 runtime API is not implemented for endpoint \&quot;unix:///var/run/containerd/containerd.sock\&quot;: rpc error: code = Unimplemented desc = unknown service runtime.v1.RuntimeService&quot;</span><br><span class="line">, error: exit status 1</span><br></pre></td></tr></table></figure>
+
+<p>解决方法：<code>vi /etc/containerd/config.toml</code>。</p>
+<p>注释掉其中的：disabled_plugins &#x3D; [“cri”]</p>
+<p>重启：<code>systemctl restart containerd</code>，然后重新进行初始化。</p>
+<p>如果第二次初始化可能会报端口占用，这时候直接重置就行：<code>kubeadm reset</code>。</p>
+<h3 id="timed-out-waiting-for-the-condition"><a href="#timed-out-waiting-for-the-condition" class="headerlink" title="timed out waiting for the condition"></a>timed out waiting for the condition</h3><p>虽然这个问题最后是我自己很傻逼的打掉了一个字造成的，但还是在这里分享一下我是怎么发现的。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[kubelet-check] Initial timeout of 40s passed.</span><br><span class="line"></span><br><span class="line">Unfortunately, an error has occurred:</span><br><span class="line">        timed out waiting for the condition</span><br><span class="line"></span><br><span class="line">This error is likely caused by:</span><br><span class="line">        - The kubelet is not running</span><br><span class="line">        - The kubelet is unhealthy due to a misconfiguration of the node in some way (required cgroups disabled)</span><br><span class="line"></span><br><span class="line">If you are on a systemd-powered system, you can try to troubleshoot the error with the following commands:</span><br><span class="line">        - &#x27;systemctl status kubelet&#x27;</span><br><span class="line">        - &#x27;journalctl -xeu kubelet&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>报错时它有两部分提示，其中第一部分提示你检查<code>kubelet</code>是否启动。这个我们很快就能排查。</p>
+<p>然后下面一部分提示，由于我一开始没有搞清楚<code>systemd-powered system</code>是什么意思，所以我就没看，就跑去网上搜了。</p>
+<p>然后发现大部分解决方法都不行。。。然后就试了一下，结果发现真能用，看到日志了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2月 08 21:37:34 k8s-main kubelet[11196]: I0208 21:37:34.072195   11196 kubelet_node_status.go:70] &quot;Attempting to register node&quot; node=&quot;k8s-main&quot;</span><br><span class="line">2月 08 21:37:34 k8s-main kubelet[11196]: E0208 21:37:34.082146   11196 kubelet_node_status.go:92] &quot;Unable to register node with API server&quot; err=&quot;Post \&quot;https://cluster-endpoint:6443/api/v1/nodes\&quot;: dial tcp: lookup2月 08 21:37:34 k8s-main kubelet[11196]: E0208 21:37:34.498994   11196 certificate_manager.go:562] kubernetes.io/kube-apiserver-client-kubelet: Failed while requesting a signed certificate from the control plane: </span><br></pre></td></tr></table></figure>
+
+<p>可用发现，访问<code>cluster-endpoint:6443</code>失败了，ping了一下，发现还真不通，然后我又去跑去看了一眼我的<code>hosts</code>。</p>
+<p>结果发现我踏马<code>endpoint</code>打掉了最后面那个<code>t</code>。。。</p>
+<p>改完host，发现还是启动不了。</p>
+<p>继续看了下日志，发现是镜像没拉下来：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2月 08 22:17:14 k8s-main kubelet[12197]: E0208 22:17:14.105521   12197 remote_runtime.go:193] &quot;RunPodSandbox from runtime service failed&quot; err=&quot;rpc error: code = DeadlineExceeded desc = failed to get sandbox image \&quot;registry.k8s.io/pause:3.6\&quot;: failed to pull image \&quot;registry.k8s.io/pause:3.6\&quot;: failed to pull and unpack image \&quot;registry.k8s.io/pause:3.6\&quot;: failed to resolve reference \&quot;registry.k8s.io/pause:3.6\&quot;: failed to do request: Head \&quot;https://registry.k8s.io/v2/pause/manifests/3.6\&quot;: dial tcp 34.96.108.209:443: i/o timeout&quot;</span><br></pre></td></tr></table></figure>
+
+<p>然后我在网上翻了半天，找到了这个人的博客：<a target="_blank" rel="noopener" href="https://blog.csdn.net/Haskei/article/details/128474534">failed to get sandbox image “k8s.gcr.io&#x2F;pause:3.6“: failed to pull image “k8s.gcr.io&#x2F;pause:3.6“</a>。</p>
+<p>我看了下本地的文件，也没有<code>sandbox_image </code>这一行啊？。。</p>
+<p>然后我直接把他的代码粘进去了，重启，发现鸟用没有。</p>
+<p>然后我灵机一动，改成搜索<code>如何修改sandbox镜像</code>，果然就找到了：<a target="_blank" rel="noopener" href="https://blog.csdn.net/u010566813/article/details/125990298">containerd拉取私库镜像失败(kubelet)</a></p>
+<p>原来是先要初始化一下配置文件:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">containerd config default &amp;gt; /etc/containerd/config.toml</span><br></pre></td></tr></table></figure>
+
+<p>然后再去修改、重启就有效了。</p>
+<h2 id="根据提示继续"><a href="#根据提示继续" class="headerlink" title="根据提示继续"></a>根据提示继续</h2><p>初始化成功后会提示下面的内容：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">Your Kubernetes control-plane has initialized successfully!</span><br><span class="line"></span><br><span class="line">To start using your cluster, you need to run the following as a regular user:</span><br><span class="line"></span><br><span class="line">  mkdir -p $HOME/.kube</span><br><span class="line">  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config</span><br><span class="line">  sudo chown $(id -u):$(id -g) $HOME/.kube/config</span><br><span class="line"></span><br><span class="line">Alternatively, if you are the root user, you can run:</span><br><span class="line"></span><br><span class="line">  export KUBECONFIG=/etc/kubernetes/admin.conf</span><br><span class="line"></span><br><span class="line">You should now deploy a pod network to the cluster.</span><br><span class="line">Run &quot;kubectl apply -f [podnetwork].yaml&quot; with one of the options listed at:</span><br><span class="line">  https://kubernetes.io/docs/concepts/cluster-administration/addons/</span><br><span class="line"></span><br><span class="line">You can now join any number of control-plane nodes by copying certificate authorities</span><br><span class="line">and service account keys on each node and then running the following as root:</span><br><span class="line"></span><br><span class="line">  kubeadm join cluster-endpoint:6443 --token wdvggh.980xtzhyrr2g0iti \</span><br><span class="line">        --discovery-token-ca-cert-hash sha256:04e247aff627e00fdee90715ab2df601641e5494cae46d6c03854a28ad2d36e4 \</span><br><span class="line">        --control-plane </span><br><span class="line"></span><br><span class="line">Then you can join any number of worker nodes by running the following on each as root:</span><br><span class="line"></span><br><span class="line">kubeadm join cluster-endpoint:6443 --token wdvggh.980xtzhyrr2g0iti \</span><br><span class="line">        --discovery-token-ca-cert-hash sha256:04e247aff627e00fdee90715ab2df601641e5494cae46d6c03854a28ad2d36e4 </span><br></pre></td></tr></table></figure>
+
+<p>按照它的提示一步一步走就行。</p>
+<h3 id="安装网络组件"><a href="#安装网络组件" class="headerlink" title="安装网络组件"></a>安装网络组件</h3><p>网络组件有很多种，在下面的官网可以看到：</p>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/cluster-administration/addons/">安装扩展（Addon</a></p>
+<p>这里以<code>calico</code>为例：<a target="_blank" rel="noopener" href="https://docs.tigera.io/calico/latest/getting-started/kubernetes/self-managed-onprem/onpremises">Install Calico networking and network policy for on-premises deployments</a>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/tigera-operator.yaml</span><br><span class="line"></span><br><span class="line"><span class="comment"># 注意这个文件里面会配置网段，如果之前kubeadm init的时候没有修改pod-network-cidr，则可用直接appy</span></span><br><span class="line"><span class="comment"># 否则需要手动修改里面的ip网段。</span></span><br><span class="line">kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/custom-resources.yaml</span><br><span class="line"></span><br><span class="line"><span class="comment"># 执行这个命令，直到所有pod全部为Running</span></span><br><span class="line">watch kubectl get pods -n calico-system</span><br><span class="line"></span><br><span class="line"><span class="comment"># 最后清除多余的东西</span></span><br><span class="line">kubectl taint nodes --all node-role.kubernetes.io/control-plane-</span><br><span class="line">kubectl taint nodes --all node-role.kubernetes.io/master-</span><br></pre></td></tr></table></figure>
+
+<p>最后执行<code>kubectl get nodes -o wide</code>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME              STATUS   ROLES    AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION    CONTAINER-RUNTIME</span><br><span class="line">&amp;lt;your-hostname&amp;gt;   Ready    master   52m   v1.12.2   10.128.0.28   &amp;lt;none&amp;gt;        Ubuntu 18.04.1 LTS   4.15.0-1023-gcp   docker://18.6.1</span><br></pre></td></tr></table></figure>
+
+<p>发现是Ready，就表示成功了。</p>
+<p>最后看一下节点：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-main ~]# kubectl get pods -A</span><br><span class="line">NAMESPACE          NAME                                       READY   STATUS    RESTARTS   AGE</span><br><span class="line">calico-apiserver   calico-apiserver-58d85b5c6-bsg9n           0/1     Running   0          24s</span><br><span class="line">calico-apiserver   calico-apiserver-58d85b5c6-gtpqg           0/1     Running   0          24s</span><br><span class="line">calico-system      calico-kube-controllers-6d957bb4d9-jrppk   1/1     Running   0          13m</span><br><span class="line">calico-system      calico-node-76987                          1/1     Running   0          13m</span><br><span class="line">calico-system      calico-typha-76dd56c6f7-tmtxs              1/1     Running   0          13m</span><br><span class="line">calico-system      csi-node-driver-6jmkd                      2/2     Running   0          13m</span><br><span class="line">kube-system        coredns-66f779496c-bpqbx                   1/1     Running   0          14m</span><br><span class="line">kube-system        coredns-66f779496c-kpj5t                   1/1     Running   0          14m</span><br><span class="line">kube-system        etcd-k8s-main                              1/1     Running   3          14m</span><br><span class="line">kube-system        kube-apiserver-k8s-main                    1/1     Running   3          14m</span><br><span class="line">kube-system        kube-controller-manager-k8s-main           1/1     Running   3          14m</span><br><span class="line">kube-system        kube-proxy-cgclx                           1/1     Running   0          14m</span><br><span class="line">kube-system        kube-scheduler-k8s-main                    1/1     Running   3          14m</span><br><span class="line">tigera-operator    tigera-operator-55585899bf-j2pvw           1/1     Running   0          13m</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="节点加入集群"><a href="#节点加入集群" class="headerlink" title="节点加入集群"></a>节点加入集群</h2><p>在主节点初始化完后，会弹出一个直接加入的命令，直接用那个加入命令就行了。</p>
+<p>如果忘记了，可以创建一个新令牌：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubeadm token create --print-join-command</span><br></pre></td></tr></table></figure>
+
+<p>使用<code>kubeadm token list</code>可以打印所有token。</p>
+<h2 id="部署Dashboard"><a href="#部署Dashboard" class="headerlink" title="部署Dashboard"></a>部署Dashboard</h2><h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/dashboard">dashboard</a></p>
+<p>直接打开release界面，选择最新版本，运行最下面的脚本：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml</span><br></pre></td></tr></table></figure>
+
+<p>部署后可能会跑不起来，使用下面的命令查看日志：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 如果容器还没创建</span></span><br><span class="line">kubectl describe pod kubernetes-dashboard-78f87ddfc-wlc7c -n kubernetes-dashboard</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果容器已经创建，但是崩溃了</span></span><br><span class="line">kubectl logs kubernetes-dashboard-78f87ddfc-wlc7c -n kubernetes-dashboard </span><br></pre></td></tr></table></figure>
+
+<p>通常会报这个错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">panic: Get &quot;https://10.96.0.1:443/api/v1/namespaces/kubernetes-dashboard/secrets/kubernetes-dashboard-csrf&quot;: dial tcp 10.96.0.1:443: i/o timeout</span><br></pre></td></tr></table></figure>
+
+<p>这是由于我们的网络模式是ClusterIp，直接进行下一步的访问端口设置就行。</p>
+<h3 id="设置访问端口"><a href="#设置访问端口" class="headerlink" title="设置访问端口"></a>设置访问端口</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl edit svc kubernetes-dashboard -n kubernetes-dashboard</span><br></pre></td></tr></table></figure>
+
+<p>之后搜索<code>ClusterIP</code>，把值修改为<code>NodePort</code>，保存。</p>
+<p>运行下面的指令查看端口：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-main docker]<span class="comment"># kubectl get svc -A</span></span><br><span class="line">NAMESPACE              NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                  AGE</span><br><span class="line">default                kubernetes                  ClusterIP   10.96.0.1       &amp;lt;none&amp;gt;        443/TCP                  23h</span><br><span class="line">kube-system            kube-dns                    ClusterIP   10.96.0.10      &amp;lt;none&amp;gt;        53/UDP,53/TCP,9153/TCP   23h</span><br><span class="line">kubernetes-dashboard   dashboard-metrics-scraper   ClusterIP   10.96.211.104   &amp;lt;none&amp;gt;        8000/TCP                 32m</span><br><span class="line">kubernetes-dashboard   kubernetes-dashboard        NodePort    10.96.100.180   &amp;lt;none&amp;gt;        443:32081/TCP            32m</span><br></pre></td></tr></table></figure>
+
+<p>最后一行有个<code>443:32081</code>，32081就是我们的外网访问地址，直接用节点ip(任意节点，主节点和从节点都可以) + 端口即可访问。</p>
+<h3 id="创建访问账号"><a href="#创建访问账号" class="headerlink" title="创建访问账号"></a>创建访问账号</h3><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/tasks/configure-pod-container/configure-service-account/#manually-create-an-api-token-for-a-serviceaccount">为 Pod 配置服务账号</a></p>
+<p>进入页面后会要求提供令牌，上面的文档也提到了，创建pod时会自动创建默认用户，但是这个默认用户权限不够高，无法使用完整功能，所以需要我们手动创建一个新账号：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建访问账号，准备一个yaml文件； vi dash.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">admin-user</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">admin-user</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line">  <span class="attr">apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line">  <span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">cluster-admin</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">admin-user</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">kubernetes-dashboard</span></span><br></pre></td></tr></table></figure>
+
+<p>应用账号：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f dash.yaml</span><br></pre></td></tr></table></figure>
+
+<p>获取访问令牌：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#获取访问令牌</span></span><br><span class="line">kubectl create token admin-user -n kubernetes-dashboard</span><br></pre></td></tr></table></figure>
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;IceOfSummer
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>
