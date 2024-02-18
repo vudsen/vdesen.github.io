@@ -243,8 +243,21 @@
 <h1 id="4-直接内存回收原理"><a href="#4-直接内存回收原理" class="headerlink" title="4. 直接内存回收原理"></a>4. 直接内存回收原理</h1><p>每个ByteBuf都实现了一个<code>ReferenceCounted</code>接口，netty也是直接采用了引用计数法来进行内存回收。</p>
 <h1 id="5-怎么判断ByteBuffer是否处于写模式或读模式"><a href="#5-怎么判断ByteBuffer是否处于写模式或读模式" class="headerlink" title="5. 怎么判断ByteBuffer是否处于写模式或读模式"></a>5. 怎么判断ByteBuffer是否处于写模式或读模式</h1><p><code>ByteBuffer</code>有三个重要参数：<code>position</code>、<code>limit</code>、<code>capacity</code>，而平常我们说的读模式或写模式只是用来方便我们理解的东西，真正在ByteBuffer的实现里并不存在什么读模式和写模式，也就是说你在”读模式下”仍然可以写。</p>
 <p>例如下面的代码：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ByteBuffer</span> <span class="variable">byteBuffer</span> <span class="operator">=</span> ByteBuffer.allocate(<span class="number">1024</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">byte</span>[] hello = <span class="string">&quot;hello&quot;</span>.getBytes(StandardCharsets.UTF_8);</span><br><span class="line">System.out.println(Arrays.toString(hello));</span><br><span class="line"><span class="comment">// &quot;write mode&quot;</span></span><br><span class="line">byteBuffer.put(hello);</span><br><span class="line"><span class="comment">// &quot;read mode&quot;</span></span><br><span class="line">byteBuffer.flip();</span><br><span class="line"><span class="comment">// write again</span></span><br><span class="line">byteBuffer.put(<span class="string">&quot;h&quot;</span>.getBytes(StandardCharsets.UTF_8));</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (byteBuffer.hasRemaining()) &#123;</span><br><span class="line">    System.out.print(byteBuffer.get() + <span class="string">&quot; &quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
 
+byte[] hello = &quot;hello&quot;.getBytes(StandardCharsets.UTF_8);
+System.out.println(Arrays.toString(hello));
+// &quot;write mode&quot;
+byteBuffer.put(hello);
+// &quot;read mode&quot;
+byteBuffer.flip();
+// write again
+byteBuffer.put(&quot;h&quot;.getBytes(StandardCharsets.UTF_8));
+
+while (byteBuffer.hasRemaining()) &#123;
+    System.out.print(byteBuffer.get() + &quot; &quot;);
+&#125;
+</code></pre>
 <p><font color=red>在”读模式”下去写的时候，并不会报错</font>，由于切换到了”读模式”，此时<code>position = 0，limit = 写模式的offset</code>，因此在写的时候，会从索引0处开始写，写完后，<code>position</code>变为1，我们再读的话也就只能从索引1读到4了。</p>
 <p>如果硬要判断是不是”读模式”或”写模式”，可以根据<code>position</code>和<code>limit</code>的值进行判断：</p>
 <ul>

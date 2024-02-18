@@ -185,12 +185,32 @@
         <p>打包前的体积有148MB。</p>
 <h2 id="删除多余的语言文件"><a href="#删除多余的语言文件" class="headerlink" title="删除多余的语言文件"></a>删除多余的语言文件</h2><p>在程序安装后，目录下有一个<code>locales</code>文件夹，可以发现里面有很多<code>.pak</code>语言文件，总体积达到了20多MB，很明显我们只需要中文的语言，即<code>zh-CN.pak</code>。</p>
 <p>在网上查了一下，可以通过添加一个hook函数<a target="_blank" rel="noopener" href="https://www.electron.build/configuration/configuration#afterpack">afterpack</a>来删除打包后的文件，具体配置如下：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;productName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;xxx&quot;</span><span class="punctuation">,</span></span><br><span class="line">    ...</span><br><span class="line">  <span class="attr">&quot;afterPack&quot;</span><span class="punctuation">:</span> <span class="string">&quot;./build/hooks/afterPack.js&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
+<pre><code class="json">&#123;
+  &quot;productName&quot;: &quot;xxx&quot;,
+    ...
+  &quot;afterPack&quot;: &quot;./build/hooks/afterPack.js&quot;
+&#125;
+</code></pre>
 <p>如果你不知道配置文件里可以写什么，你可以打开<code>node_modules/app-builder-lib/out/configuration.d.ts</code>，里面的<code>Configuration</code>接口就是可以填的东西。</p>
 <p><code>afterPack.js</code>的内容为：</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//build/hooks/afterPack.js</span></span><br><span class="line"><span class="comment">//参考 https://www.electron.build/configuration/configuration#afterpack</span></span><br><span class="line"><span class="built_in">exports</span>.<span class="property">default</span> = <span class="keyword">async</span> <span class="keyword">function</span>(<span class="params">context</span>) &#123;</span><br><span class="line">  <span class="comment">//console.log(context)</span></span><br><span class="line">  <span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">&#x27;fs&#x27;</span>)</span><br><span class="line">  <span class="keyword">const</span> localeDir = context.<span class="property">appOutDir</span> + <span class="string">&#x27;/locales/&#x27;</span></span><br><span class="line"></span><br><span class="line">  fs.<span class="title function_">readdir</span>(localeDir, <span class="keyword">function</span>(<span class="params">err, files</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!(files &amp;&amp; files.<span class="property">length</span>)) <span class="keyword">return</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>, len = files.<span class="property">length</span>; i &amp;lt; len; i++) &#123;</span><br><span class="line">      <span class="keyword">const</span> match = files[i].<span class="title function_">match</span>(<span class="regexp">/zh-CN\.pak/</span>) <span class="comment">//只保留中文</span></span><br><span class="line">      <span class="keyword">if</span> (match === <span class="literal">null</span>) &#123;</span><br><span class="line">        fs.<span class="title function_">unlinkSync</span>(localeDir + files[i])</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="js">//build/hooks/afterPack.js
+//参考 https://www.electron.build/configuration/configuration#afterpack
+exports.default = async function(context) &#123;
+  //console.log(context)
+  const fs = require(&#39;fs&#39;)
+  const localeDir = context.appOutDir + &#39;/locales/&#39;
 
+  fs.readdir(localeDir, function(err, files) &#123;
+    if (!(files &amp;&amp; files.length)) return
+    for (let i = 0, len = files.length; i &amp;lt; len; i++) &#123;
+      const match = files[i].match(/zh-CN\.pak/) //只保留中文
+      if (match === null) &#123;
+        fs.unlinkSync(localeDir + files[i])
+      &#125;
+    &#125;
+  &#125;)
+&#125;
+</code></pre>
 <p>重新打包，体积减少了5MB左右。</p>
 <hr>
 <p>目前就只找到这些方法，Electron的体积还是有点坑的。。。</p>

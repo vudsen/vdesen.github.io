@@ -265,8 +265,21 @@
 <h1 id="4-直接内存回收原理"><a href="#4-直接内存回收原理" class="headerlink" title="4. 直接内存回收原理"></a>4. 直接内存回收原理</h1><p>每个ByteBuf都实现了一个<code>ReferenceCounted</code>接口，netty也是直接采用了引用计数法来进行内存回收。</p>
 <h1 id="5-怎么判断ByteBuffer是否处于写模式或读模式"><a href="#5-怎么判断ByteBuffer是否处于写模式或读模式" class="headerlink" title="5. 怎么判断ByteBuffer是否处于写模式或读模式"></a>5. 怎么判断ByteBuffer是否处于写模式或读模式</h1><p><code>ByteBuffer</code>有三个重要参数：<code>position</code>、<code>limit</code>、<code>capacity</code>，而平常我们说的读模式或写模式只是用来方便我们理解的东西，真正在ByteBuffer的实现里并不存在什么读模式和写模式，也就是说你在”读模式下”仍然可以写。</p>
 <p>例如下面的代码：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ByteBuffer</span> <span class="variable">byteBuffer</span> <span class="operator">=</span> ByteBuffer.allocate(<span class="number">1024</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">byte</span>[] hello = <span class="string">&quot;hello&quot;</span>.getBytes(StandardCharsets.UTF_8);</span><br><span class="line">System.out.println(Arrays.toString(hello));</span><br><span class="line"><span class="comment">// &quot;write mode&quot;</span></span><br><span class="line">byteBuffer.put(hello);</span><br><span class="line"><span class="comment">// &quot;read mode&quot;</span></span><br><span class="line">byteBuffer.flip();</span><br><span class="line"><span class="comment">// write again</span></span><br><span class="line">byteBuffer.put(<span class="string">&quot;h&quot;</span>.getBytes(StandardCharsets.UTF_8));</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (byteBuffer.hasRemaining()) &#123;</span><br><span class="line">    System.out.print(byteBuffer.get() + <span class="string">&quot; &quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
 
+byte[] hello = &quot;hello&quot;.getBytes(StandardCharsets.UTF_8);
+System.out.println(Arrays.toString(hello));
+// &quot;write mode&quot;
+byteBuffer.put(hello);
+// &quot;read mode&quot;
+byteBuffer.flip();
+// write again
+byteBuffer.put(&quot;h&quot;.getBytes(StandardCharsets.UTF_8));
+
+while (byteBuffer.hasRemaining()) &#123;
+    System.out.print(byteBuffer.get() + &quot; &quot;);
+&#125;
+</code></pre>
 <p><font color=red>在”读模式”下去写的时候，并不会报错</font>，由于切换到了”读模式”，此时<code>position = 0，limit = 写模式的offset</code>，因此在写的时候，会从索引0处开始写，写完后，<code>position</code>变为1，我们再读的话也就只能从索引1读到4了。</p>
 <p>如果硬要判断是不是”读模式”或”写模式”，可以根据<code>position</code>和<code>limit</code>的值进行判断：</p>
 <ul>
@@ -359,8 +372,11 @@
 <p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/innodb-autocommit-commit-rollback.html">MySQL :: MySQL 8.0 Reference Manual :: 15.7.2.2 autocommit, Commit, and Rollback</a></p>
 <p>不管是8.0还是5.7，都是这样写的，那么就可以说的通了。每次执行单条SQL都会拿到一个事务id，然后再去进行快照读。</p>
 <p>那么什么是当前读呢，使用下面的sql语句就是当前读：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 加共享锁</span><br><span class="line"><span class="keyword">SELECT</span> ... LOCK <span class="keyword">IN</span> SHARE MODE </span><br><span class="line"># 加排它锁</span><br><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> <span class="keyword">UPDATE</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="sql"># 加共享锁
+SELECT ... LOCK IN SHARE MODE 
+# 加排它锁
+SELECT ... FROM UPDATE
+</code></pre>
 <p>这两条语句的原理就是给对应的行加上<font color=red>共享锁(读锁)或排它锁(写锁)</font>，当有事务进行增删改时也会加排它锁，对于共享锁，允许多个事务持有(即允许多读)，对于排它锁，则只允许一个事务持有(即只能一个人写，且除了自己其它人都不能读)。</p>
 <p>在排它锁和共享锁下读的的数据就是当前读，这份数据永远是最新的(此时若有其它事务想要修改相关的行，都会被阻塞)。其它状况则就是快照读了，通过MVCC创建ReadView进行数据的读取。</p>
 <h1 id="6-MySql的MVCC"><a href="#6-MySql的MVCC" class="headerlink" title="6. MySql的MVCC"></a>6. MySql的MVCC</h1><p>MVCC(Multiversion Concurrency Control)多版本并发控制。</p>
@@ -373,11 +389,19 @@
 <p>（4）当【版本链中记录的 trx_id 大于等于最小活跃事务id】且【版本链中记录的trx_id小于下一个要分配的事务id】（min_trx_id&amp;lt;&#x3D; trx_id &amp;lt; max_trx_id）时，如果版本链中记录的 trx_id 在活跃事务id列表 m_ids 中，说明生成 ReadView 时，修改记录的事务还没提交，所以该快照记录对当前事务不可见；否则该快照记录对当前事务可见。</p>
 <h2 id="6-1-RepeatableRead是怎么实现的"><a href="#6-1-RepeatableRead是怎么实现的" class="headerlink" title="6.1 RepeatableRead是怎么实现的"></a>6.1 RepeatableRead是怎么实现的</h2><p>我们都知道，RepeatableRead相比ReadCommited能够避免不可重复读的问题(实际也能够避免幻读，是通过加间隙锁实现的)。</p>
 <p>首先我们来看ReadCommitted，使用mysql执行如下指令(假如我们叫它事务A)</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> session transaction isolation level read committed;</span><br><span class="line"><span class="keyword">begin</span>;</span><br><span class="line"><span class="keyword">update</span> test <span class="keyword">set</span> xid <span class="operator">=</span> <span class="number">2</span> <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"># 等一会再提交</span><br><span class="line"><span class="keyword">commit</span>;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="sql">set session transaction isolation level read committed;
+begin;
+update test set xid = 2 where id = 1;
+# 等一会再提交
+commit;
+</code></pre>
 <p>然后再开一个mysql执行如下指令(假如我们叫它事务B)：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> session transaction isolation level read committed;</span><br><span class="line"><span class="keyword">begin</span>;</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> test <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"># 提交上面那个指令后再执行下面这条</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> test <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="sql">set session transaction isolation level read committed;
+begin;
+select * from test where id = 1;
+# 提交上面那个指令后再执行下面这条
+select * from test where id = 1;
+</code></pre>
 <p>这里就不放图了，大家都知道第二次读取会不一样。</p>
 <p>这回我们再将隔离级别设置为RepeatableRead，并同样执行上面的指令。</p>
 <p>这次执行后，<font color=red>发现两次查询的结果都是一样的</font>，而且在事务A执行更新后且没有提交时，B再去读，<font color=red>并没有发生阻塞，因为在修改数据的时候会加排它锁，在读的时候要么是当前读要么是快照读，</font>如果是当前读，那么读操作会堵塞，说明在B这里是快照读，是创建了ReadView的，通过ReadView有效地避免了不可重复读。</p>
@@ -424,14 +448,45 @@
 <p>可以这样理解：Redis的字典就是java7的HashMap，即哈希表+链表</p>
 </blockquote>
 <p>Redis字典使用的哈希表结构如下：<a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/2.6/src/dict.h#L68-L73">redis&#x2F;dict.h at 2.6 · redis&#x2F;redis (github.com)</a></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">dictht</span> &#123;</span><br><span class="line">     <span class="comment">// table 数组</span></span><br><span class="line">    dictEntry **table;</span><br><span class="line">    <span class="comment">// 哈希表的大小</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> size;</span><br><span class="line">    <span class="comment">// 等于size-1，用于计算索引值, 这里说明size肯定是2的幂</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> sizemask;</span><br><span class="line">    <span class="comment">// 已有的键值对数量</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> used;</span><br><span class="line">&#125; dictht;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="c++">typedef struct dictht &#123;
+     // table 数组
+    dictEntry **table;
+    // 哈希表的大小
+    unsigned long size;
+    // 等于size-1，用于计算索引值, 这里说明size肯定是2的幂
+    unsigned long sizemask;
+    // 已有的键值对数量
+    unsigned long used;
+&#125; dictht;
+</code></pre>
 <p><code>dictEntry</code>就是哈希节点了：<a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/2.6/src/dict.h#L47-L55">redis&#x2F;dict.h at 2.6 · redis&#x2F;redis (github.com)</a></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">dictEntry</span> &#123;</span><br><span class="line">    <span class="comment">// 键</span></span><br><span class="line">    <span class="type">void</span> *key;</span><br><span class="line">    <span class="comment">// 值   </span></span><br><span class="line">    <span class="keyword">union</span> &#123;</span><br><span class="line">        <span class="type">void</span> *val;</span><br><span class="line">        <span class="type">uint64_t</span> u64;</span><br><span class="line">        <span class="type">int64_t</span> s64;</span><br><span class="line">    &#125; v;</span><br><span class="line">    <span class="comment">// 指向下一个哈希表节点，形成链表</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">dictEntry</span> *next;</span><br><span class="line">&#125; dictEntry;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="c++">typedef struct dictEntry &#123;
+    // 键
+    void *key;
+    // 值   
+    union &#123;
+        void *val;
+        uint64_t u64;
+        int64_t s64;
+    &#125; v;
+    // 指向下一个哈希表节点，形成链表
+    struct dictEntry *next;
+&#125; dictEntry;
+</code></pre>
 <p>Redis中的字典则由<code>dict</code>组成：<a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/2.6/src/dict.h#L75-L81">redis&#x2F;dict.h at 2.6 · redis&#x2F;redis (github.com)</a></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">dict</span> &#123;</span><br><span class="line">    <span class="comment">// 类型特定的函数，提供增删改查等功能 </span></span><br><span class="line">    dictType *type;</span><br><span class="line">   <span class="comment">// 私有函数</span></span><br><span class="line">    <span class="type">void</span> *privdata;</span><br><span class="line">    <span class="comment">// 哈希表, 这里的二维是后面用来扩容的</span></span><br><span class="line">    dictht ht[<span class="number">2</span>];</span><br><span class="line">    <span class="comment">// rehash 索引，记录了当前扩容的进度</span></span><br><span class="line">    <span class="type">int</span> rehashidx; <span class="comment">/* rehashing not in progress if rehashidx == -1 */</span></span><br><span class="line">    <span class="comment">// 用来记录当前运行的安全迭代器数，当不为0的时候表示有安全迭代器正在执行，这时候就会暂停rehash操作</span></span><br><span class="line">    <span class="type">int</span> iterators; <span class="comment">/* number of iterators currently running */</span></span><br><span class="line">&#125; dict;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="c++">typedef struct dict &#123;
+    // 类型特定的函数，提供增删改查等功能 
+    dictType *type;
+   // 私有函数
+    void *privdata;
+    // 哈希表, 这里的二维是后面用来扩容的
+    dictht ht[2];
+    // rehash 索引，记录了当前扩容的进度
+    int rehashidx; /* rehashing not in progress if rehashidx == -1 */
+    // 用来记录当前运行的安全迭代器数，当不为0的时候表示有安全迭代器正在执行，这时候就会暂停rehash操作
+    int iterators; /* number of iterators currently running */
+&#125; dict;
+</code></pre>
 <p><img lazy="https://selfb.asia/public/post/2023-2-3-0c4958ca-7128-481d-807c-0c95384937ec.webp" alt="总览"></p>
 <h1 id="2-Redis扩容与缩容"><a href="#2-Redis扩容与缩容" class="headerlink" title="2. Redis扩容与缩容"></a>2. Redis扩容与缩容</h1><p>我们用<code>ht[0].used/ht[0].size</code>表示负载因子</p>
 <h2 id="2-1-扩容"><a href="#2-1-扩容" class="headerlink" title="2.1 扩容"></a>2.1 扩容</h2><ul>
@@ -450,8 +505,8 @@
 <p>假设此时哈希表容量为<code>n</code>，元素数量为<code>n</code>，在扩容哈希表容量后变为<code>2n</code>，而对于Redis来说，完成rehash需要<code>2n - n = n</code>次操作，所以我们最多进行<code>n</code>次插入，插入完后元素数量也变为<code>2n</code>，再次触发扩容。</p>
 <p>对于负载因子为5的时候，假设此时哈希表容量为<code>n</code>，元素数量为<code>5n + 1</code>，扩容后哈希表容量为<code>2n</code>，同样我们可以插入<code>n</code>个元素，此时元素数量变为<code>6n + 1</code>，负载因子为<code>(6n + 1) / 2n</code>约等于3，此时不会触发扩容。</p>
 <h1 id="3-字典遍历"><a href="#3-字典遍历" class="headerlink" title="3. 字典遍历"></a>3. 字典遍历</h1><h2 id="3-1-全遍历"><a href="#3-1-全遍历" class="headerlink" title="3.1 全遍历"></a>3.1 全遍历</h2><p>使用如下指令就会执行全遍历，返回所有的key：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keys *</span><br></pre></td></tr></table></figure>
-
+<pre><code class="shell">keys *
+</code></pre>
 <p>优点：</p>
 <ul>
 <li>返回的key不会重复</li>
@@ -461,8 +516,15 @@
 <li>在遍历完前会阻塞服务器</li>
 </ul>
 <p>迭代器结构：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">dictIterator</span> &#123;</span><br><span class="line">    dict *d; <span class="comment">//迭代的字典</span></span><br><span class="line">    <span class="type">int</span> index; <span class="comment">//当前迭代到Hash表中哪个索引值</span></span><br><span class="line">    <span class="type">int</span> table, safe; <span class="comment">//table用于表示当前正在迭代的Hash表,即ht[0]与ht[1]，safe用于表示当前创建的是否为安全迭代器</span></span><br><span class="line">    dictEntry *entry, *nextEntry;<span class="comment">//当前节点，下一个节点</span></span><br><span class="line">    <span class="comment">/* unsafe iterator fingerprint for misuse detection. */</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> fingerprint;<span class="comment">//字典的指纹，当字典未发生改变时，该值不变，发生改变时则值也随着改变</span></span><br><span class="line">&#125; dictIterator;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="c++">typedef struct dictIterator &#123;
+    dict *d; //迭代的字典
+    int index; //当前迭代到Hash表中哪个索引值
+    int table, safe; //table用于表示当前正在迭代的Hash表,即ht[0]与ht[1]，safe用于表示当前创建的是否为安全迭代器
+    dictEntry *entry, *nextEntry;//当前节点，下一个节点
+    /* unsafe iterator fingerprint for misuse detection. */
+    long long fingerprint;//字典的指纹，当字典未发生改变时，该值不变，发生改变时则值也随着改变
+&#125; dictIterator;
+</code></pre>
 <h3 id="3-3-1-安全迭代器和非安全迭代器"><a href="#3-3-1-安全迭代器和非安全迭代器" class="headerlink" title="3.3.1 安全迭代器和非安全迭代器"></a>3.3.1 安全迭代器和非安全迭代器</h3><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/damanchen/article/details/89474695">Redis源码学习——安全迭代器和非安全迭代器（一）_damanchen的博客-CSDN博客</a></p>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/damanchen/article/details/89479299">Redis源码学习——安全迭代器和非安全迭代器（二）_damanchen的博客-CSDN博客</a></p>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/42156903">跋山涉水 —— 深入 Redis 字典遍历 - 知乎 (zhihu.com)</a></p>
@@ -475,8 +537,31 @@
 <li>迭代的时候可以rehash，但是不能进行删除等操作(字典只读)，通过<code>fingerprint</code>字段来判断字典是否发生变动</li>
 </ul>
 <h2 id="3-2-间接遍历"><a href="#3-2-间接遍历" class="headerlink" title="3.2 间接遍历"></a>3.2 间接遍历</h2><p>使用<code>scan</code>命令可以间接遍历，这个命令每次会返回一个下一个需要遍历的索引值：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">redis 127.0.0.1:6379&amp;gt; scan 0</span><br><span class="line">1) &quot;17&quot;</span><br><span class="line">2)  1) &quot;key:12&quot;</span><br><span class="line">    2) &quot;key:8&quot;</span><br><span class="line">    3) &quot;key:4&quot;</span><br><span class="line">    4) &quot;key:14&quot;</span><br><span class="line">    5) &quot;key:16&quot;</span><br><span class="line">    6) &quot;key:17&quot;</span><br><span class="line">    7) &quot;key:15&quot;</span><br><span class="line">    8) &quot;key:10&quot;</span><br><span class="line">    9) &quot;key:3&quot;</span><br><span class="line">   10) &quot;key:7&quot;</span><br><span class="line">   11) &quot;key:1&quot;</span><br><span class="line">redis 127.0.0.1:6379&amp;gt; scan 17</span><br><span class="line">1) &quot;0&quot;</span><br><span class="line">2) 1) &quot;key:5&quot;</span><br><span class="line">   2) &quot;key:18&quot;</span><br><span class="line">   3) &quot;key:0&quot;</span><br><span class="line">   4) &quot;key:2&quot;</span><br><span class="line">   5) &quot;key:19&quot;</span><br><span class="line">   6) &quot;key:13&quot;</span><br><span class="line">   7) &quot;key:6&quot;</span><br><span class="line">   8) &quot;key:9&quot;</span><br><span class="line">   9) &quot;key:11&quot;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="shell">redis 127.0.0.1:6379&amp;gt; scan 0
+1) &quot;17&quot;
+2)  1) &quot;key:12&quot;
+    2) &quot;key:8&quot;
+    3) &quot;key:4&quot;
+    4) &quot;key:14&quot;
+    5) &quot;key:16&quot;
+    6) &quot;key:17&quot;
+    7) &quot;key:15&quot;
+    8) &quot;key:10&quot;
+    9) &quot;key:3&quot;
+   10) &quot;key:7&quot;
+   11) &quot;key:1&quot;
+redis 127.0.0.1:6379&amp;gt; scan 17
+1) &quot;0&quot;
+2) 1) &quot;key:5&quot;
+   2) &quot;key:18&quot;
+   3) &quot;key:0&quot;
+   4) &quot;key:2&quot;
+   5) &quot;key:19&quot;
+   6) &quot;key:13&quot;
+   7) &quot;key:6&quot;
+   8) &quot;key:9&quot;
+   9) &quot;key:11&quot;
+</code></pre>
 <p><a target="_blank" rel="noopener" href="https://redis.com.cn/commands/scan.html">Redis SCAN 命令</a></p>
 <p>优点：</p>
 <ul>
@@ -499,23 +584,55 @@
 <p>总结一下就是<code>scan</code>命令会在哈希表缩容的时候造成数据重复，在rehash的期间也会造成重复。</p>
 <p>在rehash期间调用<code>scan</code>，Redis会先扫小表，假如最终索引为v，然后会接着在大表中从v开始扫。</p>
 <h1 id="4-五大基本数据类型"><a href="#4-五大基本数据类型" class="headerlink" title="4. 五大基本数据类型"></a>4. 五大基本数据类型</h1><p>在看数据类型前，我们再回顾一下entry的结构：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">dictEntry</span> &#123;</span><br><span class="line">    <span class="comment">// 键</span></span><br><span class="line">    <span class="type">void</span> *key;</span><br><span class="line">    <span class="comment">// 值   </span></span><br><span class="line">    <span class="keyword">union</span> &#123;</span><br><span class="line">        <span class="type">void</span> *val;</span><br><span class="line">        <span class="type">uint64_t</span> u64;</span><br><span class="line">        <span class="type">int64_t</span> s64;</span><br><span class="line">    &#125; v;</span><br><span class="line">    <span class="comment">// 指向下一个哈希表节点，形成链表</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">dictEntry</span> *next;</span><br><span class="line">&#125; dictEntry;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="c++">typedef struct dictEntry &#123;
+    // 键
+    void *key;
+    // 值   
+    union &#123;
+        void *val;
+        uint64_t u64;
+        int64_t s64;
+    &#125; v;
+    // 指向下一个哈希表节点，形成链表
+    struct dictEntry *next;
+&#125; dictEntry;
+</code></pre>
 <p>有没有发现一个问题：这个v代表值，那么这个值是个什么东西？？</p>
 <p>这里其实是C语言的union，可以让多个变量使用同一个内存空间：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/595288133">C&#x2F;C++ union 使用教程 (常见操作与缺陷) - 知乎 (zhihu.com)</a></p>
 <p>你可以这样理解：这里的v即有三种类型，即<code>void*</code>、<code>uint64_t</code>(64位无符号整数)、<code>int64_t</code>(64位有符号整数)。</p>
 <p>对应<code>void*</code>你可以理解为Java中的<code>Object</code>类型，用它做参数的话就可以传入任意对象，更详细的信息可以看这篇博客：<a target="_blank" rel="noopener" href="https://blog.csdn.net/NeverLate_gogogo/article/details/79308195">void<em>（指针）的类型转换-专讲_void</em>转换_NeverLate_gogogo的博客-CSDN博客</a></p>
 <hr>
 <p>一般情况下<code>void*</code>都是指向<code>redisObject </code>：<a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/cb1717865804fdb0561e728d2f3a0a1138099d9d/README.md?plain=1#L323">redis&#x2F;README.md at cb1717865804fdb0561e728d2f3a0a1138099d9d · redis&#x2F;redis (github.com)</a></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">redisObject</span> &#123;</span><br><span class="line">    <span class="type">unsigned</span> type:<span class="number">4</span>;</span><br><span class="line">    <span class="type">unsigned</span> encoding:<span class="number">4</span>;</span><br><span class="line">    <span class="type">unsigned</span> lru:LRU_BITS; <span class="comment">/* LRU time (relative to global lru_clock) or</span></span><br><span class="line"><span class="comment">                            * LFU data (least significant 8 bits frequency</span></span><br><span class="line"><span class="comment">                            * and most significant 16 bits access time). */</span></span><br><span class="line">    <span class="type">int</span> refcount;</span><br><span class="line">    <span class="type">void</span> *ptr;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="c++">struct redisObject &#123;
+    unsigned type:4;
+    unsigned encoding:4;
+    unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or
+                            * LFU data (least significant 8 bits frequency
+                            * and most significant 16 bits access time). */
+    int refcount;
+    void *ptr;
+&#125;;
+</code></pre>
 <ul>
 <li><p><code>type</code>：没啥好说的，每种数据结构的标识符</p>
 </li>
 <li><p><code>encoding</code>：编码</p>
 <ul>
 <li><p>以string来说，就有三种：<code>int</code> , <code>embstr</code> , <code>raw</code>：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&amp;gt; SET counter 1</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&amp;gt; OBJECT ENCODING counter</span><br><span class="line">&quot;int&quot;</span><br><span class="line">127.0.0.1:6379&amp;gt; SET name &quot;Tom&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&amp;gt; OBJECT ENCODING name</span><br><span class="line">&quot;embstr&quot;</span><br><span class="line">127.0.0.1:6379&amp;gt; SETBIT bits 1 1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&amp;gt; OBJECT ENCODING bits</span><br><span class="line">&quot;raw&quot;</span><br></pre></td></tr></table></figure></li>
+<pre><code class="shell">127.0.0.1:6379&amp;gt; SET counter 1
+OK
+127.0.0.1:6379&amp;gt; OBJECT ENCODING counter
+&quot;int&quot;
+127.0.0.1:6379&amp;gt; SET name &quot;Tom&quot;
+OK
+127.0.0.1:6379&amp;gt; OBJECT ENCODING name
+&quot;embstr&quot;
+127.0.0.1:6379&amp;gt; SETBIT bits 1 1
+(integer) 0
+127.0.0.1:6379&amp;gt; OBJECT ENCODING bits
+&quot;raw&quot;
+</code></pre>
+</li>
 </ul>
 </li>
 <li><p><code>lru</code>：给Redis做内存淘汰用</p>
@@ -532,12 +649,51 @@
 <li>超过 1M，扩容时一次只会多扩 1M 的空间</li>
 </ul>
 <p>字符串最大长度为512MB。<br>数据结构：<a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/cb1717865804fdb0561e728d2f3a0a1138099d9d/src/sds.h#L45">redis&#x2F;sds.h at cb1717865804fdb0561e728d2f3a0a1138099d9d · redis&#x2F;redis (github.com)</a></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> SDS_TYPE_5  0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SDS_TYPE_8  1</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SDS_TYPE_16 2</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SDS_TYPE_32 3</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SDS_TYPE_64 4</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="type">char</span> *sds;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">__attribute__</span> ((__packed__)) sdshdr8 &#123;</span><br><span class="line">    <span class="type">uint8_t</span> len; <span class="comment">/* used */</span></span><br><span class="line">    <span class="type">uint8_t</span> alloc; <span class="comment">/* excluding the header and null terminator */</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> flags; <span class="comment">/* 3 lsb of type, 5 unused bits */</span></span><br><span class="line">    <span class="type">char</span> buf[];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">__attribute__</span> ((__packed__)) sdshdr16 &#123;</span><br><span class="line">    <span class="type">uint16_t</span> len; <span class="comment">/* used */</span></span><br><span class="line">    <span class="type">uint16_t</span> alloc; <span class="comment">/* excluding the header and null terminator */</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> flags; <span class="comment">/* 3 lsb of type, 5 unused bits */</span></span><br><span class="line">    <span class="type">char</span> buf[];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">__attribute__</span> ((__packed__)) sdshdr32 &#123;</span><br><span class="line">    <span class="type">uint32_t</span> len; <span class="comment">/* used */</span></span><br><span class="line">    <span class="type">uint32_t</span> alloc; <span class="comment">/* excluding the header and null terminator */</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> flags; <span class="comment">/* 3 lsb of type, 5 unused bits */</span></span><br><span class="line">    <span class="type">char</span> buf[];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">__attribute__</span> ((__packed__)) sdshdr64 &#123;</span><br><span class="line">    <span class="type">uint64_t</span> len; <span class="comment">/* used */</span></span><br><span class="line">    <span class="type">uint64_t</span> alloc; <span class="comment">/* excluding the header and null terminator */</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> flags; <span class="comment">/* 3 lsb of type, 5 unused bits */</span></span><br><span class="line">    <span class="type">char</span> buf[];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<pre><code class="c++">#define SDS_TYPE_5  0
+#define SDS_TYPE_8  1
+#define SDS_TYPE_16 2
+#define SDS_TYPE_32 3
+#define SDS_TYPE_64 4
+typedef char *sds;
 
+struct __attribute__ ((__packed__)) sdshdr8 &#123;
+    uint8_t len; /* used */
+    uint8_t alloc; /* excluding the header and null terminator */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    char buf[];
+&#125;;
+struct __attribute__ ((__packed__)) sdshdr16 &#123;
+    uint16_t len; /* used */
+    uint16_t alloc; /* excluding the header and null terminator */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    char buf[];
+&#125;;
+struct __attribute__ ((__packed__)) sdshdr32 &#123;
+    uint32_t len; /* used */
+    uint32_t alloc; /* excluding the header and null terminator */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    char buf[];
+&#125;;
+struct __attribute__ ((__packed__)) sdshdr64 &#123;
+    uint64_t len; /* used */
+    uint64_t alloc; /* excluding the header and null terminator */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    char buf[];
+&#125;;
+</code></pre>
 <p>我们可以发现，字符串结构体基本由<code>len</code>(已使用的长度)、<code>alloc</code>(最大长度&#x2F;分配的长度)、<code>flags</code>(标志信息)、<code>buf</code>(字符串内容)组成。</p>
 <p>字符串拼接：<a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/cb1717865804fdb0561e728d2f3a0a1138099d9d/src/sds.c#LL483">redis&#x2F;sds.c at cb1717865804fdb0561e728d2f3a0a1138099d9d · redis&#x2F;redis · GitHub</a></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">sds <span class="title">sdscatlen</span><span class="params">(sds s, <span class="type">const</span> <span class="type">void</span> *t, <span class="type">size_t</span> len)</span> </span>&#123;</span><br><span class="line">    <span class="type">size_t</span> curlen = <span class="built_in">sdslen</span>(s);</span><br><span class="line">    s = <span class="built_in">sdsMakeRoomFor</span>(s,len);</span><br><span class="line">    <span class="comment">// 内存不足</span></span><br><span class="line">    <span class="keyword">if</span> (s == <span class="literal">NULL</span>) <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    <span class="built_in">memcpy</span>(s+curlen, t, len);</span><br><span class="line">    <span class="built_in">sdssetlen</span>(s, curlen+len);</span><br><span class="line">    s[curlen+len] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">    <span class="keyword">return</span> s;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="c++">sds sdscatlen(sds s, const void *t, size_t len) &#123;
+    size_t curlen = sdslen(s);
+    s = sdsMakeRoomFor(s,len);
+    // 内存不足
+    if (s == NULL) return NULL;
+    memcpy(s+curlen, t, len);
+    sdssetlen(s, curlen+len);
+    s[curlen+len] = &#39;\0&#39;;
+    return s;
+&#125;
+</code></pre>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/269496479">要懂redis，首先得看懂sds（全网最细节的sds讲解） - 知乎 (zhihu.com)</a></p>
 <h2 id="4-2-Hash"><a href="#4-2-Hash" class="headerlink" title="4.2 Hash"></a>4.2 Hash</h2><p>Hash类型有两种实现方式：</p>
 <ul>
@@ -552,8 +708,18 @@
 <li>当hash中的数据项的数目超过512的时候，也就是ziplist数据项超过1024的时候</li>
 <li>当hash中插入的任意一个value的长度超过了64的时候</li>
 </ul>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">area        |&amp;lt;---- ziplist header ----&amp;gt;|&amp;lt;----------- entries -------------&amp;gt;|&amp;lt;-end-&amp;gt;|</span><br><span class="line"></span><br><span class="line">size          4 bytes  4 bytes  2 bytes    ?        ?        ?        ?     1 byte</span><br><span class="line">            +---------+--------+-------+--------+--------+--------+--------+-------+</span><br><span class="line">component   | zlbytes | zltail | zllen | entry1 | entry2 |  ...   | entryN | zlend |</span><br><span class="line">            +---------+--------+-------+--------+--------+--------+--------+-------+</span><br><span class="line">                                       ^                          ^        ^</span><br><span class="line">address                                |                          |        |</span><br><span class="line">                                ZIPLIST_ENTRY_HEAD                |   ZIPLIST_ENTRY_END</span><br><span class="line">                                                                  |</span><br><span class="line">                                                         ZIPLIST_ENTRY_TAIL</span><br></pre></td></tr></table></figure>
+<pre><code class="text">area        |&amp;lt;---- ziplist header ----&amp;gt;|&amp;lt;----------- entries -------------&amp;gt;|&amp;lt;-end-&amp;gt;|
 
+size          4 bytes  4 bytes  2 bytes    ?        ?        ?        ?     1 byte
+            +---------+--------+-------+--------+--------+--------+--------+-------+
+component   | zlbytes | zltail | zllen | entry1 | entry2 |  ...   | entryN | zlend |
+            +---------+--------+-------+--------+--------+--------+--------+-------+
+                                       ^                          ^        ^
+address                                |                          |        |
+                                ZIPLIST_ENTRY_HEAD                |   ZIPLIST_ENTRY_END
+                                                                  |
+                                                         ZIPLIST_ENTRY_TAIL
+</code></pre>
 <table>
 <thead>
 <tr>
@@ -589,8 +755,10 @@
 </tr>
 </tbody></table>
 <p>每个<code>entry</code>的结构是这样的：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">+-----------------------+----------+---------+</span><br><span class="line">| previous_entry_length | encoding | content |</span><br><span class="line">+-----------------------+----------+---------+</span><br></pre></td></tr></table></figure>
-
+<pre><code class="text">+-----------------------+----------+---------+
+| previous_entry_length | encoding | content |
++-----------------------+----------+---------+
+</code></pre>
 <p><code>previous_entry_length</code>：前面一个节点的长度(字节)。若前面一个节点的长度小于254字节，则该属性占1个字节的宽度，反正则是占5个字节的宽度，第一个字节是常量<code>0xFE</code>(254)</p>
 <p><code>encoding</code>：记录content的类型</p>
 <p><code>content</code>：保存节点的值</p>
@@ -618,8 +786,13 @@
 <li>元素数量超过了512个</li>
 </ul>
 <h3 id="4-4-1-intset"><a href="#4-4-1-intset" class="headerlink" title="4.4.1 intset"></a>4.4.1 intset</h3><p>数据结构：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">intset</span> &#123;</span><br><span class="line">    <span class="comment">// 这个编码用来决定contents的大小</span></span><br><span class="line">    <span class="type">uint32_t</span> encoding;</span><br><span class="line">    <span class="type">uint32_t</span> length;</span><br><span class="line">    <span class="type">int8_t</span> contents[];</span><br><span class="line">&#125; intset;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="c++">typedef struct intset &#123;
+    // 这个编码用来决定contents的大小
+    uint32_t encoding;
+    uint32_t length;
+    int8_t contents[];
+&#125; intset;
+</code></pre>
 <p><a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/971b177fa338fe06cb67a930c6e54467d29ec44f/src/intset.h#L35">redis&#x2F;intset.h at 971b177fa338fe06cb67a930c6e54467d29ec44f · redis&#x2F;redis (github.com)</a></p>
 <p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6998360508462006308">面试官：说说Redis中Set数据类型的底层实现 - 掘金 (juejin.cn)</a></p>
 <h2 id="4-5-zset-Sorted-Set"><a href="#4-5-zset-Sorted-Set" class="headerlink" title="4.5 zset(Sorted Set)"></a>4.5 zset(Sorted Set)</h2><p>zset有两种实现：</p>
@@ -641,11 +814,37 @@
 <li>length：记录跳跃表的长度，也即是，跳跃表目前包含节点的数量(表头节点不计算在内)</li>
 </ul>
 <p>节点数据结构：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">zskiplistNode</span> &#123;</span><br><span class="line">    <span class="comment">// 当前保存的值</span></span><br><span class="line">    sds ele;</span><br><span class="line">    <span class="comment">// 分值，用于排序</span></span><br><span class="line">    <span class="type">double</span> score;</span><br><span class="line">    <span class="comment">// 前一个节点</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">zskiplistNode</span> *backward;</span><br><span class="line">    <span class="comment">// 当前层节点</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">zskiplistLevel</span> &#123;</span><br><span class="line">        <span class="keyword">struct</span> <span class="title class_">zskiplistNode</span> *forward;</span><br><span class="line">        <span class="comment">// 跳表的跨度</span></span><br><span class="line">        <span class="type">unsigned</span> <span class="type">long</span> span;</span><br><span class="line">    &#125; level[];</span><br><span class="line">&#125; zskiplistNode;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="c++">typedef struct zskiplistNode &#123;
+    // 当前保存的值
+    sds ele;
+    // 分值，用于排序
+    double score;
+    // 前一个节点
+    struct zskiplistNode *backward;
+    // 当前层节点
+    struct zskiplistLevel &#123;
+        struct zskiplistNode *forward;
+        // 跳表的跨度
+        unsigned long span;
+    &#125; level[];
+&#125; zskiplistNode;
+</code></pre>
 <p><a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/971b177fa338fe06cb67a930c6e54467d29ec44f/src/server.h#L1329">redis&#x2F;server.h at 971b177fa338fe06cb67a930c6e54467d29ec44f · redis&#x2F;redis (github.com)</a></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 跳表</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">zskiplist</span> &#123;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">zskiplistNode</span> *header, *tail;</span><br><span class="line">    <span class="comment">// 跳表的长度</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> length;</span><br><span class="line">    <span class="comment">// 最高层数</span></span><br><span class="line">    <span class="type">int</span> level;</span><br><span class="line">&#125; zskiplist;</span><br><span class="line"></span><br><span class="line"><span class="comment">// zset数据结构</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">zset</span> &#123;</span><br><span class="line">    dict *dict;</span><br><span class="line">    zskiplist *zsl;</span><br><span class="line">&#125; zset;</span><br></pre></td></tr></table></figure>
+<pre><code class="c++">// 跳表
+typedef struct zskiplist &#123;
+    struct zskiplistNode *header, *tail;
+    // 跳表的长度
+    unsigned long length;
+    // 最高层数
+    int level;
+&#125; zskiplist;
 
+// zset数据结构
+typedef struct zset &#123;
+    dict *dict;
+    zskiplist *zsl;
+&#125; zset;
+</code></pre>
 <h1 id="5-Redis持久化方式"><a href="#5-Redis持久化方式" class="headerlink" title="5. Redis持久化方式"></a>5. Redis持久化方式</h1><h2 id="5-1-RDB"><a href="#5-1-RDB" class="headerlink" title="5.1 RDB"></a>5.1 RDB</h2><p>RDB即Redis Database，它会将Redis某一时刻的数据以文件的形式全量备份到磁盘。</p>
 <p>Redis提供了两个指令来生成RDB，一个是SAVE，这个命令会阻塞主线程，直到RDB生成完毕。</p>
 <p>另外一个则是BGSAVE，这时会fork一个子进程去专门负责写入RDB。</p>
@@ -656,11 +855,14 @@
 <p>Redis默认每秒执行一次AOF的写入。</p>
 <h3 id="5-2-1-AOF重写"><a href="#5-2-1-AOF重写" class="headerlink" title="5.2.1 AOF重写"></a>5.2.1 AOF重写</h3><p>为了防止AOF文件过大，当AOF的文件大小超过设定的阈值后，Redis就会启动AOF的文件压缩。</p>
 <p>压缩前：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sadd animals &quot;cat&quot;</span><br><span class="line">sadd animals &quot;dog&quot;</span><br><span class="line">sadd animals &quot;cat&quot;</span><br><span class="line">sadd animals &quot;lion&quot;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="shell">sadd animals &quot;cat&quot;
+sadd animals &quot;dog&quot;
+sadd animals &quot;cat&quot;
+sadd animals &quot;lion&quot;
+</code></pre>
 <p>压缩后：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sadd animals &quot;cat&quot; &quot;dog&quot; &quot;lion&quot;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="shell">sadd animals &quot;cat&quot; &quot;dog&quot; &quot;lion&quot;
+</code></pre>
 <h1 id="6-内存"><a href="#6-内存" class="headerlink" title="6. 内存"></a>6. 内存</h1><h2 id="6-1-内存过期策略"><a href="#6-1-内存过期策略" class="headerlink" title="6.1 内存过期策略"></a>6.1 内存过期策略</h2><p>Redis对于过期的key有两种删除策略：</p>
 <ul>
 <li>定期删除</li>
@@ -689,8 +891,16 @@
 </li>
 </ol>
 <p>关于LRU和LFU，在redisObject里会保存相关的参数：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">redisObject</span> &#123;</span><br><span class="line">    <span class="type">unsigned</span> type:<span class="number">4</span>;</span><br><span class="line">    <span class="type">unsigned</span> encoding:<span class="number">4</span>;</span><br><span class="line">    <span class="type">unsigned</span> lru:LRU_BITS; <span class="comment">/* LRU time (relative to global lru_clock) or</span></span><br><span class="line"><span class="comment">                            * LFU data (least significant 8 bits frequency</span></span><br><span class="line"><span class="comment">                            * and most significant 16 bits access time). */</span></span><br><span class="line">    <span class="type">int</span> refcount;</span><br><span class="line">    <span class="type">void</span> *ptr;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="c++">struct redisObject &#123;
+    unsigned type:4;
+    unsigned encoding:4;
+    unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or
+                            * LFU data (least significant 8 bits frequency
+                            * and most significant 16 bits access time). */
+    int refcount;
+    void *ptr;
+&#125;;
+</code></pre>
 <p><a target="_blank" rel="noopener" href="https://github.com/redis/redis/blob/cb1717865804fdb0561e728d2f3a0a1138099d9d/README.md?plain=1#L323">redis&#x2F;README.md at cb1717865804fdb0561e728d2f3a0a1138099d9d · redis&#x2F;redis (github.com)</a></p>
 <ul>
 <li>当使用LRU算法时，<code>lru</code>整个值都用来表示相关访问时间。</li>
@@ -713,8 +923,17 @@
 <li>新增的缓存容易被删除</li>
 </ul>
 <p>而Redis在此基础上会将每个数据的访问次数设置为<code>5</code>，每次访问会根据其上次访问时间<font color=red>扣除</font>一定的访问次数，然后再根据生成的一个随机数，决定是否对访问次数字段加一：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">uint8_t</span> <span class="title">LFULogIncr</span><span class="params">(<span class="type">uint8_t</span> counter)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (counter == <span class="number">255</span>) <span class="keyword">return</span> <span class="number">255</span>;</span><br><span class="line">    <span class="type">double</span> r = (<span class="type">double</span>)<span class="built_in">rand</span>()/RAND_MAX;</span><br><span class="line">    <span class="type">double</span> baseval = counter - LFU_INIT_VAL;</span><br><span class="line">    <span class="keyword">if</span> (baseval &amp;lt; <span class="number">0</span>) baseval = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">// 访问次数越多，加一的概率越小</span></span><br><span class="line">    <span class="type">double</span> p = <span class="number">1.0</span>/(baseval*server.lfu_log_factor+<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">if</span> (r &amp;lt; p) counter++;</span><br><span class="line">    <span class="keyword">return</span> counter;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="c++">uint8_t LFULogIncr(uint8_t counter) &#123;
+    if (counter == 255) return 255;
+    double r = (double)rand()/RAND_MAX;
+    double baseval = counter - LFU_INIT_VAL;
+    if (baseval &amp;lt; 0) baseval = 0;
+    // 访问次数越多，加一的概率越小
+    double p = 1.0/(baseval*server.lfu_log_factor+1);
+    if (r &amp;lt; p) counter++;
+    return counter;
+&#125;
+</code></pre>
 <p>其中<code>server.lfu_log_factor</code>默认为10。</p>
 <p>因为访问计数器的长度为8位，最大为255，如果每次访问都加一，很可能会导致溢出。</p>
 <p><a target="_blank" rel="noopener" href="https://time.geekbang.org/column/article/413038">16 | LFU算法和其他算法相比有优势吗？ (geekbang.org)</a></p>
@@ -812,8 +1031,21 @@
         <div class="content" v-pre>
             
             <h1 id="1-基础"><a href="#1-基础" class="headerlink" title="1. 基础"></a>1. 基础</h1><p>通过<code>AnnotationConfigApplicationContext</code>可以创建一个Spring容器：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MySpringApplication</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">AnnotationConfigApplicationContext</span> <span class="variable">applicationContext</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AnnotationConfigApplicationContext</span>(AppConfig.class);</span><br><span class="line"></span><br><span class="line">        <span class="type">UserService</span> <span class="variable">userService</span> <span class="operator">=</span> (UserService) applicationContext.getBean(<span class="string">&quot;userService&quot;</span>);</span><br><span class="line">        userService.test();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@ComponentScan(&quot;pers.xds.springboot&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AppConfig</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<pre><code class="java">public class MySpringApplication &#123;
 
+    public static void main(String[] args) &#123;
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+
+        UserService userService = (UserService) applicationContext.getBean(&quot;userService&quot;);
+        userService.test();
+    &#125;
+
+&#125;
+
+@ComponentScan(&quot;pers.xds.springboot&quot;)
+public class AppConfig &#123;
+&#125;
+</code></pre>
 <h2 id="1-1-生命周期"><a href="#1-1-生命周期" class="headerlink" title="1.1 生命周期"></a>1.1 生命周期</h2><p>可以在<code>AbstractAutowireCapableBeanFactory#doCreateBean</code>中看到完整的bean生成流程。</p>
 <p>大致分为如下过程：</p>
 <p>1.对Bean进行实例化</p>
@@ -843,8 +1075,23 @@
 <p><code>@Component</code>只能作用于类型上，表示这个类会作为组件类，并告诉Spring要为这个类创建bean。</p>
 <h3 id="1-6-1-Bean必须在-Configuration里使用吗"><a href="#1-6-1-Bean必须在-Configuration里使用吗" class="headerlink" title="1.6.1 @Bean必须在@Configuration里使用吗?"></a>1.6.1 @Bean必须在@Configuration里使用吗?</h3><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/40256702/spring-bean-can-still-work-without-configuration">Spring: @Bean can still work without @Configuration - Stack Overflow</a></p>
 <p><code>@Bean</code>在<code>@Configuration</code>表示的类里使用时，Spring会为其自动创建一个动态代理对象，在同一个配置类中可以直接调用方法来获取Bean：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ExampleConfiguration</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> Datasource <span class="title function_">datasource</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">BasicDatasource</span> <span class="variable">datasource</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BasicDatasource</span>();</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        <span class="keyword">return</span> datasource;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> PlatformTransactionManager <span class="title function_">transactionManager</span><span class="params">()</span> &#123;</span><br><span class="line">      	<span class="comment">// 注意这里是直接调用了方法，每次调用都会返回同一个bean，并不会多次创建</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">DataSourceTransactionManager</span>(datasource());</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="java">@Configuration
+public class ExampleConfiguration &#123;
+    
+    @Bean
+    public Datasource datasource() &#123;
+        BasicDatasource datasource = new BasicDatasource();
+        // ...
+        return datasource;
+    &#125;
+    
+    public PlatformTransactionManager transactionManager() &#123;
+          // 注意这里是直接调用了方法，每次调用都会返回同一个bean，并不会多次创建
+        return new DataSourceTransactionManager(datasource());
+    &#125;
+    
+&#125;
+</code></pre>
 <p>而在非<code>@Configuration</code>下定义的<code>@Bean</code>会以Lite Mode运作，在该模式下调用其它<code>@Bean</code>方法时，则是普通的方法调用(没有代理对象去拦截调用)。</p>
 <h2 id="1-7-Spring怎么解决循环依赖问题"><a href="#1-7-Spring怎么解决循环依赖问题" class="headerlink" title="1.7 Spring怎么解决循环依赖问题"></a>1.7 Spring怎么解决循环依赖问题</h2><p>对于构造器注入的循环依赖：Spring处理不了，直接抛出<code>BeanCurrentlylnCreationException</code>异常。</p>
 <p>非单例循环依赖：无法处理。</p>
@@ -853,8 +1100,31 @@
 <p><code>earlySingletonObjects</code>：完成实例化未初始化的单例对象map，bean name –&amp;gt; bean instance</p>
 <p><code>singletonFactories</code>： 单例对象工厂map，bean name –&amp;gt; ObjectFactory，存放 bean 工厂对象</p>
 <p>具体的执行逻辑可以在<code>DefaultSingletonBeanRegistry</code>中看到，这里贴出核心方法：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> Object <span class="title function_">getSingleton</span><span class="params">(String beanName, <span class="type">boolean</span> allowEarlyReference)</span> &#123;</span><br><span class="line">    <span class="type">Object</span> <span class="variable">singletonObject</span> <span class="operator">=</span> <span class="built_in">this</span>.singletonObjects.get(beanName);</span><br><span class="line">    <span class="keyword">if</span> (singletonObject == <span class="literal">null</span> &amp;&amp; <span class="built_in">this</span>.isSingletonCurrentlyInCreation(beanName)) &#123;</span><br><span class="line">        singletonObject = <span class="built_in">this</span>.earlySingletonObjects.get(beanName);</span><br><span class="line">        <span class="keyword">if</span> (singletonObject == <span class="literal">null</span> &amp;&amp; allowEarlyReference) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span>(<span class="built_in">this</span>.singletonObjects) &#123;</span><br><span class="line">                singletonObject = <span class="built_in">this</span>.singletonObjects.get(beanName);</span><br><span class="line">                <span class="keyword">if</span> (singletonObject == <span class="literal">null</span>) &#123;</span><br><span class="line">                    singletonObject = <span class="built_in">this</span>.earlySingletonObjects.get(beanName);</span><br><span class="line">                    <span class="keyword">if</span> (singletonObject == <span class="literal">null</span>) &#123;</span><br><span class="line">                        ObjectFactory&amp;lt;?&amp;gt; singletonFactory = (ObjectFactory)<span class="built_in">this</span>.singletonFactories.get(beanName);</span><br><span class="line">                        <span class="keyword">if</span> (singletonFactory != <span class="literal">null</span>) &#123;</span><br><span class="line">                            singletonObject = singletonFactory.getObject();</span><br><span class="line">                            <span class="built_in">this</span>.earlySingletonObjects.put(beanName, singletonObject);</span><br><span class="line">                            <span class="built_in">this</span>.singletonFactories.remove(beanName);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> singletonObject;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">protected Object getSingleton(String beanName, boolean allowEarlyReference) &#123;
+    Object singletonObject = this.singletonObjects.get(beanName);
+    if (singletonObject == null &amp;&amp; this.isSingletonCurrentlyInCreation(beanName)) &#123;
+        singletonObject = this.earlySingletonObjects.get(beanName);
+        if (singletonObject == null &amp;&amp; allowEarlyReference) &#123;
+            synchronized(this.singletonObjects) &#123;
+                singletonObject = this.singletonObjects.get(beanName);
+                if (singletonObject == null) &#123;
+                    singletonObject = this.earlySingletonObjects.get(beanName);
+                    if (singletonObject == null) &#123;
+                        ObjectFactory&amp;lt;?&amp;gt; singletonFactory = (ObjectFactory)this.singletonFactories.get(beanName);
+                        if (singletonFactory != null) &#123;
+                            singletonObject = singletonFactory.getObject();
+                            this.earlySingletonObjects.put(beanName, singletonObject);
+                            this.singletonFactories.remove(beanName);
+                        &#125;
+                    &#125;
+                &#125;
+            &#125;
+        &#125;
+    &#125;
 
+    return singletonObject;
+&#125;
+</code></pre>
 <h2 id="1-8-Spring的单例Bean是否有线程安全问题"><a href="#1-8-Spring的单例Bean是否有线程安全问题" class="headerlink" title="1.8 Spring的单例Bean是否有线程安全问题"></a>1.8 Spring的单例Bean是否有线程安全问题</h2><p>当多个用户同时请求一个服务时，容器会给每一个请求分配一个线程，这时多个线程会并发执行该请求对应的业务逻辑，如果业务逻辑有对单例状态的修改（体现为此单例的成员属性），则必须考虑线程安全问题。</p>
 <p>若每个线程中对全局变量、静态变量只有读操作，而无写操作，那么不会有线程安全问题；若有多个线程同时执行写操作，一般都需要考虑线程同步，否则就可能影响线程安全。</p>
 <p><strong>无状态bean和有状态bean</strong></p>
@@ -884,7 +1154,11 @@
 <li><p>构造会话工程(SqlSessionFactory)</p>
 </li>
 <li><p>创建会话对象(SqlSession)</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> (<span class="type">SqlSession</span> <span class="variable">session</span> <span class="operator">=</span> sqlSessionFactory.openSession()) &#123;</span><br><span class="line">  <span class="type">BlogMapper</span> <span class="variable">mapper</span> <span class="operator">=</span> session.getMapper(BlogMapper.class);</span><br><span class="line">  <span class="type">Blog</span> <span class="variable">blog</span> <span class="operator">=</span> mapper.selectBlog(<span class="number">101</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">try (SqlSession session = sqlSessionFactory.openSession()) &#123;
+  BlogMapper mapper = session.getMapper(BlogMapper.class);
+  Blog blog = mapper.selectBlog(101);
+&#125;
+</code></pre>
 </li>
 <li><p>Executor执行器</p>
 <p>Mybatis会通过Executor去执行SQL语句。一般这里面会有缓存的实现。</p>

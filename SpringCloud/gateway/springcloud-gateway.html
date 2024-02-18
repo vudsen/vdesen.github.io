@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/gateway/" style="color: #00a596">服务网关</a>
+                <a href="/SpringCloud/gateway/" style="color: #03a9f4">服务网关</a>
             </span>
             
         </span>
@@ -217,23 +217,110 @@
 <p>web请求，通过一些匹配条件，定位到真正的服务节点。并在这个转发过程的前后，进行一些精细化控制。 </p>
 <p>predicate就是我们的匹配条件。而Filter，就可以理解为一个无所不能的拦截器。有了这两个元素，再加上目标URI，就可以实现一个具体的路由了.</p>
 <h1 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h1><p>导入依赖：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&amp;lt;dependency&amp;gt;</span><br><span class="line">    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;</span><br><span class="line">    &amp;lt;artifactId&amp;gt;spring-cloud-starter-gateway&amp;lt;/artifactId&amp;gt;</span><br><span class="line">&amp;lt;/dependency&amp;gt;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="java">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-gateway&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
 <p>注意不能导入<code>spring-boot-starter-web</code>，否则会报错。</p>
 <p>主启动类：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableDiscoveryClient</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GatewayMain9527</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        SpringApplication.run(GatewayMain9527.class, args);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@SpringBootApplication
+@EnableDiscoveryClient
+public class GatewayMain9527 &#123;
 
+    public static void main(String[] args) &#123;
+        SpringApplication.run(GatewayMain9527.class, args);
+    &#125;
+
+&#125;
+</code></pre>
 <h2 id="配置文件配置网关"><a href="#配置文件配置网关" class="headerlink" title="配置文件配置网关"></a>配置文件配置网关</h2><p>配置文件：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">9527</span></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">cloud-gateway</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">gateway:</span></span><br><span class="line">      <span class="attr">routes:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">payment_routh</span> <span class="comment"># 路由的id</span></span><br><span class="line">          <span class="attr">uri:</span> <span class="string">http://localhost:8001</span> <span class="comment"># 匹配后提供服务的路由地址</span></span><br><span class="line">          <span class="attr">predicates:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">Path=/payment/get/**</span> <span class="comment"># 断言</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">payment_routh2</span></span><br><span class="line">          <span class="attr">uri:</span> <span class="string">http://localhost:8001</span></span><br><span class="line">          <span class="attr">predicates:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">Path=/payment/lb/**</span></span><br><span class="line"></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">instance:</span></span><br><span class="line">    <span class="attr">hostname:</span> <span class="string">cloud-gateway-service</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">service-url:</span></span><br><span class="line">      <span class="attr">register-with-eureka:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">fetch-registry:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://localhost:7001/eureka</span></span><br></pre></td></tr></table></figure>
+<pre><code class="yaml">server:
+  port: 9527
+spring:
+  application:
+    name: cloud-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: payment_routh # 路由的id
+          uri: http://localhost:8001 # 匹配后提供服务的路由地址
+          predicates:
+            - Path=/payment/get/** # 断言
+        - id: payment_routh2
+          uri: http://localhost:8001
+          predicates:
+            - Path=/payment/lb/**
 
+eureka:
+  instance:
+    hostname: cloud-gateway-service
+  client:
+    service-url:
+      register-with-eureka: true
+      fetch-registry: true
+      defaultZone: http://localhost:7001/eureka
+</code></pre>
 <p>之后就可以通过网络来访问相关的服务了，这个功能类似于Nginx。</p>
 <h2 id="代码配置网关"><a href="#代码配置网关" class="headerlink" title="代码配置网关"></a>代码配置网关</h2><p>除了使用配置文件，还可以通过代码的方式配置网关。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DemogatewayApplication</span> &#123;</span><br><span class="line">	<span class="meta">@Bean</span></span><br><span class="line">	<span class="keyword">public</span> RouteLocator <span class="title function_">customRouteLocator</span><span class="params">(RouteLocatorBuilder builder)</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> builder.routes()</span><br><span class="line">			.route(<span class="string">&quot;path_route&quot;</span>, r -&amp;gt; r.path(<span class="string">&quot;/get&quot;</span>)</span><br><span class="line">				.uri(<span class="string">&quot;http://httpbin.org&quot;</span>))</span><br><span class="line">			.route(<span class="string">&quot;host_route&quot;</span>, r -&amp;gt; r.host(<span class="string">&quot;*.myhost.org&quot;</span>)</span><br><span class="line">				.uri(<span class="string">&quot;http://httpbin.org&quot;</span>))</span><br><span class="line">			.route(<span class="string">&quot;rewrite_route&quot;</span>, r -&amp;gt; r.host(<span class="string">&quot;*.rewrite.org&quot;</span>)</span><br><span class="line">				.filters(f -&amp;gt; f.rewritePath(<span class="string">&quot;/foo/(?&amp;lt;segment&amp;gt;.*)&quot;</span>, <span class="string">&quot;/$&#123;segment&#125;&quot;</span>))</span><br><span class="line">				.uri(<span class="string">&quot;http://httpbin.org&quot;</span>))</span><br><span class="line">			.route(<span class="string">&quot;hystrix_route&quot;</span>, r -&amp;gt; r.host(<span class="string">&quot;*.hystrix.org&quot;</span>)</span><br><span class="line">				.filters(f -&amp;gt; f.hystrix(c -&amp;gt; c.setName(<span class="string">&quot;slowcmd&quot;</span>)))</span><br><span class="line">				.uri(<span class="string">&quot;http://httpbin.org&quot;</span>))</span><br><span class="line">			.route(<span class="string">&quot;hystrix_fallback_route&quot;</span>, r -&amp;gt; r.host(<span class="string">&quot;*.hystrixfallback.org&quot;</span>)</span><br><span class="line">				.filters(f -&amp;gt; f.hystrix(c -&amp;gt; c.setName(<span class="string">&quot;slowcmd&quot;</span>).setFallbackUri(<span class="string">&quot;forward:/hystrixfallback&quot;</span>)))</span><br><span class="line">				.uri(<span class="string">&quot;http://httpbin.org&quot;</span>))</span><br><span class="line">			.route(<span class="string">&quot;limit_route&quot;</span>, r -&amp;gt; r</span><br><span class="line">				.host(<span class="string">&quot;*.limited.org&quot;</span>).and().path(<span class="string">&quot;/anything/**&quot;</span>)</span><br><span class="line">				.filters(f -&amp;gt; f.requestRateLimiter(c -&amp;gt; c.setRateLimiter(redisRateLimiter())))</span><br><span class="line">				.uri(<span class="string">&quot;http://httpbin.org&quot;</span>))</span><br><span class="line">			.build();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="java">@SpringBootApplication
+public class DemogatewayApplication &#123;
+    @Bean
+    public RouteLocator customRouteLocator(RouteLocatorBuilder builder) &#123;
+        return builder.routes()
+            .route(&quot;path_route&quot;, r -&amp;gt; r.path(&quot;/get&quot;)
+                .uri(&quot;http://httpbin.org&quot;))
+            .route(&quot;host_route&quot;, r -&amp;gt; r.host(&quot;*.myhost.org&quot;)
+                .uri(&quot;http://httpbin.org&quot;))
+            .route(&quot;rewrite_route&quot;, r -&amp;gt; r.host(&quot;*.rewrite.org&quot;)
+                .filters(f -&amp;gt; f.rewritePath(&quot;/foo/(?&amp;lt;segment&amp;gt;.*)&quot;, &quot;/$&#123;segment&#125;&quot;))
+                .uri(&quot;http://httpbin.org&quot;))
+            .route(&quot;hystrix_route&quot;, r -&amp;gt; r.host(&quot;*.hystrix.org&quot;)
+                .filters(f -&amp;gt; f.hystrix(c -&amp;gt; c.setName(&quot;slowcmd&quot;)))
+                .uri(&quot;http://httpbin.org&quot;))
+            .route(&quot;hystrix_fallback_route&quot;, r -&amp;gt; r.host(&quot;*.hystrixfallback.org&quot;)
+                .filters(f -&amp;gt; f.hystrix(c -&amp;gt; c.setName(&quot;slowcmd&quot;).setFallbackUri(&quot;forward:/hystrixfallback&quot;)))
+                .uri(&quot;http://httpbin.org&quot;))
+            .route(&quot;limit_route&quot;, r -&amp;gt; r
+                .host(&quot;*.limited.org&quot;).and().path(&quot;/anything/**&quot;)
+                .filters(f -&amp;gt; f.requestRateLimiter(c -&amp;gt; c.setRateLimiter(redisRateLimiter())))
+                .uri(&quot;http://httpbin.org&quot;))
+            .build();
+    &#125;
+&#125;
+</code></pre>
 <h1 id="动态路由"><a href="#动态路由" class="headerlink" title="动态路由"></a>动态路由</h1><p>默认情况下Gateway会根据注册中心注册的服务列表，以注册中心上的微服务名为路径创建动态路由进行转发，从而实现动态路由的过程。</p>
 <p>修改配置文件为：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">9527</span></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">cloud-gateway</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">gateway:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">locator:</span></span><br><span class="line">          <span class="comment"># 开启从注册中心动态创建路由的过程</span></span><br><span class="line">          <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">routes:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">payment_routh</span> <span class="comment"># 路由的id</span></span><br><span class="line">          <span class="attr">uri:</span> <span class="string">lb://cloud-payment-service</span> <span class="comment"># 匹配后提供服务的路由地址</span></span><br><span class="line">          <span class="attr">predicates:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">Path=/payment/get/**</span> <span class="comment"># 断言</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">payment_routh2</span></span><br><span class="line">          <span class="attr">uri:</span> <span class="string">lb://cloud-payment-service</span></span><br><span class="line">          <span class="attr">predicates:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">Path=/payment/lb/**</span></span><br><span class="line"></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">instance:</span></span><br><span class="line">    <span class="attr">hostname:</span> <span class="string">cloud-gateway-service</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">service-url:</span></span><br><span class="line">      <span class="attr">register-with-eureka:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">fetch-registry:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://localhost:7001/eureka</span></span><br></pre></td></tr></table></figure>
+<pre><code class="yaml">server:
+  port: 9527
+spring:
+  application:
+    name: cloud-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          # 开启从注册中心动态创建路由的过程
+          enabled: true
+      routes:
+        - id: payment_routh # 路由的id
+          uri: lb://cloud-payment-service # 匹配后提供服务的路由地址
+          predicates:
+            - Path=/payment/get/** # 断言
+        - id: payment_routh2
+          uri: lb://cloud-payment-service
+          predicates:
+            - Path=/payment/lb/**
 
+eureka:
+  instance:
+    hostname: cloud-gateway-service
+  client:
+    service-url:
+      register-with-eureka: true
+      fetch-registry: true
+      defaultZone: http://localhost:7001/eureka
+</code></pre>
 <p>之后再正常方法，可以正常使用负载均衡，而且不用配置相关服务器URI</p>
 <h1 id="常用断言-Predicate"><a href="#常用断言-Predicate" class="headerlink" title="常用断言(Predicate)"></a>常用断言(Predicate)</h1><p><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-cloud-gateway/docs/current/reference/html/#gateway-request-predicates-factories">Spring Cloud Gateway - Route Predicate Factories</a></p>
 <table>
@@ -262,10 +349,27 @@
 </tbody></table>
 <h1 id="过滤器的使用"><a href="#过滤器的使用" class="headerlink" title="过滤器的使用"></a>过滤器的使用</h1><p><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-cloud-gateway/docs/current/reference/html/#gatewayfilter-factories"><code>GatewayFilter</code> Factories</a></p>
 <p>使用过滤器可以在请求被发送之前或请求发送之后都请求数据进行修改。</p>
-<h2 id="使用预设的请求头"><a href="#使用预设的请求头" class="headerlink" title="使用预设的请求头"></a>使用预设的请求头</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">	<span class="attr">cloud:</span></span><br><span class="line">		<span class="attr">routes:</span></span><br><span class="line">			<span class="bullet">-</span> <span class="attr">id:</span> <span class="string">xxx</span></span><br><span class="line">			  <span class="attr">filters:</span></span><br><span class="line">			  	<span class="comment"># 过滤器工厂会在匹配的请求头上添加下面的键值对</span></span><br><span class="line">			  	<span class="bullet">-</span> <span class="string">AddRequestHeader=X-Request-Id,1024</span></span><br></pre></td></tr></table></figure>
+<h2 id="使用预设的请求头"><a href="#使用预设的请求头" class="headerlink" title="使用预设的请求头"></a>使用预设的请求头</h2><pre><code class="yaml">spring:
+    cloud:
+        routes:
+            - id: xxx
+              filters:
+              	# 过滤器工厂会在匹配的请求头上添加下面的键值对
+              	- AddRequestHeader=X-Request-Id,1024
+</code></pre>
+<h2 id="配置自定义的全局拦截器"><a href="#配置自定义的全局拦截器" class="headerlink" title="配置自定义的全局拦截器"></a>配置自定义的全局拦截器</h2><pre><code class="java">@Component
+@Order(0)
+@Slf4j
+public class MyLogGatewayFilter implements GlobalFilter &#123;
+    @Override
+    public Mono&amp;lt;Void&amp;gt; filter(ServerWebExchange exchange, GatewayFilterChain chain) &#123;
+        log.info(&quot;*******come in, log is here&quot;);
+        return chain.filter(exchange);
+    &#125;
 
-<h2 id="配置自定义的全局拦截器"><a href="#配置自定义的全局拦截器" class="headerlink" title="配置自定义的全局拦截器"></a>配置自定义的全局拦截器</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Order(0)</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyLogGatewayFilter</span> <span class="keyword">implements</span> <span class="title class_">GlobalFilter</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Mono&amp;lt;Void&amp;gt; <span class="title function_">filter</span><span class="params">(ServerWebExchange exchange, GatewayFilterChain chain)</span> &#123;</span><br><span class="line">        log.info(<span class="string">&quot;*******come in, log is here&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> chain.filter(exchange);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+&#125;
+</code></pre>
 
     </div>
     

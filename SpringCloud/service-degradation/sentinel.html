@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/service-degradation" style="color: #03a9f4">服务降级</a>
+                <a href="/SpringCloud/service-degradation" style="color: #00bcd4">服务降级</a>
             </span>
             
         </span>
@@ -208,11 +208,42 @@
 <p><a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/releases">Releases · alibaba&#x2F;Sentinel (github.com)</a></p>
 <h1 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h1><p>首先安装Sentinel Dashboard然后启动。</p>
 <p>导入依赖：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>com.alibaba.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-alibaba-nacos-discovery<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>com.alibaba.csp<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>sentinel-datasource-nacos<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>com.alibaba.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-alibaba-sentinel<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;com.alibaba.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-alibaba-nacos-discovery&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;com.alibaba.csp&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;sentinel-datasource-nacos&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;com.alibaba.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-alibaba-sentinel&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
 <p>添加配置：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">8401</span></span><br><span class="line"></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">cloudalibaba-sentinel-service</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="string">localhost:8848</span></span><br><span class="line">    <span class="attr">sentinel:</span></span><br><span class="line">      <span class="attr">transport:</span></span><br><span class="line">        <span class="attr">dashboard:</span> <span class="string">localhost:8080</span></span><br><span class="line">        <span class="comment"># sentinel后台监控服务使用的端口号</span></span><br><span class="line">        <span class="attr">port:</span> <span class="number">8719</span></span><br><span class="line"></span><br><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoint:</span></span><br><span class="line">    <span class="attr">web:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="attr">include:</span> <span class="string">&quot;*&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<pre><code class="yaml">server:
+  port: 8401
 
+spring:
+  application:
+    name: cloudalibaba-sentinel-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+    sentinel:
+      transport:
+        dashboard: localhost:8080
+        # sentinel后台监控服务使用的端口号
+        port: 8719
+
+management:
+  endpoint:
+    web:
+      exposure:
+        include: &quot;*&quot;
+</code></pre>
 <p>如果启动时出现循环依赖导致启动失败，可以参考这里：<a target="_blank" rel="noopener" href="https://github.com/alibaba/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E">版本说明 · alibaba&#x2F;spring-cloud-alibaba Wiki (github.com)</a></p>
 <p>启动后发送请求，就可以在dashboard中看到相关数据。</p>
 <h1 id="流控规则"><a href="#流控规则" class="headerlink" title="流控规则"></a>流控规则</h1><p><img lazy="https://selfb.asia/public/SpringCloud/2023-2-6-49f558a5-65bc-4017-8058-89e2e6a932fa.webp" alt="添加流控规则"></p>
@@ -265,8 +296,17 @@
 <li>异常数 (<code>ERROR_COUNT</code>)：当单位统计时长内的异常数目超过阈值之后会自动进行熔断。经过熔断时长后熔断器会进入探测恢复状态（HALF-OPEN 状态），若接下来的一个请求成功完成（没有错误）则结束熔断，否则会再次被熔断。</li>
 </ul>
 <p>使用<code>@SentinelResource</code>可以设置fallback：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;/hotkey&quot;)</span></span><br><span class="line"><span class="meta">@SentinelResource(value = &quot;hotkey&quot;, blockHandler = &quot;dealTestHotkey&quot;)</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">testHotkey</span><span class="params">(<span class="meta">@RequestParam(value = &quot;p1&quot;, required = false)</span> String p1,</span></span><br><span class="line"><span class="params">                         <span class="meta">@RequestParam(value = &quot;p2&quot;, required = false)</span> String p2)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;----test Hotkey: &quot;</span> + p1 + p2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">dealTestHotkey</span><span class="params">(String p1, String p2, BlockException e)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;fallback: &quot;</span> + p1 + p2 + e;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@GetMapping(&quot;/hotkey&quot;)
+@SentinelResource(value = &quot;hotkey&quot;, blockHandler = &quot;dealTestHotkey&quot;)
+public String testHotkey(@RequestParam(value = &quot;p1&quot;, required = false) String p1,
+                         @RequestParam(value = &quot;p2&quot;, required = false) String p2) &#123;
+    return &quot;----test Hotkey: &quot; + p1 + p2;
+&#125;
 
+public String dealTestHotkey(String p1, String p2, BlockException e) &#123;
+    return &quot;fallback: &quot; + p1 + p2 + e;
+&#125;
+</code></pre>
 <p><font color=red>若在方法中出现异常，则不会执行fallback方法。@SentinelResource只管配置出错</font></p>
 <h1 id="热点限流"><a href="#热点限流" class="headerlink" title="热点限流"></a>热点限流</h1><p><a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/wiki/%E7%83%AD%E7%82%B9%E5%8F%82%E6%95%B0%E9%99%90%E6%B5%81">热点参数限流 · alibaba&#x2F;Sentinel Wiki (github.com)</a></p>
 <p>要使用热点限流，需要先设置<code>@SentinelResource</code>，资源名就是该注解设置的值，索引值即为参数对应的位置，从0开始。</p>
@@ -275,20 +315,40 @@
 <h1 id="SentinelResource"><a href="#SentinelResource" class="headerlink" title="@SentinelResource"></a>@SentinelResource</h1><p><a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/wiki/%E6%B3%A8%E8%A7%A3%E6%94%AF%E6%8C%81">注解支持 · alibaba&#x2F;Sentinel Wiki (github.com)</a></p>
 <h1 id="规则持久化"><a href="#规则持久化" class="headerlink" title="规则持久化"></a>规则持久化</h1><p><a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/wiki/%E5%9C%A8%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E4%B8%AD%E4%BD%BF%E7%94%A8-Sentinel">在生产环境中使用 Sentinel · alibaba&#x2F;Sentinel Wiki (github.com)</a></p>
 <p>导入依赖：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>com.alibaba.csp<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>sentinel-datasource-nacos<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;com.alibaba.csp&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;sentinel-datasource-nacos&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
 <p>添加配置：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">cloudalibaba-sentinel-service</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">sentinel:</span></span><br><span class="line">      <span class="attr">datasource:</span></span><br><span class="line">        <span class="attr">ds1:</span></span><br><span class="line">          <span class="attr">nacos:</span></span><br><span class="line">            <span class="attr">server-addr:</span> <span class="string">localhost:8848</span></span><br><span class="line">            <span class="attr">data-id:</span> <span class="string">cloudalibaba-sentinel-service</span></span><br><span class="line">            <span class="attr">data-type:</span> <span class="string">json</span></span><br><span class="line">            <span class="attr">rule-type:</span> <span class="string">flow</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="yaml">spring:
+  application:
+    name: cloudalibaba-sentinel-service
+  cloud:
+    sentinel:
+      datasource:
+        ds1:
+          nacos:
+            server-addr: localhost:8848
+            data-id: cloudalibaba-sentinel-service
+            data-type: json
+            rule-type: flow
+</code></pre>
 <p>在nacos添加配置，名称即为服务名，类型选择json，初始内容可选为空数组。</p>
 <p>这里需要注意sentinel的配置只能在nacos配置了，<font color=red>sentinel里配置的不会被同步到nacos</font>！</p>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_42270645/article/details/123399569">Sentinel配置规则持久化至Nacos_sentinel持久化到nacos_小脑斧学技术的博客-CSDN博客</a></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/wiki/Sentinel-%E6%8E%A7%E5%88%B6%E5%8F%B0%EF%BC%88%E9%9B%86%E7%BE%A4%E6%B5%81%E6%8E%A7%E7%AE%A1%E7%90%86%EF%BC%89#%E8%A7%84%E5%88%99%E9%85%8D%E7%BD%AE">Sentinel 控制台（集群流控管理） · alibaba&#x2F;Sentinel Wiki (github.com)</a></p>
 <p>经过我自己实践后发现，其实只需要将这个文件<a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/blob/master/sentinel-dashboard/src/test/java/com/alibaba/csp/sentinel/dashboard/rule/nacos/FlowRuleNacosPublisher.java">Sentinel&#x2F;FlowRuleNacosPublisher.java at master · alibaba&#x2F;Sentinel · GitHub</a>搬到main代码里，然后再修改<a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/blob/master/sentinel-dashboard/src/main/java/com/alibaba/csp/sentinel/dashboard/controller/v2/FlowControllerV2.java">Sentinel&#x2F;FlowControllerV2.java at master · alibaba&#x2F;Sentinel · GitHub</a>：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 原来的</span></span><br><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="meta">@Qualifier(&quot;flowRuleDefaultPublisher&quot;)</span></span><br><span class="line"><span class="keyword">private</span> DynamicRulePublisher&amp;lt;List&amp;lt;FlowRuleEntity&amp;gt;&amp;gt; rulePublisher;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 改为</span></span><br><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="meta">@Qualifier(&quot;flowRuleNacosPublisher&quot;)</span></span><br><span class="line"><span class="keyword">private</span> DynamicRulePublisher&amp;lt;List&amp;lt;FlowRuleEntity&amp;gt;&amp;gt; rulePublisher;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">// 原来的
+@Autowired
+@Qualifier(&quot;flowRuleDefaultPublisher&quot;)
+private DynamicRulePublisher&amp;lt;List&amp;lt;FlowRuleEntity&amp;gt;&amp;gt; rulePublisher;
 
-
-
+// 改为
+@Autowired
+@Qualifier(&quot;flowRuleNacosPublisher&quot;)
+private DynamicRulePublisher&amp;lt;List&amp;lt;FlowRuleEntity&amp;gt;&amp;gt; rulePublisher;
+</code></pre>
 
     </div>
     

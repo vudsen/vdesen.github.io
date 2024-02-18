@@ -193,48 +193,137 @@
     <div class="content" v-pre id="main-content">
         <h1 id="下载安装"><a href="#下载安装" class="headerlink" title="下载安装"></a>下载安装</h1><p><a target="_blank" rel="noopener" href="https://github.com/alibaba/nacos/releases">Releases · alibaba&#x2F;nacos (github.com)</a></p>
 <p>下载后进入bin目录下，使用如下指令启动：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用单机模式</span></span><br><span class="line">startup.cmd -m standalone</span><br></pre></td></tr></table></figure>
-
+<pre><code class="shell"># 使用单机模式
+startup.cmd -m standalone
+</code></pre>
 <p>新版本需要手动配置密匙，否则启动会失败，打开<code>conf/application.properties</code>，配置下面的内容：</p>
-<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">### The default token (Base64 String):</span></span><br><span class="line"><span class="attr">nacos.core.auth.plugin.nacos.token.secret.key</span>=<span class="string">VGhpc0lzTXlDdXN0b21TZWNyZXRLZXkwMTIzNDU2Nzg=</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="properties">### The default token (Base64 String):
+nacos.core.auth.plugin.nacos.token.secret.key=VGhpc0lzTXlDdXN0b21TZWNyZXRLZXkwMTIzNDU2Nzg=
+</code></pre>
 <p>之后就可以在网页登录了，默认账号和密码都是<code>nacos</code></p>
 <p>Nacos同时支持CP和AP模式的切换。</p>
 <h1 id="服务注册与发现"><a href="#服务注册与发现" class="headerlink" title="服务注册与发现"></a>服务注册与发现</h1><h2 id="服务注册"><a href="#服务注册" class="headerlink" title="服务注册"></a>服务注册</h2><p>导入依赖：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>com.alibaba.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-alibaba-nacos-discovery<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;com.alibaba.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-alibaba-nacos-discovery&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
 <p>添加配置：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">9001</span></span><br><span class="line"></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-payment-provider</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="string">localhost:8848</span></span><br><span class="line"></span><br><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoint:</span></span><br><span class="line">    <span class="attr">web:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="attr">include:</span> <span class="string">&quot;*&quot;</span></span><br></pre></td></tr></table></figure>
+<pre><code class="yaml">server:
+  port: 9001
 
+spring:
+  application:
+    name: nacos-payment-provider
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+
+management:
+  endpoint:
+    web:
+      exposure:
+        include: &quot;*&quot;
+</code></pre>
 <p>主启动类添加<code>@EnableDiscoveryClient</code>，启动后即可完成服务注册。</p>
 <h2 id="服务消费"><a href="#服务消费" class="headerlink" title="服务消费"></a>服务消费</h2><p>导入同样的依赖：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>com.alibaba.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-alibaba-nacos-discovery<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-loadbalancer<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;com.alibaba.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-alibaba-nacos-discovery&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-loadbalancer&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
 <p>配置：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-order-consumer</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="string">localhost:8848</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 下面为可选</span></span><br><span class="line"><span class="attr">service-url:</span></span><br><span class="line">  <span class="attr">nacos-user-service:</span> <span class="string">http://nacos-payment-provider</span></span><br></pre></td></tr></table></figure>
+<pre><code class="yaml">spring:
+  application:
+    name: nacos-order-consumer
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
 
+# 下面为可选
+service-url:
+  nacos-user-service: http://nacos-payment-provider
+</code></pre>
 <p>主启动类还是只需要添加<code>@EnableDiscoveryClient</code>即可。</p>
 <p>配置类：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ApplicationContextConfig</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="meta">@LoadBalanced</span></span><br><span class="line">    <span class="keyword">public</span> RestTemplate <span class="title function_">restTemplate</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">RestTemplate</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@Configuration
+public class ApplicationContextConfig &#123;
 
+    @Bean
+    @LoadBalanced
+    public RestTemplate restTemplate() &#123;
+        return new RestTemplate();
+    &#125;
+
+&#125;
+</code></pre>
 <p>业务类：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">OrderNacosController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> RestTemplate restTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setRestTemplate</span><span class="params">(RestTemplate restTemplate)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.restTemplate = restTemplate;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;service-url.nacos-user-service&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String serverUrl;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/consumer/payment/nacos/&#123;id&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">paymentInfo</span><span class="params">(<span class="meta">@PathVariable</span> Integer id)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> restTemplate.getForObject(serverUrl + <span class="string">&quot;/payment/nacos/&quot;</span> + id, String.class);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@RestController
+public class OrderNacosController &#123;
 
+    private RestTemplate restTemplate;
+
+    @Autowired
+    public void setRestTemplate(RestTemplate restTemplate) &#123;
+        this.restTemplate = restTemplate;
+    &#125;
+
+    @Value(&quot;$&#123;service-url.nacos-user-service&#125;&quot;)
+    private String serverUrl;
+
+    @GetMapping(&quot;/consumer/payment/nacos/&#123;id&#125;&quot;)
+    public String paymentInfo(@PathVariable Integer id) &#123;
+        return restTemplate.getForObject(serverUrl + &quot;/payment/nacos/&quot; + id, String.class);
+    &#125;
+
+&#125;
+</code></pre>
 <h1 id="配置中心"><a href="#配置中心" class="headerlink" title="配置中心"></a>配置中心</h1><p><a target="_blank" rel="noopener" href="https://github.com/alibaba/spring-cloud-alibaba/wiki/Nacos-config">Nacos config · alibaba&#x2F;spring-cloud-alibaba Wiki (github.com)</a></p>
 <h2 id="基础配置"><a href="#基础配置" class="headerlink" title="基础配置"></a>基础配置</h2><p>导入配置：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>com.alibaba.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-alibaba-nacos-discovery<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>com.alibaba.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-alibaba-nacos-config<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-bootstrap<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;com.alibaba.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-alibaba-nacos-discovery&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;com.alibaba.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-alibaba-nacos-config&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-bootstrap&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
 <p>Nacos同SpringCloud Config一样，在项目初始化时，要保证先从配置中心进行配置拉取，拉取配置之后才能保证项目的正常启动。</p>
 <p><code>bootstrap.yaml</code>:</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="string">localhost:8848</span></span><br><span class="line">      <span class="attr">config:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="string">localhost:8848</span></span><br><span class="line">        <span class="attr">file-extension:</span> <span class="string">yaml</span></span><br><span class="line">        <span class="attr">shared-configs:</span></span><br><span class="line">          <span class="comment"># 开启刷新</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">data-id:</span> <span class="string">nacos-config-client-dev.yaml</span></span><br><span class="line">            <span class="attr">refresh:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="yaml">spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+      config:
+        server-addr: localhost:8848
+        file-extension: yaml
+        shared-configs:
+          # 开启刷新
+          - data-id: nacos-config-client-dev.yaml
+            refresh: true
+</code></pre>
 <p><code>application.yaml</code>:</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">profiles:</span></span><br><span class="line">  	<span class="comment"># 指示导入dev配置</span></span><br><span class="line">    <span class="attr">active:</span> <span class="string">dev</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="yaml">spring:
+  profiles:
+      # 指示导入dev配置
+    active: dev
+</code></pre>
 <p>在运行后，Nacos会去获取指定<code>dataId</code>的配置文件。</p>
 <p>在 Nacos Spring Cloud 中，<code>dataId</code> 的完整格式如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$&#123;prefix&#125;-$&#123;spring.profiles.active&#125;.$&#123;file-extension&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="plain">$&#123;prefix&#125;-$&#123;spring.profiles.active&#125;.$&#123;file-extension&#125;
+</code></pre>
 <ul>
 <li><code>prefix</code> 默认为 <code>spring.application.name</code> 的值，也可以通过配置项 <code>spring.cloud.nacos.config.prefix</code>来配置。</li>
 <li><code>spring.profiles.active</code> 即为当前环境对应的 profile，详情可以参考 <a target="_blank" rel="noopener" href="https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-profiles.html#boot-features-profiles">Spring Boot文档</a>。 <strong>注意：当 <code>spring.profiles.active</code> 为空时，对应的连接符 <code>-</code> 也将不存在，dataId 的拼接格式变成 <code>$&#123;prefix&#125;.$&#123;file-extension&#125;</code></strong></li>
@@ -246,17 +335,41 @@
 <h1 id="集群以及持久化配置"><a href="#集群以及持久化配置" class="headerlink" title="集群以及持久化配置"></a>集群以及持久化配置</h1><h2 id="持久化配置"><a href="#持久化配置" class="headerlink" title="持久化配置"></a>持久化配置</h2><p>默认Nacos使用嵌入式数据库<code>derby</code>实现数据的存储。所以，如果启动多个默认配置下的Nacos节点，数据存储是存在一致性问题的。为了解决这个问题，Nacos采用了集中式存储的方式来支持集群化的部署，目前只支持MySQL。</p>
 <p>首先找到<code>conf/mysql-schema.sql</code>，在数据库中运行，创建相关的表。</p>
 <p>之后打开<code>conf/application.properties</code>，设置如下参数：</p>
-<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">### If use MySQL as datasource:</span></span><br><span class="line"><span class="attr">spring.datasource.platform</span>=<span class="string">mysql</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">### Count of DB:</span></span><br><span class="line"><span class="attr">db.num</span>=<span class="string">1</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">### Connect URL of DB:</span></span><br><span class="line"><span class="attr">db.url.0</span>=<span class="string">jdbc:mysql://127.0.0.1:3306/cloud?characterEncoding=utf8&amp;connectTimeout=1000&amp;socketTimeout=3000&amp;autoReconnect=true&amp;useUnicode=true&amp;useSSL=false&amp;serverTimezone=UTC</span></span><br><span class="line"><span class="attr">db.user.0</span>=<span class="string">root</span></span><br><span class="line"><span class="attr">db.password.0</span>=<span class="string">abc123</span></span><br></pre></td></tr></table></figure>
+<pre><code class="properties">### If use MySQL as datasource:
+spring.datasource.platform=mysql
 
+### Count of DB:
+db.num=1
+
+### Connect URL of DB:
+db.url.0=jdbc:mysql://127.0.0.1:3306/cloud?characterEncoding=utf8&amp;connectTimeout=1000&amp;socketTimeout=3000&amp;autoReconnect=true&amp;useUnicode=true&amp;useSSL=false&amp;serverTimezone=UTC
+db.user.0=root
+db.password.0=abc123
+</code></pre>
 <p>重启，即可使用mysql做持久化。</p>
 <h2 id="集群部署"><a href="#集群部署" class="headerlink" title="集群部署"></a>集群部署</h2><p>首先每个集群需要配置持久化为MySql，之后需要配置<code>cluster.conf</code>。</p>
 <p>在<code>conf</code>下创建一个<code>cluster.conf</code>，官方提供了一个<code>cluster.conf.example</code>：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">192.168.16.101:3333</span><br><span class="line">192.168.16.102:4444</span><br><span class="line">192.168.16.103:5555</span><br></pre></td></tr></table></figure>
-
+<pre><code class="text">192.168.16.101:3333
+192.168.16.102:4444
+192.168.16.103:5555
+</code></pre>
 <p>这里不能写<code>127.0.0.1</code>，否则会报错。</p>
 <p>之后通过Nginx来进行负载均衡：</p>
-<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">upstream</span> cluster &#123;</span><br><span class="line">    <span class="attribute">server</span> <span class="number">127.0.0.1:3333</span></span><br><span class="line">    server <span class="number">127.0.0.1:4444</span></span><br><span class="line">    server <span class="number">127.0.0.1:5555</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">    <span class="attribute">listen</span> <span class="number">80</span>;</span><br><span class="line">    <span class="attribute">server_name</span> localhost;</span><br><span class="line">    </span><br><span class="line">    <span class="section">location</span> / &#123;</span><br><span class="line">        <span class="attribute">proxy_pass</span> http://cluster</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="nginx">upstream cluster &#123;
+    server 127.0.0.1:3333
+    server 127.0.0.1:4444
+    server 127.0.0.1:5555
+&#125;
 
+server &#123;
+    listen 80;
+    server_name localhost;
+    
+    location / &#123;
+        proxy_pass http://cluster
+    &#125;
+&#125;
+</code></pre>
 <p>之后在客户端直接配置连接1111端口即可。</p>
 
     </div>

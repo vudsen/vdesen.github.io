@@ -192,100 +192,296 @@
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
         <h1 id="1-泛型"><a href="#1-泛型" class="headerlink" title="1. 泛型"></a>1. 泛型</h1><p>声明一个泛型:</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">largest</span>&amp;lt;T&amp;gt;(list: &amp;[T]) <span class="punctuation">-&amp;gt;</span> T &#123;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">fn largest&amp;lt;T&amp;gt;(list: &amp;[T]) -&amp;gt; T &#123;
+</code></pre>
 <p>如果想要泛型具有某些属性或方法，则需要限制其特征，例如让泛型允许相加的特征：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">add</span>&amp;lt;T: std::ops::Add&amp;lt;Output = T&amp;gt;&amp;gt;(a:T, b:T) <span class="punctuation">-&amp;gt;</span> T &#123;</span><br><span class="line">    a + b</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">fn add&amp;lt;T: std::ops::Add&amp;lt;Output = T&amp;gt;&amp;gt;(a:T, b:T) -&amp;gt; T &#123;
+    a + b
+&#125;
+</code></pre>
 <h2 id="结构体中的泛型"><a href="#结构体中的泛型" class="headerlink" title="结构体中的泛型"></a>结构体中的泛型</h2><p>结构体中的字段类型也可以用泛型来定义，下面代码定义了一个坐标点 Point，它可以存放任何类型的坐标值：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Point</span>&amp;lt;T&amp;gt; &#123;</span><br><span class="line">    x: T,</span><br><span class="line">    y: T,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">integer</span> = Point &#123; x: <span class="number">5</span>, y: <span class="number">10</span> &#125;;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">float</span> = Point &#123; x: <span class="number">1.0</span>, y: <span class="number">4.0</span> &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">struct Point&amp;lt;T&amp;gt; &#123;
+    x: T,
+    y: T,
+&#125;
 
+fn main() &#123;
+    let integer = Point &#123; x: 5, y: 10 &#125;;
+    let float = Point &#123; x: 1.0, y: 4.0 &#125;;
+&#125;
+</code></pre>
 <h2 id="枚举中的泛型"><a href="#枚举中的泛型" class="headerlink" title="枚举中的泛型"></a>枚举中的泛型</h2><p>最常见的就是<code>Option</code>了：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">Option</span>&amp;lt;T&amp;gt; &#123;</span><br><span class="line">    <span class="title function_ invoke__">Some</span>(T),</span><br><span class="line">    <span class="literal">None</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">enum Option&amp;lt;T&amp;gt; &#123;
+    Some(T),
+    None,
+&#125;
+</code></pre>
 <h2 id="方法中的泛型"><a href="#方法中的泛型" class="headerlink" title="方法中的泛型"></a>方法中的泛型</h2><p>方法上也可以使用泛型：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Point</span>&amp;lt;T&amp;gt; &#123;</span><br><span class="line">    x: T,</span><br><span class="line">    y: T,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span>&amp;lt;T&amp;gt; Point&amp;lt;T&amp;gt; &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">x</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> &amp;T &#123;</span><br><span class="line">        &amp;<span class="keyword">self</span>.x</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">mixup</span>&amp;lt;V&amp;gt;(<span class="keyword">self</span>, other: Point&amp;lt;V&amp;gt;) <span class="punctuation">-&amp;gt;</span> Point&amp;lt;V&amp;gt; &#123;</span><br><span class="line">        Point &#123;</span><br><span class="line">            x: <span class="keyword">self</span>.x,</span><br><span class="line">            y: other.y,</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">p</span> = Point &#123; x: <span class="number">5</span>, y: <span class="number">10</span> &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;p.x = &#123;&#125;&quot;</span>, p.<span class="title function_ invoke__">x</span>());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">struct Point&amp;lt;T&amp;gt; &#123;
+    x: T,
+    y: T,
+&#125;
+
+impl&amp;lt;T&amp;gt; Point&amp;lt;T&amp;gt; &#123;
+    fn x(&amp;self) -&amp;gt; &amp;T &#123;
+        &amp;self.x
+    &#125;
+
+    fn mixup&amp;lt;V&amp;gt;(self, other: Point&amp;lt;V&amp;gt;) -&amp;gt; Point&amp;lt;V&amp;gt; &#123;
+        Point &#123;
+            x: self.x,
+            y: other.y,
+        &#125;
+    &#125;
+&#125;
+
+fn main() &#123;
+    let p = Point &#123; x: 5, y: 10 &#125;;
+
+    println!(&quot;p.x = &#123;&#125;&quot;, p.x());
+&#125;
+</code></pre>
 <p>使用泛型参数前，依然需要提前声明：impl<T>，只有提前声明了，我们才能在Point<T>中使用它，这样 Rust 就知道 Point 的尖括号中的类型是泛型而不是具体类型。</p>
 <h3 id="为具体的泛型单独实现方法"><a href="#为具体的泛型单独实现方法" class="headerlink" title="为具体的泛型单独实现方法"></a>为具体的泛型单独实现方法</h3><p>例如你想到对泛型使用<code>f32</code>的方法提供单独的实现，可以这样进行定义：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span> <span class="title class_">Point</span>&amp;lt;<span class="type">f32</span>&amp;gt; &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">distance_from_origin</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">f32</span> &#123;</span><br><span class="line">        (<span class="keyword">self</span>.x.<span class="title function_ invoke__">powi</span>(<span class="number">2</span>) + <span class="keyword">self</span>.y.<span class="title function_ invoke__">powi</span>(<span class="number">2</span>)).<span class="title function_ invoke__">sqrt</span>()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">impl Point&amp;lt;f32&amp;gt; &#123;
+    fn distance_from_origin(&amp;self) -&amp;gt; f32 &#123;
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    &#125;
+&#125;
+</code></pre>
 <p>这段代码意味着 Point<f32> 类型会有一个方法 distance_from_origin，而其他 T 不是 f32 类型的 Point<T> 实例则没有定义此方法。这个方法计算点实例与坐标(0.0, 0.0) 之间的距离，并使用了只能用于浮点型的数学运算符。</p>
 <p>这样我们就能针对特定的泛型类型实现某个特定的方法，对于其它泛型类型则没有定义该方法。</p>
 <h2 id="const泛型"><a href="#const泛型" class="headerlink" title="const泛型"></a>const泛型</h2><p>在旧版本的 Rust 中，如果需要以数组为参数，要么使用引用：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">display_array</span>(arr: &amp;[<span class="type">i32</span>]) &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;&#123;:?&#125;&quot;</span>, arr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">fn display_array(arr: &amp;[i32]) &#123;
+    println!(&quot;&#123;:?&#125;&quot;, arr);
+&#125;
+</code></pre>
 <p>要么使用带有长度的数组：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">display_array</span>(arr: [<span class="type">i32</span>; <span class="number">3</span>]) &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;&#123;:?&#125;&quot;</span>, arr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">fn display_array(arr: [i32; 3]) &#123;
+    println!(&quot;&#123;:?&#125;&quot;, arr);
+&#125;
+</code></pre>
 <p>对于数组的类型，不同的长度是完全不同的类型，例如 <code>[i32; 2]</code> 和 <code>[i32; 3]</code> 是不同的数组类型，将 <code>[i32; 2]</code> 的数组<br>传入上方函数将会报错。</p>
 <p>而在旧版本，对于数组的长度是无法抽象成一个泛型或其它东西的，因此旧版本一些标准库数组的长度被限定在了 32。</p>
 <p>在新版本中，可以使用 const 泛型来处理数组长度问题：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">display_array</span>&amp;lt;T: std::fmt::<span class="built_in">Debug</span>, <span class="keyword">const</span> N: <span class="type">usize</span>&amp;gt;(arr: [T; N]) &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;&#123;:?&#125;&quot;</span>, arr);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">arr</span>: [<span class="type">i32</span>; <span class="number">3</span>] = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];</span><br><span class="line">    <span class="title function_ invoke__">display_array</span>(arr);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">arr</span>: [<span class="type">i32</span>; <span class="number">2</span>] = [<span class="number">1</span>, <span class="number">2</span>];</span><br><span class="line">    <span class="title function_ invoke__">display_array</span>(arr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">fn display_array&amp;lt;T: std::fmt::Debug, const N: usize&amp;gt;(arr: [T; N]) &#123;
+    println!(&quot;&#123;:?&#125;&quot;, arr);
+&#125;
+fn main() &#123;
+    let arr: [i32; 3] = [1, 2, 3];
+    display_array(arr);
 
-
+    let arr: [i32; 2] = [1, 2];
+    display_array(arr);
+&#125;
+</code></pre>
 <h1 id="2-特征-Trait"><a href="#2-特征-Trait" class="headerlink" title="2. 特征 Trait"></a>2. 特征 Trait</h1><p>特征，类似与 Java 中的接口，<strong>只用来定义一组行为，而不提供具体实现</strong>。</p>
 <p>定义一个特征：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">trait</span> <span class="title class_">Summary</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">summarize</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">String</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">pub trait Summary &#123;
+    fn summarize(&amp;self) -&amp;gt; String;
+&#125;
+</code></pre>
 <p>这里使用 trait 关键字来声明一个特征，Summary 是特征名。在大括号中定义了该特征的所有方法，在这个例子中是： fn summarize(&amp;self) -&amp;gt; String。</p>
 <p>由于特征不关心具体实现，因此直接使用了 <code>;</code> 进行结尾。</p>
 <h2 id="为类型实现特征"><a href="#为类型实现特征" class="headerlink" title="为类型实现特征"></a>为类型实现特征</h2><p>为 <code>Post</code> 和 <code>Weibo</code> 实现 <code>Summary</code> 特征：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">trait</span> <span class="title class_">Summary</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">summarize</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">String</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Post</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> title: <span class="type">String</span>, <span class="comment">// 标题</span></span><br><span class="line">    <span class="keyword">pub</span> author: <span class="type">String</span>, <span class="comment">// 作者</span></span><br><span class="line">    <span class="keyword">pub</span> content: <span class="type">String</span>, <span class="comment">// 内容</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Summary</span> <span class="keyword">for</span> <span class="title class_">Post</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">summarize</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">String</span> &#123;</span><br><span class="line">        <span class="built_in">format!</span>(<span class="string">&quot;文章&#123;&#125;, 作者是&#123;&#125;&quot;</span>, <span class="keyword">self</span>.title, <span class="keyword">self</span>.author)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">Weibo</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> username: <span class="type">String</span>,</span><br><span class="line">    <span class="keyword">pub</span> content: <span class="type">String</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Summary</span> <span class="keyword">for</span> <span class="title class_">Weibo</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">summarize</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">String</span> &#123;</span><br><span class="line">        <span class="built_in">format!</span>(<span class="string">&quot;&#123;&#125;发表了微博&#123;&#125;&quot;</span>, <span class="keyword">self</span>.username, <span class="keyword">self</span>.content)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">pub trait Summary &#123;
+    fn summarize(&amp;self) -&amp;gt; String;
+&#125;
+pub struct Post &#123;
+    pub title: String, // 标题
+    pub author: String, // 作者
+    pub content: String, // 内容
+&#125;
 
+impl Summary for Post &#123;
+    fn summarize(&amp;self) -&amp;gt; String &#123;
+        format!(&quot;文章&#123;&#125;, 作者是&#123;&#125;&quot;, self.title, self.author)
+    &#125;
+&#125;
+
+pub struct Weibo &#123;
+    pub username: String,
+    pub content: String
+&#125;
+
+impl Summary for Weibo &#123;
+    fn summarize(&amp;self) -&amp;gt; String &#123;
+        format!(&quot;&#123;&#125;发表了微博&#123;&#125;&quot;, self.username, self.content)
+    &#125;
+&#125;
+</code></pre>
 <p>具体语法: <code>impl Trait for TypeName</code>。</p>
 <p>在实现后，就可以在这个类型上调用特征的方法：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">post</span> = Post&#123;title: <span class="string">&quot;Rust语言简介&quot;</span>.<span class="title function_ invoke__">to_string</span>(),author: <span class="string">&quot;Sunface&quot;</span>.<span class="title function_ invoke__">to_string</span>(), content: <span class="string">&quot;Rust棒极了!&quot;</span>.<span class="title function_ invoke__">to_string</span>()&#125;;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">weibo</span> = Weibo&#123;username: <span class="string">&quot;sunface&quot;</span>.<span class="title function_ invoke__">to_string</span>(),content: <span class="string">&quot;好像微博没Tweet好用&quot;</span>.<span class="title function_ invoke__">to_string</span>()&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>,post.<span class="title function_ invoke__">summarize</span>());</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>,weibo.<span class="title function_ invoke__">summarize</span>());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">fn main() &#123;
+    let post = Post&#123;title: &quot;Rust语言简介&quot;.to_string(),author: &quot;Sunface&quot;.to_string(), content: &quot;Rust棒极了!&quot;.to_string()&#125;;
+    let weibo = Weibo&#123;username: &quot;sunface&quot;.to_string(),content: &quot;好像微博没Tweet好用&quot;.to_string()&#125;;
 
+    println!(&quot;&#123;&#125;&quot;,post.summarize());
+    println!(&quot;&#123;&#125;&quot;,weibo.summarize());
+&#125;
+</code></pre>
 <h3 id="默认实现"><a href="#默认实现" class="headerlink" title="默认实现"></a>默认实现</h3><p>你可以在特征中定义具有默认实现的方法，这样其它类型无需再实现该方法，或者也可以选择重载该方法：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">trait</span> <span class="title class_">Summary</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">summarize</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">String</span> &#123;</span><br><span class="line">        <span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;(Read more...)&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">pub trait Summary &#123;
+    fn summarize(&amp;self) -&amp;gt; String &#123;
+        String::from(&quot;(Read more...)&quot;)
+    &#125;
+&#125;
+</code></pre>
 <h2 id="使用特征作为函数参数"><a href="#使用特征作为函数参数" class="headerlink" title="使用特征作为函数参数"></a>使用特征作为函数参数</h2><p>定义一个函数，使用特征作为函数参数：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">notify</span>(item: &amp;<span class="keyword">impl</span> <span class="title class_">Summary</span>) &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;Breaking news! &#123;&#125;&quot;</span>, item.<span class="title function_ invoke__">summarize</span>());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">pub fn notify(item: &amp;impl Summary) &#123;
+    println!(&quot;Breaking news! &#123;&#125;&quot;, item.summarize());
+&#125;
+</code></pre>
 <p>需要再特征名称前面加上一个<code>impl</code>，可以使用任何实现了 &#96;Summary&#96;&#96; 特征的类型作为该函数的参数。</p>
 <h2 id="特征约束-trait-bound"><a href="#特征约束-trait-bound" class="headerlink" title="特征约束 (trait bound)"></a>特征约束 (trait bound)</h2><p>虽然 impl Trait 这种语法非常好理解，但是实际上它只是一个语法糖，真正的写法如下：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">notify</span>&amp;lt;T: Summary&amp;gt;(item: &amp;T) &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;Breaking news! &#123;&#125;&quot;</span>, item.<span class="title function_ invoke__">summarize</span>());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">pub fn notify&amp;lt;T: Summary&amp;gt;(item: &amp;T) &#123;
+    println!(&quot;Breaking news! &#123;&#125;&quot;, item.summarize());
+&#125;
+</code></pre>
 <p>大部分情况下这个语法糖是足够使用的，但是如果存在如下情况：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">notify</span>(item1: &amp;<span class="keyword">impl</span> <span class="title class_">Summary</span>, item2: &amp;<span class="keyword">impl</span> <span class="title class_">Summary</span>) &#123;&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">pub fn notify(item1: &amp;impl Summary, item2: &amp;impl Summary) &#123;&#125;
+</code></pre>
 <p>如果要求 <code>item1</code> 和 <code>item2</code> 都必须是同一类型，则使用 <code>impl</code> 就不行了，此时需要使用特征约束来实现：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">notify</span>&amp;lt;T: Summary&amp;gt;(item1: &amp;T, item2: &amp;T) &#123;&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">pub fn notify&amp;lt;T: Summary&amp;gt;(item1: &amp;T, item2: &amp;T) &#123;&#125;
+</code></pre>
 <h3 id="多重约束"><a href="#多重约束" class="headerlink" title="多重约束"></a>多重约束</h3><p>除了单个约束条件，我们还可以指定多个约束条件，例如除了让参数实现 Summary 特征外，还可以让参数实现 Display 特征以控制它的格式化输出：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">notify</span>(item: &amp;(<span class="keyword">impl</span> <span class="title class_">Summary</span> + Display)) &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">notify</span>&amp;lt;T: Summary + Display&amp;gt;(item: &amp;T) &#123;&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">pub fn notify(item: &amp;(impl Summary + Display)) &#123;&#125;
 
+pub fn notify&amp;lt;T: Summary + Display&amp;gt;(item: &amp;T) &#123;&#125;
+</code></pre>
 <h3 id="where-约束"><a href="#where-约束" class="headerlink" title="where 约束"></a>where 约束</h3><p>当特征约束变得很多时，函数的签名将变得很复杂：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">some_function</span>&amp;lt;T: Display + <span class="built_in">Clone</span>, U: <span class="built_in">Clone</span> + <span class="built_in">Debug</span>&amp;gt;(t: &amp;T, u: &amp;U) <span class="punctuation">-&amp;gt;</span> <span class="type">i32</span> &#123;&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">fn some_function&amp;lt;T: Display + Clone, U: Clone + Debug&amp;gt;(t: &amp;T, u: &amp;U) -&amp;gt; i32 &#123;&#125;
+</code></pre>
 <p>通过 <code>where</code> 可以对其进行简化：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">some_function</span>&amp;lt;T, U&amp;gt;(t: &amp;T, u: &amp;U) <span class="punctuation">-&amp;gt;</span> <span class="type">i32</span></span><br><span class="line">    <span class="keyword">where</span> T: Display + <span class="built_in">Clone</span>,</span><br><span class="line">          U: <span class="built_in">Clone</span> + <span class="built_in">Debug</span></span><br><span class="line">&#123;&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">fn some_function&amp;lt;T, U&amp;gt;(t: &amp;T, u: &amp;U) -&amp;gt; i32
+    where T: Display + Clone,
+          U: Clone + Debug
+&#123;&#125;
+</code></pre>
 <h3 id="使用特征约束有条件地实现方法或特征"><a href="#使用特征约束有条件地实现方法或特征" class="headerlink" title="使用特征约束有条件地实现方法或特征"></a>使用特征约束有条件地实现方法或特征</h3><p>特征约束，可以让我们在指定类型 + 指定特征的条件下去实现方法，例如：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::fmt::Display;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Pair</span>&amp;lt;T&amp;gt; &#123;</span><br><span class="line">    x: T,</span><br><span class="line">    y: T,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span>&amp;lt;T&amp;gt; Pair&amp;lt;T&amp;gt; &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">new</span>(x: T, y: T) <span class="punctuation">-&amp;gt;</span> <span class="keyword">Self</span> &#123;</span><br><span class="line">        <span class="keyword">Self</span> &#123;</span><br><span class="line">            x,</span><br><span class="line">            y,</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span>&amp;lt;T: Display + <span class="built_in">PartialOrd</span>&amp;gt; Pair&amp;lt;T&amp;gt; &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">cmp_display</span>(&amp;<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">self</span>.x &amp;gt;= <span class="keyword">self</span>.y &#123;</span><br><span class="line">            <span class="built_in">println!</span>(<span class="string">&quot;The largest member is x = &#123;&#125;&quot;</span>, <span class="keyword">self</span>.x);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">println!</span>(<span class="string">&quot;The largest member is y = &#123;&#125;&quot;</span>, <span class="keyword">self</span>.y);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">use std::fmt::Display;
 
+struct Pair&amp;lt;T&amp;gt; &#123;
+    x: T,
+    y: T,
+&#125;
+
+impl&amp;lt;T&amp;gt; Pair&amp;lt;T&amp;gt; &#123;
+    fn new(x: T, y: T) -&amp;gt; Self &#123;
+        Self &#123;
+            x,
+            y,
+        &#125;
+    &#125;
+&#125;
+
+impl&amp;lt;T: Display + PartialOrd&amp;gt; Pair&amp;lt;T&amp;gt; &#123;
+    fn cmp_display(&amp;self) &#123;
+        if self.x &amp;gt;= self.y &#123;
+            println!(&quot;The largest member is x = &#123;&#125;&quot;, self.x);
+        &#125; else &#123;
+            println!(&quot;The largest member is y = &#123;&#125;&quot;, self.y);
+        &#125;
+    &#125;
+&#125;
+</code></pre>
 <p><code>cmp_display</code> 方法，并不是所有的 <code>Pair&amp;lt;T&amp;gt;</code> 结构体对象都可以拥有，只有 <code>T</code> 同时实现了 <code>Display + PartialOrd</code> 的 <code>Pair&amp;lt;T&amp;gt;</code> 才可以拥有此方法。</p>
 <p>也可以有条件地实现特征, 例如，标准库为任何实现了 Display 特征的类型实现了 ToString 特征：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span>&amp;lt;T: Display&amp;gt; <span class="built_in">ToString</span> <span class="keyword">for</span> <span class="title class_">T</span> &#123;</span><br><span class="line">    <span class="comment">// --snip--</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">impl&amp;lt;T: Display&amp;gt; ToString for T &#123;
+    // --snip--
+&#125;
+</code></pre>
 <p>我们可以对任何实现了 Display 特征的类型调用由 ToString 定义的 to_string 方法。例如，可以将整型转换为对应的 String 值，因为整型实现了 Display：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="variable">s</span> = <span class="number">3</span>.<span class="title function_ invoke__">to_string</span>();</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">let s = 3.to_string();
+</code></pre>
 <h2 id="函数返回中的-impl-Trait"><a href="#函数返回中的-impl-Trait" class="headerlink" title="函数返回中的 impl Trait"></a>函数返回中的 impl Trait</h2><p>可以通过 impl Trait 来说明一个函数返回了一个类型，该类型实现了某个特征：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">returns_summarizable</span>() <span class="punctuation">-&amp;gt;</span> <span class="keyword">impl</span> <span class="title class_">Summary</span> &#123;</span><br><span class="line">    Weibo &#123;</span><br><span class="line">        username: <span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;sunface&quot;</span>),</span><br><span class="line">        content: <span class="type">String</span>::<span class="title function_ invoke__">from</span>(</span><br><span class="line">            <span class="string">&quot;m1 max太厉害了，电脑再也不会卡&quot;</span>,</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">fn returns_summarizable() -&amp;gt; impl Summary &#123;
+    Weibo &#123;
+        username: String::from(&quot;sunface&quot;),
+        content: String::from(
+            &quot;m1 max太厉害了，电脑再也不会卡&quot;,
+        )
+    &#125;
+&#125;
+</code></pre>
 <p>因为 Weibo 实现了 Summary，因此这里可以用它来作为返回值。要注意的是，虽然我们知道这里是一个 Weibo 类型，但是对于 returns_summarizable 的调用者而言，他只知道返回了一个实现了 Summary 特征的对象，但是并不知道返回了一个 Weibo 类型。</p>
 <p>但是这种返回值方式有一个很大的限制：只能有一个具体的类型，例如：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">returns_summarizable</span>(switch: <span class="type">bool</span>) <span class="punctuation">-&amp;gt;</span> <span class="keyword">impl</span> <span class="title class_">Summary</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> switch &#123;</span><br><span class="line">        Post &#123;</span><br><span class="line">            title: <span class="type">String</span>::<span class="title function_ invoke__">from</span>(</span><br><span class="line">                <span class="string">&quot;Penguins win the Stanley Cup Championship!&quot;</span>,</span><br><span class="line">            ),</span><br><span class="line">            author: <span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;Iceburgh&quot;</span>),</span><br><span class="line">            content: <span class="type">String</span>::<span class="title function_ invoke__">from</span>(</span><br><span class="line">                <span class="string">&quot;The Pittsburgh Penguins once again are the best \</span></span><br><span class="line"><span class="string">                 hockey team in the NHL.&quot;</span>,</span><br><span class="line">            ),</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        Weibo &#123;</span><br><span class="line">            username: <span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;horse_ebooks&quot;</span>),</span><br><span class="line">            content: <span class="type">String</span>::<span class="title function_ invoke__">from</span>(</span><br><span class="line">                <span class="string">&quot;of course, as you probably already know, people&quot;</span>,</span><br><span class="line">            ),</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">fn returns_summarizable(switch: bool) -&amp;gt; impl Summary &#123;
+    if switch &#123;
+        Post &#123;
+            title: String::from(
+                &quot;Penguins win the Stanley Cup Championship!&quot;,
+            ),
+            author: String::from(&quot;Iceburgh&quot;),
+            content: String::from(
+                &quot;The Pittsburgh Penguins once again are the best \
+                 hockey team in the NHL.&quot;,
+            ),
+        &#125;
+    &#125; else &#123;
+        Weibo &#123;
+            username: String::from(&quot;horse_ebooks&quot;),
+            content: String::from(
+                &quot;of course, as you probably already know, people&quot;,
+            ),
+        &#125;
+    &#125;
+&#125;
+</code></pre>
 <p>以上的代码就无法通过编译，因为它返回了两个不同的类型 Post 和 Weibo。如果需要实现这个功能，则需要用到特征对象。</p>
 <h1 id="3-特征对象"><a href="#3-特征对象" class="headerlink" title="3. 特征对象"></a>3. 特征对象</h1><p>使用 <code>dyn</code> 即可表示一个参数为特征对象：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title class_">Draw</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">draw</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">String</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Draw</span> <span class="keyword">for</span> <span class="title class_">u8</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">draw</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">String</span> &#123;</span><br><span class="line">        <span class="built_in">format!</span>(<span class="string">&quot;u8: &#123;&#125;&quot;</span>, *<span class="keyword">self</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Draw</span> <span class="keyword">for</span> <span class="title class_">f64</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">draw</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">String</span> &#123;</span><br><span class="line">        <span class="built_in">format!</span>(<span class="string">&quot;f64: &#123;&#125;&quot;</span>, *<span class="keyword">self</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 若 T 实现了 Draw 特征， 则调用该函数时传入的 Box&amp;lt;T&amp;gt; 可以被隐式转换成函数参数签名中的 Box&amp;lt;dyn Draw&amp;gt;</span></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">draw1</span>(x: <span class="type">Box</span>&amp;lt;<span class="keyword">dyn</span> Draw&amp;gt;) &#123;</span><br><span class="line">    <span class="comment">// 由于实现了 Deref 特征，Box 智能指针会自动解引用为它所包裹的值，然后调用该值对应的类型上定义的 `draw` 方法</span></span><br><span class="line">    x.<span class="title function_ invoke__">draw</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">draw2</span>(x: &amp;<span class="keyword">dyn</span> Draw) &#123;</span><br><span class="line">    x.<span class="title function_ invoke__">draw</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">x</span> = <span class="number">1.1f64</span>;</span><br><span class="line">    <span class="comment">// do_something(&amp;x);</span></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">y</span> = <span class="number">8u8</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// x 和 y 的类型 T 都实现了 `Draw` 特征，因为 Box&amp;lt;T&amp;gt; 可以在函数调用时隐式地被转换为特征对象 Box&amp;lt;dyn Draw&amp;gt; </span></span><br><span class="line">    <span class="comment">// 基于 x 的值创建一个 Box&amp;lt;f64&amp;gt; 类型的智能指针，指针指向的数据被放置在了堆上</span></span><br><span class="line">    <span class="title function_ invoke__">draw1</span>(<span class="type">Box</span>::<span class="title function_ invoke__">new</span>(x));</span><br><span class="line">    <span class="comment">// 基于 y 的值创建一个 Box&amp;lt;u8&amp;gt; 类型的智能指针</span></span><br><span class="line">    <span class="title function_ invoke__">draw1</span>(<span class="type">Box</span>::<span class="title function_ invoke__">new</span>(y));</span><br><span class="line">    <span class="title function_ invoke__">draw2</span>(&amp;x);</span><br><span class="line">    <span class="title function_ invoke__">draw2</span>(&amp;y);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">trait Draw &#123;
+    fn draw(&amp;self) -&amp;gt; String;
+&#125;
 
+impl Draw for u8 &#123;
+    fn draw(&amp;self) -&amp;gt; String &#123;
+        format!(&quot;u8: &#123;&#125;&quot;, *self)
+    &#125;
+&#125;
+
+impl Draw for f64 &#123;
+    fn draw(&amp;self) -&amp;gt; String &#123;
+        format!(&quot;f64: &#123;&#125;&quot;, *self)
+    &#125;
+&#125;
+
+// 若 T 实现了 Draw 特征， 则调用该函数时传入的 Box&amp;lt;T&amp;gt; 可以被隐式转换成函数参数签名中的 Box&amp;lt;dyn Draw&amp;gt;
+fn draw1(x: Box&amp;lt;dyn Draw&amp;gt;) &#123;
+    // 由于实现了 Deref 特征，Box 智能指针会自动解引用为它所包裹的值，然后调用该值对应的类型上定义的 `draw` 方法
+    x.draw();
+&#125;
+
+fn draw2(x: &amp;dyn Draw) &#123;
+    x.draw();
+&#125;
+
+fn main() &#123;
+    let x = 1.1f64;
+    // do_something(&amp;x);
+    let y = 8u8;
+
+    // x 和 y 的类型 T 都实现了 `Draw` 特征，因为 Box&amp;lt;T&amp;gt; 可以在函数调用时隐式地被转换为特征对象 Box&amp;lt;dyn Draw&amp;gt; 
+    // 基于 x 的值创建一个 Box&amp;lt;f64&amp;gt; 类型的智能指针，指针指向的数据被放置在了堆上
+    draw1(Box::new(x));
+    // 基于 y 的值创建一个 Box&amp;lt;u8&amp;gt; 类型的智能指针
+    draw1(Box::new(y));
+    draw2(&amp;x);
+    draw2(&amp;y);
+&#125;
+</code></pre>
 <p>特征对象，需要在运行时从 vtable 动态查找需要调用的方法，性能相对于泛型 + 特征约束较差。</p>
 <p><code>dyn</code> 不能单独作为特征对象的定义，例如下面的代码编译器会报错，原因是特征对象可以是任意实现了某个特征的类型，编译器在编译期不知道该类型的大小，不同的类型大小是不同的。</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">draw2</span>(x: <span class="keyword">dyn</span> Draw) &#123;</span><br><span class="line">    x.<span class="title function_ invoke__">draw</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">10 | fn draw2(x: dyn Draw) &#123;</span><br><span class="line">   |          ^ doesn&#x27;t have a size known at compile-time</span><br><span class="line">   |</span><br><span class="line">   = help: the trait `Sized` is not implemented for `(dyn Draw + &#x27;static)`</span><br><span class="line">help: function arguments must have a statically known size, borrowed types always have a known size</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">fn draw2(x: dyn Draw) &#123;
+    x.draw();
+&#125;
+</code></pre>
+<pre><code class="shell">10 | fn draw2(x: dyn Draw) &#123;
+   |          ^ doesn&#39;t have a size known at compile-time
+   |
+   = help: the trait `Sized` is not implemented for `(dyn Draw + &#39;static)`
+help: function arguments must have a statically known size, borrowed types always have a known size
+</code></pre>
 <h2 id="特征对象的动态分发"><a href="#特征对象的动态分发" class="headerlink" title="特征对象的动态分发"></a>特征对象的动态分发</h2><p>泛型是在编译期完成处理的：编译器会为每一个泛型参数对应的具体类型生成一份代码，这种方式是**静态分发(static dispatch)**，因为是在编译期完成的，对于运行期性能完全没有任何影响。</p>
 <p>与静态分发相对应的是**动态分发(dynamic dispatch)**，在这种情况下，直到运行时，才能确定需要调用什么方法。之前代码中的关键字 <code>dyn</code> 正是在强调这一“动态”的特点。</p>
 <p>当使用特征对象时，Rust 必须使用动态分发。编译器无法知晓所有可能用于特征对象代码的类型，所以它也不知道应该调用哪个类型的哪个方法实现。为此，Rust 在运行时使用特征对象中的指针来知晓需要调用哪个方法。动态分发也阻止编译器有选择的内联方法代码，这会相应的禁用一些优化。</p>
@@ -295,61 +491,193 @@
 <li>方法没有任何泛型参数</li>
 </ul>
 <p>标准库中的 Clone 特征就不符合对象安全的要求：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">trait</span> <span class="title class_">Clone</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">clone</span>(&amp;<span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> <span class="keyword">Self</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">pub trait Clone &#123;
+    fn clone(&amp;self) -&amp;gt; Self;
+&#125;
+</code></pre>
 <p>因为它的其中一个方法，返回了 Self 类型，因此它是对象不安全的。</p>
 <h1 id="3-其它"><a href="#3-其它" class="headerlink" title="3. 其它"></a>3. 其它</h1><h2 id="关联类型"><a href="#关联类型" class="headerlink" title="关联类型"></a>关联类型</h2><p>关联类型是在特征定义的语句块中，申明一个自定义类型，这样就可以在特征的方法签名中使用该类型：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">trait</span> <span class="title class_">Iterator</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">Item</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">next</span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>) <span class="punctuation">-&amp;gt;</span> <span class="type">Option</span>&amp;lt;<span class="keyword">Self</span>::Item&amp;gt;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">pub trait Iterator &#123;
+    type Item;
 
+    fn next(&amp;mut self) -&amp;gt; Option&amp;lt;Self::Item&amp;gt;;
+&#125;
+</code></pre>
 <p>以上是标准库中的迭代器特征 Iterator，它有一个 Item 关联类型，用于替代遍历的值的类型。</p>
 <p>同时，next 方法也返回了一个 Item 类型，不过使用 Option 枚举进行了包裹，假如迭代器中的值是 i32 类型，那么调用 next 方法就将获取一个 Option<i32> 的值。</p>
 <p><strong>关联类型总是可以用泛型来替代实现，但反之则不一定</strong>，那么关联类型有什么用呢？</p>
 <p>例如使用泛型会得到如下代码：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title class_">Container</span>&amp;lt;A,B&amp;gt; &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">contains</span>(&amp;<span class="keyword">self</span>,a: A,b: B) <span class="punctuation">-&amp;gt;</span> <span class="type">bool</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">difference</span>&amp;lt;A,B,C&amp;gt;(container: &amp;C) <span class="punctuation">-&amp;gt;</span> <span class="type">i32</span></span><br><span class="line">  <span class="keyword">where</span></span><br><span class="line">    C : Container&amp;lt;A,B&amp;gt; &#123;...&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">trait Container&amp;lt;A,B&amp;gt; &#123;
+    fn contains(&amp;self,a: A,b: B) -&amp;gt; bool;
+&#125;
 
+fn difference&amp;lt;A,B,C&amp;gt;(container: &amp;C) -&amp;gt; i32
+  where
+    C : Container&amp;lt;A,B&amp;gt; &#123;...&#125;
+</code></pre>
 <p>可以看到，由于使用了泛型，导致函数头部也必须增加泛型的声明，导致结构比较臃肿，而使用关联类型，将得到可读性好得多的代码：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title class_">Container</span>&#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">A</span>;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">B</span>;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">contains</span>(&amp;<span class="keyword">self</span>, a: &amp;<span class="keyword">Self</span>::A, b: &amp;<span class="keyword">Self</span>::B) <span class="punctuation">-&amp;gt;</span> <span class="type">bool</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">difference</span>&amp;lt;C: Container&amp;gt;(container: &amp;C) &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">difference</span>&amp;lt;C: Container&amp;lt;A = <span class="type">i32</span>, B = <span class="type">i32</span>&amp;gt;&amp;gt;(container: &amp;C) &#123;</span><br><span class="line">    container.<span class="title function_ invoke__">contains</span>(&amp;<span class="number">1</span>, &amp;<span class="number">2</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">trait Container&#123;
+    type A;
+    type B;
+    fn contains(&amp;self, a: &amp;Self::A, b: &amp;Self::B) -&amp;gt; bool;
+&#125;
 
+fn difference&amp;lt;C: Container&amp;gt;(container: &amp;C) &#123;&#125;
+
+fn difference&amp;lt;C: Container&amp;lt;A = i32, B = i32&amp;gt;&amp;gt;(container: &amp;C) &#123;
+    container.contains(&amp;1, &amp;2);
+&#125;
+</code></pre>
 <h2 id="默认泛型类型参数"><a href="#默认泛型类型参数" class="headerlink" title="默认泛型类型参数"></a>默认泛型类型参数</h2><p>当使用泛型类型参数时，可以为其指定一个默认的具体类型，例如标准库中的 std::ops::Add 特征：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title class_">Add</span>&amp;lt;RHS=<span class="keyword">Self</span>&amp;gt; &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">Output</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">add</span>(<span class="keyword">self</span>, rhs: RHS) <span class="punctuation">-&amp;gt;</span> <span class="keyword">Self</span>::Output;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">trait Add&amp;lt;RHS=Self&amp;gt; &#123;
+    type Output;
 
+    fn add(self, rhs: RHS) -&amp;gt; Self::Output;
+&#125;
+</code></pre>
 <p>它有一个泛型参数 RHS，但是与我们以往的用法不同，这里它给 RHS 一个默认值，也就是当用户不指定 RHS 时，默认使用两个同样类型的值进行相加，然后返回一个关联类型 Output。</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::ops::Add;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[derive(Debug, PartialEq)]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Point</span> &#123;</span><br><span class="line">    x: <span class="type">i32</span>,</span><br><span class="line">    y: <span class="type">i32</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Add</span> <span class="keyword">for</span> <span class="title class_">Point</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">Output</span> = Point;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">add</span>(<span class="keyword">self</span>, other: Point) <span class="punctuation">-&amp;gt;</span> Point &#123;</span><br><span class="line">        Point &#123;</span><br><span class="line">            x: <span class="keyword">self</span>.x + other.x,</span><br><span class="line">            y: <span class="keyword">self</span>.y + other.y,</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="built_in">assert_eq!</span>(Point &#123; x: <span class="number">1</span>, y: <span class="number">0</span> &#125; + Point &#123; x: <span class="number">2</span>, y: <span class="number">3</span> &#125;,</span><br><span class="line">               Point &#123; x: <span class="number">3</span>, y: <span class="number">3</span> &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">use std::ops::Add;
 
+#[derive(Debug, PartialEq)]
+struct Point &#123;
+    x: i32,
+    y: i32,
+&#125;
+
+impl Add for Point &#123;
+    type Output = Point;
+
+    fn add(self, other: Point) -&amp;gt; Point &#123;
+        Point &#123;
+            x: self.x + other.x,
+            y: self.y + other.y,
+        &#125;
+    &#125;
+&#125;
+
+fn main() &#123;
+    assert_eq!(Point &#123; x: 1, y: 0 &#125; + Point &#123; x: 2, y: 3 &#125;,
+               Point &#123; x: 3, y: 3 &#125;);
+&#125;
+</code></pre>
 <p>上面的代码主要干了一件事，就是为 Point 结构体提供 + 的能力，这就是运算符重载，不过 Rust 并不支持创建自定义运算符，你也无法为所有运算符进行重载，目前来说，只有定义在 std::ops 中的运算符才能进行重载。</p>
 <h2 id="调用同名的方法"><a href="#调用同名的方法" class="headerlink" title="调用同名的方法"></a>调用同名的方法</h2><p>不同特征拥有同名的方法是很正常的事情，你没有任何办法阻止这一点；甚至除了特征上的同名方法外，在你的类型上，也有同名方法：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title class_">Pilot</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">fly</span>(&amp;<span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">trait</span> <span class="title class_">Wizard</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">fly</span>(&amp;<span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Human</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Pilot</span> <span class="keyword">for</span> <span class="title class_">Human</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">fly</span>(&amp;<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;This is your captain speaking.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Wizard</span> <span class="keyword">for</span> <span class="title class_">Human</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">fly</span>(&amp;<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;Up!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Human</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">fly</span>(&amp;<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;*waving arms furiously*&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">trait Pilot &#123;
+    fn fly(&amp;self);
+&#125;
 
+trait Wizard &#123;
+    fn fly(&amp;self);
+&#125;
+
+struct Human;
+
+impl Pilot for Human &#123;
+    fn fly(&amp;self) &#123;
+        println!(&quot;This is your captain speaking.&quot;);
+    &#125;
+&#125;
+
+impl Wizard for Human &#123;
+    fn fly(&amp;self) &#123;
+        println!(&quot;Up!&quot;);
+    &#125;
+&#125;
+
+impl Human &#123;
+    fn fly(&amp;self) &#123;
+        println!(&quot;*waving arms furiously*&quot;);
+    &#125;
+&#125;
+</code></pre>
 <h3 id="优先调用类型上的方法"><a href="#优先调用类型上的方法" class="headerlink" title="优先调用类型上的方法"></a>优先调用类型上的方法</h3><p>当调用 Human 实例的 fly 时，编译器默认调用该类型中定义的方法：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">person</span> = Human;</span><br><span class="line">    person.<span class="title function_ invoke__">fly</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">fn main() &#123;
+    let person = Human;
+    person.fly();
+&#125;
+</code></pre>
 <p>这段代码会打印 <em>waving arms furiously</em>，说明直接调用了类型上定义的方法。</p>
 <h3 id="调用特征上的方法"><a href="#调用特征上的方法" class="headerlink" title="调用特征上的方法"></a>调用特征上的方法</h3><p>为了能够调用两个特征的方法，需要使用显式调用的语法：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">person</span> = Human;</span><br><span class="line">    Pilot::<span class="title function_ invoke__">fly</span>(&amp;person); <span class="comment">// 调用Pilot特征上的方法</span></span><br><span class="line">    Wizard::<span class="title function_ invoke__">fly</span>(&amp;person); <span class="comment">// 调用Wizard特征上的方法</span></span><br><span class="line">    person.<span class="title function_ invoke__">fly</span>(); <span class="comment">// 调用Human类型自身的方法</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">fn main() &#123;
+    let person = Human;
+    Pilot::fly(&amp;person); // 调用Pilot特征上的方法
+    Wizard::fly(&amp;person); // 调用Wizard特征上的方法
+    person.fly(); // 调用Human类型自身的方法
+&#125;
+</code></pre>
 <p>运行后依次输出：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">This is your captain speaking.</span><br><span class="line">Up!</span><br><span class="line">*waving arms furiously*</span><br></pre></td></tr></table></figure>
-
+<pre><code class="shell">This is your captain speaking.
+Up!
+*waving arms furiously*
+</code></pre>
 <p>但如果方法没有<code>self</code>参数，情况又会变得不一样：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title class_">Animal</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">baby_name</span>() <span class="punctuation">-&amp;gt;</span> <span class="type">String</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Dog</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Dog</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">baby_name</span>() <span class="punctuation">-&amp;gt;</span> <span class="type">String</span> &#123;</span><br><span class="line">        <span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;Spot&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Animal</span> <span class="keyword">for</span> <span class="title class_">Dog</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">baby_name</span>() <span class="punctuation">-&amp;gt;</span> <span class="type">String</span> &#123;</span><br><span class="line">        <span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;puppy&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="comment">// Spot</span></span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;A baby dog is called a &#123;&#125;&quot;</span>, Dog::<span class="title function_ invoke__">baby_name</span>());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">trait Animal &#123;
+    fn baby_name() -&amp;gt; String;
+&#125;
 
+struct Dog;
+
+impl Dog &#123;
+    fn baby_name() -&amp;gt; String &#123;
+        String::from(&quot;Spot&quot;)
+    &#125;
+&#125;
+
+impl Animal for Dog &#123;
+    fn baby_name() -&amp;gt; String &#123;
+        String::from(&quot;puppy&quot;)
+    &#125;
+&#125;
+
+fn main() &#123;
+    // Spot
+    println!(&quot;A baby dog is called a &#123;&#125;&quot;, Dog::baby_name());
+&#125;
+</code></pre>
 <p>如果需要调用<code>Animal</code>特征上的方法，则需要使用完全限定语法：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&amp;lt;Type <span class="keyword">as</span> Trait&amp;gt;::<span class="title function_ invoke__">function</span>(receiver_if_method, next_arg, ...);</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">&amp;lt;Type as Trait&amp;gt;::function(receiver_if_method, next_arg, ...);
+</code></pre>
 <p>上面定义中，第一个参数是方法接收器 receiver （三种 self），只有方法才拥有，例如关联函数就没有 receiver。</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;A baby dog is called a &#123;&#125;&quot;</span>, &amp;lt;Dog <span class="keyword">as</span> Animal&amp;gt;::<span class="title function_ invoke__">baby_name</span>());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">fn main() &#123;
+    println!(&quot;A baby dog is called a &#123;&#125;&quot;, &amp;lt;Dog as Animal&amp;gt;::baby_name());
+&#125;
+</code></pre>
 <p>完全限定语法可以用于任何函数或方法调用，但大部分时候是用不上的。</p>
 <h2 id="特征定义中的特征约束"><a href="#特征定义中的特征约束" class="headerlink" title="特征定义中的特征约束"></a>特征定义中的特征约束</h2><p>有时，我们会需要让某个特征 A 能使用另一个特征 B 的功能(另一种形式的特征约束)，类似于Java中一个A接口继承了另外一个接口B，在实现时需要实现两个接口，而且在A中，可以使用B接口的方法。</p>
 <p>例如有一个特征 OutlinePrint，它有一个方法，能够对当前的实现类型进行格式化输出：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::fmt::Display;</span><br><span class="line"></span><br><span class="line"><span class="keyword">trait</span> <span class="title class_">OutlinePrint</span>: Display &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">outline_print</span>(&amp;<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">output</span> = <span class="keyword">self</span>.<span class="title function_ invoke__">to_string</span>();</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">len</span> = output.<span class="title function_ invoke__">len</span>();</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>, <span class="string">&quot;*&quot;</span>.<span class="title function_ invoke__">repeat</span>(len + <span class="number">4</span>));</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;*&#123;&#125;*&quot;</span>, <span class="string">&quot; &quot;</span>.<span class="title function_ invoke__">repeat</span>(len + <span class="number">2</span>));</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;* &#123;&#125; *&quot;</span>, output);</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;*&#123;&#125;*&quot;</span>, <span class="string">&quot; &quot;</span>.<span class="title function_ invoke__">repeat</span>(len + <span class="number">2</span>));</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>, <span class="string">&quot;*&quot;</span>.<span class="title function_ invoke__">repeat</span>(len + <span class="number">4</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">use std::fmt::Display;
 
+trait OutlinePrint: Display &#123;
+    fn outline_print(&amp;self) &#123;
+        let output = self.to_string();
+        let len = output.len();
+        println!(&quot;&#123;&#125;&quot;, &quot;*&quot;.repeat(len + 4));
+        println!(&quot;*&#123;&#125;*&quot;, &quot; &quot;.repeat(len + 2));
+        println!(&quot;* &#123;&#125; *&quot;, output);
+        println!(&quot;*&#123;&#125;*&quot;, &quot; &quot;.repeat(len + 2));
+        println!(&quot;&#123;&#125;&quot;, &quot;*&quot;.repeat(len + 4));
+    &#125;
+&#125;
+</code></pre>
 <p>其中<code>self</code>的<code>to_string</code>方法是由<code>Display</code>特征提供的。</p>
 <h2 id="在外部类型上实现外部特征-newtype"><a href="#在外部类型上实现外部特征-newtype" class="headerlink" title="在外部类型上实现外部特征(newtype)"></a>在外部类型上实现外部特征(newtype)</h2><p>特征存在一个<em>孤儿规则</em>，就是特征或者类型必需至少有一个是本地的，才能在此类型上定义特征。</p>
 <p>但有一个办法来绕过孤儿规则，那就是使用 newtype 模式，简而言之：就是为一个元组结构体创建新类型。该元组结构体封装有一个字段，该字段就是希望实现特征的具体类型。</p>
 <p>newtype 不仅仅能实现以上的功能，而且它在运行时没有任何性能损耗，因为在编译期，该类型会被自动忽略。</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::fmt;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Wrapper</span>(<span class="type">Vec</span>&amp;lt;<span class="type">String</span>&amp;gt;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">fmt</span>::Display <span class="keyword">for</span> <span class="title class_">Wrapper</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">fmt</span>(&amp;<span class="keyword">self</span>, f: &amp;<span class="keyword">mut</span> fmt::Formatter) <span class="punctuation">-&amp;gt;</span> fmt::<span class="type">Result</span> &#123;</span><br><span class="line">        <span class="built_in">write!</span>(f, <span class="string">&quot;[&#123;&#125;]&quot;</span>, <span class="keyword">self</span>.<span class="number">0</span>.<span class="title function_ invoke__">join</span>(<span class="string">&quot;, &quot;</span>))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">w</span> = <span class="title function_ invoke__">Wrapper</span>(<span class="built_in">vec!</span>[<span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;hello&quot;</span>), <span class="type">String</span>::<span class="title function_ invoke__">from</span>(<span class="string">&quot;world&quot;</span>)]);</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;w = &#123;&#125;&quot;</span>, w);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">use std::fmt;
 
+struct Wrapper(Vec&amp;lt;String&amp;gt;);
+
+impl fmt::Display for Wrapper &#123;
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&amp;gt; fmt::Result &#123;
+        write!(f, &quot;[&#123;&#125;]&quot;, self.0.join(&quot;, &quot;))
+    &#125;
+&#125;
+
+fn main() &#123;
+    let w = Wrapper(vec![String::from(&quot;hello&quot;), String::from(&quot;world&quot;)]);
+    println!(&quot;w = &#123;&#125;&quot;, w);
+&#125;
+</code></pre>
 <p>上面的例子中，任何数组上的方法，都无法直接调用，需要先用 <code>self.0</code> 取出数组，然后再进行调用。</p>
 <p>但是 Rust 提供了一个特征叫 <code>Deref</code>，实现该特征后，可以自动做一层类似类型转换的操作，可以将 <code>Wrapper</code> 变成 <code>Vec&amp;lt;String&amp;gt;</code> 来使用。这样就会像直接使用数组那样去使用 <code>Wrapper</code>，而无需为每一个操作都添加上 <code>self.0</code>。</p>
 

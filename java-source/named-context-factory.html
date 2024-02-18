@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#Spring-Cloud" style="color: #ff7d73">SpringCloud</a>
+                <a href="/2023/03/05/java-source#Spring-Cloud" style="color: #03a9f4">SpringCloud</a>
             </span>
             
         </span>
@@ -204,8 +204,17 @@
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
         <p>在OpenFeign中，我们可能用过如下配置:</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">feign:</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">config:</span></span><br><span class="line">      <span class="comment"># 为每个服务单独配置超时时间</span></span><br><span class="line">      <span class="attr">CLOUD-PAYMENT-SERVICE:</span></span><br><span class="line">        <span class="attr">connect-timeout:</span> <span class="number">1</span></span><br><span class="line">        <span class="attr">read-timeout:</span> <span class="number">1</span></span><br><span class="line">      <span class="attr">CLOUD-QUERY-SERVICE:</span></span><br><span class="line">		<span class="attr">connect-timeout:</span> <span class="number">5</span></span><br><span class="line">        <span class="attr">read-timeout:</span> <span class="number">5</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
+<pre><code class="yaml">feign:
+  client:
+    config:
+      # 为每个服务单独配置超时时间
+      CLOUD-PAYMENT-SERVICE:
+        connect-timeout: 1
+        read-timeout: 1
+      CLOUD-QUERY-SERVICE:
+        connect-timeout: 5
+        read-timeout: 5
+</code></pre>
 <p>我们为了给每个服务单独配置超时时间等设置，需要在配置文件里这样配置。</p>
 <p>而这个东西的实现，和<code>NamedContextFactory</code>有脱不开的关系</p>
 <p>这个东西你可以先暂时这样理解：</p>
@@ -216,22 +225,165 @@
 <li>子容器之间配置隔离。比如我们上面分别配置了超时时间</li>
 </ul>
 <h1 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h1><p>下面的代码中，我们就实现了<code>service1</code>和<code>service2</code>两个容器：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cloud.context.named.NamedContextFactory;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.AnnotationConfigApplicationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Bean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.core.env.Environment;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.annotation.PostConstruct;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">NamedContextTest</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@PostConstruct</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 创建根context</span></span><br><span class="line">        <span class="type">AnnotationConfigApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AnnotationConfigApplicationContext</span>();</span><br><span class="line">		<span class="comment">// 注册一个基础配置，后面每个容器都能访问到</span></span><br><span class="line">        context.register(BaseConfig.class);</span><br><span class="line">		<span class="comment">// 可以看做初始化的方法</span></span><br><span class="line">        context.refresh();</span><br><span class="line">		</span><br><span class="line">        <span class="comment">// 这里我们自己实现的NamedContextFactory</span></span><br><span class="line">        <span class="type">MyNamedContextFactory</span> <span class="variable">client</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyNamedContextFactory</span>(ClientCommonConfig.class);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建两个子容器, 第二个参数可以为子容器添加单独的配置</span></span><br><span class="line">        <span class="type">MySpecification</span> <span class="variable">service1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MySpecification</span>(<span class="string">&quot;service1&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[<span class="number">0</span>]);</span><br><span class="line">        <span class="type">MySpecification</span> <span class="variable">service2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MySpecification</span>(<span class="string">&quot;service2&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[<span class="number">0</span>]);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 设置根context</span></span><br><span class="line">        client.setApplicationContext(context);</span><br><span class="line">        <span class="comment">// 把子容器加进去</span></span><br><span class="line">        client.setConfigurations(List.of(service1, service2));</span><br><span class="line"></span><br><span class="line">        <span class="type">BaseBean</span> <span class="variable">baseBean1</span> <span class="operator">=</span> client.getInstance(<span class="string">&quot;service1&quot;</span>, BaseBean.class);</span><br><span class="line">        <span class="type">BaseBean</span> <span class="variable">baseBean2</span> <span class="operator">=</span> client.getInstance(<span class="string">&quot;service2&quot;</span>, BaseBean.class);</span><br><span class="line">        log.info((baseBean1 == baseBean2) + <span class="string">&quot;\t&quot;</span> + baseBean1 + <span class="string">&quot;\t&quot;</span> + baseBean2);</span><br><span class="line"></span><br><span class="line">        <span class="type">ClientCommonBean</span> <span class="variable">commonBean1</span> <span class="operator">=</span> client.getInstance(<span class="string">&quot;service1&quot;</span>, ClientCommonBean.class);</span><br><span class="line">        <span class="type">ClientCommonBean</span> <span class="variable">commonBean2</span> <span class="operator">=</span> client.getInstance(<span class="string">&quot;service2&quot;</span>, ClientCommonBean.class);</span><br><span class="line">        log.info((commonBean1 == commonBean2) + <span class="string">&quot;\t&quot;</span> + commonBean1 + <span class="string">&quot;\t&quot;</span> + commonBean2);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">BaseConfig</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Bean</span></span><br><span class="line">        BaseBean <span class="title function_">baseBean</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">BaseBean</span>();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ClientCommonConfig</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Bean</span></span><br><span class="line">        ClientCommonBean <span class="title function_">clientCommonBean</span><span class="params">(Environment environment, BaseBean baseBean)</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ClientCommonBean</span>(environment.getProperty(MyNamedContextFactory.PROPERTY_NAME), baseBean);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ClientCommonBean</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> String name;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> BaseBean baseBean;</span><br><span class="line"></span><br><span class="line">        ClientCommonBean(String name, BaseBean baseBean) &#123;</span><br><span class="line">            <span class="built_in">this</span>.name = name;</span><br><span class="line">            <span class="built_in">this</span>.baseBean = baseBean;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">toString</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;ClientCommonBean&#123;&quot;</span> +</span><br><span class="line">                    <span class="string">&quot;name=&#x27;&quot;</span> + name + <span class="string">&#x27;\&#x27;&#x27;</span> +</span><br><span class="line">                    <span class="string">&quot;, baseBean=&quot;</span> + baseBean +</span><br><span class="line">                    <span class="string">&#x27;&#125;&#x27;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">BaseBean</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">MySpecification</span> <span class="keyword">implements</span> <span class="title class_">NamedContextFactory</span>.Specification &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> String name;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> Class&amp;lt;?&amp;gt;[] configurations;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">MySpecification</span><span class="params">(String name, Class&amp;lt;?&amp;gt;[] configurations)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.name = name;</span><br><span class="line">            <span class="built_in">this</span>.configurations = configurations;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">getName</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> name;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> Class&amp;lt;?&amp;gt;[] getConfiguration() &#123;</span><br><span class="line">            <span class="keyword">return</span> configurations;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">MyNamedContextFactory</span> <span class="keyword">extends</span> <span class="title class_">NamedContextFactory</span>&amp;lt;MySpecification&amp;gt; &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">PROPERTY_NAME</span> <span class="operator">=</span> <span class="string">&quot;test.context.name&quot;</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">MyNamedContextFactory</span><span class="params">(Class defaultConfigType)</span> &#123;</span><br><span class="line">            <span class="comment">// 第一个参数也是为每个子容器提供相同的配置类，第二个就是一个名称</span></span><br><span class="line">            <span class="comment">// 第三个代表每个容器的名字应该从哪个属性找</span></span><br><span class="line">            <span class="built_in">super</span>(defaultConfigType, <span class="string">&quot;myNamedContextFactory&quot;</span>, PROPERTY_NAME);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.context.named.NamedContextFactory;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import java.util.List;
+
+@Component
+@Slf4j
+public class NamedContextTest &#123;
+
+    @PostConstruct
+    public void init() &#123;
+        // 创建根context
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        // 注册一个基础配置，后面每个容器都能访问到
+        context.register(BaseConfig.class);
+        // 可以看做初始化的方法
+        context.refresh();
+        
+        // 这里我们自己实现的NamedContextFactory
+        MyNamedContextFactory client = new MyNamedContextFactory(ClientCommonConfig.class);
+
+        // 创建两个子容器, 第二个参数可以为子容器添加单独的配置
+        MySpecification service1 = new MySpecification(&quot;service1&quot;, new Class[0]);
+        MySpecification service2 = new MySpecification(&quot;service2&quot;, new Class[0]);
+        
+        // 设置根context
+        client.setApplicationContext(context);
+        // 把子容器加进去
+        client.setConfigurations(List.of(service1, service2));
+
+        BaseBean baseBean1 = client.getInstance(&quot;service1&quot;, BaseBean.class);
+        BaseBean baseBean2 = client.getInstance(&quot;service2&quot;, BaseBean.class);
+        log.info((baseBean1 == baseBean2) + &quot;\t&quot; + baseBean1 + &quot;\t&quot; + baseBean2);
+
+        ClientCommonBean commonBean1 = client.getInstance(&quot;service1&quot;, ClientCommonBean.class);
+        ClientCommonBean commonBean2 = client.getInstance(&quot;service2&quot;, ClientCommonBean.class);
+        log.info((commonBean1 == commonBean2) + &quot;\t&quot; + commonBean1 + &quot;\t&quot; + commonBean2);
+    &#125;
+
+    static class BaseConfig &#123;
+
+        @Bean
+        BaseBean baseBean() &#123;
+            return new BaseBean();
+        &#125;
+
+    &#125;
+
+    static class ClientCommonConfig &#123;
+
+        @Bean
+        ClientCommonBean clientCommonBean(Environment environment, BaseBean baseBean) &#123;
+            return new ClientCommonBean(environment.getProperty(MyNamedContextFactory.PROPERTY_NAME), baseBean);
+        &#125;
+
+    &#125;
+
+    public static class ClientCommonBean &#123;
+        private final String name;
+        private final BaseBean baseBean;
+
+        ClientCommonBean(String name, BaseBean baseBean) &#123;
+            this.name = name;
+            this.baseBean = baseBean;
+        &#125;
+
+        @Override
+        public String toString() &#123;
+            return &quot;ClientCommonBean&#123;&quot; +
+                    &quot;name=&#39;&quot; + name + &#39;\&#39;&#39; +
+                    &quot;, baseBean=&quot; + baseBean +
+                    &#39;&#125;&#39;;
+        &#125;
+    &#125;
+
+    static class BaseBean &#123;&#125;
+
+    static class MySpecification implements NamedContextFactory.Specification &#123;
+
+        private final String name;
+
+        private final Class&amp;lt;?&amp;gt;[] configurations;
+
+        public MySpecification(String name, Class&amp;lt;?&amp;gt;[] configurations) &#123;
+            this.name = name;
+            this.configurations = configurations;
+        &#125;
+
+        @Override
+        public String getName() &#123;
+            return name;
+        &#125;
+
+        @Override
+        public Class&amp;lt;?&amp;gt;[] getConfiguration() &#123;
+            return configurations;
+        &#125;
+    &#125;
+
+
+    static class MyNamedContextFactory extends NamedContextFactory&amp;lt;MySpecification&amp;gt; &#123;
+        private static final String PROPERTY_NAME = &quot;test.context.name&quot;;
+
+        public MyNamedContextFactory(Class defaultConfigType) &#123;
+            // 第一个参数也是为每个子容器提供相同的配置类，第二个就是一个名称
+            // 第三个代表每个容器的名字应该从哪个属性找
+            super(defaultConfigType, &quot;myNamedContextFactory&quot;, PROPERTY_NAME);
+        &#125;
+    &#125;
+
+&#125;
+</code></pre>
 <p>运行后输出：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2023-03-07 20:08:18.238  INFO 20596 --- [           main] p.xds.springcloud.test.NamedContextTest  : true	pers.xds.springcloud.test.NamedContextTest$BaseBean@2571066a	pers.xds.springcloud.test.NamedContextTest$BaseBean@2571066a</span><br><span class="line">2023-03-07 20:08:18.242  INFO 20596 --- [           main] p.xds.springcloud.test.NamedContextTest  : false	ClientCommonBean&#123;name=&#x27;service1&#x27;, baseBean=pers.xds.springcloud.test.NamedContextTest$BaseBean@2571066a&#125;	ClientCommonBean&#123;name=&#x27;service2&#x27;, baseBean=pers.xds.springcloud.test.NamedContextTest$BaseBean@2571066a&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="plainText">2023-03-07 20:08:18.238  INFO 20596 --- [           main] p.xds.springcloud.test.NamedContextTest  : true	pers.xds.springcloud.test.NamedContextTest$BaseBean@2571066a	pers.xds.springcloud.test.NamedContextTest$BaseBean@2571066a
+2023-03-07 20:08:18.242  INFO 20596 --- [           main] p.xds.springcloud.test.NamedContextTest  : false	ClientCommonBean&#123;name=&#39;service1&#39;, baseBean=pers.xds.springcloud.test.NamedContextTest$BaseBean@2571066a&#125;	ClientCommonBean&#123;name=&#39;service2&#39;, baseBean=pers.xds.springcloud.test.NamedContextTest$BaseBean@2571066a&#125;
+</code></pre>
 <p>可以发现给<code>context</code>注册的配置每个子容器都是一样的，给<code>client</code>声明的配置则是每个子容器独享的。</p>
 <p>可以发现我们的配置类是<font color="red">不需要</font>被注册进IOC容器里的，比如<code>BaseConfig</code>我们就没有注册(没有加<code>@Component</code>什么的)，正常情况下里面的bean是拿不到的。</p>
 <p>那么关于怎么去实现配置隔离呢？其实就可以直接在我们的<code>ClientCommonConfig</code>下手，可以发现我们能够在<code>Environment</code>拿到当前容器的名字，我们也可以根据名字拿到对应的配置(自动注入配置类)，然后单独设置对应的<code>ClientCommonConfig</code>！</p>
 <h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h2 id="1-getInstance"><a href="#1-getInstance" class="headerlink" title="1. getInstance"></a>1. getInstance</h2><p>其中一个比较重要的就是<code>getInstance</code>方法了:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &amp;lt;T&amp;gt; T <span class="title function_">getInstance</span><span class="params">(String name, Class&amp;lt;T&amp;gt; type)</span> &#123;</span><br><span class="line">    <span class="type">AnnotationConfigApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> <span class="built_in">this</span>.getContext(name);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> context.getBean(type);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (NoSuchBeanDefinitionException var5) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span> AnnotationConfigApplicationContext <span class="title function_">getContext</span><span class="params">(String name)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">this</span>.contexts.containsKey(name)) &#123;</span><br><span class="line">        <span class="keyword">synchronized</span>(<span class="built_in">this</span>.contexts) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!<span class="built_in">this</span>.contexts.containsKey(name)) &#123;</span><br><span class="line">                <span class="built_in">this</span>.contexts.put(name, <span class="built_in">this</span>.createContext(name));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">// this.context是一个ConcurrentHashMap</span></span><br><span class="line">    <span class="keyword">return</span> (AnnotationConfigApplicationContext)<span class="built_in">this</span>.contexts.get(name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">public &amp;lt;T&amp;gt; T getInstance(String name, Class&amp;lt;T&amp;gt; type) &#123;
+    AnnotationConfigApplicationContext context = this.getContext(name);
 
+    try &#123;
+        return context.getBean(type);
+    &#125; catch (NoSuchBeanDefinitionException var5) &#123;
+        return null;
+    &#125;
+&#125;
+
+protected AnnotationConfigApplicationContext getContext(String name) &#123;
+    if (!this.contexts.containsKey(name)) &#123;
+        synchronized(this.contexts) &#123;
+            if (!this.contexts.containsKey(name)) &#123;
+                this.contexts.put(name, this.createContext(name));
+            &#125;
+        &#125;
+    &#125;
+    // this.context是一个ConcurrentHashMap
+    return (AnnotationConfigApplicationContext)this.contexts.get(name);
+&#125;
+</code></pre>
 <p>这个很简单，就是根据<code>name</code>到Map中尝试获取对应的<code>Context</code>，然后再尝试获取对应的bean</p>
 <h2 id="2-配置类是怎么被注入的"><a href="#2-配置类是怎么被注入的" class="headerlink" title="2. 配置类是怎么被注入的"></a>2. 配置类是怎么被注入的</h2><p>我们在前面，会给容器注册一个<code>BaseConfig</code>，以及后面我们给<code>client</code>，以及每个子容器添加配置类时，都会发现这些类上并没有被加上<code>@Compnoent</code>或<code>@Configuration</code>这些类，但最后这些类还是被注入了，这里来研究一下是怎么实现的。</p>
 <p>先来看<code>AnnotationConfigApplicationContext#register</code>方法：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">register</span><span class="params">(Class&amp;lt;?&amp;gt;... componentClasses)</span> &#123;</span><br><span class="line">    Assert.notEmpty(componentClasses, <span class="string">&quot;At least one component class must be specified&quot;</span>);</span><br><span class="line">    <span class="type">StartupStep</span> <span class="variable">registerComponentClass</span> <span class="operator">=</span> <span class="built_in">this</span>.getApplicationStartup().start(<span class="string">&quot;spring.context.component-classes.register&quot;</span>)</span><br><span class="line">    .tag(<span class="string">&quot;classes&quot;</span>, () -&amp;gt; Arrays.toString(componentClasses));</span><br><span class="line">    <span class="built_in">this</span>.reader.register(componentClasses);</span><br><span class="line">    registerComponentClass.end();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="java">@Override
+public void register(Class&amp;lt;?&amp;gt;... componentClasses) &#123;
+    Assert.notEmpty(componentClasses, &quot;At least one component class must be specified&quot;);
+    StartupStep registerComponentClass = this.getApplicationStartup().start(&quot;spring.context.component-classes.register&quot;)
+    .tag(&quot;classes&quot;, () -&amp;gt; Arrays.toString(componentClasses));
+    this.reader.register(componentClasses);
+    registerComponentClass.end();
+&#125;
+</code></pre>
 <p>可以发现比较重要的一句是<code>this.reader.register(componentClasses)</code>，而这个render则是<code>AnnotatedBeanDefinitionReader</code>类，打开文档说明：</p>
 <blockquote>
 <p>Convenient adapter for programmatic registration of bean classes.<br>This is an alternative to ClassPathBeanDefinitionScanner, applying the same resolution of annotations but for explicitly registered classes only.</p>

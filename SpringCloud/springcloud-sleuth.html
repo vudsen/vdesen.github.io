@@ -197,11 +197,24 @@
 <p>在Sleuth中，每条请求链路，都有一个唯一的TraceId、Span标识，每个Span通过parent id关联起来。</p>
 <p><img lazy="https://selfb.asia/public/SpringCloud/2023-2-6-3f34fa6b-ab82-43ea-b82d-207cbe47ded2.webp" alt="链路图"></p>
 <h1 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h1><p>添加配置：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-sleuth<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-sleuth-zipkin<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-sleuth&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-sleuth-zipkin&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
 <p>配置文件添加：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">zipkin:</span></span><br><span class="line">    <span class="attr">base-url:</span> <span class="string">http://localhost:9411</span></span><br><span class="line">  <span class="attr">sleuth:</span></span><br><span class="line">    <span class="attr">sampler:</span></span><br><span class="line">      <span class="comment"># 采样率. 介于0到1，使用1则是全部采集</span></span><br><span class="line">      <span class="attr">probability:</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="yaml">spring:
+  zipkin:
+    base-url: http://localhost:9411
+  sleuth:
+    sampler:
+      # 采样率. 介于0到1，使用1则是全部采集
+      probability: 1
+</code></pre>
 <p>之后进行请求，就可以在zipkin上看到了。</p>
 
     </div>

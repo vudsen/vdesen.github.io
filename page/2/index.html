@@ -218,17 +218,55 @@
 <li><a target="_blank" rel="noopener" href="https://github.com/alibaba/arthas/issues/482">获取SpringContext</a></li>
 </ul>
 <h1 id="1-安装arthas"><a href="#1-安装arthas" class="headerlink" title="1. 安装arthas"></a>1. 安装arthas</h1><p>如果没有用docker，直接从官网下载然后丢服务器就行了，如果用的是docker那么就麻烦一点，这里我整了一个脚本来一键安装&#x2F;启动：</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">workdir=<span class="string">&quot;/opt/arthas-dev&quot;</span></span><br><span class="line">user=user</span><br><span class="line">container=<span class="variable">$1</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="variable">$container</span> ];<span class="keyword">then</span></span><br><span class="line">	<span class="built_in">echo</span> -e <span class="string">&quot;\e[32m用法: arthas-launcher.sh [容器名|容器ID] [用户名(可选，必须和启动应用的用户一致)]\e[0m&quot;</span></span><br><span class="line">	<span class="built_in">exit</span> 0</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="keyword">if</span> [ ! -z <span class="variable">$2</span> ];<span class="keyword">then</span></span><br><span class="line">	user=<span class="variable">$2</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">installArthas</span></span>() &#123;</span><br><span class="line">	<span class="built_in">echo</span> <span class="string">&quot;开始安装arthas...&quot;</span></span><br><span class="line">	docker <span class="built_in">exec</span> -u <span class="variable">$user</span> <span class="variable">$container</span> <span class="built_in">mkdir</span> <span class="variable">$workdir</span>/arthas</span><br><span class="line">	docker <span class="built_in">cp</span> jdk-8u381-linux-x64.tar.gz <span class="variable">$container</span>:<span class="variable">$workdir</span>/jdk.tar.gz</span><br><span class="line">	docker <span class="built_in">cp</span> arthas-packaging-3.7.1-bin.zip <span class="variable">$container</span>:<span class="variable">$workdir</span>/arthas/arthas.zip</span><br><span class="line">	docker <span class="built_in">exec</span> -u root <span class="variable">$container</span> <span class="built_in">chmod</span> 777 <span class="variable">$workdir</span>/jdk.tar.gz</span><br><span class="line">	docker <span class="built_in">exec</span> -u root <span class="variable">$container</span> <span class="built_in">chmod</span> 777 <span class="variable">$workdir</span>/arthas/arthas.zip</span><br><span class="line">	docker <span class="built_in">exec</span> -u <span class="variable">$user</span> <span class="variable">$container</span> tar zxvf <span class="variable">$workdir</span>/jdk.tar.gz -C <span class="variable">$workdir</span></span><br><span class="line">	docker <span class="built_in">exec</span> -u <span class="variable">$user</span> <span class="variable">$container</span> unzip <span class="variable">$workdir</span>/arthas/arthas.zip -d <span class="variable">$workdir</span>/arthas</span><br><span class="line">	docker <span class="built_in">exec</span> -u <span class="variable">$user</span> <span class="variable">$container</span> <span class="built_in">touch</span> <span class="variable">$workdir</span>/installedMark</span><br><span class="line">	<span class="built_in">echo</span> <span class="string">&quot;安装成功!&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># --------------main--------------</span></span><br><span class="line">docker <span class="built_in">exec</span> -u <span class="variable">$user</span> <span class="variable">$container</span> <span class="built_in">test</span> -d <span class="variable">$workdir</span></span><br><span class="line"><span class="keyword">if</span> [ ! $? -eq 0 ];<span class="keyword">then</span></span><br><span class="line">	docker <span class="built_in">exec</span> -u root <span class="variable">$container</span> <span class="built_in">mkdir</span> <span class="variable">$workdir</span></span><br><span class="line">	docker <span class="built_in">exec</span> -u root <span class="variable">$container</span> <span class="built_in">chown</span> <span class="variable">$user</span> <span class="variable">$workdir</span></span><br><span class="line">	installArthas</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">docker <span class="built_in">exec</span> -u <span class="variable">$user</span> <span class="variable">$container</span> <span class="built_in">test</span> -e <span class="variable">$workdir</span>/installedMark</span><br><span class="line"><span class="keyword">if</span> [ $? -eq 0 ];<span class="keyword">then</span></span><br><span class="line">	docker <span class="built_in">exec</span> -it -u <span class="variable">$user</span> <span class="variable">$container</span> <span class="variable">$workdir</span>/jdk1.8.0_381/bin/java -jar <span class="variable">$workdir</span>/arthas/arthas-boot.jar</span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line">	<span class="built_in">echo</span> <span class="string">&quot;文件完整性校验失败! 重新尝试安装arthas.&quot;</span></span><br><span class="line">	installArthas</span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+<pre><code class="sh">#!/bin/bash
+workdir=&quot;/opt/arthas-dev&quot;
+user=user
+container=$1
+if [ -z $container ];then
+    echo -e &quot;\e[32m用法: arthas-launcher.sh [容器名|容器ID] [用户名(可选，必须和启动应用的用户一致)]\e[0m&quot;
+    exit 0
+fi
+if [ ! -z $2 ];then
+    user=$2
+fi
 
+function installArthas() &#123;
+    echo &quot;开始安装arthas...&quot;
+    docker exec -u $user $container mkdir $workdir/arthas
+    docker cp jdk-8u381-linux-x64.tar.gz $container:$workdir/jdk.tar.gz
+    docker cp arthas-packaging-3.7.1-bin.zip $container:$workdir/arthas/arthas.zip
+    docker exec -u root $container chmod 777 $workdir/jdk.tar.gz
+    docker exec -u root $container chmod 777 $workdir/arthas/arthas.zip
+    docker exec -u $user $container tar zxvf $workdir/jdk.tar.gz -C $workdir
+    docker exec -u $user $container unzip $workdir/arthas/arthas.zip -d $workdir/arthas
+    docker exec -u $user $container touch $workdir/installedMark
+    echo &quot;安装成功!&quot;
+&#125;
+# --------------main--------------
+docker exec -u $user $container test -d $workdir
+if [ ! $? -eq 0 ];then
+    docker exec -u root $container mkdir $workdir
+    docker exec -u root $container chown $user $workdir
+    installArthas
+fi
+
+docker exec -u $user $container test -e $workdir/installedMark
+if [ $? -eq 0 ];then
+    docker exec -it -u $user $container $workdir/jdk1.8.0_381/bin/java -jar $workdir/arthas/arthas-boot.jar
+else 
+    echo &quot;文件完整性校验失败! 重新尝试安装arthas.&quot;
+    installArthas
+fi
+</code></pre>
 <h1 id="2-watch"><a href="#2-watch" class="headerlink" title="2. watch"></a>2. watch</h1><h2 id="2-1-基本使用"><a href="#2-1-基本使用" class="headerlink" title="2.1 基本使用"></a>2.1 基本使用</h2><p>例如有一个Encoder的encrypt方法我们想要观察，但是由于每次请求这个方法都会被调用很多次，如果不加限制，每次会爆出很多不相干的信息。</p>
 <p>watch提供了一个condition-express选项来帮助我们过滤输出：</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">watch xxx.Encoder encrypt &#123;returnObj&#125; <span class="string">&#x27;params[0]==&quot;P@ssw0rd&quot;&#x27;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="sh">watch xxx.Encoder encrypt &#123;returnObj&#125; &#39;params[0]==&quot;P@ssw0rd&quot;&#39;
+</code></pre>
 <p>上面这条指令则是让arthas在第一个参数是<code>P@ssw0rd</code>的时候输出调用的返回值</p>
 <h2 id="2-2-观察异常抛出"><a href="#2-2-观察异常抛出" class="headerlink" title="2.2 观察异常抛出"></a>2.2 观察异常抛出</h2><p>有些时候，代码抛出了异常，但是又被另外一个异常包了一层抛出去了，例如<code>throw new RuntimeException(e)</code>，甚至有的时候<br>没有被抛出：<code>log.error(e.getMessage())</code>，导致我们不能看到我们想要的调用栈。</p>
 <p>而watch也提供了观察异常抛出的功能。假如有一个Encoder的encrypt方法抛出了一个ExceptionA，但是没有打印栈信息，我们可以用<br>如下指令：</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">watch xxx.Encoder encrypt &#123;throwExp&#125; -e -x 2</span><br></pre></td></tr></table></figure>
-
+<pre><code class="sh">watch xxx.Encoder encrypt &#123;throwExp&#125; -e -x 2
+</code></pre>
 <p><code>-e</code>表示抛出异常才触发。<br><code>-x</code>表示输出属性的遍历深度，这个是啥意思呢，例如-x的值为1的时候，watch输出的结果可能就只是对象的toString，而-x的值为2的时候，watch也会输出这个对象里面属性的toString，如果等于3，则是对象里面的属性的属性的toString…</p>
 <hr>
 <p>随缘更新。。</p>
@@ -271,10 +309,10 @@
         <div class="content" v-pre>
             
             <p>不定时更新…</p>
-<h1 id="达梦8"><a href="#达梦8" class="headerlink" title="达梦8"></a>达梦8</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 5236:5236 --restart=always --name dm8_01 --privileged=true -e PAGE_SIZE=16 -e LD_LIBRARY_PATH=/opt/dmdbms/bin -e INSTANCE_NAME=dm8_01 -v /data/dm8_01:/opt/dmdbms/data dm8_single:v8.1.2.128_ent_x86_64_ctm_pack4</span><br></pre></td></tr></table></figure>
-
-<h1 id="人大金仓"><a href="#人大金仓" class="headerlink" title="人大金仓"></a>人大金仓</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -it --privileged=true -p 54321:54321 -v /opt/docker/kingbase-latest/opt/:/opt --name kingbase-latest godmeowicesun/kingbase:latest</span><br></pre></td></tr></table></figure>
-
+<h1 id="达梦8"><a href="#达梦8" class="headerlink" title="达梦8"></a>达梦8</h1><pre><code class="shell">docker run -d -p 5236:5236 --restart=always --name dm8_01 --privileged=true -e PAGE_SIZE=16 -e LD_LIBRARY_PATH=/opt/dmdbms/bin -e INSTANCE_NAME=dm8_01 -v /data/dm8_01:/opt/dmdbms/data dm8_single:v8.1.2.128_ent_x86_64_ctm_pack4
+</code></pre>
+<h1 id="人大金仓"><a href="#人大金仓" class="headerlink" title="人大金仓"></a>人大金仓</h1><pre><code class="shell">docker run -d -it --privileged=true -p 54321:54321 -v /opt/docker/kingbase-latest/opt/:/opt --name kingbase-latest godmeowicesun/kingbase:latest
+</code></pre>
 <ul>
 <li><p>端口: 54321</p>
 </li>
@@ -285,16 +323,18 @@
 <li><p>默认数据库: TEST</p>
 </li>
 </ul>
-<h1 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name mysql -p 3307:3306 -e MYSQL_ROOT_PASSWORD=123456 --privileged -v /home/vagrant/mysql5.7/data:/var/lib/mysql -d mysql:5.7.42</span><br></pre></td></tr></table></figure>
-
-<h1 id="opengauss5-0-0"><a href="#opengauss5-0-0" class="headerlink" title="opengauss5.0.0"></a>opengauss5.0.0</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --hostname=fcdea04e2440 --env=GS_PASSWORD=P@ssw0rd --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --env=EXEC_GOSU=gosu-amd64 --env=GOSU_VERSION=1.12 --env=PGDATA=/var/lib/opengauss/data --volume=/var/lib/opengauss/data:/var/lib/opengauss/data --privileged --workdir=/ -p 5432:5432 --restart=no --label=&#x27;CREATE_DATE=2022-10&#x27; --label=&#x27;GAUSS_SERVER=openGauss-5.0.0&#x27; --label=&#x27;MAIL=heguofeng@huawei.com&#x27; --runtime=runc -d opengauss/opengauss:5.0.0</span><br></pre></td></tr></table></figure>
-
-<h1 id="opengauss2-1-0"><a href="#opengauss2-1-0" class="headerlink" title="opengauss2.1.0"></a>opengauss2.1.0</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name opengauss2.1.0 --privileged=true -d -e GS_PASSWORD=P@ssw0rd -u root -p 5432:5432 enmotech/opengauss:2.1.0</span><br></pre></td></tr></table></figure>
-
-<h1 id="oracel"><a href="#oracel" class="headerlink" title="oracel"></a>oracel</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name oracle-db -p 1521:1521 --privileged -e ORACLE_PWD=123456 -e ORACLE_CHARACTERSET=utf8mb4 -v /opt/oracle/oradata container-registry.oracle.com/database/free:latest</span><br></pre></td></tr></table></figure>
-
+<h1 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h1><pre><code class="shell">docker run --name mysql -p 3307:3306 -e MYSQL_ROOT_PASSWORD=123456 --privileged -v /home/vagrant/mysql5.7/data:/var/lib/mysql -d mysql:5.7.42
+</code></pre>
+<h1 id="opengauss5-0-0"><a href="#opengauss5-0-0" class="headerlink" title="opengauss5.0.0"></a>opengauss5.0.0</h1><pre><code class="shell">docker run --hostname=fcdea04e2440 --env=GS_PASSWORD=P@ssw0rd --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --env=EXEC_GOSU=gosu-amd64 --env=GOSU_VERSION=1.12 --env=PGDATA=/var/lib/opengauss/data --volume=/var/lib/opengauss/data:/var/lib/opengauss/data --privileged --workdir=/ -p 5432:5432 --restart=no --label=&#39;CREATE_DATE=2022-10&#39; --label=&#39;GAUSS_SERVER=openGauss-5.0.0&#39; --label=&#39;MAIL=heguofeng@huawei.com&#39; --runtime=runc -d opengauss/opengauss:5.0.0
+</code></pre>
+<h1 id="opengauss2-1-0"><a href="#opengauss2-1-0" class="headerlink" title="opengauss2.1.0"></a>opengauss2.1.0</h1><pre><code class="shell">docker run --name opengauss2.1.0 --privileged=true -d -e GS_PASSWORD=P@ssw0rd -u root -p 5432:5432 enmotech/opengauss:2.1.0
+</code></pre>
+<h1 id="oracel"><a href="#oracel" class="headerlink" title="oracel"></a>oracel</h1><pre><code class="shell">docker run -d --name oracle-db -p 1521:1521 --privileged -e ORACLE_PWD=123456 -e ORACLE_CHARACTERSET=utf8mb4 -v /opt/oracle/oradata container-registry.oracle.com/database/free:latest
+</code></pre>
 <p><a target="_blank" rel="noopener" href="https://container-registry.oracle.com/ords/f?p=113:4:13054629146525:::4:P4_REPOSITORY,AI_REPOSITORY,AI_REPOSITORY_NAME,P4_REPOSITORY_NAME,P4_EULA_ID,P4_BUSINESS_AREA_ID:1863,1863,Oracle%20Database%20Free,Oracle%20Database%20Free,1,0&cs=3AJX-e6QGdNtweUNwoM_S6Bx1QBnHxTQChj06uKkm5-wObbTXatpBsvWpkNOZlJJdiGb7W-BEXdATDDaCQn1gOw">文档</a></p>
-<h1 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name redis --net host --privileged=true -v /data/redis/share/redis-node-1:/data redis --requirepass 123456 --appendonly yes --port 6381</span><br></pre></td></tr></table></figure>
+<h1 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h1><pre><code class="shell">docker run -d --name redis --net host --privileged=true -v /data/redis/share/redis-node-1:/data redis --requirepass 123456 --appendonly yes --port 6381
+</code></pre>
+
             
         </div>
     </div>
@@ -333,28 +373,73 @@
         <div class="content" v-pre>
             
             <h1 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h1><p>公司要求项目去适配高斯数据库，看了一下，高斯数据库就可以当做postgresql用，有啥问题把高斯换成postgresql来查就行。<br>其实整个项目没有太大的变动，只是几个函数需要改一下，如果用mybatis就更简单了：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="keyword">public</span> VendorDatabaseIdProvider <span class="title function_">vendorDatabaseIdProvider</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">VendorDatabaseIdProvider</span> <span class="variable">vendorDatabaseIdProvider</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">VendorDatabaseIdProvider</span>();</span><br><span class="line">    <span class="type">Properties</span> <span class="variable">properties</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Properties</span>();</span><br><span class="line">    properties.put(<span class="string">&quot;MySQL&quot;</span>, <span class="string">&quot;mysql&quot;</span>);</span><br><span class="line">    properties.put(<span class="string">&quot;Oracle&quot;</span>, <span class="string">&quot;oracle&quot;</span>);</span><br><span class="line">    properties.put(<span class="string">&quot;PostgreSQL&quot;</span>, <span class="string">&quot;pgsql&quot;</span>);</span><br><span class="line">    properties.put(<span class="string">&quot;DM DBMS&quot;</span>, <span class="string">&quot;dm&quot;</span>);</span><br><span class="line">    vendorDatabaseIdProvider.setProperties(properties);</span><br><span class="line">    <span class="keyword">return</span> vendorDatabaseIdProvider;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="keyword">public</span> SqlSessionFactoryBean <span class="title function_">sqlSessionFactoryBean</span><span class="params">(<span class="meta">@Qualifier(&quot;dataSource&quot;)</span> DataSource dataSource)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">SqlSessionFactoryBean</span> <span class="variable">factoryBean</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SqlSessionFactoryBean</span>();</span><br><span class="line">    factoryBean.setDataSource(dataSource);</span><br><span class="line">    factoryBean.setDatabaseIdProvider(databaseIdProvider());</span><br><span class="line">    factoryBean.setMapperLocations(<span class="keyword">new</span> <span class="title class_">PathMatchingResourcePatternResolver</span>().getResources(mapperLocations));</span><br><span class="line">    <span class="keyword">return</span> factoryBean;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@Bean
+public VendorDatabaseIdProvider vendorDatabaseIdProvider() &#123;
+    VendorDatabaseIdProvider vendorDatabaseIdProvider = new VendorDatabaseIdProvider();
+    Properties properties = new Properties();
+    properties.put(&quot;MySQL&quot;, &quot;mysql&quot;);
+    properties.put(&quot;Oracle&quot;, &quot;oracle&quot;);
+    properties.put(&quot;PostgreSQL&quot;, &quot;pgsql&quot;);
+    properties.put(&quot;DM DBMS&quot;, &quot;dm&quot;);
+    vendorDatabaseIdProvider.setProperties(properties);
+    return vendorDatabaseIdProvider;
+&#125;
+
+@Bean
+public SqlSessionFactoryBean sqlSessionFactoryBean(@Qualifier(&quot;dataSource&quot;) DataSource dataSource) throws Exception &#123;
+    SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
+    factoryBean.setDataSource(dataSource);
+    factoryBean.setDatabaseIdProvider(databaseIdProvider());
+    factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(mapperLocations));
+    return factoryBean;
+&#125;
+</code></pre>
 <p>添加上面配置后，碰到不兼容的函数可以这样处理：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">select</span> <span class="attr">id</span>=<span class="string">&quot;maxid&quot;</span> <span class="attr">databaseId</span>=<span class="string">&quot;pgsql&quot;</span> <span class="attr">resultType</span>=<span class="string">&quot;int&quot;</span>&amp;gt;</span></span><br><span class="line">    select another_max(power_id) from tb_xx</span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">select</span>&amp;gt;</span></span><br><span class="line"><span class="comment">&amp;lt;!-- 给一个默认的 --&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;<span class="name">select</span> <span class="attr">id</span>=<span class="string">&quot;maxid&quot;</span> <span class="attr">resultType</span>=<span class="string">&quot;int&quot;</span>&amp;gt;</span></span><br><span class="line">    select max(power_id) from tb_xx</span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">select</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
+<pre><code class="xml">&amp;lt;select id=&quot;maxid&quot; databaseId=&quot;pgsql&quot; resultType=&quot;int&quot;&amp;gt;
+    select another_max(power_id) from tb_xx
+&amp;lt;/select&amp;gt;
+&amp;lt;!-- 给一个默认的 --&amp;gt;
+&amp;lt;select id=&quot;maxid&quot; resultType=&quot;int&quot;&amp;gt;
+    select max(power_id) from tb_xx
+&amp;lt;/select&amp;gt;
+</code></pre>
 <p>这样idea会爆红，可能看着有点不舒服。</p>
 <p>也可以考虑这样写：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">choose</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">when</span> <span class="attr">test</span>=<span class="string">&quot;_databaseId == &#x27;oracle&#x27;&quot;</span>&amp;gt;</span></span><br><span class="line">        xxx</span><br><span class="line">    <span class="tag">&amp;lt;/<span class="name">when</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">when</span> <span class="attr">test</span>=<span class="string">&quot;_databaseId == &#x27;dm&#x27;&quot;</span>&amp;gt;</span></span><br><span class="line">        xxx</span><br><span class="line">    <span class="tag">&amp;lt;/<span class="name">when</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">when</span> <span class="attr">test</span>=<span class="string">&quot;_databaseId == &#x27;mysql&#x27;&quot;</span>&amp;gt;</span></span><br><span class="line">        xxx</span><br><span class="line">    <span class="tag">&amp;lt;/<span class="name">when</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">when</span> <span class="attr">test</span>=<span class="string">&quot;_databaseId == &#x27;informix&#x27; or _databaseId == &#x27;gbase8s&#x27;&quot;</span>&amp;gt;</span></span><br><span class="line">        xxx</span><br><span class="line">    <span class="tag">&amp;lt;/<span class="name">when</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">otherwise</span>&amp;gt;</span></span><br><span class="line">        xxx</span><br><span class="line">    <span class="tag">&amp;lt;/<span class="name">otherwise</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">choose</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="xml">&amp;lt;choose&amp;gt;
+    &amp;lt;when test=&quot;_databaseId == &#39;oracle&#39;&quot;&amp;gt;
+        xxx
+    &amp;lt;/when&amp;gt;
+    &amp;lt;when test=&quot;_databaseId == &#39;dm&#39;&quot;&amp;gt;
+        xxx
+    &amp;lt;/when&amp;gt;
+    &amp;lt;when test=&quot;_databaseId == &#39;mysql&#39;&quot;&amp;gt;
+        xxx
+    &amp;lt;/when&amp;gt;
+    &amp;lt;when test=&quot;_databaseId == &#39;informix&#39; or _databaseId == &#39;gbase8s&#39;&quot;&amp;gt;
+        xxx
+    &amp;lt;/when&amp;gt;
+    &amp;lt;otherwise&amp;gt;
+        xxx
+    &amp;lt;/otherwise&amp;gt;
+&amp;lt;/choose&amp;gt;
+</code></pre>
 <p>两种都可以，如果太复杂了建议用第一种。</p>
 <hr>
 <p>本来到这，已经完事大吉了，就去mapper里面去检查一下有没有哪个函数是高斯没有的，然后改一下就行。</p>
 <p>结果，万万没想到，项目里面有拿StringBuilder搞SQL拼串的代码，结果写的全是坑，这玩意狠狠折磨了我好几个星期！</p>
-<h1 id="2-别名问题"><a href="#2-别名问题" class="headerlink" title="2. 别名问题"></a>2. 别名问题</h1><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> id <span class="keyword">AS</span> userId <span class="keyword">FROM</span> <span class="keyword">user</span></span><br></pre></td></tr></table></figure>
+<h1 id="2-别名问题"><a href="#2-别名问题" class="headerlink" title="2. 别名问题"></a>2. 别名问题</h1><pre><code class="sql">SELECT id AS userId FROM user
+</code></pre>
 <p>上面这个SQL很简单，就是查用户id，然后起个别名叫<code>userId</code>，乍一看好像没什么，下面我放个图，大家来找不同：</p>
 <p><img lazy="https://selfb.asia/public/2023-9/Snipaste_2023-09-26_10-45-53.webp" alt="找不同"></p>
 <p>发现了吗？仔细看一下userId，有没有发现查出来全部变成小写了？</p>
 <p>在我们项目代码里，直接从结果集里面拿userId，结果拿不到爆空指针！</p>
 <p>原本我以为是配置问题，把大小写搞得不敏感了，结果去网上搜了一下，结果只有表名能修改大小写敏感。</p>
 <p>所以要怎么改呢，其实只需要在别名的左右加上双引号就行了：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> id <span class="keyword">AS</span> &quot;userId&quot; <span class="keyword">FROM</span> <span class="keyword">user</span></span><br></pre></td></tr></table></figure>
+<pre><code class="sql">SELECT id AS &quot;userId&quot; FROM user
+</code></pre>
 <p>这个操作同样兼容mysql。</p>
-<h1 id="3-COUNT"><a href="#3-COUNT" class="headerlink" title="3. COUNT(*)"></a>3. COUNT(*)</h1><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">FROM</span> userId</span><br></pre></td></tr></table></figure>
-
+<h1 id="3-COUNT"><a href="#3-COUNT" class="headerlink" title="3. COUNT(*)"></a>3. COUNT(*)</h1><pre><code class="sql">SELECT COUNT(*) FROM userId
+</code></pre>
 <p>又是一个非常简单的SQL，然后咱们又来找不同：</p>
 <p>高斯的结果：</p>
 <p><img lazy="https://selfb.asia/public/2023-9/gs-count.webp" alt="gs-count"></p>
@@ -426,10 +511,22 @@
         <div class="content" v-pre>
             
             <h1 id="1-起因"><a href="#1-起因" class="headerlink" title="1. 起因"></a>1. 起因</h1><p>由于最近公司要求给tomcat配置https，本来以为只是简单的塞个证书和私钥就行了：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">&amp;lt;</span>Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot; SSLEnabled=&quot;true&quot; <span class="symbol">&amp;gt;</span></span><br><span class="line">    <span class="symbol">&amp;lt;</span>SSLHostConfig protocols=&quot;TLSv1.2&quot; sslProtocol=&quot;TLS&quot;<span class="symbol">&amp;gt;</span></span><br><span class="line">        <span class="symbol">&amp;lt;</span>Certificate certificateKeyFile=&quot;conf/server.key&quot;</span><br><span class="line">                    certificateFile=&quot;conf/server.crt&quot;</span><br><span class="line">                    type=&quot;RSA&quot;/<span class="symbol">&amp;gt;</span></span><br><span class="line">    <span class="symbol">&amp;lt;</span>/SSLHostConfig<span class="symbol">&amp;gt;</span></span><br><span class="line"><span class="symbol">&amp;lt;</span>/Connector<span class="symbol">&amp;gt;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="xml">&amp;lt;Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot; SSLEnabled=&quot;true&quot; &amp;gt;
+    &amp;lt;SSLHostConfig protocols=&quot;TLSv1.2&quot; sslProtocol=&quot;TLS&quot;&amp;gt;
+        &amp;lt;Certificate certificateKeyFile=&quot;conf/server.key&quot;
+                    certificateFile=&quot;conf/server.crt&quot;
+                    type=&quot;RSA&quot;/&amp;gt;
+    &amp;lt;/SSLHostConfig&amp;gt;
+&amp;lt;/Connector&amp;gt;
+</code></pre>
 <p>结果要求用jks证书文件，彳亍：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">&amp;lt;</span>Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot; </span><br><span class="line">    sslProtocol=&quot;TLS&quot; </span><br><span class="line">    protocols=&quot;TLSv1.2&quot;</span><br><span class="line">    SSLEnabled=&quot;true&quot;</span><br><span class="line">    keystoreFile=&quot;conf/server.keystore&quot;</span><br><span class="line">    keystorePass=&quot;xxxx&quot;/<span class="symbol">&amp;gt;</span></span><br></pre></td></tr></table></figure>
+<pre><code class="xml">&amp;lt;Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot; 
+    sslProtocol=&quot;TLS&quot; 
+    protocols=&quot;TLSv1.2&quot;
+    SSLEnabled=&quot;true&quot;
+    keystoreFile=&quot;conf/server.keystore&quot;
+    keystorePass=&quot;xxxx&quot;/&amp;gt;
+</code></pre>
 <p>本以为万事大吉，结果甲方爸爸因为密码是直接写的明文，要求我们必须把密码穿成加密的🥲。</p>
 <p>不过还好顺带也给了我份博客：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/suncoolcat/p/3292252.html">tomcat安全配置之证书密码加密存储</a></p>
 <h1 id="2-tomcat配置https"><a href="#2-tomcat配置https" class="headerlink" title="2. tomcat配置https"></a>2. tomcat配置https</h1><h2 id="2-1-编写实现类"><a href="#2-1-编写实现类" class="headerlink" title="2.1 编写实现类"></a>2.1 编写实现类</h2><p>其实这份博客已经说的很清楚了，只需要继承<code>Http11NioProtocol</code>这个类就可以了</p>
@@ -438,49 +535,102 @@
 </blockquote>
 <p>但是这个博客还是不太完整，这个类怎么打jar包？<code>Http11Protocol</code>从哪里来？打了的jar包丢在哪里？博客里都没有说明。</p>
 <p>这里我自己研究了一下，首先创建一个maven项目，pom.xml添加依赖：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">&amp;lt;</span>dependency<span class="symbol">&amp;gt;</span></span><br><span class="line">    <span class="symbol">&amp;lt;</span>groupId<span class="symbol">&amp;gt;</span>org.apache.tomcat<span class="symbol">&amp;lt;</span>/groupId<span class="symbol">&amp;gt;</span></span><br><span class="line">    <span class="symbol">&amp;lt;</span>artifactId<span class="symbol">&amp;gt;</span>tomcat-coyote<span class="symbol">&amp;lt;</span>/artifactId<span class="symbol">&amp;gt;</span></span><br><span class="line">    <span class="symbol">&amp;lt;</span>version<span class="symbol">&amp;gt;</span>8.5.87<span class="symbol">&amp;lt;</span>/version<span class="symbol">&amp;gt;</span></span><br><span class="line">    <span class="symbol">&amp;lt;</span>scope<span class="symbol">&amp;gt;</span>provided<span class="symbol">&amp;lt;</span>/scope<span class="symbol">&amp;gt;</span></span><br><span class="line"><span class="symbol">&amp;lt;</span>/dependency<span class="symbol">&amp;gt;</span></span><br></pre></td></tr></table></figure>
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.apache.tomcat&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;tomcat-coyote&amp;lt;/artifactId&amp;gt;
+    &amp;lt;version&amp;gt;8.5.87&amp;lt;/version&amp;gt;
+    &amp;lt;scope&amp;gt;provided&amp;lt;/scope&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
 <p>注意scope是provided。</p>
 <p>之后就可以直接写代码了：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.coyote.http11.Http11NioProtocol;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EncryptedHttp11Protocol</span> <span class="keyword">extends</span> <span class="title class_">Http11NioProtocol</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 进行你自己的密码获取逻辑</span></span><br><span class="line">        setKeystorePass(<span class="string">&quot;xxx&quot;</span>);</span><br><span class="line">        <span class="built_in">super</span>.init();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">import org.apache.coyote.http11.Http11NioProtocol;
 
+public class EncryptedHttp11Protocol extends Http11NioProtocol &#123;
+
+    @Override
+    public void init() throws Exception &#123;
+        // 进行你自己的密码获取逻辑
+        setKeystorePass(&quot;xxx&quot;);
+        super.init();
+    &#125;
+
+&#125;
+</code></pre>
 <p>写完直接用maven打包：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn package -DskipTests</span><br></pre></td></tr></table></figure>
-
+<pre><code class="shell">mvn package -DskipTests
+</code></pre>
 <p>然后丢到tomcat目录的lib文件夹里就可以了。</p>
 <p>最后配置server.xml：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="symbol">&amp;lt;</span>Connector port=&quot;8443&quot; protocol=&quot;xxxxxxx.EncryptedHttp11Protocol&quot; SSLEnabled=&quot;true&quot;</span><br><span class="line">    keystoreFile=&quot;conf/server.keystore&quot;</span><br><span class="line">    sslProtocol=&quot;TLS&quot;<span class="symbol">&amp;gt;</span></span><br><span class="line"><span class="symbol">&amp;lt;</span>/Connector<span class="symbol">&amp;gt;</span></span><br></pre></td></tr></table></figure>
+<pre><code class="xml"> &amp;lt;Connector port=&quot;8443&quot; protocol=&quot;xxxxxxx.EncryptedHttp11Protocol&quot; SSLEnabled=&quot;true&quot;
+    keystoreFile=&quot;conf/server.keystore&quot;
+    sslProtocol=&quot;TLS&quot;&amp;gt;
+&amp;lt;/Connector&amp;gt;
+</code></pre>
 <p><strong>注意protocol属性要改成你自己的实现类</strong></p>
 <h2 id="2-2-设置环境变量"><a href="#2-2-设置环境变量" class="headerlink" title="2.2 设置环境变量"></a>2.2 设置环境变量</h2><p>由于jks被加密，需要提供密码，因此推荐的方法是通过系统环境变量来提供（这里直接根据自己的机器设置即可）。<br>在java代码里这样获取系统环境变量：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> System.getenv(key);</span><br></pre></td></tr></table></figure>
-
+<pre><code class="java">String value = System.getenv(key);
+</code></pre>
 <h2 id="2-3-设置命令行参数"><a href="#2-3-设置命令行参数" class="headerlink" title="2.3 设置命令行参数"></a>2.3 设置命令行参数</h2><p>也可以通过设置tomcat命令行参数来传输秘钥，<br>在tomcat的bin目录下创建setenv.bat(windows) &#x2F; setenv.sh (linux)文件，并且配置相关参数即可。</p>
 <p>windows: </p>
-<figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">set</span> &quot;JAVA_OPTS=-DsecretKey=xxxx -DsercretKey2=xxxx&quot;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="bat">set &quot;JAVA_OPTS=-DsecretKey=xxxx -DsercretKey2=xxxx&quot;
+</code></pre>
 <p>linux:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JAVA_OPTS=&quot;-DsecretKey=xxxx -DsercretKey2=xxxx&quot;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="shell">JAVA_OPTS=&quot;-DsecretKey=xxxx -DsercretKey2=xxxx&quot;
+</code></pre>
 <p>之后在代码中这样获取：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> System.getProperty(key);</span><br></pre></td></tr></table></figure>
-
+<pre><code class="java">String value = System.getProperty(key);
+</code></pre>
 <h1 id="3-SpringBoot内嵌tomcat配置https"><a href="#3-SpringBoot内嵌tomcat配置https" class="headerlink" title="3. SpringBoot内嵌tomcat配置https"></a>3. SpringBoot内嵌tomcat配置https</h1><p>你说的对，但是我是SpringBoot内嵌tomcat！</p>
 <p>公司的众多模块中，偏偏就是有一个SpringBoot项目，这玩意用的内嵌tomcat，上面的方法都用不了👎👎👎。</p>
 <p>首先我们要知道SpringBoot项目怎么开启https：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">    <span class="attr">ssl:</span></span><br><span class="line">        <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">        <span class="attr">key-store:</span> <span class="string">classpath:server.keystore</span></span><br><span class="line">        <span class="attr">key-store-password:</span> <span class="string">xxxxxx</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="yaml">server:
+    ssl:
+        enabled: true
+        key-store: classpath:server.keystore
+        key-store-password: xxxxxx
+</code></pre>
 <p>我们只需要找到一个方法在配置ssl前修改配置，提供密码即可。</p>
 <p>你别说，还真被我找到了，在启动类添加下面的代码：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="keyword">public</span> WebServerFactoryCustomizer&amp;lt;UndertowServletWebServerFactory&amp;gt; <span class="title function_">webServerFactoryCustomizer</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> factory -&amp;gt; &#123;</span><br><span class="line">        <span class="type">Ssl</span> <span class="variable">ssl</span> <span class="operator">=</span> factory.getSsl();</span><br><span class="line">        <span class="keyword">if</span> (ssl == <span class="literal">null</span> || !ssl.isEnabled()) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// ... 获取秘钥</span></span><br><span class="line"></span><br><span class="line">        ssl.setKeyStorePassword(<span class="string">&quot;xxxx&quot;</span>);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@Bean
+public WebServerFactoryCustomizer&amp;lt;UndertowServletWebServerFactory&amp;gt; webServerFactoryCustomizer() &#123;
+    return factory -&amp;gt; &#123;
+        Ssl ssl = factory.getSsl();
+        if (ssl == null || !ssl.isEnabled()) &#123;
+            return;
+        &#125;
+        
+        // ... 获取秘钥
 
+        ssl.setKeyStorePassword(&quot;xxxx&quot;);
+    &#125;;
+&#125;
+</code></pre>
 <p>甚至你在这里还可以引用刚才为tomcat准备的jar包，直接使用里面的秘钥获取逻辑，就不用再写一遍了√。</p>
 <h1 id="4-其它：由证书和私钥生成jks文件"><a href="#4-其它：由证书和私钥生成jks文件" class="headerlink" title="4. 其它：由证书和私钥生成jks文件"></a>4. 其它：由证书和私钥生成jks文件</h1><p>首先执行命令生成p12文件（输入后会要求输入密码，直接填上你要的密码就行）：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl pkcs12 -export -in server.crt -inkey server.key -out server.p12</span><br></pre></td></tr></table></figure>
-
+<pre><code class="shell">openssl pkcs12 -export -in server.crt -inkey server.key -out server.p12
+</code></pre>
 <p>输完后执行：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keytool -importkeystore -v -srckeystore server.p12 -srcstoretype pkcs12 -srcstorepass 上面的密码 -destkeystore server.keystore -destoretype jks -deststorepass 上面的密码</span><br></pre></td></tr></table></figure>
-
+<pre><code class="shell">keytool -importkeystore -v -srckeystore server.p12 -srcstoretype pkcs12 -srcstorepass 上面的密码 -destkeystore server.keystore -destoretype jks -deststorepass 上面的密码
+</code></pre>
 <p>这里如果jdk版本过低会报错：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">keytool 错误: java.io.IOException: parseAlgParameters failed: ObjectIdentifier() -- data isn<span class="string">&#x27;t an object ID (tag = 48)</span></span><br><span class="line"><span class="string">java.io.IOException: parseAlgParameters failed: ObjectIdentifier() -- data isn&#x27;</span>t an object <span class="title function_">ID</span> <span class="params">(tag = <span class="number">48</span>)</span></span><br><span class="line">        at sun.security.pkcs12.PKCS12KeyStore.parseAlgParameters(PKCS12KeyStore.java:<span class="number">816</span>)</span><br><span class="line">        at sun.security.pkcs12.PKCS12KeyStore.engineLoad(PKCS12KeyStore.java:<span class="number">2018</span>)</span><br><span class="line">        at java.security.KeyStore.load(KeyStore.java:<span class="number">1445</span>)</span><br><span class="line">        at sun.security.tools.keytool.Main.loadSourceKeyStore(Main.java:<span class="number">2040</span>)</span><br><span class="line">        at sun.security.tools.keytool.Main.doCommands(Main.java:<span class="number">1067</span>)</span><br><span class="line">        at sun.security.tools.keytool.Main.run(Main.java:<span class="number">366</span>)</span><br><span class="line">        at sun.security.tools.keytool.Main.main(Main.java:<span class="number">359</span>)</span><br><span class="line">Caused by: java.io.IOException: ObjectIdentifier() -- data isn<span class="string">&#x27;t an object ID (tag = 48)</span></span><br><span class="line"><span class="string">        at sun.security.util.ObjectIdentifier.&amp;lt;init&amp;gt;(ObjectIdentifier.java:257)</span></span><br><span class="line"><span class="string">        at sun.security.util.DerInputStream.getOID(DerInputStream.java:314)</span></span><br><span class="line"><span class="string">        at com.sun.crypto.provider.PBES2Parameters.engineInit(PBES2Parameters.java:267)</span></span><br><span class="line"><span class="string">        at java.security.AlgorithmParameters.init(AlgorithmParameters.java:293)</span></span><br><span class="line"><span class="string">        at sun.security.pkcs12.PKCS12KeyStore.parseAlgParameters(PKCS12KeyStore.java:812)</span></span><br><span class="line"><span class="string">        ... 6 more</span></span><br></pre></td></tr></table></figure>
+<pre><code class="java">keytool 错误: java.io.IOException: parseAlgParameters failed: ObjectIdentifier() -- data isn&#39;t an object ID (tag = 48)
+java.io.IOException: parseAlgParameters failed: ObjectIdentifier() -- data isn&#39;t an object ID (tag = 48)
+        at sun.security.pkcs12.PKCS12KeyStore.parseAlgParameters(PKCS12KeyStore.java:816)
+        at sun.security.pkcs12.PKCS12KeyStore.engineLoad(PKCS12KeyStore.java:2018)
+        at java.security.KeyStore.load(KeyStore.java:1445)
+        at sun.security.tools.keytool.Main.loadSourceKeyStore(Main.java:2040)
+        at sun.security.tools.keytool.Main.doCommands(Main.java:1067)
+        at sun.security.tools.keytool.Main.run(Main.java:366)
+        at sun.security.tools.keytool.Main.main(Main.java:359)
+Caused by: java.io.IOException: ObjectIdentifier() -- data isn&#39;t an object ID (tag = 48)
+        at sun.security.util.ObjectIdentifier.&amp;lt;init&amp;gt;(ObjectIdentifier.java:257)
+        at sun.security.util.DerInputStream.getOID(DerInputStream.java:314)
+        at com.sun.crypto.provider.PBES2Parameters.engineInit(PBES2Parameters.java:267)
+        at java.security.AlgorithmParameters.init(AlgorithmParameters.java:293)
+        at sun.security.pkcs12.PKCS12KeyStore.parseAlgParameters(PKCS12KeyStore.java:812)
+        ... 6 more
+</code></pre>
 <p>这里用的jdk1.8.0_241导致的报错，换成jdk-11.0.18可以正常执行，其它版本暂未测试。</p>
 
             
@@ -537,20 +687,85 @@
 <h1 id="4-解决冲突"><a href="#4-解决冲突" class="headerlink" title="4. 解决冲突"></a>4. 解决冲突</h1><p>这里我们先在码云上修改一下，然后也在本地修改同样的文件，然后在本地提交：</p>
 <p><img lazy="https://selfb.asia/public/svn/2023-4-4-be381ad9-6523-406d-9d22-494a2fc9dc81.webp" alt="Commit failed"></p>
 <p>提交失败了，可以发现它让我们去更新：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">You have to update your working copy first</span><br></pre></td></tr></table></figure>
-
+<pre><code class="text">You have to update your working copy first
+</code></pre>
 <p>那我们就更新，直接项目目录下右键，点击<code>Update</code>，结果又报错了：</p>
 <p><img lazy="https://selfb.asia/public/svn/2023-4-4-f69a5b86-d6c6-42d8-a8e4-ba19423d7380.webp" alt="Update failed"></p>
 <p>可以发现是因为出现了文件冲突，和Git一样，我们需要先解决冲突后再提交。</p>
 <p>这里是我本地的文件内容：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">hello world</span><br><span class="line">hello world</span><br><span class="line">hello world</span><br><span class="line">hello world</span><br><span class="line"></span><br><span class="line">12312</span><br><span class="line">312</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
+<pre><code class="text">hello world
+hello world
+hello world
+hello world
 
+12312
+312
+3
+12
+3
+12
+3
+12
+3
+hello world
+</code></pre>
 <p>这是服务器的：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">hello world</span><br><span class="line"></span><br><span class="line">12312</span><br><span class="line">312</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12312</span><br><span class="line">312</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">123312312</span><br></pre></td></tr></table></figure>
+<pre><code class="text">hello world
 
+12312
+312
+3
+12
+3
+12
+3
+12
+3
+12312
+312
+3
+12
+3
+12
+3
+12
+3
+123312312
+</code></pre>
 <p>这是发生冲突后的文件：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">hello world</span><br><span class="line">hello world</span><br><span class="line">hello world</span><br><span class="line">hello world</span><br><span class="line"></span><br><span class="line">&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt; .mine</span><br><span class="line">hello world</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">||||||| .r3</span><br><span class="line">12312</span><br><span class="line">312</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3=======</span><br><span class="line">12312</span><br><span class="line">312</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">12</span><br><span class="line">3</span><br><span class="line">123312312&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt; .r4</span><br></pre></td></tr></table></figure>
+<pre><code class="text">hello world
+hello world
+hello world
+hello world
 
+&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt; .mine
+hello world
+
+
+
+
+
+||||||| .r3
+12312
+312
+3
+12
+3
+12
+3
+12
+3=======
+12312
+312
+3
+12
+3
+12
+3
+12
+3
+123312312&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt; .r4
+</code></pre>
 <p>这特么谁看得懂，别急，还记得之前我说过SVN有丰富的图形客户端吗？这里就还真有解决冲突用的玩意：</p>
 <p><img lazy="https://selfb.asia/public/svn/2023-4-4-bd001ea3-fca1-4b2d-9950-64f0e52cc430.webp" alt="Edit conflicts"></p>
 <p>打开后就非常直观了，这里就不放图了，修改完后点击左上角的<code>Save</code>保存，这时它会问你冲突是否已经解决完毕了，如果选择解决完了（Mark as resolved），就可以直接提交了。当然如果又冲突了，就又需要重复上述过程。</p>

@@ -192,14 +192,47 @@
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
         <h1 id="Namespace"><a href="#Namespace" class="headerlink" title="Namespace"></a>Namespace</h1><p>命名空间用来隔离资源。默认只隔离资源，不隔离网络。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl create ns hello</span><br><span class="line">kubectl delete ns hello</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Namespace</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">hello</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="bash">kubectl create ns hello
+kubectl delete ns hello
+</code></pre>
+<pre><code class="yaml">apiVersion: v1
+kind: Namespace
+metadata:
+  name: hello
+</code></pre>
 <h1 id="Pod"><a href="#Pod" class="headerlink" title="Pod"></a>Pod</h1><p>Pod是运行中的一组容器，Pod是kubernets中应用的最小单位。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">kubectl run mynginx --image=nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看default名称空间的Pod</span></span><br><span class="line">kubectl get pod </span><br><span class="line"><span class="comment"># 描述</span></span><br><span class="line">kubectl describe pod 你自己的Pod名字</span><br><span class="line"><span class="comment"># 删除</span></span><br><span class="line">kubectl delete pod Pod名字</span><br><span class="line"><span class="comment"># 查看Pod的运行日志</span></span><br><span class="line">kubectl logs Pod名字</span><br><span class="line"></span><br><span class="line"><span class="comment"># 每个Pod - k8s都会分配一个ip</span></span><br><span class="line">kubectl get pod -owide</span><br><span class="line"><span class="comment"># 使用Pod的ip+pod里面运行容器的端口</span></span><br><span class="line">curl 192.168.169.136</span><br><span class="line"></span><br><span class="line"><span class="comment"># 集群中的任意一个机器以及任意的应用都能通过Pod分配的ip来访问这个Pod</span></span><br></pre></td></tr></table></figure>
+<pre><code class="bash">kubectl run mynginx --image=nginx
 
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">run:</span> <span class="string">myapp</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">myapp</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">image:</span> <span class="string">nginx</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nginx</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">image:</span> <span class="string">tomcat:8.5.68</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">tomcat</span></span><br></pre></td></tr></table></figure>
+# 查看default名称空间的Pod
+kubectl get pod 
+# 描述
+kubectl describe pod 你自己的Pod名字
+# 删除
+kubectl delete pod Pod名字
+# 查看Pod的运行日志
+kubectl logs Pod名字
+
+# 每个Pod - k8s都会分配一个ip
+kubectl get pod -owide
+# 使用Pod的ip+pod里面运行容器的端口
+curl 192.168.169.136
+
+# 集群中的任意一个机器以及任意的应用都能通过Pod分配的ip来访问这个Pod
+</code></pre>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: myapp
+  name: myapp
+spec:
+  containers:
+  - image: nginx
+    name: nginx
+  - image: tomcat:8.5.68
+    name: tomcat
+</code></pre>
+
     </div>
     
     

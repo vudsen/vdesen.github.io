@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#Spring-Boot" style="color: #ff7d73">SpringBoot</a>
+                <a href="/2023/03/05/java-source#Spring-Boot" style="color: #00a596">SpringBoot</a>
             </span>
             
         </span>
@@ -205,34 +205,112 @@
     <div class="content" v-pre id="main-content">
         <p><code>@Conditional</code>的作用可以理解为满足一定条件就进行注入。</p>
 <h1 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h1><p>其源码如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(&#123;ElementType.TYPE, ElementType.METHOD&#125;)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Conditional &#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * All &#123;<span class="doctag">@link</span> Condition&#125; classes that must &#123;<span class="doctag">@linkplain</span> Condition#matches match&#125;</span></span><br><span class="line"><span class="comment">	 * in order for the component to be registered.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	Class&amp;lt;? <span class="keyword">extends</span> <span class="title class_">Condition</span>&amp;gt;[] value();</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@Target(&#123;ElementType.TYPE, ElementType.METHOD&#125;)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Conditional &#123;
 
+    /**
+     * All &#123;@link Condition&#125; classes that must &#123;@linkplain Condition#matches match&#125;
+     * in order for the component to be registered.
+     */
+    Class&amp;lt;? extends Condition&amp;gt;[] value();
+
+&#125;
+</code></pre>
 <p>在使用时只需传入Condition接口的实现类即可。</p>
 <p>在Condition接口中，只有一个<code>matches</code>方法：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Condition</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Determine if the condition matches.</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> context the condition context</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> metadata the metadata of the &#123;<span class="doctag">@link</span> org.springframework.core.type.AnnotationMetadata class&#125;</span></span><br><span class="line"><span class="comment">	 * or &#123;<span class="doctag">@link</span> org.springframework.core.type.MethodMetadata method&#125; being checked</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span> &#123;<span class="doctag">@code</span> true&#125; if the condition matches and the component can be registered,</span></span><br><span class="line"><span class="comment">	 * or &#123;<span class="doctag">@code</span> false&#125; to veto the annotated component&#x27;s registration</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="type">boolean</span> <span class="title function_">matches</span><span class="params">(ConditionContext context, AnnotatedTypeMetadata metadata)</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@FunctionalInterface
+public interface Condition &#123;
 
+    /**
+     * Determine if the condition matches.
+     * @param context the condition context
+     * @param metadata the metadata of the &#123;@link org.springframework.core.type.AnnotationMetadata class&#125;
+     * or &#123;@link org.springframework.core.type.MethodMetadata method&#125; being checked
+     * @return &#123;@code true&#125; if the condition matches and the component can be registered,
+     * or &#123;@code false&#125; to veto the annotated component&#39;s registration
+     */
+    boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata);
+
+&#125;
+</code></pre>
 <p>当matches返回true时，将会进行注册。</p>
 <h1 id="2-SpringBootCondition"><a href="#2-SpringBootCondition" class="headerlink" title="2. SpringBootCondition"></a>2. SpringBootCondition</h1><p>SpringBootCondition可以配合日志系统，帮助我们查看加载了哪些类。</p>
 <p>我们只需要实现一个方法即可：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Determine the outcome of the match along with suitable log output.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> context the condition context</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> metadata the annotation metadata</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> the condition outcome</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> ConditionOutcome <span class="title function_">getMatchOutcome</span><span class="params">(ConditionContext context, AnnotatedTypeMetadata metadata)</span>;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="java">/**
+ * Determine the outcome of the match along with suitable log output.
+ * @param context the condition context
+ * @param metadata the annotation metadata
+ * @return the condition outcome
+ */
+public abstract ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata);
+</code></pre>
 <p>如果匹配，则直接返回<code>ConditionOutcome.matches</code>。或者在不匹配时调用<code>ConditionOutcome.noMatch</code>。</p>
 <h1 id="3-拓展"><a href="#3-拓展" class="headerlink" title="3. 拓展"></a>3. 拓展</h1><p><strong>@ConditionalOnBean</strong>：仅仅在当前上下文中存在某个对象时，才会实例化一个Bean。<br><strong>@ConditionalOnClass</strong>：某个class位于类路径上，才会实例化一个Bean。<br><strong>@ConditionalOnExpression</strong>：当表达式为true的时候，才会实例化一个Bean。<br><strong>@ConditionalOnMissingBean</strong>：仅仅在当前上下文中不存在某个对象时，才会实例化一个Bean。<br><strong>@ConditionalOnMissingClass</strong>：某个class类路径上不存在的时候，才会实例化一个Bean。<br><strong>@ConditionalOnNotWebApplication</strong>：不是web应用，才会实例化一个Bean。<br><strong>@ConditionalOnBean</strong>：当容器中有指定Bean的条件下进行实例化。<br><strong>@ConditionalOnMissingBean</strong>：当容器里没有指定Bean的条件下进行实例化。<br><strong>@ConditionalOnClass</strong>：当classpath类路径下有指定类的条件下进行实例化。<br><strong>@ConditionalOnMissingClass</strong>：当类路径下没有指定类的条件下进行实例化。<br><strong>@ConditionalOnWebApplication</strong>：当项目是一个Web项目时进行实例化。<br><strong>@ConditionalOnNotWebApplication</strong>：当项目不是一个Web项目时进行实例化。<br><strong>@ConditionalOnProperty</strong>：当指定的属性有指定的值时进行实例化。<br><strong>@ConditionalOnExpression</strong>：基于SpEL表达式的条件判断。<br><strong>@ConditionalOnJava</strong>：当JVM版本为指定的版本范围时触发实例化。<br><strong>@ConditionalOnResource</strong>：当类路径下有指定的资源时触发实例化。<br><strong>@ConditionalOnJndi</strong>：在JNDI存在的条件下触发实例化。<br><strong>@ConditionalOnSingleCandidate</strong>：当指定的Bean在容器中只有一个，或者有多个但是指定了首选的Bean时触发实例化。</p>
 <h1 id="4-疑问"><a href="#4-疑问" class="headerlink" title="4. 疑问"></a>4. 疑问</h1><p>在看源码时，经常会发现一些<code>Conditional</code>的注解顶在一个静态类上，比如下面的：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">RetryMissingOrDisabledCondition</span> <span class="keyword">extends</span> <span class="title class_">AnyNestedCondition</span> &#123;</span><br><span class="line"></span><br><span class="line">    RetryMissingOrDisabledCondition() &#123;</span><br><span class="line">        <span class="built_in">super</span>(ConfigurationPhase.REGISTER_BEAN);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@ConditionalOnMissingClass(&quot;org.springframework.retry.support.RetryTemplate&quot;)</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">RetryTemplateMissing</span> &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@ConditionalOnProperty(value = &quot;spring.cloud.loadbalancer.retry.enabled&quot;, havingValue = &quot;false&quot;)</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">RetryDisabled</span> &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">private static class RetryMissingOrDisabledCondition extends AnyNestedCondition &#123;
 
+    RetryMissingOrDisabledCondition() &#123;
+        super(ConfigurationPhase.REGISTER_BEAN);
+    &#125;
+
+    @ConditionalOnMissingClass(&quot;org.springframework.retry.support.RetryTemplate&quot;)
+    static class RetryTemplateMissing &#123;
+
+    &#125;
+
+    @ConditionalOnProperty(value = &quot;spring.cloud.loadbalancer.retry.enabled&quot;, havingValue = &quot;false&quot;)
+    static class RetryDisabled &#123;
+
+    &#125;
+
+&#125;
+</code></pre>
 <p>网上查了一下没找到，所以自己打算测试一下这是干什么的。</p>
 <p>首先我猜测的话：如果这个Condition为false，后面在外部的注册请求都会被拒绝。</p>
 <p>首先我们写一个测试类：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这个condition肯定是false</span></span><br><span class="line"><span class="meta">@ConditionalOnProperty(value = &quot;xxx&quot;, havingValue = &quot;xxx&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestClass</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">TestClass</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;被实例化了&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">// 这个condition肯定是false
+@ConditionalOnProperty(value = &quot;xxx&quot;, havingValue = &quot;xxx&quot;)
+public class TestClass &#123;
 
+    public TestClass() &#123;
+        System.out.println(&quot;被实例化了&quot;);
+    &#125;
+&#125;
+</code></pre>
 <p>然后在主类注册：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestApplication</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> TestClass <span class="title function_">testClass</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">TestClass</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        SpringApplication.run(TestApplication.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@SpringBootApplication
+public class TestApplication &#123;
+    
+    @Bean
+    public TestClass testClass() &#123;
+        return new TestClass();
+    &#125;
 
+    public static void main(String[] args) &#123;
+        SpringApplication.run(TestApplication.class, args);
+    &#125;
+&#125;
+</code></pre>
 <p>运行后发现这个类还是被实例化了。</p>
 <p>猜测可能是需要在Condition类里使用：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyCondition</span> <span class="keyword">implements</span> <span class="title class_">Condition</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">matches</span><span class="params">(ConditionContext context, AnnotatedTypeMetadata metadata)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@ConditionalOnProperty(value = &quot;true&quot;, havingValue = &quot;false&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">Test</span><span class="params">()</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;被实例化了&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">public class MyCondition implements Condition &#123;
 
+    @Override
+    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) &#123;
+        return true;
+    &#125;
+
+    @ConditionalOnProperty(value = &quot;true&quot;, havingValue = &quot;false&quot;)
+    public static class Test &#123;
+        public Test() &#123;
+            System.out.println(&quot;被实例化了&quot;);
+        &#125;
+    &#125;
+
+&#125;
+</code></pre>
 <p>最后发现<code>Test</code>类还是会被注入。</p>
 <p>emmm就先这样吧，如果以后发现有什么用了就再来补坑。</p>
 

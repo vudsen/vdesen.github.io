@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/bus" style="color: #00bcd4">服务总线</a>
+                <a href="/SpringCloud/bus" style="color: #00a596">服务总线</a>
             </span>
             
         </span>
@@ -208,27 +208,70 @@
 <p>SpringCloud Config-Client实例都监听MQ中同一个topic(默认为<code>springCloudBus</code>)。当一个服务刷新数据的时候，它会把这个信息放入到Topic中，这样其它监听同一个Topic的服务就能得到通知，然后去更新自身的配置。</p>
 <p>SpringCloud Bus目前仅支持RabbitMQ和Kafaka。</p>
 <h1 id="1-简单使用"><a href="#1-简单使用" class="headerlink" title="1. 简单使用"></a>1. 简单使用</h1><h2 id="1-1-配置"><a href="#1-1-配置" class="headerlink" title="1.1 配置"></a>1.1 配置</h2><h3 id="1-1-1-配置中心配置"><a href="#1-1-1-配置中心配置" class="headerlink" title="1.1.1 配置中心配置"></a>1.1.1 配置中心配置</h3><p>添加依赖：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-bus-amqp<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-bus-amqp&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
 <p>配置文件添加配置：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">3344</span></span><br><span class="line"></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">cloud-config-center</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">config:</span></span><br><span class="line">      <span class="attr">server:</span></span><br><span class="line">        <span class="attr">git:</span></span><br><span class="line">          <span class="attr">uri:</span> <span class="string">https://gitee.com/hupeng333/springcloud-config.git</span></span><br><span class="line">          <span class="attr">search-paths:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">springcloud-config</span></span><br><span class="line">          <span class="attr">default-label:</span> <span class="string">master</span></span><br><span class="line">      <span class="attr">label:</span> <span class="string">master</span></span><br><span class="line">  <span class="comment"># rabbitmq配置    </span></span><br><span class="line">  <span class="attr">rabbitmq:</span></span><br><span class="line">    <span class="attr">host:</span> <span class="string">localhost</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">5672</span></span><br><span class="line">    <span class="attr">username:</span> <span class="string">guest</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">guest</span></span><br><span class="line"></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">service-url:</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://localhost:7001/eureka</span></span><br><span class="line"></span><br><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoint:</span></span><br><span class="line">    <span class="attr">web:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="comment"># 暴露bus刷新配置的端点</span></span><br><span class="line">        <span class="attr">include:</span> <span class="string">&#x27;busrefresh&#x27;</span></span><br></pre></td></tr></table></figure>
+<pre><code class="yaml">server:
+  port: 3344
 
+spring:
+  application:
+    name: cloud-config-center
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://gitee.com/hupeng333/springcloud-config.git
+          search-paths:
+            - springcloud-config
+          default-label: master
+      label: master
+  # rabbitmq配置    
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:7001/eureka
+
+management:
+  endpoint:
+    web:
+      exposure:
+        # 暴露bus刷新配置的端点
+        include: &#39;busrefresh&#39;
+</code></pre>
 <h3 id="1-1-2-客户端配置"><a href="#1-1-2-客户端配置" class="headerlink" title="1.1.2 客户端配置"></a>1.1.2 客户端配置</h3><p>同样添加相同的依赖:</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-bus-amqp<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-bus-amqp&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
 <p>添加rabbitmq支持：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">	<span class="attr">rabbitmq:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">localhost</span></span><br><span class="line">        <span class="attr">port:</span> <span class="number">5672</span></span><br><span class="line">        <span class="attr">username:</span> <span class="string">guest</span></span><br><span class="line">        <span class="attr">password:</span> <span class="string">guest</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="yaml">spring:
+    rabbitmq:
+        host: localhost
+        port: 5672
+        username: guest
+        password: guest
+</code></pre>
 <h2 id="1-2-全局更新配置"><a href="#1-2-全局更新配置" class="headerlink" title="1.2 全局更新配置"></a>1.2 全局更新配置</h2><p>对配置中心发送如下请求即可进行自动更新：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -X POST &quot;http://localhost:3344/actuator/busrefresh&quot;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="shell">curl -X POST &quot;http://localhost:3344/actuator/busrefresh&quot;
+</code></pre>
 <h2 id="1-3-定点通知"><a href="#1-3-定点通知" class="headerlink" title="1.3 定点通知"></a>1.3 定点通知</h2><p>定点通知即指定某一个具体的实例刷新配置，而不是全部的实例。</p>
 <p>使用如下请求进行定点通知：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://配置中心host/actuator/busrefresh/&#123;destination&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="shell">http://配置中心host/actuator/busrefresh/&#123;destination&#125;
+</code></pre>
 <p>例如某个实例的<code>spring.application.name</code>为<code>config-client</code>，并且端口为3355，使用如下指令进行刷新：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://配置中心host/actuator/busrefresh/config-client:3355</span><br></pre></td></tr></table></figure>
-
+<pre><code class="shell">http://配置中心host/actuator/busrefresh/config-client:3355
+</code></pre>
 
     </div>
     

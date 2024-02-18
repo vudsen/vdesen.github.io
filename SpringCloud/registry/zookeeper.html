@@ -192,13 +192,31 @@
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
         <p>Zookeeper用法与Eureka相似。</p>
-<h2 id="服务提供者"><a href="#服务提供者" class="headerlink" title="服务提供者"></a>服务提供者</h2><h3 id="导入依赖"><a href="#导入依赖" class="headerlink" title="导入依赖"></a>导入依赖</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-zookeeper-discovery<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="添加配置"><a href="#添加配置" class="headerlink" title="添加配置"></a>添加配置</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">cloud-payment-service</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">zookeeper:</span></span><br><span class="line">      <span class="attr">connect-string:</span> <span class="string">localhost:2181</span></span><br></pre></td></tr></table></figure>
-
+<h2 id="服务提供者"><a href="#服务提供者" class="headerlink" title="服务提供者"></a>服务提供者</h2><h3 id="导入依赖"><a href="#导入依赖" class="headerlink" title="导入依赖"></a>导入依赖</h3><pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-zookeeper-discovery&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
+<h3 id="添加配置"><a href="#添加配置" class="headerlink" title="添加配置"></a>添加配置</h3><pre><code class="yaml">spring:
+  application:
+    name: cloud-payment-service
+  cloud:
+    zookeeper:
+      connect-string: localhost:2181
+</code></pre>
 <p>在主类添加<code>@EnableDiscoveryClient</code>注解</p>
-<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ApplicationContextConfig</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="comment">// 这里是ribbon提供的负载均衡</span></span><br><span class="line">    <span class="meta">@LoadBanalce</span></span><br><span class="line">    <span class="keyword">public</span> RestTemplate <span class="title function_">restTemplate</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">RestTemplate</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><pre><code class="java">@Configuration
+public class ApplicationContextConfig &#123;
 
+    @Bean
+    // 这里是ribbon提供的负载均衡
+    @LoadBanalce
+    public RestTemplate restTemplate() &#123;
+        return new RestTemplate();
+    &#125;
+
+&#125;
+</code></pre>
 <p>直接用服务名代替域名即可，大致流程和Eureka一样，只不过注册中心变为了Zookeeper了。</p>
 
     </div>

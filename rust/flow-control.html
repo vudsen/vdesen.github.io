@@ -192,21 +192,51 @@
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
         <h1 id="1-基础"><a href="#1-基础" class="headerlink" title="1. 基础"></a>1. 基础</h1><h2 id="1-1-if判断"><a href="#1-1-if判断" class="headerlink" title="1.1 if判断"></a>1.1 if判断</h2><p>rust的if表达式如下：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> condition == <span class="literal">true</span> &#123;</span><br><span class="line">    <span class="comment">// A...</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// B...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">if condition == true &#123;
+    // A...
+&#125; else &#123;
+    // B...
+&#125;
+</code></pre>
 <p>在rust中的三目运算符也需要if来完成：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">condition</span> = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">number</span> = <span class="keyword">if</span> condition &#123;</span><br><span class="line">        <span class="number">5</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="number">6</span></span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;The value of number is: &#123;&#125;&quot;</span>, number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">fn main() &#123;
+    let condition = true;
+    let number = if condition &#123;
+        5
+    &#125; else &#123;
+        6
+    &#125;;
 
+    println!(&quot;The value of number is: &#123;&#125;&quot;, number);
+&#125;
+</code></pre>
 <p>用 if 来赋值时，要保证每个分支返回的类型一样，不然编译会报错。</p>
 <h2 id="1-2-for循环"><a href="#1-2-for循环" class="headerlink" title="1.2 for循环"></a>1.2 for循环</h2><p>rust的for循环和寻常的语言不一样，例如从1到5是这样写的：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">1</span>..=<span class="number">5</span> &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>, i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">fn main() &#123;
+    for i in 1..=5 &#123;
+        println!(&quot;&#123;&#125;&quot;, i);
+    &#125;
+&#125;
+</code></pre>
 <p>加上等号代表范围是[1, 5]，去掉则是[1, 5)。</p>
 <p>主要的语义表达式如下：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> 元素 <span class="keyword">in</span> 集合 &#123;</span><br><span class="line">  <span class="comment">// 使用元素干一些你懂我不懂的事情</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">for 元素 in 集合 &#123;
+  // 使用元素干一些你懂我不懂的事情
+&#125;
+</code></pre>
 <p>如果想在循环中，修改该元素，可以使用 mut 关键字：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">collection</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>];</span><br><span class="line">    <span class="keyword">for</span> <span class="variable">val</span> <span class="keyword">in</span> &amp;<span class="keyword">mut</span> collection &#123;</span><br><span class="line">        *val = <span class="number">3</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="variable">val</span> <span class="keyword">in</span> &amp;collection &#123;</span><br><span class="line">        <span class="comment">// output: 3 3 3 3 3 3</span></span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>, val)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">fn main() &#123;
+    let mut collection = [1, 2, 3, 4, 5];
+    for val in &amp;mut collection &#123;
+        *val = 3;
+    &#125;
 
+    for val in &amp;collection &#123;
+        // output: 3 3 3 3 3 3
+        println!(&quot;&#123;&#125;&quot;, val)
+    &#125;
+&#125;
+</code></pre>
 <p><strong>在使用时，如果传入的集合不是一个引用，那么对应的所有权将会被转移走</strong>。</p>
 <table>
 <thead>
@@ -232,16 +262,74 @@
 <td>可变借用</td>
 </tr>
 </tbody></table>
-<h2 id="1-3-while循环"><a href="#1-3-while循环" class="headerlink" title="1.3 while循环"></a>1.3 while循环</h2><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">n</span> = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> n &amp;lt;= <span class="number">5</span> &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;!&quot;</span>, n);</span><br><span class="line"></span><br><span class="line">        n = n + <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;我出来了！&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="1-3-while循环"><a href="#1-3-while循环" class="headerlink" title="1.3 while循环"></a>1.3 while循环</h2><pre><code class="rust">fn main() &#123;
+    let mut n = 0;
 
+    while n &amp;lt;= 5 &#123;
+        println!(&quot;&#123;&#125;!&quot;, n);
+
+        n = n + 1;
+    &#125;
+
+    println!(&quot;我出来了！&quot;);
+&#125;
+</code></pre>
 <h2 id="1-4-loop循环"><a href="#1-4-loop循环" class="headerlink" title="1.4 loop循环"></a>1.4 loop循环</h2><p>loop循环可以理解为简化版的while true循环，代码块中的代码会一直运行，直到返回或退出。</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">counter</span> = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">result</span> = <span class="keyword">loop</span> &#123;</span><br><span class="line">        counter += <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> counter == <span class="number">10</span> &#123;</span><br><span class="line">            <span class="keyword">break</span> counter * <span class="number">2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;The result is &#123;&#125;&quot;</span>, result);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">fn main() &#123;
+    let mut counter = 0;
 
+    let result = loop &#123;
+        counter += 1;
+
+        if counter == 10 &#123;
+            break counter * 2;
+        &#125;
+    &#125;;
+
+    println!(&quot;The result is &#123;&#125;&quot;, result);
+&#125;
+</code></pre>
 <p>使用<code>label</code>可以控制<code>continue</code>和<code>break</code>的位置：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">count</span> = <span class="number">0</span>;</span><br><span class="line">    <span class="symbol">&#x27;outer</span>: <span class="keyword">loop</span> &#123;</span><br><span class="line">        <span class="symbol">&#x27;inner1</span>: <span class="keyword">loop</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> count &amp;gt;= <span class="number">20</span> &#123;</span><br><span class="line">                <span class="comment">// 这只会跳出 inner1 循环</span></span><br><span class="line">                <span class="keyword">break</span> <span class="symbol">&#x27;inner1</span>; <span class="comment">// 这里使用 `break` 也是一样的</span></span><br><span class="line">            &#125;</span><br><span class="line">            count += <span class="number">2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        count += <span class="number">5</span>;</span><br><span class="line">        <span class="symbol">&#x27;inner2</span>: <span class="keyword">loop</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> count &amp;gt;= <span class="number">30</span> &#123;</span><br><span class="line">                <span class="keyword">break</span> <span class="symbol">&#x27;outer</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">continue</span> <span class="symbol">&#x27;outer</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">assert!</span>(count == <span class="number">30</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">fn main() &#123;
+    let mut count = 0;
+    &#39;outer: loop &#123;
+        &#39;inner1: loop &#123;
+            if count &amp;gt;= 20 &#123;
+                // 这只会跳出 inner1 循环
+                break &#39;inner1; // 这里使用 `break` 也是一样的
+            &#125;
+            count += 2;
+        &#125;
+        count += 5;
+        &#39;inner2: loop &#123;
+            if count &amp;gt;= 30 &#123;
+                break &#39;outer;
+            &#125;
+            continue &#39;outer;
+        &#125;
+    &#125;
+    assert!(count == 30)
+&#125;
+</code></pre>
 <h1 id="2-模式匹配"><a href="#2-模式匹配" class="headerlink" title="2. 模式匹配"></a>2. 模式匹配</h1><h2 id="2-1-match匹配"><a href="#2-1-match匹配" class="headerlink" title="2.1 match匹配"></a>2.1 match匹配</h2><p>在 Rust 中，模式匹配最常用的就是 match 和 if let，下面是match的一个例子：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">Direction</span> &#123;</span><br><span class="line">    East,</span><br><span class="line">    West,</span><br><span class="line">    North,</span><br><span class="line">    South,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">dire</span> = Direction::South;</span><br><span class="line">    <span class="keyword">match</span> dire &#123;</span><br><span class="line">        Direction::East =&amp;gt; <span class="built_in">println!</span>(<span class="string">&quot;East&quot;</span>),</span><br><span class="line">        Direction::North | Direction::South =&amp;gt; &#123;</span><br><span class="line">            <span class="built_in">println!</span>(<span class="string">&quot;South or North&quot;</span>);</span><br><span class="line">        &#125;,</span><br><span class="line">        _ =&amp;gt; <span class="built_in">println!</span>(<span class="string">&quot;West&quot;</span>),</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">enum Direction &#123;
+    East,
+    West,
+    North,
+    South,
+&#125;
+
+fn main() &#123;
+    let dire = Direction::South;
+    match dire &#123;
+        Direction::East =&amp;gt; println!(&quot;East&quot;),
+        Direction::North | Direction::South =&amp;gt; &#123;
+            println!(&quot;South or North&quot;);
+        &#125;,
+        _ =&amp;gt; println!(&quot;West&quot;),
+    &#125;;
+&#125;
+</code></pre>
 <p>这里我们想去匹配 dire 对应的枚举类型，因此在 match 中用三个匹配分支来完全覆盖枚举变量 Direction 的所有成员类型，有以下几点值得注意：</p>
 <ul>
 <li>match 的匹配必须要穷举出所有可能，因此这里用 _ 来代表未列出的所有可能性</li>
@@ -250,38 +338,143 @@
 </ul>
 <p>其实 match 跟其他语言中的 switch 非常像，_ 类似于 switch 中的 default，如果没有默认，则match必须要覆盖所有的值，不然会报错。</p>
 <p>match匹配的通用形式：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">match</span> target &#123;</span><br><span class="line">    模式<span class="number">1</span> =&amp;gt; 表达式<span class="number">1</span>,</span><br><span class="line">    模式<span class="number">2</span> =&amp;gt; &#123;</span><br><span class="line">        语句<span class="number">1</span>;</span><br><span class="line">        语句<span class="number">2</span>;</span><br><span class="line">        表达式<span class="number">2</span></span><br><span class="line">    &#125;,</span><br><span class="line">    _ =&amp;gt; 表达式<span class="number">3</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">match target &#123;
+    模式1 =&amp;gt; 表达式1,
+    模式2 =&amp;gt; &#123;
+        语句1;
+        语句2;
+        表达式2
+    &#125;,
+    _ =&amp;gt; 表达式3
+&#125;
+</code></pre>
 <p>match可以用于返回值：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">Coin</span> &#123;</span><br><span class="line">    Penny,</span><br><span class="line">    Nickel,</span><br><span class="line">    Dime,</span><br><span class="line">    Quarter,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">value_in_cents</span>(coin: Coin) <span class="punctuation">-&amp;gt;</span> <span class="type">u8</span> &#123;</span><br><span class="line">    <span class="keyword">match</span> coin &#123;</span><br><span class="line">        Coin::Penny =&amp;gt;  &#123;</span><br><span class="line">            <span class="built_in">println!</span>(<span class="string">&quot;Lucky penny!&quot;</span>);</span><br><span class="line">            <span class="number">1</span></span><br><span class="line">        &#125;,</span><br><span class="line">        Coin::Nickel =&amp;gt; <span class="number">5</span>,</span><br><span class="line">        Coin::Dime =&amp;gt; <span class="number">10</span>,</span><br><span class="line">        Coin::Quarter =&amp;gt; <span class="number">25</span>,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">enum Coin &#123;
+    Penny,
+    Nickel,
+    Dime,
+    Quarter,
+&#125;
 
+fn value_in_cents(coin: Coin) -&amp;gt; u8 &#123;
+    match coin &#123;
+        Coin::Penny =&amp;gt;  &#123;
+            println!(&quot;Lucky penny!&quot;);
+            1
+        &#125;,
+        Coin::Nickel =&amp;gt; 5,
+        Coin::Dime =&amp;gt; 10,
+        Coin::Quarter =&amp;gt; 25,
+    &#125;
+&#125;
+</code></pre>
 <p>也可以给变量赋值：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">IpAddr</span> &#123;</span><br><span class="line">   Ipv4,</span><br><span class="line">   Ipv6</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">ip1</span> = IpAddr::Ipv6;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">ip_str</span> = <span class="keyword">match</span> ip1 &#123;</span><br><span class="line">        IpAddr::Ipv4 =&amp;gt; <span class="string">&quot;127.0.0.1&quot;</span>,</span><br><span class="line">        _ =&amp;gt; <span class="string">&quot;::1&quot;</span>,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>, ip_str);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">enum IpAddr &#123;
+   Ipv4,
+   Ipv6
+&#125;
 
+fn main() &#123;
+    let ip1 = IpAddr::Ipv6;
+    let ip_str = match ip1 &#123;
+        IpAddr::Ipv4 =&amp;gt; &quot;127.0.0.1&quot;,
+        _ =&amp;gt; &quot;::1&quot;,
+    &#125;;
+
+    println!(&quot;&#123;&#125;&quot;, ip_str);
+&#125;
+</code></pre>
 <h3 id="2-1-1-模式绑定"><a href="#2-1-1-模式绑定" class="headerlink" title="2.1.1 模式绑定"></a>2.1.1 模式绑定</h3><p>模式匹配的另外一个重要功能是从模式中取出绑定的值，例如：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[derive(Debug)]</span></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">UsState</span> &#123;</span><br><span class="line">    Alabama,</span><br><span class="line">    Alaska,</span><br><span class="line">    <span class="comment">// --snip--</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">Coin</span> &#123;</span><br><span class="line">    Penny,</span><br><span class="line">    Nickel,</span><br><span class="line">    Dime,</span><br><span class="line">    <span class="title function_ invoke__">Quarter</span>(UsState), <span class="comment">// 25美分硬币</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">#[derive(Debug)]
+enum UsState &#123;
+    Alabama,
+    Alaska,
+    // --snip--
+&#125;
 
+enum Coin &#123;
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState), // 25美分硬币
+&#125;
+</code></pre>
 <p>其中 Coin::Quarter 成员还存放了一个值，可以通过模式绑定取到这个值：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">value_in_cents</span>(coin: Coin) <span class="punctuation">-&amp;gt;</span> <span class="type">u8</span> &#123;</span><br><span class="line">    <span class="keyword">match</span> coin &#123;</span><br><span class="line">        Coin::Penny =&amp;gt; <span class="number">1</span>,</span><br><span class="line">        Coin::Nickel =&amp;gt; <span class="number">5</span>,</span><br><span class="line">        Coin::Dime =&amp;gt; <span class="number">10</span>,</span><br><span class="line">        Coin::<span class="title function_ invoke__">Quarter</span>(state) =&amp;gt; &#123;</span><br><span class="line">            <span class="built_in">println!</span>(<span class="string">&quot;State quarter from &#123;:?&#125;!&quot;</span>, state);</span><br><span class="line">            <span class="number">25</span></span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">fn value_in_cents(coin: Coin) -&amp;gt; u8 &#123;
+    match coin &#123;
+        Coin::Penny =&amp;gt; 1,
+        Coin::Nickel =&amp;gt; 5,
+        Coin::Dime =&amp;gt; 10,
+        Coin::Quarter(state) =&amp;gt; &#123;
+            println!(&quot;State quarter from &#123;:?&#125;!&quot;, state);
+            25
+        &#125;,
+    &#125;
+&#125;
+</code></pre>
 <h3 id="2-1-2-通配符"><a href="#2-1-2-通配符" class="headerlink" title="2.1.2 _通配符"></a>2.1.2 _通配符</h3><p>通配符提供了一种默认的处理方式：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="variable">some_u8_value</span> = <span class="number">0u8</span>;</span><br><span class="line"><span class="keyword">match</span> some_u8_value &#123;</span><br><span class="line">    <span class="number">1</span> =&amp;gt; <span class="built_in">println!</span>(<span class="string">&quot;one&quot;</span>),</span><br><span class="line">    <span class="number">3</span> =&amp;gt; <span class="built_in">println!</span>(<span class="string">&quot;three&quot;</span>),</span><br><span class="line">    <span class="number">5</span> =&amp;gt; <span class="built_in">println!</span>(<span class="string">&quot;five&quot;</span>),</span><br><span class="line">    <span class="number">7</span> =&amp;gt; <span class="built_in">println!</span>(<span class="string">&quot;seven&quot;</span>),</span><br><span class="line">    _ =&amp;gt; (),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">let some_u8_value = 0u8;
+match some_u8_value &#123;
+    1 =&amp;gt; println!(&quot;one&quot;),
+    3 =&amp;gt; println!(&quot;three&quot;),
+    5 =&amp;gt; println!(&quot;five&quot;),
+    7 =&amp;gt; println!(&quot;seven&quot;),
+    _ =&amp;gt; (),
+&#125;
+</code></pre>
 <p>如果不使用通配符，则需要覆盖所有情况。</p>
 <p>除了使用通配符，用一个变量来承载其它情况也是可以的：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[derive(Debug)]</span></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">Direction</span> &#123;</span><br><span class="line">    East,</span><br><span class="line">    West,</span><br><span class="line">    North,</span><br><span class="line">    South,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">dire</span> = Direction::South;</span><br><span class="line">    <span class="keyword">match</span> dire &#123;</span><br><span class="line">        Direction::East =&amp;gt; <span class="built_in">println!</span>(<span class="string">&quot;East&quot;</span>),</span><br><span class="line">        other =&amp;gt; <span class="built_in">println!</span>(<span class="string">&quot;other direction: &#123;:?&#125;&quot;</span>, other),</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">#[derive(Debug)]
+enum Direction &#123;
+    East,
+    West,
+    North,
+    South,
+&#125;
 
+fn main() &#123;
+    let dire = Direction::South;
+    match dire &#123;
+        Direction::East =&amp;gt; println!(&quot;East&quot;),
+        other =&amp;gt; println!(&quot;other direction: &#123;:?&#125;&quot;, other),
+    &#125;;
+&#125;
+</code></pre>
 <h2 id="2-2-if-let匹配"><a href="#2-2-if-let匹配" class="headerlink" title="2.2 if let匹配"></a>2.2 if let匹配</h2><p>有时会遇到只有一个模式的值需要被处理，其它值直接忽略的场景，如果用 match 来处理就要写成下面这样：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="variable">v</span> = <span class="title function_ invoke__">Some</span>(<span class="number">3u8</span>);</span><br><span class="line"><span class="keyword">match</span> v &#123;</span><br><span class="line">    <span class="title function_ invoke__">Some</span>(<span class="number">3</span>) =&amp;gt; <span class="built_in">println!</span>(<span class="string">&quot;three&quot;</span>),</span><br><span class="line">    _ =&amp;gt; (),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">let v = Some(3u8);
+match v &#123;
+    Some(3) =&amp;gt; println!(&quot;three&quot;),
+    _ =&amp;gt; (),
+&#125;
+</code></pre>
 <p>为了减少代码量，可以使用<code>if let</code>的方式来替换：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="keyword">let</span> <span class="variable">Some</span>(<span class="number">3</span>) = v &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;three&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="rust">if let Some(3) = v &#123;
+    println!(&quot;three&quot;);
+&#125;
+</code></pre>
 <p>当只要匹配一个条件，且忽略其他条件时就用 <code>if let</code> ，否则都用 <code>match</code>。</p>
 <h2 id="2-3-matches-宏"><a href="#2-3-matches-宏" class="headerlink" title="2.3 matches! 宏"></a>2.3 matches! 宏</h2><p><code>matches!</code>宏用于匹配两个变量，返回一个布尔值，它可以用于快速进行匹配：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="variable">foo</span> = <span class="string">&#x27;f&#x27;</span>;</span><br><span class="line"><span class="built_in">assert!</span>(matches!(foo, <span class="string">&#x27;A&#x27;</span>..=<span class="string">&#x27;Z&#x27;</span> | <span class="string">&#x27;a&#x27;</span>..=<span class="string">&#x27;z&#x27;</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="variable">bar</span> = <span class="title function_ invoke__">Some</span>(<span class="number">4</span>);</span><br><span class="line"><span class="built_in">assert!</span>(matches!(bar, <span class="title function_ invoke__">Some</span>(x) <span class="keyword">if</span> x &amp;gt; <span class="number">2</span>));</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">let foo = &#39;f&#39;;
+assert!(matches!(foo, &#39;A&#39;..=&#39;Z&#39; | &#39;a&#39;..=&#39;z&#39;));
 
+let bar = Some(4);
+assert!(matches!(bar, Some(x) if x &amp;gt; 2));
+</code></pre>
 <h2 id="2-4-while-let-条件循环"><a href="#2-4-while-let-条件循环" class="headerlink" title="2.4 while let 条件循环"></a>2.4 while let 条件循环</h2><p>一个与 if let 类似的结构是 while let 条件循环，它允许只要模式匹配就一直进行 while 循环。下面展示了一个使用 while let 的例子：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Vec是动态数组</span></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">stack</span> = <span class="type">Vec</span>::<span class="title function_ invoke__">new</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 向数组尾部插入元素</span></span><br><span class="line">stack.<span class="title function_ invoke__">push</span>(<span class="number">1</span>);</span><br><span class="line">stack.<span class="title function_ invoke__">push</span>(<span class="number">2</span>);</span><br><span class="line">stack.<span class="title function_ invoke__">push</span>(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// stack.pop从数组尾部弹出元素</span></span><br><span class="line"><span class="keyword">while</span> <span class="keyword">let</span> <span class="variable">Some</span>(top) = stack.<span class="title function_ invoke__">pop</span>() &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>, top);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="rust">// Vec是动态数组
+let mut stack = Vec::new();
+
+// 向数组尾部插入元素
+stack.push(1);
+stack.push(2);
+stack.push(3);
+
+// stack.pop从数组尾部弹出元素
+while let Some(top) = stack.pop() &#123;
+    println!(&quot;&#123;&#125;&quot;, top);
+&#125;
+</code></pre>
+
     </div>
     
     

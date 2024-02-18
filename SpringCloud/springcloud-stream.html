@@ -202,23 +202,62 @@
 <h1 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h1><p>如果你在网上看到的还是用<code>@EnableBinding</code>注解的，那么<font color=red>说明这个教程已经过时了</font>！！</p>
 <p>我自己在这里研究了一下新版是怎么玩的。</p>
 <h2 id="单个消费者"><a href="#单个消费者" class="headerlink" title="单个消费者"></a>单个消费者</h2><h3 id="消费者配置"><a href="#消费者配置" class="headerlink" title="消费者配置"></a>消费者配置</h3><p>导入依赖</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-stream-rabbit<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-stream-rabbit&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
 <p>消费者非常简单，直接注入一个<code>Functional</code>接口即可：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ReceiveMessageController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> Consumer&amp;lt;Message&amp;lt;String&amp;gt;&amp;gt; <span class="title function_">sendMsg</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> stringMessage -&amp;gt; &#123;</span><br><span class="line">            System.out.println(stringMessage.getPayload());</span><br><span class="line">            System.out.println(<span class="string">&quot;收到消息&quot;</span>);</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@Component
+public class ReceiveMessageController &#123;
 
+    @Bean
+    public Consumer&amp;lt;Message&amp;lt;String&amp;gt;&amp;gt; sendMsg() &#123;
+        return stringMessage -&amp;gt; &#123;
+            System.out.println(stringMessage.getPayload());
+            System.out.println(&quot;收到消息&quot;);
+        &#125;;
+    &#125;
+
+&#125;
+</code></pre>
 <p>启动之后查看RabbitMQ上的交换机：</p>
 <p><img lazy="https://selfb.asia/public/SpringCloud/2023-2-6-130e3b65-2843-4b38-b1f2-c5a381c75d06.webp" alt="交换机列表"></p>
 <p>可以发现多出了一个<code>sendMsg-in-0</code>交换机，同时该主题下同时也拥有一个匿名队列，里面有一个消费者，就是我们刚才启动的消费者。</p>
 <h3 id="生产者"><a href="#生产者" class="headerlink" title="生产者"></a>生产者</h3><p>生产者同样十分简单，只需要注入<code>StreamBridge</code>然后发送消息即可：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">IMessageProviderImpl</span> <span class="keyword">implements</span> <span class="title class_">IMessageProvider</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> StreamBridge streamBridge;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setStreamBridge</span><span class="params">(StreamBridge streamBridge)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.streamBridge = streamBridge;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">send</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">uuid</span> <span class="operator">=</span> UUID.randomUUID().toString();</span><br><span class="line">        streamBridge.send(<span class="string">&quot;sendMsg-in-0&quot;</span>, uuid);</span><br><span class="line">        <span class="keyword">return</span> uuid;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@Component
+public class IMessageProviderImpl implements IMessageProvider &#123;
 
+    private StreamBridge streamBridge;
+
+    @Autowired
+    public void setStreamBridge(StreamBridge streamBridge) &#123;
+        this.streamBridge = streamBridge;
+    &#125;
+
+
+    @Override
+    public String send() &#123;
+        String uuid = UUID.randomUUID().toString();
+        streamBridge.send(&quot;sendMsg-in-0&quot;, uuid);
+        return uuid;
+    &#125;
+
+
+&#125;
+</code></pre>
 <p>之后发送消息，消费者端能够成功接收到消息。</p>
 <h2 id="消费者集群"><a href="#消费者集群" class="headerlink" title="消费者集群"></a>消费者集群</h2><p>如果开启多个消费者，可以发现每个消费者都会单独开一个队列，但大部分情况下我们希望是多个消费者共用一个队列。</p>
 <p>这里必须要配置<code>group</code>属性：<a target="_blank" rel="noopener" href="https://docs.spring.io/spring-cloud-stream/docs/current/reference/html/spring-cloud-stream.html#_configuration_options">文档</a></p>
 <p>需要注意的时，配置的时候必须是这样的：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">stream:</span></span><br><span class="line">      <span class="attr">bindings:</span></span><br><span class="line">      	<span class="comment"># 这里后面必须加上in-0</span></span><br><span class="line">        <span class="attr">sendMsg-in-0:</span></span><br><span class="line">          <span class="attr">group:</span> <span class="string">&#x27;testGroup&#x27;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="yaml">spring:
+  cloud:
+    stream:
+      bindings:
+          # 这里后面必须加上in-0
+        sendMsg-in-0:
+          group: &#39;testGroup&#39;
+</code></pre>
 <p>关于这里的<code>in-0</code>是什么，我们后面再讲。</p>
 <p>重启之后登录RabbitMQ控制台查看：</p>
 <p><img lazy="https://selfb.asia/public/SpringCloud/2023-2-6-fdfb00cf-1328-44d3-aadc-05d77230677c.webp" alt="控制台"></p>
@@ -232,22 +271,78 @@
 </ul>
 <p>在只有单个input&#x2F;output function时，index永远为0(<del>这不废话</del>)</p>
 <p>首先我们尝试注入两个<code>Functional</code>进去：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ReceiveMessageController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> Consumer&amp;lt;Message&amp;lt;String&amp;gt;&amp;gt; <span class="title function_">sendMsg</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> stringMessage -&amp;gt; &#123;</span><br><span class="line">            System.out.println(stringMessage.getPayload());</span><br><span class="line">            System.out.println(<span class="string">&quot;收到消息&quot;</span>);</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> Consumer&amp;lt;Message&amp;lt;String&amp;gt;&amp;gt; <span class="title function_">consumeMessage</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> stringMessage -&amp;gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;******consume message:&quot;</span> + stringMessage.getPayload());</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@Component
+public class ReceiveMessageController &#123;
 
+    @Bean
+    public Consumer&amp;lt;Message&amp;lt;String&amp;gt;&amp;gt; sendMsg() &#123;
+        return stringMessage -&amp;gt; &#123;
+            System.out.println(stringMessage.getPayload());
+            System.out.println(&quot;收到消息&quot;);
+        &#125;;
+    &#125;
+
+    @Bean
+    public Consumer&amp;lt;Message&amp;lt;String&amp;gt;&amp;gt; consumeMessage() &#123;
+        return stringMessage -&amp;gt; &#123;
+            System.out.println(&quot;******consume message:&quot; + stringMessage.getPayload());
+        &#125;;
+    &#125;
+
+&#125;
+</code></pre>
 <p>启动后发现，不仅原来的<code>sendMsg</code>寄了，而且新的<code>consumeMessage</code>也没有生效。</p>
 <p>仔细翻了一下<a target="_blank" rel="noopener" href="https://docs.spring.io/spring-cloud-stream/docs/current/reference/html/spring-cloud-stream.html#_multiple_functions_in_a_single_application">文档</a>，发现如果有多个<code>Functional</code>接口被注入了，则必须要在配置文件中指明哪些是用作SpringCloud Stream的。</p>
 <p>因此添加如下配置：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">function:</span></span><br><span class="line">      <span class="attr">definition:</span> <span class="string">sendMsg;consumeMessage</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="yaml">spring:
+  cloud:
+    function:
+      definition: sendMsg;consumeMessage
+</code></pre>
 <p>注意每个名称之间用分号分隔。</p>
 <p>之后再次启动，发现两个交换机都出现了，但两个交换机后面的索引还是为0。。。</p>
 <p>但是众所周知，Spring里不会出现同名的bean，那么这个索引有什么用就暂时不是很清楚了。。</p>
 <h2 id="手动应答"><a href="#手动应答" class="headerlink" title="手动应答"></a>手动应答</h2><p>若要开启手动应答，需要如下配置：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">stream:</span></span><br><span class="line">      <span class="attr">rabbit:</span></span><br><span class="line">        <span class="attr">bindings:</span></span><br><span class="line">          <span class="attr">sendMsg-in-0:</span></span><br><span class="line">            <span class="attr">consumer:</span></span><br><span class="line">              <span class="comment"># 手动ack</span></span><br><span class="line">              <span class="attr">acknowledge-mode:</span> <span class="string">manual</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="yaml">spring:
+  cloud:
+    stream:
+      rabbit:
+        bindings:
+          sendMsg-in-0:
+            consumer:
+              # 手动ack
+              acknowledge-mode: manual
+</code></pre>
 <p>之后在代码中进行手动应答：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="keyword">public</span> Consumer&amp;lt;Message&amp;lt;String&amp;gt;&amp;gt; <span class="title function_">sendMsg</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> stringMessage -&amp;gt; &#123;</span><br><span class="line">        <span class="type">MessageHeaders</span> <span class="variable">headers</span> <span class="operator">=</span> stringMessage.getHeaders();</span><br><span class="line">        <span class="type">Channel</span> <span class="variable">channel</span> <span class="operator">=</span> headers.get(AmqpHeaders.CHANNEL, Channel.class);</span><br><span class="line">        <span class="keyword">if</span> (channel == <span class="literal">null</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;channel is null&quot;</span>);</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;channel is null&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">Long</span> <span class="variable">deliveryTag</span> <span class="operator">=</span> headers.get(AmqpHeaders.DELIVERY_TAG, Long.class);</span><br><span class="line">        <span class="keyword">if</span> (deliveryTag == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;deliveryTag is null&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">v</span> <span class="operator">=</span> (<span class="type">int</span>) (Math.random() * <span class="number">2</span>);</span><br><span class="line">            System.out.println(<span class="string">&quot;收到消息: &quot;</span> + stringMessage.getPayload());</span><br><span class="line">            <span class="keyword">if</span> (v == <span class="number">0</span>) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;**********取消&quot;</span>);</span><br><span class="line">                channel.basicReject(deliveryTag, <span class="literal">true</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;**********确认&quot;</span>);</span><br><span class="line">                channel.basicAck(deliveryTag, <span class="literal">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="java">@Bean
+public Consumer&amp;lt;Message&amp;lt;String&amp;gt;&amp;gt; sendMsg() &#123;
+    return stringMessage -&amp;gt; &#123;
+        MessageHeaders headers = stringMessage.getHeaders();
+        Channel channel = headers.get(AmqpHeaders.CHANNEL, Channel.class);
+        if (channel == null) &#123;
+            System.out.println(&quot;channel is null&quot;);
+            throw new IllegalArgumentException(&quot;channel is null&quot;);
+        &#125;
+        Long deliveryTag = headers.get(AmqpHeaders.DELIVERY_TAG, Long.class);
+        if (deliveryTag == null) &#123;
+            throw new IllegalArgumentException(&quot;deliveryTag is null&quot;);
+        &#125;
+        try &#123;
+            int v = (int) (Math.random() * 2);
+            System.out.println(&quot;收到消息: &quot; + stringMessage.getPayload());
+            if (v == 0) &#123;
+                System.out.println(&quot;**********取消&quot;);
+                channel.basicReject(deliveryTag, true);
+            &#125; else &#123;
+                System.out.println(&quot;**********确认&quot;);
+                channel.basicAck(deliveryTag, false);
+            &#125;
+        &#125; catch (IOException e) &#123;
+            throw new RuntimeException(e);
+        &#125;
+    &#125;;
+&#125;
+</code></pre>
 <h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><h2 id="消费者配置-1"><a href="#消费者配置-1" class="headerlink" title="消费者配置"></a>消费者配置</h2><p>下面的配置需要在<code>spring.cloud.stream.rabbit.bindings.&amp;lt;channelName&amp;gt;.consumer.</code>处设置</p>
 <p>更多请查阅<a target="_blank" rel="noopener" href="https://docs.spring.io/spring-cloud-stream/docs/current/reference/html/spring-cloud-stream-binder-rabbit.html#_rabbitmq_consumer_properties">官方文档</a>，这里只讲一些常用的</p>
 <table>

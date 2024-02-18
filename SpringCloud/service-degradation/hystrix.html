@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/service-degradation" style="color: #ffa2c4">服务降级</a>
+                <a href="/SpringCloud/service-degradation" style="color: #00a596">服务降级</a>
             </span>
             
         </span>
@@ -206,13 +206,33 @@
         <p><font color="red">Hystrix目前已经进入维护模式</font></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/Netflix/Hystrix">Netflix&#x2F;Hystrix (github.com)</a></p>
 <h1 id="入门使用"><a href="#入门使用" class="headerlink" title="入门使用"></a>入门使用</h1><p>导入依赖：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-netflix-hystrix<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-netflix-hystrix&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
 <p>配置文件和基础的服务提供者一样。</p>
 <p>主启动类添加注解：<code>@EnableCircuitBreaker</code></p>
 <p>之后在服务类中添加相关注解：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@HystrixCommand(fallbackMethod = &quot;paymentInfoTimeout_TimeoutHandler&quot;, commandProperties = &#123;</span></span><br><span class="line"><span class="meta">    	// 设置3秒超时</span></span><br><span class="line"><span class="meta">        @HystrixProperty(name = &quot;execution.isolation.thread.timeoutInMilliseconds&quot;, value = &quot;3000&quot;)</span></span><br><span class="line"><span class="meta">&#125;)</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">paymentInfoTimeout</span><span class="params">(Integer id)</span> &#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="type">int</span> <span class="variable">timeout</span> <span class="operator">=</span> <span class="number">5000</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Thread.sleep(timeout);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;线程池:   &quot;</span> + Thread.currentThread().getName() + <span class="string">&quot; paymentInfoTimeout, id: &quot;</span> + id + <span class="string">&quot;\ttimeout = &quot;</span> + timeout;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// fallback</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">paymentInfoTimeout_TimeoutHandler</span><span class="params">(Integer id)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;paymentInfoTimeout_TimeoutHandler: &quot;</span> + id;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@HystrixCommand(fallbackMethod = &quot;paymentInfoTimeout_TimeoutHandler&quot;, commandProperties = &#123;
+        // 设置3秒超时
+        @HystrixProperty(name = &quot;execution.isolation.thread.timeoutInMilliseconds&quot;, value = &quot;3000&quot;)
+&#125;)
+public String paymentInfoTimeout(Integer id) &#123;
+    final int timeout = 5000;
+    try &#123;
+        Thread.sleep(timeout);
+    &#125; catch (InterruptedException e) &#123;
+        throw new RuntimeException(e);
+    &#125;
+    return &quot;线程池:   &quot; + Thread.currentThread().getName() + &quot; paymentInfoTimeout, id: &quot; + id + &quot;\ttimeout = &quot; + timeout;
+&#125;
 
+// fallback
+public String paymentInfoTimeout_TimeoutHandler(Integer id) &#123;
+    return &quot;paymentInfoTimeout_TimeoutHandler: &quot; + id;
+&#125;
+</code></pre>
 <p>不管是超时还是出现异常，都会调用<code>fallback</code>指定的方法。</p>
 <p>这个设置在客户端或服务端都是一样的。</p>
 <h1 id="全局配置fallback"><a href="#全局配置fallback" class="headerlink" title="全局配置fallback"></a>全局配置fallback</h1><p>一般在如下情况会触发降级：</p>
@@ -223,20 +243,78 @@
 <li>并发量过高(线程池&#x2F;信号量是否用完)</li>
 </ul>
 <p>给某个类配置：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.netflix.hystrix.contrib.javanica.annotation.DefaultProperties;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@DefaultProperties(defaultFallback = &quot;paymentFallback&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PaymentHystrixController</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">paymentFallback</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;服务运行异常，请稍后再试&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">import com.netflix.hystrix.contrib.javanica.annotation.DefaultProperties;
 
+@RestController
+@Slf4j
+@DefaultProperties(defaultFallback = &quot;paymentFallback&quot;)
+public class PaymentHystrixController &#123;
+    
+    public String paymentFallback() &#123;
+        return &quot;服务运行异常，请稍后再试&quot;;
+    &#125;
+    
+    // ...
+    
+&#125;
+</code></pre>
 <p>还有更加优雅的配置方法：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="meta">@FeignClient(value = &quot;CLOUD-PROVIDER-HYSTRIX-PAYMENT&quot;, fallback = PaymentServiceFallback.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">PaymentHystrixService</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/payment/hystrix/ok/&#123;id&#125;&quot;)</span></span><br><span class="line">    String <span class="title function_">paymentInfoSuccess</span><span class="params">(<span class="meta">@PathVariable</span> Integer id)</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/payment/hystrix/timeout/&#123;id&#125;&quot;)</span></span><br><span class="line">    String <span class="title function_">paymentInfoTimeout</span><span class="params">(<span class="meta">@PathVariable</span> Integer id)</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PaymentServiceFallback</span> <span class="keyword">implements</span> <span class="title class_">PaymentHystrixService</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">paymentInfoSuccess</span><span class="params">(Integer id)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;paymentInfoSuccess_fallback&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">paymentInfoTimeout</span><span class="params">(Integer id)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;paymentInfoTimeout_fallback&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@Service
+@FeignClient(value = &quot;CLOUD-PROVIDER-HYSTRIX-PAYMENT&quot;, fallback = PaymentServiceFallback.class)
+public interface PaymentHystrixService &#123;
 
+    @GetMapping(&quot;/payment/hystrix/ok/&#123;id&#125;&quot;)
+    String paymentInfoSuccess(@PathVariable Integer id);
+
+
+    @GetMapping(&quot;/payment/hystrix/timeout/&#123;id&#125;&quot;)
+    String paymentInfoTimeout(@PathVariable Integer id);
+
+&#125;
+
+
+public class PaymentServiceFallback implements PaymentHystrixService &#123;
+    @Override
+    public String paymentInfoSuccess(Integer id) &#123;
+        return &quot;paymentInfoSuccess_fallback&quot;;
+    &#125;
+
+    @Override
+    public String paymentInfoTimeout(Integer id) &#123;
+        return &quot;paymentInfoTimeout_fallback&quot;;
+    &#125;
+&#125;
+</code></pre>
 <p>这样就不用把业务代码和异常代码混合在一起了。</p>
 <p>但是在使用前必须要添加配置：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">feign:</span></span><br><span class="line">  <span class="attr">circuitbreaker:</span></span><br><span class="line">    <span class="attr">enabled:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="yaml">feign:
+  circuitbreaker:
+    enabled: true
+</code></pre>
 <h1 id="服务熔断"><a href="#服务熔断" class="headerlink" title="服务熔断"></a>服务熔断</h1><p>在触发服务熔断后，服务器会拒绝所有请求，然后使用服务降级的方法返回友好提示。</p>
 <p>熔断机制是应对雪崩效应的一种微服务链路保护机制。当扇出链路的某个微服务出错不可用或者响应时间太长时，会进行服务的降级，进而熔断该节点微服务的调用，快速返回错误的响应信息。</p>
 <p>当检测到该节点微服务调用响应正常后，恢复调用链路。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@HystrixCommand(fallbackMethod = &quot;paymentCircuitBreaker_fallback&quot;, commandProperties = &#123;</span></span><br><span class="line"><span class="meta">    // 是否开启断路器</span></span><br><span class="line"><span class="meta">    @HystrixProperty(name = HystrixPropertiesManager.CIRCUIT_BREAKER_ENABLED, value = &quot;true&quot;),</span></span><br><span class="line"><span class="meta">    // 请求次数阈值</span></span><br><span class="line"><span class="meta">    @HystrixProperty(name = &quot;circuitBreaker.requestVolumeThreshold&quot;, value = &quot;10&quot;),</span></span><br><span class="line"><span class="meta">    // 时间窗口期, 在触发熔断后，多久恢复HALF_OPEN状态，之后会放行一个请求，根据执行结果决定是否恢复正常</span></span><br><span class="line"><span class="meta">    @HystrixProperty(name = &quot;circuitBreaker.sleepWindowInMilliseconds&quot;, value = &quot;1000000&quot;),</span></span><br><span class="line"><span class="meta">    // 失败率达到多少后熔断</span></span><br><span class="line"><span class="meta">    @HystrixProperty(name = &quot;circuitBreaker.errorThresholdPercentage&quot;, value = &quot;60&quot;),</span></span><br><span class="line"><span class="meta">&#125;)</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">paymentCircuitBreaker</span><span class="params">(Integer id)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (id &amp;lt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(<span class="string">&quot;id 不能为负数&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> Thread.currentThread().getName() + <span class="string">&quot;\t调用成功，流水号: &quot;</span> + UUID.randomUUID();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">paymentCircuitBreaker_fallback</span><span class="params">(Integer id)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;paymentCircuitBreaker_fallback, id: &quot;</span> + id;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">@HystrixCommand(fallbackMethod = &quot;paymentCircuitBreaker_fallback&quot;, commandProperties = &#123;
+    // 是否开启断路器
+    @HystrixProperty(name = HystrixPropertiesManager.CIRCUIT_BREAKER_ENABLED, value = &quot;true&quot;),
+    // 请求次数阈值
+    @HystrixProperty(name = &quot;circuitBreaker.requestVolumeThreshold&quot;, value = &quot;10&quot;),
+    // 时间窗口期, 在触发熔断后，多久恢复HALF_OPEN状态，之后会放行一个请求，根据执行结果决定是否恢复正常
+    @HystrixProperty(name = &quot;circuitBreaker.sleepWindowInMilliseconds&quot;, value = &quot;1000000&quot;),
+    // 失败率达到多少后熔断
+    @HystrixProperty(name = &quot;circuitBreaker.errorThresholdPercentage&quot;, value = &quot;60&quot;),
+&#125;)
+public String paymentCircuitBreaker(Integer id) &#123;
+    if (id &amp;lt; 0) &#123;
+        throw new RuntimeException(&quot;id 不能为负数&quot;);
+    &#125;
+    return Thread.currentThread().getName() + &quot;\t调用成功，流水号: &quot; + UUID.randomUUID();
+&#125;
 
+public String paymentCircuitBreaker_fallback(Integer id) &#123;
+    return &quot;paymentCircuitBreaker_fallback, id: &quot; + id;
+&#125;
+</code></pre>
 <p>具体的配置列表：<a target="_blank" rel="noopener" href="https://github.com/Netflix/Hystrix/wiki/Configuration">https://github.com/Netflix/Hystrix/wiki/Configuration</a></p>
 <p>在触发熔断后，服务参数即使正确，也会一直返回降级的内容。</p>
 <p>熔断类型：</p>
@@ -267,8 +345,11 @@
 </tr>
 </tbody></table>
 <h1 id="HystrixDashboard"><a href="#HystrixDashboard" class="headerlink" title="HystrixDashboard"></a>HystrixDashboard</h1><p>导入依赖：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&amp;lt;<span class="name">dependency</span>&amp;gt;</span></span><br><span class="line">	<span class="tag">&amp;lt;<span class="name">groupId</span>&amp;gt;</span>org.springframework.cloud<span class="tag">&amp;lt;/<span class="name">groupId</span>&amp;gt;</span></span><br><span class="line">    <span class="tag">&amp;lt;<span class="name">artifactId</span>&amp;gt;</span>spring-cloud-starter-netflix-hystrix-dashboard<span class="tag">&amp;lt;/<span class="name">artifactId</span>&amp;gt;</span></span><br><span class="line"><span class="tag">&amp;lt;/<span class="name">dependency</span>&amp;gt;</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="xml">&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-cloud-starter-netflix-hystrix-dashboard&amp;lt;/artifactId&amp;gt;
+&amp;lt;/dependency&amp;gt;
+</code></pre>
 
     </div>
     

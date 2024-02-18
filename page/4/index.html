@@ -214,21 +214,38 @@
 <h2 id="1-2-败者树"><a href="#1-2-败者树" class="headerlink" title="1.2 败者树"></a>1.2 败者树</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/meihao1203/p/9561256.html">败者树，图解败者树，算法执行调整每一步详细分析 - 正在加载…… - 博客园 (cnblogs.com)</a></p>
 <p>败者树同样也要先排序，但是每次寻找最小值的世界复杂度为<code>O(log(k))</code>左右，总时间复杂度大致为<code>O(k*log(n/k) + n * log(k))</code></p>
 <h1 id="2-写一个java方法，实现参数a-b值的交换"><a href="#2-写一个java方法，实现参数a-b值的交换" class="headerlink" title="2. 写一个java方法，实现参数a,b值的交换"></a>2. 写一个java方法，实现参数a,b值的交换</h1><p>这个题目一上来就挺懵逼的，因为Java是值传递，所以基本数据类型咱就别想了，如果是包装类，则可以通过反射进行交换：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">swap</span><span class="params">(Integer a, Integer b)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">Integer</span> <span class="variable">temp</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Integer</span>(a);</span><br><span class="line">    <span class="type">Field</span> <span class="variable">field</span> <span class="operator">=</span> Integer.class.getDeclaredField(<span class="string">&quot;value&quot;</span>);</span><br><span class="line">    field.setAccessible(<span class="literal">true</span>);</span><br><span class="line">    field.set(a, b);</span><br><span class="line">    field.set(b, temp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="java">public static void swap(Integer a, Integer b) throws Exception &#123;
+    Integer temp = new Integer(a);
+    Field field = Integer.class.getDeclaredField(&quot;value&quot;);
+    field.setAccessible(true);
+    field.set(a, b);
+    field.set(b, temp);
+&#125;
+</code></pre>
 <p>但是这样有风险，咱们都知道包装类在[-128, 127]以内的数字返回的都是同一个对象，也就是说我们要是修改了这些值，也会影响后续的对象：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">1</span>, b = <span class="number">2</span>;</span><br><span class="line">swap(a, b);</span><br><span class="line">System.out.println(a);</span><br><span class="line">System.out.println(b);</span><br><span class="line"><span class="type">Integer</span> <span class="variable">test</span> <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line">System.out.println(test);</span><br></pre></td></tr></table></figure>
-
+<pre><code class="java">Integer a = 1, b = 2;
+swap(a, b);
+System.out.println(a);
+System.out.println(b);
+Integer test = 1;
+System.out.println(test);
+</code></pre>
 <p>输出:</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2</span><br><span class="line">1</span><br><span class="line">2</span><br></pre></td></tr></table></figure>
-
+<pre><code class="text">2
+1
+2
+</code></pre>
 <p>具体内容可以看<code>Integer#valueOf</code></p>
 <p>在测试的时候发现一个有趣的现象：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">1</span>, b = <span class="number">2</span>;</span><br><span class="line">swap(a, b);</span><br><span class="line">System.out.println(a + <span class="string">&quot; &quot;</span> + b);</span><br></pre></td></tr></table></figure>
-
+<pre><code class="java">Integer a = 1, b = 2;
+swap(a, b);
+System.out.println(a + &quot; &quot; + b);
+</code></pre>
 <p>输出：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread &quot;main&quot; java.lang.InternalError: Storage is not completely initialized, 1 bytes left</span><br><span class="line">	at java.base/java.lang.StringConcatHelper.newString(StringConcatHelper.java:346)</span><br><span class="line">	at juc.CHMTest.main(CHMTest.java:13)</span><br></pre></td></tr></table></figure>
-
+<pre><code class="text">Exception in thread &quot;main&quot; java.lang.InternalError: Storage is not completely initialized, 1 bytes left
+    at java.base/java.lang.StringConcatHelper.newString(StringConcatHelper.java:346)
+    at juc.CHMTest.main(CHMTest.java:13)
+</code></pre>
 <p>用debug稍微看了一下，不知道为什么。。</p>
 <h1 id="3-JVM有哪些部分"><a href="#3-JVM有哪些部分" class="headerlink" title="3. JVM有哪些部分"></a>3. JVM有哪些部分</h1><p>这种东西一定要记一共有几个，不然容易说漏。</p>
 <p>JVM从整体分为<strong>三部分</strong>：类加载子系统、运行时数据区以及执行引擎。</p>
