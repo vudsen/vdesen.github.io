@@ -28,7 +28,8 @@
   "homepage": "https://github.com/argvchs/hexo-theme-particlex#readme",
   "dependencies": {
     "hexo-helper-crypto": "^1.1.0",
-    "hexo-renderer-ejs": "^2.0.0"
+    "hexo-renderer-ejs": "^2.0.0",
+    "terser-webpack-plugin": "^5.3.10"
   },
   "devDependencies": {
     "@vue/babel-helper-vue-jsx-merge-props": "^1.4.0",
@@ -46,7 +47,6 @@
     "style-loader": "^3.3.2",
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.4",
-    "uglifyjs-webpack-plugin": "^2.2.0",
     "vue": "^3.2.47",
     "webpack": "^5.77.0",
     "webpack-cli": "^5.0.1"
