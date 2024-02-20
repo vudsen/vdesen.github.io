@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>核心 | IceOfSummerの博客</title>
+        <title>生命周期 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="后面一辈子的博客都在这了！" />
         <meta name="keywords" content="" />
@@ -167,22 +167,22 @@
 
                 <div class="article">
     <div>
-        <h1>核心</h1>
+        <h1>生命周期</h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2024/2/12
+            2023/1/30
         </span>
         
         <span class="category">
-            <a href="/2024/02/k8s">
+            <a href="/2023/12/04/Rust/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
-                k8s
+                Rust
             </a>
         </span>
         
@@ -191,127 +191,46 @@
     
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
-        <h1 id="Namespace"><a href="#Namespace" class="headerlink" title="Namespace"></a>Namespace</h1><p>命名空间用来隔离资源。默认只隔离资源，不隔离网络。</p>
-<pre><code class="bash">kubectl create ns hello
-kubectl delete ns hello
-</code></pre>
-<pre><code class="yaml">apiVersion: v1
-kind: Namespace
-metadata:
-  name: hello
-</code></pre>
-<h1 id="Pod"><a href="#Pod" class="headerlink" title="Pod"></a>Pod</h1><p>Pod是运行中的一组容器，Pod是kubernets中应用的最小单位。</p>
-<pre><code class="bash">kubectl run mynginx --image=nginx
+        <h1 id="悬垂指针和生命周期"><a href="#悬垂指针和生命周期" class="headerlink" title="悬垂指针和生命周期"></a>悬垂指针和生命周期</h1><p>生命周期的主要作用是避免悬垂引用，它会导致程序引用了本不该引用的数据：</p>
+<pre><code class="rust">&#123;
+    let r;
 
-# 查看default名称空间的Pod
-kubectl get pod 
-# 描述
-kubectl describe pod 你自己的Pod名字
-# 删除
-kubectl delete pod Pod名字
-# 查看Pod的运行日志
-kubectl logs Pod名字
+    &#123;
+        let x = 5;
+        r = &amp;x;
+    &#125;
 
-# 每个Pod - k8s都会分配一个ip
-kubectl get pod -owide
-# 使用Pod的ip+pod里面运行容器的端口
-curl 192.168.169.136
-
-# 集群中的任意一个机器以及任意的应用都能通过Pod分配的ip来访问这个Pod
+    println!(&quot;r: &#123;&#125;&quot;, r);
+&#125;
 </code></pre>
-<pre><code class="yaml">apiVersion: v1
-kind: Pod
-metadata:
-  labels:
-    run: myapp
-  name: myapp
-spec:
-  containers:
-  - image: nginx
-    name: nginx
-  - image: tomcat:8.5.68
-    name: tomcat
+<p><code>r</code> 引用了内部花括号中的 <code>x</code> 变量，但是 <code>x</code> 会在内部花括号 <code>&#125;</code> 处被释放，因此回到外部花括号后，<code>r</code> 会引用一个无效的 <code>x</code>。</p>
+<p>此处 <code>r</code> 就是一个悬垂指针，它引用了提前被释放的变量 <code>x</code>，编译器在编译时就会报错。</p>
+<p>#借用检查</p>
+<p>为了保证 Rust 的所有权和借用的正确性，Rust 使用了一个借用检查器(Borrow checker)，来检查我们程序的借用正确性：</p>
+<pre><code class="rust">&#123;
+    let r;                // ---------+-- &#39;a
+                          //          |
+    &#123;                     //          |
+        let x = 5;        // -+-- &#39;b  |
+        r = &amp;x;           //  |       |
+    &#125;                     // -+       |
+                          //          |
+    println!(&quot;r: &#123;&#125;&quot;, r); //          |
+&#125;                         // ---------+
 </code></pre>
-<h1 id="Deployment"><a href="#Deployment" class="headerlink" title="Deployment"></a>Deployment</h1><p>控制Pod，使Pod拥有多副本，自愈，扩缩容等能力。</p>
-<pre><code class="bash"># 创建含有3个副本的tomcat
-kubectl create deployment my-dep --image=tomcat:8.5.68 --replicas=3
+<p>这段代码和之前的一模一样，唯一的区别在于增加了对变量生命周期的注释。这里，<code>r</code> 变量被赋予了生命周期 <code>&#39;a</code>，<code>x</code> 被赋予了生命周期 <code>&#39;b</code>，从图示上可以明显看出生命周期 <code>&#39;b</code> 比 <code>&#39;a</code> 小很多。</p>
+<p>在编译期，Rust 会比较两个变量的生命周期，结果发现 <code>r</code> 明明拥有生命周期 <code>&#39;a</code>，但是却引用了一个小得多的生命周期 <code>&#39;b</code>，在这种情况下，编译器会认为我们的程序存在风险，因此拒绝运行。</p>
+<p>如果想要编译通过，也很简单，只要 ‘b 比 ‘a 大就好。总之，x 变量只要比 r 活得久，那么 r 就能随意引用 x 且不会存在危险：</p>
+<pre><code class="rust">&#123;
+    let x = 5;            // ----------+-- &#39;b
+                          //           |
+    let r = &amp;x;           // --+-- &#39;a  |
+                          //   |       |
+    println!(&quot;r: &#123;&#125;&quot;, r); //   |       |
+                          // --+       |
+&#125;                         // ----------+
 </code></pre>
-<p>由 Deployment 创建的 Pod，在被手动删除后会自动重新创建一个新的 Pod。</p>
-<p><img lazy="https://selfb.asia/images/2024/02/k8s-workload.webp" alt="k8s工作负载"></p>
-<h2 id="扩缩容"><a href="#扩缩容" class="headerlink" title="扩缩容"></a>扩缩容</h2><pre><code class="bash">kubectl scale --replicas=5 deployment/my-dep
-</code></pre>
-<p>也可以手动修改yaml来进行扩缩容：</p>
-<pre><code class="bash">kubectl edit deploy my-dep
-</code></pre>
-<p>修改<code>spec.replicas</code>的值即可进行扩缩容。</p>
-<h2 id="滚动更新"><a href="#滚动更新" class="headerlink" title="滚动更新"></a>滚动更新</h2><p>滚动更新能够做到不停机更新，在服务更新的同时也能提供服务。在一个新版本的 pod 启动完成后会删除旧版本的 pod，然后接着操作下一个旧版本 pod，直到所有的全部更新完毕。</p>
-<pre><code class="bash">kubectl set image deployment/my-dep tomcat=tomcat:latest --record
-</code></pre>
-<p>其中<code>tomcat=xxx</code>左边的<code>tomcat</code>，代表的是容器名，而不是镜像名。</p>
-<h2 id="版本回退"><a href="#版本回退" class="headerlink" title="版本回退"></a>版本回退</h2><pre><code class="bash">#历史记录
-kubectl rollout history deployment/my-dep
-
-#查看某个历史详情
-kubectl rollout history deployment/my-dep --revision=2
-
-#回滚(回到上次)
-kubectl rollout undo deployment/my-dep
-
-#回滚(回到指定版本)
-kubectl rollout undo deployment/my-dep --to-revision=2
-</code></pre>
-<h1 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h1><p>将一组 Pods 公开为网络服务的抽象方法。客户端只需要访问 Service，就能够访问到各个 Pod 上的服务。</p>
-<p><img lazy="https://selfb.asia/images/2024/02/k8s-svc.webp" alt="k8s-svc"></p>
-<h2 id="ClusterIP"><a href="#ClusterIP" class="headerlink" title="ClusterIP"></a>ClusterIP</h2><p>ClusterIp 类型的服务只能在集群内访问，在外网无法访问。</p>
-<pre><code class="bash"># 暴露Deploy，暴露 pod 的 80 端口，直接访问服务的8000端口即可间接访问 Pod。
-kubectl expose deployment my-dep --port=8000 --target-port=80
-
-#使用标签检索Pod
-kubectl get pod -l app=my-dep
-</code></pre>
-<blockquote>
-<p>使用<code>my-dep.default.svc:8000</code>(<code>服务名.命名空间.svc:服务端口</code>)也可以访问到服务。<strong>但是只能在容器内访问，在容器外无法使用</strong>。</p>
-</blockquote>
-<p>或者使用yaml创建：</p>
-<pre><code class="yaml">apiVersion: v1
-kind: Service
-metadata:
-  labels: 
-    app: my-dep
-  name: my-dep
-spec:
-  selector:
-    app: my-dep
-  ports:
-    - port: 8080
-      protocol: TCP
-      targetPort: 80
-</code></pre>
-<h2 id="NodePort"><a href="#NodePort" class="headerlink" title="NodePort"></a>NodePort</h2><p>如果想要把服务暴露给外网，则需要使用 NodePort。</p>
-<p>NodePort 也叫节点端口，意思是在每个 Pod 上都暴露一个端口给公网，暴露后可以通过任意节点Ip + 端口访问。</p>
-<pre><code class="bash"># 注意需要添加 `--type=NodePort` 来指定服务类型。
-kubectl expose deploy my-dep --port=8000 --target-port=80 --type=NodePort
-</code></pre>
-<p>使用yaml：</p>
-<pre><code class="yaml">apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: my-dep
-  name: my-dep
-spec:
-  ports:
-  - port: 8000
-    protocol: TCP
-    targetPort: 80
-  selector:
-    app: my-dep
-  type: NodePort
-</code></pre>
-<blockquote>
-<p>NodePort范围在 30000 - 32767 之间</p>
-</blockquote>
-
+<h1 id="函数中的生命周期"><a href="#函数中的生命周期" class="headerlink" title="函数中的生命周期"></a>函数中的生命周期</h1>
     </div>
     
     
