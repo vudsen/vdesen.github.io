@@ -58,6 +58,7 @@ subtitle: '还是自己搭的博客靠谱'
 description: '后面一辈子的博客都在这了！'
 keywords:
 author: IceOfSummer
+authorHome: https://github.com/IceOfSummer
 language: zh-CN
 timezone: Asia/Shanghai
 
@@ -151,6 +152,7 @@ ignore:
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
 theme: particlex-my
+# theme: test-themes
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
