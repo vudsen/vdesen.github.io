@@ -182,3 +182,9 @@ spec:
 ```
 
 > NodePort范围在 30000 - 32767 之间
+
+# Ingress
+
+Ingress 翻译为'入口'，意思为 k8s 希望使用 Ingress 来作为我们的服务统一网关入口来为外网服务。
+
+![ingress](https://selfb.asia/images/2024/02/ingress.webp)

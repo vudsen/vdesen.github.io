@@ -11,4 +11,7 @@ categories: "k8s"
 
 - [基础](/kubernets/basic)
 - [进阶](/kubernets/core)
+
 # 其它
+
+- [搭建私有镜像仓库](/kubernets/self-registry)
