@@ -253,14 +253,14 @@ sudo sysctl --system
 <h2 id="安装三大组件"><a href="#安装三大组件" class="headerlink" title="安装三大组件"></a>安装三大组件</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/install-kubeadm/">官方文档</a></p>
 <p>查看最新版本：<a target="_blank" rel="noopener" href="https://dl.k8s.io/release/stable.txt">https://dl.k8s.io/release/stable.txt</a></p>
 <pre><code class="bash">cat &amp;lt;&amp;lt; EOF &amp;gt; /etc/yum.repos.d/kubernetes.repo 
-&amp;gt; [kubernetes]
-&amp;gt; name=Kubernetes
-&amp;gt; baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
-&amp;gt; enabled=1
-&amp;gt; gpgcheck=1
-&amp;gt; repo_gpgcheck=1
-&amp;gt; gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
-&amp;gt; EOF
+[kubernetes]
+name=Kubernetes
+baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+EOF
 
 
 sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
