@@ -313,6 +313,317 @@ spec:
 </blockquote>
 <h1 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h1><p>Ingress 翻译为’入口’，意思为 k8s 希望使用 Ingress 来作为我们的服务统一网关入口来为外网服务。</p>
 <p><img lazy="https://selfb.asia/images/2024/02/ingress.webp" alt="ingress"></p>
+<h2 id="安装Ingress-Nginx"><a href="#安装Ingress-Nginx" class="headerlink" title="安装Ingress-Nginx"></a>安装Ingress-Nginx</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.github.io/ingress-nginx/deploy/">安装文档</a></p>
+<pre><code class="bash">curl -O https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
+</code></pre>
+<p>打开后需要修改镜像，使用阿里云镜像<code>registry.aliyuncs.com/google_containers</code>。</p>
+<p>然后镜像名称按照下面的修改，改完只留版本号，后面的<code>@sha256</code>一长串删掉：</p>
+<ul>
+<li><code>/ingress-nginx/controller</code> -&amp;gt; <code>nginx-ingress-controller</code></li>
+<li><code>/ingress-nginx/kube-webhook-certgen</code> -&amp;gt; <code>kube-webhook-certgen</code></li>
+<li><code>/ingress-nginx/kube-webhook-certgen</code> -&amp;gt; <code>kube-webhook-certgen</code></li>
+</ul>
+<p>这里是我最终用的镜像：</p>
+<ul>
+<li><code>registry.aliyuncs.com/google_containers/nginx-ingress-controller:v1.8.1</code></li>
+<li><code>registry.aliyuncs.com/google_containers/kube-webhook-certgen:v20230407</code></li>
+<li><code>registry.aliyuncs.com/google_containers/kube-webhook-certgen:v20230407</code></li>
+</ul>
+<h3 id="修改服务类型"><a href="#修改服务类型" class="headerlink" title="修改服务类型"></a>修改服务类型</h3><p>新版本的 Igress-Nginx 会默认创建一个 LoadBancler 的服务：</p>
+<pre><code class="bash">NAMESPACE              NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+ingress-nginx          ingress-nginx-controller             LoadBalancer   10.96.228.236   &amp;lt;pending&amp;gt;     80:31635/TCP,443:31243/TCP   3h44m
+</code></pre>
+<p>启动后可以发现我们的 EXTERNAL-IP 这一列一直是 pending，也正因为如此，我们现在是访问不了服务的，我们需要把 LoadBalancer 改成 NodePort 才行。</p>
+<p>来看一下创建 Service的配置，照着我的注释删就行了：</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.8.1
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+spec:
+  # 这里是关键，改成 NodePort 必须删除，否则只能使用对应 pod 所在的节点iP进行访问
+  externalTrafficPolicy: Local
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - appProtocol: http
+    name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  - appProtocol: https
+    name: https
+    port: 443
+    protocol: TCP
+    targetPort: https
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  # 把这里改成 NodePort
+  type: LoadBalancer
+</code></pre>
+<p>改完后删除原有服务，创建一个新的，就能访问了。</p>
+<h2 id="测试Ingress"><a href="#测试Ingress" class="headerlink" title="测试Ingress"></a>测试Ingress</h2><p>应用如下yaml：</p>
+<pre><code class="yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-server
+  template:
+    metadata:
+      labels:
+        app: hello-server
+    spec:
+      containers:
+      - name: hello-server
+        image: registry.cn-hangzhou.aliyuncs.com/lfy_k8s_images/hello-server
+        ports:
+        - containerPort: 9000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-demo
+  name: nginx-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-demo
+  template:
+    metadata:
+      labels:
+        app: nginx-demo
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx-demo
+  name: nginx-demo
+spec:
+  selector:
+    app: nginx-demo
+  ports:
+  - port: 8000
+    protocol: TCP
+    targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: hello-server
+  name: hello-server
+spec:
+  selector:
+    app: hello-server
+  ports:
+  - port: 8000
+    protocol: TCP
+    targetPort: 9000
+</code></pre>
+<h3 id="创建-Ingress"><a href="#创建-Ingress" class="headerlink" title="创建 Ingress"></a>创建 Ingress</h3><pre><code class="yaml">apiVersion: networking.k8s.io/v1
+kind: Ingress  
+metadata:
+  name: ingress-host-bar
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: &quot;hello.atguigu.com&quot;
+    http:
+      paths:
+      - pathType: Prefix
+        path: &quot;/&quot;
+        backend:
+          service:
+            name: hello-server
+            port:
+              number: 8000
+  - host: &quot;demo.atguigu.com&quot;
+    http:
+      paths:
+      - pathType: Prefix
+        path: &quot;/nginx&quot;  # 把请求会转给下面的服务，下面的服务一定要能处理这个路径，不能处理就是404
+        backend:
+          service:
+            name: nginx-demo  ## java，比如使用路径重写，去掉前缀nginx
+            port:
+              number: 8000
+</code></pre>
+<p>创建完后修改本地host，将域名指定到任意节点ip，配置完后直接使用 域名 + 节点端口访问。</p>
+<p>在访问<code>demo.atguigu.com:port/nginx</code>时，也会返回一个404，但是这其实是我们自己的 nginx pod 返回的，相当于我们在该 pod 下的访问路径是<code>/nginx</code>，导致我们看到了404页面，而不是 nginx 欢迎首页。</p>
+<blockquote>
+<p>如果碰到x509证书过期，运行该命令(<a target="_blank" rel="noopener" href="https://blog.csdn.net/yeyslspi59/article/details/123281240">origin</a>)：<code>kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission</code></p>
+</blockquote>
+<blockquote>
+<p>如果请求头含有<code>_</code>，则默认会被忽略掉，需要向config map添加<code>enable-underscores-in-headers: &quot;true&quot;</code>属性才可以允许此类请求头。</p>
+</blockquote>
+<h3 id="路径重新"><a href="#路径重新" class="headerlink" title="路径重新"></a>路径重新</h3><p><a target="_blank" rel="noopener" href="https://kubernetes.github.io/ingress-nginx/examples/rewrite/">Rewrite</a></p>
+<p>在上面的例子中，如果我们访问<code>/nginx</code>时，希望访问的是 pod 上的<code>/</code>路径，则需要使用到路径重写：</p>
+<pre><code class="yaml">apiVersion: networking.k8s.io/v1
+kind: Ingress  
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  name: ingress-host-bar
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: &quot;hello.atguigu.com&quot;
+    http:
+      paths:
+      - pathType: Prefix
+        path: &quot;/&quot;
+        backend:
+          service:
+            name: hello-server
+            port:
+              number: 8000
+  - host: &quot;demo.atguigu.com&quot;
+    http:
+      paths:
+      - pathType: Prefix
+        path: &quot;/nginx(/|$)(.*)&quot;  # 把请求会转给下面的服务，下面的服务一定要能处理这个路径，不能处理就是404
+        backend:
+          service:
+            name: nginx-demo  ## java，比如使用路径重写，去掉前缀nginx
+            port:
+              number: 8000
+</code></pre>
+<h1 id="存储抽象"><a href="#存储抽象" class="headerlink" title="存储抽象"></a>存储抽象</h1><blockquote>
+<p>NFS安装省略掉。</p>
+</blockquote>
+<h2 id="原生方式挂载"><a href="#原生方式挂载" class="headerlink" title="原生方式挂载"></a>原生方式挂载</h2><pre><code class="yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-pv-demo
+  name: nginx-pv-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-pv-demo
+  template:
+    metadata:
+      labels:
+        app: nginx-pv-demo
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+      volumes:
+        - name: html
+          nfs:
+            server: 172.31.0.4
+            path: /nfs/data/nginx-pv
+</code></pre>
+<h2 id="PV-PVC"><a href="#PV-PVC" class="headerlink" title="PV &amp; PVC"></a>PV &amp; PVC</h2><p>PV: 持久卷 (Persistent Volume)，将应用需要持久化的数据保存到指定位置。<br>PVC：持久卷声明（PersistentVolumeClaim）申明需要使用的持久卷规格。</p>
+<h3 id="创建PV"><a href="#创建PV" class="headerlink" title="创建PV"></a>创建PV</h3><pre><code class="yaml">apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv01-10m
+spec:
+  capacity:
+    storage: 10M
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs
+  nfs:
+    path: /nfs/data/01
+    server: 172.31.0.4
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv02-1gi
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs
+  nfs:
+    path: /nfs/data/02
+    server: 172.31.0.4
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv03-3gi
+spec:
+  capacity:
+    storage: 3Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs
+  nfs:
+    path: /nfs/data/03
+    server: 172.31.0.4
+</code></pre>
+<h3 id="PVC创建与绑定"><a href="#PVC创建与绑定" class="headerlink" title="PVC创建与绑定"></a>PVC创建与绑定</h3><p>此处为静态创建，动态创建：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/655923057">https://zhuanlan.zhihu.com/p/655923057</a></p>
+<p>创建PVC：</p>
+<pre><code class="yaml">kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: nginx-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 200Mi
+  storageClassName: nfs
+</code></pre>
+<p>创建Pod绑定PVC:</p>
+<pre><code class="yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-deploy-pvc
+  name: nginx-deploy-pvc
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-deploy-pvc
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy-pvc
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+      volumes:
+        - name: html
+          persistentVolumeClaim:
+            claimName: nginx-pvc
+</code></pre>
 
     </div>
     
