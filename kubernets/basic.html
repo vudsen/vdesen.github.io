@@ -455,9 +455,23 @@ subjects:
 <p>应用账号：</p>
 <pre><code class="bash">kubectl apply -f dash.yaml
 </code></pre>
-<p>获取访问令牌：</p>
+<p>获取临时访问令牌：</p>
 <pre><code class="bash">#获取访问令牌
 kubectl create token admin-user -n kubernetes-dashboard
+</code></pre>
+<h4 id="获取长期访问令牌"><a href="#获取长期访问令牌" class="headerlink" title="获取长期访问令牌"></a>获取长期访问令牌</h4><pre><code class="yaml">kubectl apply -f - &amp;lt;&amp;lt;EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: admin-user-secret
+  namespace: kubernetes-dashboard
+  annotations:
+    kubernetes.io/service-account.name: admin-user
+type: kubernetes.io/service-account-token
+EOF
+</code></pre>
+<p>查看长期令牌：</p>
+<pre><code class="shell">kubectl describe secrets/admin-user-secret -n kubernetes-dashboard
 </code></pre>
 
     </div>

@@ -476,7 +476,7 @@ spec:
 <blockquote>
 <p>如果请求头含有<code>_</code>，则默认会被忽略掉，需要向config map添加<code>enable-underscores-in-headers: &quot;true&quot;</code>属性才可以允许此类请求头。</p>
 </blockquote>
-<h3 id="路径重新"><a href="#路径重新" class="headerlink" title="路径重新"></a>路径重新</h3><p><a target="_blank" rel="noopener" href="https://kubernetes.github.io/ingress-nginx/examples/rewrite/">Rewrite</a></p>
+<h3 id="路径重写"><a href="#路径重写" class="headerlink" title="路径重写"></a>路径重写</h3><p><a target="_blank" rel="noopener" href="https://kubernetes.github.io/ingress-nginx/examples/rewrite/">Rewrite</a></p>
 <p>在上面的例子中，如果我们访问<code>/nginx</code>时，希望访问的是 pod 上的<code>/</code>路径，则需要使用到路径重写：</p>
 <pre><code class="yaml">apiVersion: networking.k8s.io/v1
 kind: Ingress  
@@ -508,9 +508,157 @@ spec:
             port:
               number: 8000
 </code></pre>
-<h1 id="存储抽象"><a href="#存储抽象" class="headerlink" title="存储抽象"></a>存储抽象</h1><blockquote>
-<p>NFS安装省略掉。</p>
-</blockquote>
+<h1 id="存储抽象"><a href="#存储抽象" class="headerlink" title="存储抽象"></a>存储抽象</h1><h2 id="安装nfs"><a href="#安装nfs" class="headerlink" title="安装nfs"></a>安装nfs</h2><pre><code class="bash"># 在每个机器。
+yum install -y nfs-utils
+
+
+# 在master 执行以下命令 
+echo &quot;/nfs/data/ *(insecure,rw,sync,no_root_squash)&quot; &amp;gt; /etc/exports
+
+
+# 执行以下命令，启动 nfs 服务;创建共享目录
+mkdir -p /nfs/data
+
+
+# 在master执行
+systemctl enable rpcbind
+systemctl enable nfs-server
+systemctl start rpcbind
+systemctl start nfs-server
+
+# 使配置生效
+exportfs -r
+
+
+#检查配置是否生效
+exportfs
+</code></pre>
+<h3 id="配置默认存储"><a href="#配置默认存储" class="headerlink" title="配置默认存储"></a>配置默认存储</h3><pre><code class="yaml">## 创建了一个存储类
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-storage
+  annotations:
+    storageclass.kubernetes.io/is-default-class: &quot;true&quot;
+provisioner: k8s-sigs.io/nfs-subdir-external-provisioner
+parameters:
+  archiveOnDelete: &quot;true&quot;  ## 删除pv的时候，pv的内容是否要备份
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-client-provisioner
+  labels:
+    app: nfs-client-provisioner
+  # replace with namespace where provisioner is deployed
+  namespace: default
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nfs-client-provisioner
+  template:
+    metadata:
+      labels:
+        app: nfs-client-provisioner
+    spec:
+      serviceAccountName: nfs-client-provisioner
+      containers:
+        - name: nfs-client-provisioner
+          image: registry.cn-hangzhou.aliyuncs.com/lfy_k8s_images/nfs-subdir-external-provisioner:v4.0.2
+          # resources:
+          #    limits:
+          #      cpu: 10m
+          #    requests:
+          #      cpu: 10m
+          volumeMounts:
+            - name: nfs-client-root
+              mountPath: /persistentvolumes
+          env:
+            - name: PROVISIONER_NAME
+              value: k8s-sigs.io/nfs-subdir-external-provisioner
+            - name: NFS_SERVER
+              value: 172.31.0.4 ## 指定自己nfs服务器地址
+            - name: NFS_PATH  
+              value: /nfs/data  ## nfs服务器共享的目录
+      volumes:
+        - name: nfs-client-root
+          nfs:
+            server: 172.31.0.4
+            path: /nfs/data
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nfs-client-provisioner
+  # replace with namespace where provisioner is deployed
+  namespace: default
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: nfs-client-provisioner-runner
+rules:
+  - apiGroups: [&quot;&quot;]
+    resources: [&quot;nodes&quot;]
+    verbs: [&quot;get&quot;, &quot;list&quot;, &quot;watch&quot;]
+  - apiGroups: [&quot;&quot;]
+    resources: [&quot;persistentvolumes&quot;]
+    verbs: [&quot;get&quot;, &quot;list&quot;, &quot;watch&quot;, &quot;create&quot;, &quot;delete&quot;]
+  - apiGroups: [&quot;&quot;]
+    resources: [&quot;persistentvolumeclaims&quot;]
+    verbs: [&quot;get&quot;, &quot;list&quot;, &quot;watch&quot;, &quot;update&quot;]
+  - apiGroups: [&quot;storage.k8s.io&quot;]
+    resources: [&quot;storageclasses&quot;]
+    verbs: [&quot;get&quot;, &quot;list&quot;, &quot;watch&quot;]
+  - apiGroups: [&quot;&quot;]
+    resources: [&quot;events&quot;]
+    verbs: [&quot;create&quot;, &quot;update&quot;, &quot;patch&quot;]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: run-nfs-client-provisioner
+subjects:
+  - kind: ServiceAccount
+    name: nfs-client-provisioner
+    # replace with namespace where provisioner is deployed
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: nfs-client-provisioner-runner
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: leader-locking-nfs-client-provisioner
+  # replace with namespace where provisioner is deployed
+  namespace: default
+rules:
+  - apiGroups: [&quot;&quot;]
+    resources: [&quot;endpoints&quot;]
+    verbs: [&quot;get&quot;, &quot;list&quot;, &quot;watch&quot;, &quot;create&quot;, &quot;update&quot;, &quot;patch&quot;]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: leader-locking-nfs-client-provisioner
+  # replace with namespace where provisioner is deployed
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: nfs-client-provisioner
+    # replace with namespace where provisioner is deployed
+    namespace: default
+roleRef:
+  kind: Role
+  name: leader-locking-nfs-client-provisioner
+  apiGroup: rbac.authorization.k8s.io
+</code></pre>
 <h2 id="原生方式挂载"><a href="#原生方式挂载" class="headerlink" title="原生方式挂载"></a>原生方式挂载</h2><pre><code class="yaml">apiVersion: apps/v1
 kind: Deployment
 metadata:

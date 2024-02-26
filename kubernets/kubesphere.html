@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>IceOfSummerの博客</title>
+        <title>Kubesphere | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="后面一辈子的博客都在这了！" />
         <meta name="keywords" content="" />
@@ -167,14 +167,23 @@
 
                 <div class="article">
     <div>
-        <h1></h1>
+        <h1>Kubesphere</h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2024/2/27
+            2024/2/26
+        </span>
+        
+        <span class="category">
+            <a href="/2024/02/k8s">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                k8s
+            </a>
         </span>
         
         
@@ -182,7 +191,30 @@
     
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
-        
+        <h1 id="前置准备"><a href="#前置准备" class="headerlink" title="前置准备"></a>前置准备</h1><h2 id="安装监控服务"><a href="#安装监控服务" class="headerlink" title="安装监控服务"></a>安装监控服务</h2><p><a target="_blank" rel="noopener" href="https://github.com/kubernetes-sigs/metrics-server">metrics-server</a></p>
+<pre><code class="bash">kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+</code></pre>
+<p>由于没找到好用的镜像（貌似可以用<code>egistry.cn-hangzhou.aliyuncs.com/google_containers</code>），所以直接给docker配置了代理硬拉下来了：</p>
+<pre><code class="bash">vi /etc/docker/daemon.json
+# 添加代理(clash开允许局域网)
+&quot;proxies&quot;: &#123;
+    &quot;http-proxy&quot;: &quot;http://192.168.0.111:7890&quot;,
+    &quot;https-proxy&quot;: &quot;http://192.168.0.111:7890&quot;
+&#125;
+
+# 修改完后
+docker pull registry.k8s.io/metrics-server/metrics-server:v0.7.0
+# 导出
+docker save -o metrics-server.tar registry.k8s.io/metrics-server/metrics-server:v0.7.0
+# 导入
+ctr -n=k8s.io image import metrics-server.tar
+</code></pre>
+<p>注意导入时需要导入到每个工作节点。或者这边可以直接重新打个tag然后推到自己的私有镜像仓库里面去。</p>
+<p>部署后发现pod仍然是0&#x2F;1，但状态已经是Running了，翻了下文档发现需要在启动参数中配置忽略ssl：<code>--kubelet-insecure-tls</code>，或者也可以直接提供证书。</p>
+<blockquote>
+<p>发现一篇好文章：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/142990931">一文带你彻底厘清 Kubernetes 中的证书工作机制</a></p>
+</blockquote>
+
     </div>
     
     
