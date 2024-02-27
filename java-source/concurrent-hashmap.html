@@ -338,11 +338,11 @@ ABASE = 16, ASHIFT = 3, scale = 8
 <p>ABASE则是元素在数组里的偏移值，一般大小为：<strong>对象头(8字节) + 类型指针(默认4字节，关闭指针压缩后为8字节) + 数组长度(4字节)  &#x3D; 16</strong>，如果你不清楚我在说什么，可以去看一下我的这篇博客：<a target="_blank" rel="noopener" href="https://www.notion.so/f3486133d4f64c738ae857df740bee95">对象在内存中的存储布局 (notion.so)</a>。</p>
 <p>ASHIFT则是表示当前元素占用大小二进制的1右边有多少个0，在<code>ConcurrentHashMap</code>初始化时，如果scale不是2的幂则会报错。</p>
 <p>那么在取值的时候是什么意思呢？</p>
-<p>其实这里很像C的指针了，ABASE代表基础偏移值，而<code>i &amp;lt;&amp;lt; ASHIFT</code>则每个元素的位置：</p>
+<p>其实这里很像C的指针了，ABASE代表基础偏移值，而<code>i &lt;&lt; ASHIFT</code>则每个元素的位置：</p>
 <ul>
-<li><p>比如<code>i</code>为0，<code>i &amp;lt;&amp;lt; ASHIFT = 0</code>，代表这个元素在<code>对象在堆中的地址 + ABASE</code></p>
+<li><p>比如<code>i</code>为0，<code>i &lt;&lt; ASHIFT = 0</code>，代表这个元素在<code>对象在堆中的地址 + ABASE</code></p>
 </li>
-<li><p>比如<code>i</code>为1，<code>i &amp;lt;&amp;lt; ASHIFT = 4</code>，代表这个元素在<code>对象在堆中的地址 + ABASE + 4</code></p>
+<li><p>比如<code>i</code>为1，<code>i &lt;&lt; ASHIFT = 4</code>，代表这个元素在<code>对象在堆中的地址 + ABASE + 4</code></p>
 </li>
 </ul>
 <h2 id="2-2-putVal"><a href="#2-2-putVal" class="headerlink" title="2.2 putVal"></a>2.2 putVal</h2><p><code>put</code>内部其实就是调用了<code>putVal</code>：</p>
@@ -439,7 +439,7 @@ ABASE = 16, ASHIFT = 3, scale = 8
 &#125;
 </code></pre>
 <p>这个方法主要是获取n最高位前面有几个0，然后和后面的值相与。RESIZE_STAMP_BITS为常量：16</p>
-<p>那么右边整体就是个常量：(1 &amp;lt;&amp;lt; 15) 即1的右边15个0。</p>
+<p>那么右边整体就是个常量：(1 &lt;&lt; 15) 即1的右边15个0。</p>
 <p>那么这个方法有什么用呢？其实这里是用作来生成一个扩容标记的，相当于一个版本号。</p>
 <p>至于这么玩有什么用，正常看源码到这里是不知道的，我们先接着往后看。</p>
 <h3 id="2-3-2-transfer"><a href="#2-3-2-transfer" class="headerlink" title="2.3.2 transfer"></a>2.3.2 transfer</h3><blockquote>
@@ -666,7 +666,7 @@ ABASE = 16, ASHIFT = 3, scale = 8
     &#125;
 &#125;
 </code></pre>
-<p>关于<code>rs &amp;lt;&amp;lt; RESIZE_STAMP_SHIFT</code>可能不好理解，这里我们举个例子：</p>
+<p>关于<code>rs &lt;&lt; RESIZE_STAMP_SHIFT</code>可能不好理解，这里我们举个例子：</p>
 <pre><code class="java">int n = 16;
 int i = Integer.numberOfLeadingZeros(n) | (1 &amp;lt;&amp;lt; 15);
 //        System.out.println(Integer.toBinaryString());

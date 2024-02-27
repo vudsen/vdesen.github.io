@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#Java" style="color: #00a596">Java</a>
+                <a href="/2023/03/05/java-source#Java" style="color: #03a9f4">Java</a>
             </span>
             
         </span>
@@ -282,31 +282,31 @@
 </thead>
 <tbody><tr>
 <td>RUNNING</td>
-<td>-1 &amp;lt;&amp;lt; COUNT_BITS</td>
+<td>-1 &lt;&lt; COUNT_BITS</td>
 <td>111</td>
 <td>线程池正在正常运行</td>
 </tr>
 <tr>
 <td>SHUTDOWN</td>
-<td>0 &amp;lt;&amp;lt; COUNT_BITS</td>
+<td>0 &lt;&lt; COUNT_BITS</td>
 <td>000</td>
 <td>线程池准备关闭，此时拒绝新的任务，在所有任务执行完后进入TIDYING状态</td>
 </tr>
 <tr>
 <td>STOP</td>
-<td>1 &amp;lt;&amp;lt; COUNT_BITS</td>
+<td>1 &lt;&lt; COUNT_BITS</td>
 <td>001</td>
 <td>线程池准备关闭，此时会中断所有正在运行的线程，不再接收新任务，也不会执行已经在队列里的任务，工作线程数为0时进入TIDYING状态</td>
 </tr>
 <tr>
 <td>TIDYING</td>
-<td>2 &amp;lt;&amp;lt; COUNT_BITS</td>
+<td>2 &lt;&lt; COUNT_BITS</td>
 <td>010</td>
 <td>所有任务已经终止，进行整理状态</td>
 </tr>
 <tr>
 <td>TERMINATED</td>
-<td>3 &amp;lt;&amp;lt; COUNT_BITS</td>
+<td>3 &lt;&lt; COUNT_BITS</td>
 <td>011</td>
 <td>线程池彻底终止运行</td>
 </tr>
@@ -446,7 +446,7 @@
 <p>可以发现线程调用<code>start</code>方法后实则运行的是<code>runWorker</code>，在看<code>runWorker</code>前先来看一下<code>getTask</code>方法：</p>
 <p>先来看它的注释：</p>
 <blockquote>
-<p>Performs blocking or timed wait for a task, depending on current configuration settings, or returns null if this worker must exit because of any of: 1. There are more than maximumPoolSize workers (due to a call to setMaximumPoolSize). 2. The pool is stopped. 3. The pool is shutdown and the queue is empty. 4. This worker timed out waiting for a task, and timed-out workers are subject to termination (that is, allowCoreThreadTimeOut || workerCount &amp;gt; corePoolSize) both before and after the timed wait, and if the queue is non-empty, this worker is not the last thread in the pool.</p>
+<p>Performs blocking or timed wait for a task, depending on current configuration settings, or returns null if this worker must exit because of any of: 1. There are more than maximumPoolSize workers (due to a call to setMaximumPoolSize). 2. The pool is stopped. 3. The pool is shutdown and the queue is empty. 4. This worker timed out waiting for a task, and timed-out workers are subject to termination (that is, allowCoreThreadTimeOut || workerCount &gt; corePoolSize) both before and after the timed wait, and if the queue is non-empty, this worker is not the last thread in the pool.</p>
 </blockquote>
 <p>大致意思是：执行阻塞或定时等待任务，当出现如下情况时返回null：</p>
 <ul>

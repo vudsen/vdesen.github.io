@@ -393,7 +393,7 @@ scores.insert(String::from(&quot;Yellow&quot;), 50);
 let team_name = String::from(&quot;Blue&quot;);
 let score: Option&amp;lt;&amp;i32&amp;gt; = scores.get(&amp;team_name);
 </code></pre>
-<p><code>get</code> 方法返回一个 <code>Option&amp;lt;&amp;i32&amp;gt;</code> 类型：当查询不到时，会返回一个 <code>None</code>，查询到时返回 <code>Some(&amp;i32)</code></p>
+<p><code>get</code> 方法返回一个 <code>Option&lt;&amp;i32&gt;</code> 类型：当查询不到时，会返回一个 <code>None</code>，查询到时返回 <code>Some(&amp;i32)</code></p>
 <p>并且返回的是一个借用的值，而不是直接带着所有权返回原始的值。</p>
 <p>如果需要获取不带引用的值，可以尝试使用<code>Optional</code>的<code>copied</code>方法：</p>
 <pre><code class="rust">let score: i32 = scores.get(&amp;team_name).copied().unwrap_or(0);

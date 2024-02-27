@@ -194,11 +194,11 @@
         <h1 id="VMWare固定虚拟机Ip"><a href="#VMWare固定虚拟机Ip" class="headerlink" title="VMWare固定虚拟机Ip"></a>VMWare固定虚拟机Ip</h1><p>因为我不想出钱买服务器，毕竟要充100才能按量扣费。。。刚好自己电脑内存是32G的，所以打算自己开虚拟机。</p>
 <p>这里固定ip是我学习的中途才开始做的，真的踩了很大的坑，没有固定Ip，电脑重启后Ip直接变了，原本我有台虚拟机的Ip是105结尾，我自己笔记本重启后，Ip居然也变成了105结尾。。。当时服务器都连不上了，排查了半天，才发现是宿主机和虚拟机ip重复了。</p>
 <hr>
-<p>VMWare -&amp;gt; 编辑 -&amp;gt; 虚拟网络编辑器。</p>
+<p>VMWare -&gt; 编辑 -&gt; 虚拟网络编辑器。</p>
 <p>先点右下角的管理员授权，然后选中VMnet8，点击NAT设置：<br><img lazy="https://selfb.asia/images/2024/02/PixPin_2024-02-11_17-00-49.webp" alt="配置"></p>
 <p>记住里面的网关IP，其实就是外面的子网IP，但是最后一个IP位的值必须是2。</p>
 <p>比如我这里的子网IP是<code>192.168.138.0</code>，那网关的值就只能是<code>192.168.138.2</code>。</p>
-<p>之后把虚拟机关机，在设置里面选择网络适配器 -&amp;gt; 自定义 -&amp;gt; 选择上面的<code>VMnet8</code>，保存后开机。</p>
+<p>之后把虚拟机关机，在设置里面选择网络适配器 -&gt; 自定义 -&gt; 选择上面的<code>VMnet8</code>，保存后开机。</p>
 <p>开机后，编辑<code>/etc/sysconfig/network-scripts/ifcfg-ens33</code>文件</p>
 <p><img lazy="https://selfb.asia/images/2024/02/PixPin_2024-02-11_17-12-06.webp" alt="ifcfg-ens33"></p>
 <p>记得把上面的<code>BOOTPROTO</code>从<code>dhcp</code>改为<code>static</code>。</p>

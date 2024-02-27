@@ -266,8 +266,8 @@ public class IMessageProviderImpl implements IMessageProvider &#123;
 <p><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-cloud-stream/docs/current/reference/html/spring-cloud-stream.html#_functional_binding_names">官方文档</a></p>
 <p>在官方文档说明了，每个<code>Function</code>都会被分作如下两种名称</p>
 <ul>
-<li>input - <code>&amp;lt;functionName&amp;gt; + -in- + &amp;lt;index&amp;gt;</code></li>
-<li>output - <code>&amp;lt;functionName&amp;gt; + -out- + &amp;lt;index&amp;gt;</code></li>
+<li>input - <code>&lt;functionName&gt; + -in- + &lt;index&gt;</code></li>
+<li>output - <code>&lt;functionName&gt; + -out- + &lt;index&gt;</code></li>
 </ul>
 <p>在只有单个input&#x2F;output function时，index永远为0(<del>这不废话</del>)</p>
 <p>首先我们尝试注入两个<code>Functional</code>进去：</p>
@@ -343,7 +343,7 @@ public Consumer&amp;lt;Message&amp;lt;String&amp;gt;&amp;gt; sendMsg() &#123;
     &#125;;
 &#125;
 </code></pre>
-<h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><h2 id="消费者配置-1"><a href="#消费者配置-1" class="headerlink" title="消费者配置"></a>消费者配置</h2><p>下面的配置需要在<code>spring.cloud.stream.rabbit.bindings.&amp;lt;channelName&amp;gt;.consumer.</code>处设置</p>
+<h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><h2 id="消费者配置-1"><a href="#消费者配置-1" class="headerlink" title="消费者配置"></a>消费者配置</h2><p>下面的配置需要在<code>spring.cloud.stream.rabbit.bindings.&lt;channelName&gt;.consumer.</code>处设置</p>
 <p>更多请查阅<a target="_blank" rel="noopener" href="https://docs.spring.io/spring-cloud-stream/docs/current/reference/html/spring-cloud-stream-binder-rabbit.html#_rabbitmq_consumer_properties">官方文档</a>，这里只讲一些常用的</p>
 <table>
 <thead>

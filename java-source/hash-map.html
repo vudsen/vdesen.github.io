@@ -240,7 +240,7 @@ public HashMap(Map&amp;lt;? extends K, ? extends V&amp;gt; m) &#123;
 </code></pre>
 <p>可以发现其中出现了两个属性：<code>loadFactor(负载因子)</code>和<code>threshold(扩容阈值)</code></p>
 <p>首先需要知道这样一个关系：<code>threshold = loadFactor * capacity</code></p>
-<p>其中<code>capacity</code>为整个Hash表数组长度，当<code>size(插入到HashMap中元素的个数) &amp;gt; threshold</code>时，就会对HashMap进行扩容。</p>
+<p>其中<code>capacity</code>为整个Hash表数组长度，当<code>size(插入到HashMap中元素的个数) &gt; threshold</code>时，就会对HashMap进行扩容。</p>
 <p>可以发现，除了第四个构造器，其它3个其实都没有对Hash表数组进行初始化，只是设置了扩容阈值和负载因子而已。</p>
 <h2 id="1-1-tableSizeFor"><a href="#1-1-tableSizeFor" class="headerlink" title="1.1 tableSizeFor"></a>1.1 tableSizeFor</h2><p>第一个构造器中，在给threshold赋值前，还调用了tableSizeFor方法：</p>
 <pre><code class="java">// java11

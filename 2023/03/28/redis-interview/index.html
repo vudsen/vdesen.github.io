@@ -312,9 +312,9 @@ redis 127.0.0.1:6379&amp;gt; scan 17
 </ul>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/ldw201510803006/article/details/124052245">redis scan 命令底层原理（为什么会重复扫描？）_redis scan命令原理_柏油的博客-CSDN博客</a></p>
 <p>这里第一次看可能会有这个疑问，我们打个比方：</p>
-<p>遍历顺序：00 -&amp;gt; 10 -&amp;gt; 01 -&amp;gt; 11</p>
+<p>遍历顺序：00 -&gt; 10 -&gt; 01 -&gt; 11</p>
 <p>若正好遍历到10时扩容完毕了，则新顺序为：</p>
-<p>000 -&amp;gt; 100 -&amp;gt; 010 -&amp;gt; 110 -&amp;gt; 001 -&amp;gt; 101 -&amp;gt; 011 -&amp;gt; 111</p>
+<p>000 -&gt; 100 -&gt; 010 -&gt; 110 -&gt; 001 -&gt; 101 -&gt; 011 -&gt; 111</p>
 <p>此时我们在第三个位置，即010那里。</p>
 <p>这时候可能就有疑问了：<font color=red>100那里不就遍历不到了吗？这不是丢数据了吗？</font></p>
 <p>但这样其实是想多了，我们来看000和100，假如哈希表长度为4时，这两个索引下的元素会落到哪个哈希表下？</p>

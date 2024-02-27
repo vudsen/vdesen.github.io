@@ -255,16 +255,16 @@
 <h1 id="2-TCP"><a href="#2-TCP" class="headerlink" title="2. TCP"></a>2. TCP</h1><h2 id="2-1-三次握手"><a href="#2-1-三次握手" class="headerlink" title="2.1 三次握手"></a>2.1 三次握手</h2><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/430799766">深入浅出TCP三次握手 （多图详解） - 知乎 (zhihu.com)</a></p>
 <p>主要是要记住客户端和服务端的状态：</p>
 <ul>
-<li>客户端：CLOSED -&amp;gt; SYN-SENT -&amp;gt; ESTABLISHED</li>
-<li>服务端：CLOSED -&amp;gt; SYN-RCVD -&amp;gt; ESTABLISHED</li>
+<li>客户端：CLOSED -&gt; SYN-SENT -&gt; ESTABLISHED</li>
+<li>服务端：CLOSED -&gt; SYN-RCVD -&gt; ESTABLISHED</li>
 </ul>
 <p>之后在每次通信时，下次消息的<code>seq</code>为对方上次消息的<code>ack</code>，下次消息的<code>ack</code>为对方上次消息的<code>seq + 总数据长度</code>(同一个<code>seq</code>可能会有多个消息)</p>
 <p><font color=red>在握手时，虽然数据长度为0，在理解时需要将其”当做”长度为1。</font></p>
 <h2 id="2-2-四次挥手"><a href="#2-2-四次挥手" class="headerlink" title="2.2 四次挥手"></a>2.2 四次挥手</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/LOOKTOMMER/article/details/121307137">TCP四次挥手详解_‍oOoOoOooOO的博客-CSDN博客</a></p>
 <p>客户端和服务端的状态：</p>
 <ul>
-<li>客户端(主动关闭的那一方)：ESTABLISHED -&amp;gt; FIN_WAIT -&amp;gt; TIME_WAIT(等待2ms) -&amp;gt; CLOSE</li>
-<li>服务端(响应关闭的那一方)：ESTABLISHED -&amp;gt; CLOSE_WAIT -&amp;gt; LAST_ACK -&amp;gt; CLOSE</li>
+<li>客户端(主动关闭的那一方)：ESTABLISHED -&gt; FIN_WAIT -&gt; TIME_WAIT(等待2ms) -&gt; CLOSE</li>
+<li>服务端(响应关闭的那一方)：ESTABLISHED -&gt; CLOSE_WAIT -&gt; LAST_ACK -&gt; CLOSE</li>
 </ul>
 <p>这里在主动关闭的那一方需要等待2MSL，原因如下：</p>
 <ul>

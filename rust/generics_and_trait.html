@@ -281,7 +281,7 @@ fn main() &#123;
     fn summarize(&amp;self) -&amp;gt; String;
 &#125;
 </code></pre>
-<p>这里使用 trait 关键字来声明一个特征，Summary 是特征名。在大括号中定义了该特征的所有方法，在这个例子中是： fn summarize(&amp;self) -&amp;gt; String。</p>
+<p>这里使用 trait 关键字来声明一个特征，Summary 是特征名。在大括号中定义了该特征的所有方法，在这个例子中是： fn summarize(&amp;self) -&gt; String。</p>
 <p>由于特征不关心具体实现，因此直接使用了 <code>;</code> 进行结尾。</p>
 <h2 id="为类型实现特征"><a href="#为类型实现特征" class="headerlink" title="为类型实现特征"></a>为类型实现特征</h2><p>为 <code>Post</code> 和 <code>Weibo</code> 实现 <code>Summary</code> 特征：</p>
 <pre><code class="rust">pub trait Summary &#123;
@@ -385,7 +385,7 @@ impl&amp;lt;T: Display + PartialOrd&amp;gt; Pair&amp;lt;T&amp;gt; &#123;
     &#125;
 &#125;
 </code></pre>
-<p><code>cmp_display</code> 方法，并不是所有的 <code>Pair&amp;lt;T&amp;gt;</code> 结构体对象都可以拥有，只有 <code>T</code> 同时实现了 <code>Display + PartialOrd</code> 的 <code>Pair&amp;lt;T&amp;gt;</code> 才可以拥有此方法。</p>
+<p><code>cmp_display</code> 方法，并不是所有的 <code>Pair&lt;T&gt;</code> 结构体对象都可以拥有，只有 <code>T</code> 同时实现了 <code>Display + PartialOrd</code> 的 <code>Pair&lt;T&gt;</code> 才可以拥有此方法。</p>
 <p>也可以有条件地实现特征, 例如，标准库为任何实现了 Display 特征的类型实现了 ToString 特征：</p>
 <pre><code class="rust">impl&amp;lt;T: Display&amp;gt; ToString for T &#123;
     // --snip--
@@ -679,7 +679,7 @@ fn main() &#123;
 &#125;
 </code></pre>
 <p>上面的例子中，任何数组上的方法，都无法直接调用，需要先用 <code>self.0</code> 取出数组，然后再进行调用。</p>
-<p>但是 Rust 提供了一个特征叫 <code>Deref</code>，实现该特征后，可以自动做一层类似类型转换的操作，可以将 <code>Wrapper</code> 变成 <code>Vec&amp;lt;String&amp;gt;</code> 来使用。这样就会像直接使用数组那样去使用 <code>Wrapper</code>，而无需为每一个操作都添加上 <code>self.0</code>。</p>
+<p>但是 Rust 提供了一个特征叫 <code>Deref</code>，实现该特征后，可以自动做一层类似类型转换的操作，可以将 <code>Wrapper</code> 变成 <code>Vec&lt;String&gt;</code> 来使用。这样就会像直接使用数组那样去使用 <code>Wrapper</code>，而无需为每一个操作都添加上 <code>self.0</code>。</p>
 
     </div>
     

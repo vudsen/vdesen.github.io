@@ -243,11 +243,12 @@ let a = b;
 <blockquote>
 <p>其实这里我当初也没明白，我都用双引号来给字符串了，而且又是UTF-8，长度怎么就不明白呢？</p>
 <p>到后面查了很多资料才明白了，首先是因为<code>str</code>类型的字符串它没有保存长度，而<code>&amp;str</code>保存了长度，具体为什么不保存长度我也不知道，网上也没有搜到相关内容，个人猜测是为了字符串复用？然后我们知道Rust的GC是自动的，变量退出作用域自动被回收，但是回收的前提是你需要知道这个变量在内存的什么位置，以及它的大小，而<code>str</code>类型是没有保存大小的，如果直接放到变量中使用，是无法进行内存回收的，因为不知道其具体大小，例如下面的代码：</p>
-<pre><code class="rust">fn test(val: str) &#123;
-  // xxx   
-&#125;
+<pre><code class="rust">&amp;gt; fn test(val: str) &#123;
+&amp;gt;   // xxx   
+&amp;gt; &#125;
+&amp;gt; ```
+我们在这里获取了`str`的所有权，在函数结束时就需要将其回收，而在这里无法确定str的大小，因此无法进行回收。
 </code></pre>
-<p>我们在这里获取了<code>str</code>的所有权，在函数结束时就需要将其回收，而在这里无法确定str的大小，因此无法进行回收。</p>
 </blockquote>
 <h2 id="1-3-字符串索引"><a href="#1-3-字符串索引" class="headerlink" title="1.3 字符串索引"></a>1.3 字符串索引</h2><p>在rust中，使用索引访问字符串的某个字符会导致报错：</p>
 <pre><code class="rust">let s1 = String::from(&quot;hello&quot;);
