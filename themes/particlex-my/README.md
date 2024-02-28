@@ -1,6 +1,6 @@
 # Hexo-Theme-ParticleX
 
-[ParticleX](https://github.com/argvchs/hexo-theme-particlex) 主题的魔改版本。
+[ParticleX](https://github.com/argvchs/hexo-theme-particlex) 主题的魔改版本。原本这个仓库是从这里fork出来的，但是fork的提示太烦了，所以我把fork的仓库删了重新创建了一个
 
 ## 演示
 
@@ -18,29 +18,57 @@
 
 ## 安装
 
-### 从Release列表下载(推荐)
+### 从Actons列表下载(推荐)
 
 由于项目中用了webpack，**直接克隆项目是用不了的，需要手动打包！**
 
-[Release](https://github.com/argvchs/hexo-theme-particlex/releases)
+点击上方Actions，进入最后一次运行的Action，下载下面的文件。
 
-### 手动安装
+### 开发
+
+首先修改[webpack.config.dev.js](webpack.config.dev.js)文件中的`output.path`值为你的hexo博客主题路径。
+
+运行如下指令即可进行开发：
 ```bash
-# 克隆本项目
 npm i
-npm run build
+npm run dev
+
+# 另开一个命令行
+hexo serve
 ```
 
-### 配置
-#### 关闭高亮 
+## 博客工具
+
+仓库的`tools`目录下提供了各种工具：
+
+- [replace-to-cdn.cjs](tools/replace-to-cdn.cjs)：将主题的静态资源替换为自己的CDN加载(可以极大地提高博客访问速度)。
+- [replace-old-cdn.cjs](tools/replace-old-cdn.cjs)：将博客中旧的CDN链接替换为新CDN的链接。
+
+## 配置
+### 关闭高亮 
 Hexo 有自带的代码高亮，但是和 ParticleX 的不兼容(具体表现为代码块会出现bug)
 
 ```yaml
+# hexo v7
+syntax_highlighter: 
+# hexo v6
 highlight:
-    enable: false
+  enable: false
+  line_number: true
+  auto_detect: false
+  tab_replace: ''
+  wrap: true
+  hljs: false
+# hexo v6, v7
 prismjs:
     enable: false
 ```
+
+### 底部作者链接
+```yaml
+authorHome: https://github.com/IceOfSummer
+```
+
 
 其它配置请在[ParticleX](https://github.com/argvchs/hexo-theme-particlex)中查看。
 
