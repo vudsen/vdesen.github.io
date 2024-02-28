@@ -68,7 +68,7 @@
                 <div id="loading-circle">
                     <h2>LOADING</h2>
                     <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
-                    <img src="https://selfb.asia/static/particlex/images/loading.gif" />
+                    <img src="/images/loading.gif" />
                 </div>
             </div>
             </transition>
@@ -329,6 +329,17 @@ If you are on a systemd-powered system, you can try to troubleshoot the error wi
 <pre><code class="bash">containerd config default &amp;gt; /etc/containerd/config.toml
 </code></pre>
 <p>然后再去修改、重启就有效了。</p>
+<p>可用的镜像源：</p>
+<ul>
+<li>registry.aliyuncs.com&#x2F;google_containers</li>
+<li>registry.aliyuncs.com&#x2F;k8sxio</li>
+</ul>
+<h3 id="Pod创建容器时拉取pause失败"><a href="#Pod创建容器时拉取pause失败" class="headerlink" title="Pod创建容器时拉取pause失败"></a>Pod创建容器时拉取pause失败</h3><pre><code class="shell">ctr -n k8s.io i pull registry.aliyuncs.com/k8sxio/pause:3.6
+ctr -n k8s.io i tag registry.aliyuncs.com/k8sxio/pause:3.6 registry.k8s.io/pause:3.6
+</code></pre>
+<p>上面是网上的方案，因为我们已经修改过镜像了，所以我以为这个是在容器内又拉容器，导致外面的配置没用。</p>
+<p>然后搞完发现没用。。。</p>
+<p>我看了一下午，结果是因为我没改我工作节点的镜像配置。。。是工作节点一直在拉这个镜像。。。</p>
 <h2 id="根据提示继续"><a href="#根据提示继续" class="headerlink" title="根据提示继续"></a>根据提示继续</h2><p>初始化成功后会提示下面的内容：</p>
 <pre><code class="shell">Your Kubernetes control-plane has initialized successfully!
 
