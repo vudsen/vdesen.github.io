@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>Hystrix | IceOfSummerの博客</title>
+        <title>Kubesphere | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="后面一辈子的博客都在这了！" />
         <meta name="keywords" content="" />
@@ -167,188 +167,69 @@
 
                 <div class="article">
     <div>
-        <h1>Hystrix</h1>
+        <h1>Kubesphere</h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2023/3/7
+            2024/2/26
         </span>
         
         <span class="category">
-            <a href="/2023/03/04/SpringCloud/">
+            <a href="/2024/02/08/k8s">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
-                SpringCloud
+                k8s
             </a>
         </span>
         
-        
-        <span class="tags">
-            <span class="icon">
-                <i class="fa-solid fa-tags fa-fw"></i>
-            </span>
-            
-            <span class="tag">
-                
-                <a href="/SpringCloud/service-degradation" style="color: #ff7d73">服务降级</a>
-            </span>
-            
-        </span>
         
     </div>
     
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
-        <p><font color="red">Hystrix目前已经进入维护模式</font></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/Netflix/Hystrix">Netflix&#x2F;Hystrix (github.com)</a></p>
-<h1 id="入门使用"><a href="#入门使用" class="headerlink" title="入门使用"></a>入门使用</h1><p>导入依赖：</p>
-<pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-starter-netflix-hystrix&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
+        <h1 id="前置准备"><a href="#前置准备" class="headerlink" title="前置准备"></a>前置准备</h1><h2 id="安装监控服务"><a href="#安装监控服务" class="headerlink" title="安装监控服务"></a>安装监控服务</h2><p><a target="_blank" rel="noopener" href="https://github.com/kubernetes-sigs/metrics-server">metrics-server</a></p>
+<pre><code class="bash">kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 </code></pre>
-<p>配置文件和基础的服务提供者一样。</p>
-<p>主启动类添加注解：<code>@EnableCircuitBreaker</code></p>
-<p>之后在服务类中添加相关注解：</p>
-<pre><code class="java">@HystrixCommand(fallbackMethod = &quot;paymentInfoTimeout_TimeoutHandler&quot;, commandProperties = &#123;
-        // 设置3秒超时
-        @HystrixProperty(name = &quot;execution.isolation.thread.timeoutInMilliseconds&quot;, value = &quot;3000&quot;)
-&#125;)
-public String paymentInfoTimeout(Integer id) &#123;
-    final int timeout = 5000;
-    try &#123;
-        Thread.sleep(timeout);
-    &#125; catch (InterruptedException e) &#123;
-        throw new RuntimeException(e);
-    &#125;
-    return &quot;线程池:   &quot; + Thread.currentThread().getName() + &quot; paymentInfoTimeout, id: &quot; + id + &quot;\ttimeout = &quot; + timeout;
+<p>由于没找到好用的镜像（貌似可以用<code>egistry.cn-hangzhou.aliyuncs.com/google_containers</code>），所以直接给docker配置了代理硬拉下来了：</p>
+<pre><code class="bash">vi /etc/docker/daemon.json
+# 添加代理(clash开允许局域网)
+&quot;proxies&quot;: &#123;
+    &quot;http-proxy&quot;: &quot;http://192.168.0.111:7890&quot;,
+    &quot;https-proxy&quot;: &quot;http://192.168.0.111:7890&quot;
 &#125;
 
-// fallback
-public String paymentInfoTimeout_TimeoutHandler(Integer id) &#123;
-    return &quot;paymentInfoTimeout_TimeoutHandler: &quot; + id;
-&#125;
+# 修改完后
+docker pull registry.k8s.io/metrics-server/metrics-server:v0.7.0
+# 导出
+docker save -o metrics-server.tar registry.k8s.io/metrics-server/metrics-server:v0.7.0
+# 导入
+ctr -n=k8s.io image import metrics-server.tar
 </code></pre>
-<p>不管是超时还是出现异常，都会调用<code>fallback</code>指定的方法。</p>
-<p>这个设置在客户端或服务端都是一样的。</p>
-<h1 id="全局配置fallback"><a href="#全局配置fallback" class="headerlink" title="全局配置fallback"></a>全局配置fallback</h1><p>一般在如下情况会触发降级：</p>
-<ul>
-<li>程序运行异常</li>
-<li>超时</li>
-<li>服务熔断触发服务降级</li>
-<li>并发量过高(线程池&#x2F;信号量是否用完)</li>
-</ul>
-<p>给某个类配置：</p>
-<pre><code class="java">import com.netflix.hystrix.contrib.javanica.annotation.DefaultProperties;
-
-@RestController
-@Slf4j
-@DefaultProperties(defaultFallback = &quot;paymentFallback&quot;)
-public class PaymentHystrixController &#123;
-    
-    public String paymentFallback() &#123;
-        return &quot;服务运行异常，请稍后再试&quot;;
-    &#125;
-    
-    // ...
-    
-&#125;
-</code></pre>
-<p>还有更加优雅的配置方法：</p>
-<pre><code class="java">@Service
-@FeignClient(value = &quot;CLOUD-PROVIDER-HYSTRIX-PAYMENT&quot;, fallback = PaymentServiceFallback.class)
-public interface PaymentHystrixService &#123;
-
-    @GetMapping(&quot;/payment/hystrix/ok/&#123;id&#125;&quot;)
-    String paymentInfoSuccess(@PathVariable Integer id);
-
-
-    @GetMapping(&quot;/payment/hystrix/timeout/&#123;id&#125;&quot;)
-    String paymentInfoTimeout(@PathVariable Integer id);
-
-&#125;
-
-
-public class PaymentServiceFallback implements PaymentHystrixService &#123;
-    @Override
-    public String paymentInfoSuccess(Integer id) &#123;
-        return &quot;paymentInfoSuccess_fallback&quot;;
-    &#125;
-
-    @Override
-    public String paymentInfoTimeout(Integer id) &#123;
-        return &quot;paymentInfoTimeout_fallback&quot;;
-    &#125;
-&#125;
-</code></pre>
-<p>这样就不用把业务代码和异常代码混合在一起了。</p>
-<p>但是在使用前必须要添加配置：</p>
-<pre><code class="yaml">feign:
-  circuitbreaker:
-    enabled: true
-</code></pre>
-<h1 id="服务熔断"><a href="#服务熔断" class="headerlink" title="服务熔断"></a>服务熔断</h1><p>在触发服务熔断后，服务器会拒绝所有请求，然后使用服务降级的方法返回友好提示。</p>
-<p>熔断机制是应对雪崩效应的一种微服务链路保护机制。当扇出链路的某个微服务出错不可用或者响应时间太长时，会进行服务的降级，进而熔断该节点微服务的调用，快速返回错误的响应信息。</p>
-<p>当检测到该节点微服务调用响应正常后，恢复调用链路。</p>
-<pre><code class="java">@HystrixCommand(fallbackMethod = &quot;paymentCircuitBreaker_fallback&quot;, commandProperties = &#123;
-    // 是否开启断路器
-    @HystrixProperty(name = HystrixPropertiesManager.CIRCUIT_BREAKER_ENABLED, value = &quot;true&quot;),
-    // 请求次数阈值
-    @HystrixProperty(name = &quot;circuitBreaker.requestVolumeThreshold&quot;, value = &quot;10&quot;),
-    // 时间窗口期, 在触发熔断后，多久恢复HALF_OPEN状态，之后会放行一个请求，根据执行结果决定是否恢复正常
-    @HystrixProperty(name = &quot;circuitBreaker.sleepWindowInMilliseconds&quot;, value = &quot;1000000&quot;),
-    // 失败率达到多少后熔断
-    @HystrixProperty(name = &quot;circuitBreaker.errorThresholdPercentage&quot;, value = &quot;60&quot;),
-&#125;)
-public String paymentCircuitBreaker(Integer id) &#123;
-    if (id &amp;lt; 0) &#123;
-        throw new RuntimeException(&quot;id 不能为负数&quot;);
-    &#125;
-    return Thread.currentThread().getName() + &quot;\t调用成功，流水号: &quot; + UUID.randomUUID();
-&#125;
-
-public String paymentCircuitBreaker_fallback(Integer id) &#123;
-    return &quot;paymentCircuitBreaker_fallback, id: &quot; + id;
-&#125;
-</code></pre>
-<p>具体的配置列表：<a target="_blank" rel="noopener" href="https://github.com/Netflix/Hystrix/wiki/Configuration">https://github.com/Netflix/Hystrix/wiki/Configuration</a></p>
-<p>在触发熔断后，服务参数即使正确，也会一直返回降级的内容。</p>
-<p>熔断类型：</p>
-<ul>
-<li><strong>CLOSE</strong>：熔断关闭，不会对服务进行熔断</li>
-<li><strong>OPEN</strong>：请求不再进行当前服务的调用，直接进行服务降级，在经过一定时间后转换为HALF_OPEN状态</li>
-<li><strong>HALF_OPEN</strong>：此时放行部分请求，根据返回结果绝定是否继续开启熔断</li>
-</ul>
-<p>常用参数：</p>
-<table>
-<thead>
-<tr>
-<th>配置名称</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>circuitBreaker.requestVolumeThreshold</td>
-<td>在一个时间窗口内，至少失败多少次会触发熔断</td>
-</tr>
-<tr>
-<td>circuitBreaker.sleepWindowInMilliseconds</td>
-<td>在熔断后，恢复为HALF_OPEN的时间</td>
-</tr>
-<tr>
-<td>circuitBreaker.errorThresholdPercentage</td>
-<td>当错误百分比高于该值时，应触发熔断</td>
-</tr>
-</tbody></table>
-<h1 id="HystrixDashboard"><a href="#HystrixDashboard" class="headerlink" title="HystrixDashboard"></a>HystrixDashboard</h1><p>导入依赖：</p>
-<pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-starter-netflix-hystrix-dashboard&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
+<p>注意导入时需要导入到每个工作节点。或者这边可以直接重新打个tag然后推到自己的私有镜像仓库里面去。</p>
+<p>部署后发现pod仍然是0&#x2F;1，但状态已经是Running了，翻了下文档发现需要在启动参数中配置忽略ssl：<code>--kubelet-insecure-tls</code>，或者也可以直接提供证书。</p>
+<blockquote>
+<p>发现一篇好文章：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/142990931">一文带你彻底厘清 Kubernetes 中的证书工作机制</a></p>
+</blockquote>
+<h2 id="安装nfs"><a href="#安装nfs" class="headerlink" title="安装nfs"></a>安装nfs</h2><p><a href="/kubernets">安装nfs</a></p>
+<h1 id="安装kubesphere"><a href="#安装kubesphere" class="headerlink" title="安装kubesphere"></a>安装kubesphere</h1><p>注意机器配置，我自己使用VMWare，两台虚拟机2核4G是跑不起Kubesphere的，CPU一定要多给一点。</p>
+<p><strong>不要一上来就开所有功能，不然配置不够直接给你集群弄炸</strong>，反正我自己跟着视频一上来直接开了所有功能，然后CPU直接100%，各种Pod起不来，然后就把集群重置了。</p>
+<p><a target="_blank" rel="noopener" href="https://www.kubesphere.io/zh/docs/v3.4/quick-start/minimal-kubesphere-on-k8s/">文档</a></p>
+<p><strong>再提醒一下，不要一上来就开所有功能！！！！</strong></p>
+<blockquote>
+<p>我自己两个8核6G的虚拟机，默认配置文件很快就能启动，但是开devOps功能后服务器直接卡死，节点重启后才恢复正常。</p>
+</blockquote>
+<h1 id="应用部署"><a href="#应用部署" class="headerlink" title="应用部署"></a>应用部署</h1><h2 id="部署mysql"><a href="#部署mysql" class="headerlink" title="部署mysql"></a>部署mysql</h2><p>使用Docker启动mysql时的命令：</p>
+<pre><code class="bash">docker run -p 3306:3306 --name mysql-01 \
+  -v /mydata/mysql/log:/var/log/mysql \
+  -v /mydata/mysql/data:/var/lib/mysql \
+  -v /mydata/mysql/conf:/etc/mysql/conf.d \
+  -e MYSQL_ROOT_PASSWORD=root \
+  --restart=always \
+  -d mysql:5.7 
 </code></pre>
 
     </div>

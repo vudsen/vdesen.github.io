@@ -1,0 +1,430 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>镜像底层存储原理 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="后面一辈子的博客都在这了！" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 7.1.1"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>镜像底层存储原理</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/3/3
+        </span>
+        
+        <span class="category">
+            <a href="/2023/04/20/docker/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                Docker
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="镜像存储"><a href="#镜像存储" class="headerlink" title="镜像存储"></a>镜像存储</h1><p>查看镜像信息：</p>
+<pre><code class="bash">docker inspect nginx:latest
+</code></pre>
+<p>可以发现这段数据：</p>
+<pre><code class="json">&#123;
+
+    // ......
+
+    &quot;GraphDriver&quot;: &#123;
+        &quot;Data&quot;: &#123;
+                &quot;LowerDir&quot;: &quot;/var/lib/docker/overlay2/9dbe4e72af5122d82424060a7e5c584cd4e0d033ffe18d2c48195bb464ebc7d3/diff:/var/lib/docker/overlay2/e7835eb584a204c5865ea76005304d92675246c288df7bd5a93128c5a5f12328/diff:/var/lib/docker/overlay2/0fa5641bd040128a82e7438f2d798e564352a2e79d58c38676e48e64d15d39fe/diff:/var/lib/docker/overlay2/c3c620c3b71957982ff4032db14bcfe5bc96fc0c401c6d56421402e98e14bb17/diff:/var/lib/docker/overlay2/f5f4757bc9d8c8bb7245b11f625e755442603b87f46eb1fcb2556801b4921b98/diff&quot;,
+                &quot;MergedDir&quot;: &quot;/var/lib/docker/overlay2/5bd32a9a280aabb65f1ea0cf24a5d075383aa768fb9d83ba9a4e2568f2effddd/merged&quot;,
+                &quot;UpperDir&quot;: &quot;/var/lib/docker/overlay2/5bd32a9a280aabb65f1ea0cf24a5d075383aa768fb9d83ba9a4e2568f2effddd/diff&quot;,
+                &quot;WorkDir&quot;: &quot;/var/lib/docker/overlay2/5bd32a9a280aabb65f1ea0cf24a5d075383aa768fb9d83ba9a4e2568f2effddd/work&quot;
+            &#125;,
+        &#125;,
+        &quot;Name&quot;: &quot;overlay2&quot;
+    &#125;
+
+    // ......
+&#125;
+</code></pre>
+<p>该数据指示了镜像是怎么存的：</p>
+<h2 id="底层目录：LowerDir"><a href="#底层目录：LowerDir" class="headerlink" title="底层目录：LowerDir"></a>底层目录：LowerDir</h2><p>以冒号分割每个路径：</p>
+<ul>
+<li>&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;9dbe4e72af5122d82424060a7e5c584cd4e0d033ffe18d2c48195bb464ebc7d3&#x2F;diff</li>
+<li>&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;e7835eb584a204c5865ea76005304d92675246c288df7bd5a93128c5a5f12328&#x2F;diff</li>
+<li>&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;0fa5641bd040128a82e7438f2d798e564352a2e79d58c38676e48e64d15d39fe&#x2F;diff</li>
+<li>&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;c3c620c3b71957982ff4032db14bcfe5bc96fc0c401c6d56421402e98e14bb17&#x2F;diff</li>
+<li>&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;f5f4757bc9d8c8bb7245b11f625e755442603b87f46eb1fcb2556801b4921b98&#x2F;diff</li>
+</ul>
+<p>进入第一个目录查看：</p>
+<pre><code class="bash">[root@my diff]# cd /var/lib/docker/overlay2/9dbe4e72af5122d82424060a7e5c584cd4e0d033ffe18d2c48195bb464ebc7d3/diff
+[root@my diff]# ls
+docker-entrypoint.d
+</code></pre>
+<p>这里没有什么特别的，继续进第二个查看：</p>
+<pre><code class="bash">[root@my diff]# cd /var/lib/docker/overlay2/e7835eb584a204c5865ea76005304d92675246c288df7bd5a93128c5a5f12328/diff
+[root@my diff]# ls
+docker-entrypoint.d
+</code></pre>
+<p>直到第四个目录：</p>
+<pre><code class="bash">[root@my diff]# cd /var/lib/docker/overlay2/c3c620c3b71957982ff4032db14bcfe5bc96fc0c401c6d56421402e98e14bb17/diff
+[root@my diff]# ls
+docker-entrypoint.d  etc  lib  tmp  usr  var
+[root@my diff]# cd etc/
+[root@my etc]# ls
+apt                   default  group-    init.d       logrotate.d  passwd-  rc2.d  rc5.d   shadow-  ucf.conf
+ca-certificates       fonts    gshadow   inputrc      nginx        rc0.d    rc3.d  rc6.d   ssl
+ca-certificates.conf  group    gshadow-  ld.so.cache  passwd       rc1.d    rc4.d  shadow  systemd
+[root@my etc]# cd nginx/
+[root@my nginx]# ls
+conf.d  fastcgi_params  mime.types  modules  nginx.conf  scgi_params  uwsgi_params
+</code></pre>
+<p>可以发现nginx的软件包已经在里面了。</p>
+<p>最后再来看最后一个文件夹：</p>
+<pre><code class="bash">[root@my nginx]# cd /var/lib/docker/overlay2/f5f4757bc9d8c8bb7245b11f625e755442603b87f46eb1fcb2556801b4921b98/diff
+[root@my diff]# ls
+bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+</code></pre>
+<p>可以发现这就是一个基础Linux系统的文件目录。</p>
+<hr>
+<p>综合上面的结果，我们可以得知，LowerDir需要倒着看，并且LowerDir中的内容<strong>只记录了变化</strong>，也就是说把文件夹的内容倒着合并，就能得到我们最终的镜像。</p>
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>我们进入最底层的操作系统目录：</p>
+<pre><code class="bash">[root@my ~]# cd /var/lib/docker/overlay2/f5f4757bc9d8c8bb7245b11f625e755442603b87f46eb1fcb2556801b4921b98/diff
+[root@my diff]# ls -i
+  529307 bin   50966209 etc   16785303 lib64    530840 opt   50966638 run   50966640 sys  50968228 var
+17404669 boot  50966510 home  33662264 media  16785305 proc  16785306 sbin    530842 tmp
+33658094 dev     529586 lib   50966637 mnt    33662265 root  33662268 srv   17396824 usr
+</code></pre>
+<p>使用<code>ls -i</code>可以打印出文件的 inode 值，这个值是唯一的，如果两个文件的 inode 值一样，则表示它们是同一个文件。</p>
+<blockquote>
+<p>省略掉测试过程，实际容器启动后的 inode 值是完全一样的。</p>
+</blockquote>
+<h3 id="文件删除如何表现？"><a href="#文件删除如何表现？" class="headerlink" title="文件删除如何表现？"></a>文件删除如何表现？</h3><h2 id="合并目录：MergedDir"><a href="#合并目录：MergedDir" class="headerlink" title="合并目录：MergedDir"></a>合并目录：MergedDir</h2><h2 id="上层目录：UpperDir"><a href="#上层目录：UpperDir" class="headerlink" title="上层目录：UpperDir"></a>上层目录：UpperDir</h2><h3 id="镜像中的上层目录"><a href="#镜像中的上层目录" class="headerlink" title="镜像中的上层目录"></a>镜像中的上层目录</h3><p>测试如下Dockerfile：</p>
+<pre><code class="bash">FROM centos:centos7
+
+RUN echo &quot;eeee&quot; &amp;gt; /home/a.txt
+RUN rm -f /home/a.txt
+
+CMD /bin/bash
+</code></pre>
+<p>构建后 inspect 镜像：</p>
+<pre><code class="json">&#123;
+    &quot;GraphDriver&quot;: &#123;
+        &quot;Data&quot;: &#123;
+            &quot;LowerDir&quot;: &quot;/var/lib/docker/overlay2/moall4wjc9i62uwepefru630o/diff:/var/lib/docker/overlay2/0121c8265441df30c90ff0f2f5e35135b521e4919810cd3bd777e9f51cd0b883/diff&quot;,
+            &quot;MergedDir&quot;: &quot;/var/lib/docker/overlay2/wh9e0f3n3dq3r4rgm8sllc2b2/merged&quot;,
+            &quot;UpperDir&quot;: &quot;/var/lib/docker/overlay2/wh9e0f3n3dq3r4rgm8sllc2b2/diff&quot;,
+            &quot;WorkDir&quot;: &quot;/var/lib/docker/overlay2/wh9e0f3n3dq3r4rgm8sllc2b2/work&quot;
+        &#125;,
+        &quot;Name&quot;: &quot;overlay2&quot;
+    &#125;,
+&#125;
+</code></pre>
+<p>可以发现 LowerDir 只有两层了, 最后一层是我们的 centos，进入第一层看看：</p>
+<pre><code class="bash">[root@my diff]# cd /var/lib/docker/overlay2/moall4wjc9i62uwepefru630o/diff
+[root@my diff]# ls
+etc  home
+[root@my diff]# ls home/
+a.txt
+[root@my diff]# cat home/a.txt 
+eeee
+</code></pre>
+<p>可以发现文件仍然存在，但是启动容器后文件消失，那么就可以推断，文件删除并不是在 LowerDir 中做的。</p>
+<hr>
+<p>搜索其它文件夹，可以发现在上层目录中有这样的东西：</p>
+<pre><code class="bash">[root@my wh9e0f3n3dq3r4rgm8sllc2b2]# cd /var/lib/docker/overlay2/wh9e0f3n3dq3r4rgm8sllc2b2/diff
+[root@my diff]# ls
+etc  home
+[root@my diff]# cd home/
+[root@my home]# ls
+a.txt
+[root@my home]# ll
+总用量 0
+c---------. 1 root root 0, 0 3月   3 16:35 a.txt
+</code></pre>
+<p>可以发现<code>a.txt</code>被标记为了字符设备文件来表示这个文件被删除(我猜的)。</p>
+<hr>
+<p>如果有多个删除呢：</p>
+<pre><code class="Dockerfile">FROM centos:centos7
+
+RUN echo &quot;eeee&quot; &amp;gt; /home/a.txt
+RUN rm -f /home/a.txt
+RUN mkdir /home/test
+RUN echo &quot;eeee111&quot; &amp;gt; /home/test/b.txt
+RUN rm -f /home/test/b.txt
+
+CMD /bin/bash
+</code></pre>
+<p>inspect一下：</p>
+<pre><code class="json">&#123;
+    &quot;GraphDriver&quot;: &#123;
+        &quot;Data&quot;: &#123;
+                &quot;LowerDir&quot;: &quot;/var/lib/docker/overlay2/x4g07210p4f4l01ak85q2s6e4/diff:/var/lib/docker/overlay2/qo1amtaglj2r0klq946qrts65/diff:/var/lib/docker/overlay2/wh9e0f3n3dq3r4rgm8sllc2b2/diff:/var/lib/docker/overlay2/moall4wjc9i62uwepefru630o/diff:/var/lib/docker/overlay2/0121c8265441df30c90ff0f2f5e35135b521e4919810cd3bd777e9f51cd0b883/diff&quot;,
+                &quot;MergedDir&quot;: &quot;/var/lib/docker/overlay2/xxgrx14wij07venjjp168aod1/merged&quot;,
+                &quot;UpperDir&quot;: &quot;/var/lib/docker/overlay2/xxgrx14wij07venjjp168aod1/diff&quot;,
+                &quot;WorkDir&quot;: &quot;/var/lib/docker/overlay2/xxgrx14wij07venjjp168aod1/work&quot;
+        &#125;,
+        &quot;Name&quot;: &quot;overlay2&quot;
+    &#125;
+&#125;
+</code></pre>
+<p>可以发现<code>a.txt</code>已经被删除，但是<code>b.txt</code>仍然在最上层的 LowerDir 中，并且在 UpperDir 中，<code>b.txt</code>同样被标识为 字符设备文件。</p>
+<h3 id="容器中的上层目录"><a href="#容器中的上层目录" class="headerlink" title="容器中的上层目录"></a>容器中的上层目录</h3><p>进入运行中的nginx容器，修改其配置文件：</p>
+<pre><code class="bash">cd /etc/nginx
+echo &quot;#111&quot; &amp;gt;&amp;gt; nginx.conf 
+</code></pre>
+<p>inspect容器：</p>
+<pre><code class="json">&#123;
+    &quot;GraphDriver&quot;: &#123;
+    &quot;Data&quot;: &#123;
+        &quot;LowerDir&quot;: &quot;/var/lib/docker/overlay2/a50ef32231b6680d8ba9b0f709fba69faa40b504dfe6b1d283765d88e16e9755-init/diff:/var/lib/docker/overlay2/5bd32a9a280aabb65f1ea0cf24a5d075383aa768fb9d83ba9a4e2568f2effddd/diff:/var/lib/docker/overlay2/9dbe4e72af5122d82424060a7e5c584cd4e0d033ffe18d2c48195bb464ebc7d3/diff:/var/lib/docker/overlay2/e7835eb584a204c5865ea76005304d92675246c288df7bd5a93128c5a5f12328/diff:/var/lib/docker/overlay2/0fa5641bd040128a82e7438f2d798e564352a2e79d58c38676e48e64d15d39fe/diff:/var/lib/docker/overlay2/c3c620c3b71957982ff4032db14bcfe5bc96fc0c401c6d56421402e98e14bb17/diff:/var/lib/docker/overlay2/f5f4757bc9d8c8bb7245b11f625e755442603b87f46eb1fcb2556801b4921b98/diff&quot;,
+        &quot;MergedDir&quot;: &quot;/var/lib/docker/overlay2/a50ef32231b6680d8ba9b0f709fba69faa40b504dfe6b1d283765d88e16e9755/merged&quot;,
+        &quot;UpperDir&quot;: &quot;/var/lib/docker/overlay2/a50ef32231b6680d8ba9b0f709fba69faa40b504dfe6b1d283765d88e16e9755/diff&quot;,
+        &quot;WorkDir&quot;: &quot;/var/lib/docker/overlay2/a50ef32231b6680d8ba9b0f709fba69faa40b504dfe6b1d283765d88e16e9755/work&quot;
+    &#125;,
+    &quot;Name&quot;: &quot;overlay2&quot;
+&#125;,
+&#125;
+</code></pre>
+<p>同样查看其上层目录中的<code>nginx.conf</code>，可以发现我们追加的内容。</p>
+<p>如果我们再进容器，再修改某个文件，再来看上层目录，可以发现上层目录是会跟着变的。</p>
+<blockquote>
+<p>写时复制技术：如果在需要修改底层目录中的内容，Docker会先把对应的文件复制到UpperDir，然后再修改。如果是读，则优先读UpperDir，如果没有，则去读 LowerDir，此时并不会复制。</p>
+</blockquote>
+<h2 id="合并目录-MergeDir"><a href="#合并目录-MergeDir" class="headerlink" title="合并目录: MergeDir"></a>合并目录: MergeDir</h2><p>看名字就知道，合并目录是将所有东西整合起来后的目录，所以这里也不多说啥了。</p>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;<a target="_blank" rel="noopener" href="https://github.com/IceOfSummer">IceOfSummer</a>
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/IceOfSummer/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>
