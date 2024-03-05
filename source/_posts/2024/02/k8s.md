@@ -16,3 +16,4 @@ categories: "k8s"
 # 其它
 
 - [搭建私有镜像仓库](/kubernets/self-registry)
+- [DevOps](/kubernets/dev-ops)
