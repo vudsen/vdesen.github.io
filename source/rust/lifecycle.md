@@ -205,3 +205,119 @@ fn main() {
 ```
 
 观察代码，可以看出结构体比它引用的字符串活得更久，引用字符串在内部语句块末尾 } 被释放后，println! 依然在外面使用了该结构体，因此会导致无效的引用。
+
+# 生命周期消除
+
+对于编译器来说，每一个引用类型都有一个生命周期，在大部分情况下，编译器会自动识别并标注：
+```rust
+fn first_word(s: &str) -> &str {
+    let bytes = s.as_bytes();
+
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &s[0..i];
+        }
+    }
+
+    &s[..]
+}
+```
+
+该函数的参数和返回值都是引用类型，尽管我们没有显式的为其标注生命周期，编译依然可以通过。
+
+对于 first_word 函数，它的返回值是一个引用类型，那么该引用只有两种情况：
+
+- 从参数获取
+- 从函数体内部新创建的变量获取
+
+如果是后者，就会出现悬垂引用，编译器会报错。因此只剩一种情况：返回值的引用是获取自参数，这就意味着参数和返回值的生命周期是一样的。
+
+## 消除规则
+
+编译器使用三条消除规则来确定哪些场景不需要显式地去标注生命周期：
+
+1. 每一个引用参数都会获得独自的生命周期
+
+    例如一个引用参数的函数就有一个生命周期标注: fn foo<'a>(x: &'a i32)，两个引用参数的有两个生命周期标注:fn foo<'a, 'b>(x: &'a i32, y: &'b i32), 依此类推。
+
+2. 若只有一个输入生命周期(函数参数中只有一个引用类型)，那么该生命周期会被赋给所有的输出生命周期，也就是所有返回值的生命周期都等于该输入生命周期
+
+    例如函数 fn foo(x: &i32) -> &i32，x 参数的生命周期会被自动赋给返回值 &i32，因此该函数等同于 fn foo<'a>(x: &'a i32) -> &'a i32
+
+3. 若存在多个输入生命周期，且其中一个是 &self 或 &mut self，则 &self 的生命周期被赋给所有的输出生命周期
+
+    拥有 &self 形式的参数，说明该函数是一个 `方法`，该规则让方法的使用便利度大幅提升。
+
+# 方法中的生命周期
+
+方法的生命周期和泛型声明相似：
+```rust
+struct ImportantExcerpt<'a> {
+    part: &'a str,
+}
+
+impl<'a> ImportantExcerpt<'a> {
+    fn level(&self) -> i32 {
+        3
+    }
+}
+```
+
+- impl 中必须使用结构体的完整名称，包括 <'a>，因为生命周期标注也是结构体类型的一部分！
+- 方法签名中，往往不需要标注生命周期，得益于生命周期消除的第一和第三规则：
+    ```rust
+    impl<'a> ImportantExcerpt<'a> {
+        fn announce_and_return_part(&self, announcement: &str) -> &str {
+            println!("Attention please: {}", announcement);
+            self.part
+        }
+    }
+    ```
+
+## 复杂用法
+
+```rust
+impl<'a> ImportantExcerpt<'a> {
+    fn announce_and_return_part<'b>(&'a self, announcement: &'b str) -> &'b str {
+        println!("Attention please: {}", announcement);
+        self.part
+    }
+}
+```
+该代码编译器会报错，因为编译器无法知道 'a 和 'b 的关系，因为`self.part`的生命周期为`'a`，而返回值的生命周期应该为`'b`。
+
+如果想要让该代码通过编译，则需要让`'a`的生命周期大于`'b`的生命周期即可：
+```rust
+impl<'a: 'b, 'b> ImportantExcerpt<'a> {
+    fn announce_and_return_part(&'a self, announcement: &'b str) -> &'b str {
+        println!("Attention please: {}", announcement);
+        self.part
+    }
+}
+```
+
+`'a: 'b`，是生命周期约束语法，跟泛型约束非常相似，用于说明 'a 必须比 'b 活得久。
+
+也可以通过`where`进行声明：
+```rust
+impl<'a> ImportantExcerpt<'a> {
+    fn announce_and_return_part<'b>(&'a self, announcement: &'b str) -> &'b str
+    where
+        'a: 'b,
+    {
+        println!("Attention please: {}", announcement);
+        self.part
+    }
+}
+```
+
+# 静态生命周期
+
+在 Rust 中有一个非常特殊的生命周期，那就是 `'static`，拥有该生命周期的引用可以和整个程序活得一样久。
+
+我们常见的字符串字面量就是`'static`的生命周期：
+
+```rust
+let s: &'static str = "我没啥优点，就是活得久，嘿嘿";
+```
+
