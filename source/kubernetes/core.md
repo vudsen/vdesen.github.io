@@ -3,7 +3,7 @@ title: 核心
 date: 2024-02-12 21:25:40
 categories: 
   data:
-    - { name: "k8s", path: "/2024/02/k8s" }
+    - { name: "k8s", path: "/2024/02/08/k8s" }
 ---
 
 # Namespace

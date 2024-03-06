@@ -3,7 +3,7 @@ title: 基础
 date: 2024-02-08 17:37:52
 categories: 
   data:
-    - { name: "k8s", path: "/2024/02/k8s" }
+    - { name: "k8s", path: "/2024/02/08/k8s" }
 ---
 
 # VMWare固定虚拟机Ip
@@ -214,24 +214,6 @@ containerd config default > /etc/containerd/config.toml
 ```
 
 然后再去修改、重启就有效了。
-
-可用的镜像源：
-
-- registry.aliyuncs.com/google_containers
-- registry.aliyuncs.com/k8sxio
-
-### Pod创建容器时拉取pause失败
-
-```shell
-ctr -n k8s.io i pull registry.aliyuncs.com/k8sxio/pause:3.6
-ctr -n k8s.io i tag registry.aliyuncs.com/k8sxio/pause:3.6 registry.k8s.io/pause:3.6
-```
-
-上面是网上的方案，因为我们已经修改过镜像了，所以我以为这个是在容器内又拉容器，导致外面的配置没用。
-
-然后搞完发现没用。。。
-
-我看了一下午，结果是因为我没改我工作节点的镜像配置。。。是工作节点一直在拉这个镜像。。。
 
 ## 根据提示继续
 

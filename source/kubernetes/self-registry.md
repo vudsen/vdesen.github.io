@@ -3,7 +3,7 @@ title: 搭建私钥镜像仓库
 date: 2024-02-21 20:54:15
 categories: 
   data:
-    - { name: "k8s", path: "/2024/02/k8s" }
+    - { name: "k8s", path: "/2024/02/08/k8s" }
 ---
 
 因为k8s在之前的版本中弃用了 Docker ，新版本中使用的是 containerd，因此忽略证书校验也是不一样的。
