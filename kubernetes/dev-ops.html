@@ -253,6 +253,10 @@
 &#125;
 </code></pre>
 <p>之后直接在jenkins控制台进行打包，即可看到完整结果。</p>
+<h2 id="修改时区"><a href="#修改时区" class="headerlink" title="修改时区"></a>修改时区</h2><p>虽然启动时修改了容器时区，但是 jenkins 默认还是会用其它的时区，这时候需要我们手动改一下。</p>
+<p>打开系统管理 -&gt; 脚本命令行 ，输入如下内容然后执行：</p>
+<pre><code class="groovy">System.setProperty(&#39;org.apache.commons.jelly.tags.fmt.timeZone&#39;, &#39;Asia/Shanghai&#39;)
+</code></pre>
 <h1 id="3-插件推荐"><a href="#3-插件推荐" class="headerlink" title="3. 插件推荐"></a>3. 插件推荐</h1><h2 id="自定义执行环境-Docker-Pipeline"><a href="#自定义执行环境-Docker-Pipeline" class="headerlink" title="自定义执行环境(Docker Pipeline)"></a>自定义执行环境(Docker Pipeline)</h2><p><a target="_blank" rel="noopener" href="https://www.jenkins.io/zh/doc/book/pipeline/docker/">在流水线中使用Docker</a></p>
 <p>安装<code>Docker Pipeline</code>插件后，就可以使用 Docker 镜像作为某个 stage 的执行环境：</p>
 <pre><code class="groovy">pipeline &#123;
@@ -314,6 +318,75 @@
     steps &#123;
         // 打包
         sh &#39;mvn clean package -DskipTests -s &quot;/var/jenkins_home/appconfig/maven/settings.xml&quot;&#39;
+    &#125;
+&#125;
+</code></pre>
+<h2 id="SSH执行远程命令"><a href="#SSH执行远程命令" class="headerlink" title="SSH执行远程命令"></a>SSH执行远程命令</h2><p><a target="_blank" rel="noopener" href="https://plugins.jenkins.io/ssh-steps/">SSH Pipeline Steps</a></p>
+<p>使用方式：</p>
+<pre><code class="groovy">stage(&#39;Run remote command&#39;) &#123;
+
+    environment &#123;
+        K8S_MAIN_NODE = credentials(&#39;test-k8s-main&#39;)
+    &#125;
+
+    steps &#123;
+        script &#123;
+            def remote = [
+                    name: &#39;k8s-main&#39;,
+                    host: &#39;10.10.10.10&#39;,
+                    user: K8S_MAIN_NODE_USR,
+                    password: K8S_MAIN_NODE_PSW,
+                    allowAnyHosts: true
+            ]
+            echo &quot;Restarting server.&quot;
+            sshCommand remote:remote, command: &#39;~/restart.sh&#39;
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<h2 id="缓存node-modules"><a href="#缓存node-modules" class="headerlink" title="缓存node_modules"></a>缓存node_modules</h2><p>直接写了一个函数：</p>
+<pre><code class="groovy">def resolveLastBuildVersion(String name) &#123;
+    dir(&quot;buildVersion&quot;) &#123;
+        result = sh encoding: &#39;UTF-8&#39;, returnStdout: true, script: &quot;if [ -f \&quot;$&#123;name&#125;\&quot; ];then cat $&#123;name&#125;; fi&quot;
+        return result
+    &#125;
+&#125;
+
+def writeLastBuildVersion(String name, String hash) &#123;
+    writeFile encoding: &#39;UTF-8&#39;, file: &quot;buildVersion/$&#123;name&#125;&quot;, text: hash
+&#125;
+
+def buildWebProject(String project) &#123;
+    checkoutRepo(project)
+    dir(project) &#123;
+        String buildVersionKey = &quot;$&#123;project&#125;-build&quot;
+        String depVersionKey = &quot;$&#123;project&#125;-dep&quot;
+        String currentVersion = sh encoding: &#39;UTF-8&#39;, returnStdout: true, script: &#39;git rev-parse HEAD&#39;
+        String lastBuildVersion = resolveLastBuildVersion(buildVersionKey)
+        echo &quot;Current version is $&#123;currentVersion&#125;, last build version is $&#123;lastBuildVersion&#125;&quot;
+        if (currentVersion == lastBuildVersion) &#123;
+            int status = sh encoding: &#39;UTF-8&#39;, returnStatus: true, script: &#39;test -d dist&#39;
+            int status2 = sh encoding: &#39;UTF-8&#39;, returnStatus: true, script: &#39;test -f dist/index.html&#39;
+            if (status == 0 &amp;&amp; status2 == 0) &#123;
+                echo &quot;No changes found, skip build.&quot;
+                return
+            &#125;
+        &#125; else &#123;
+            echo &quot;Changes found, starting build web project.&quot;
+        &#125;
+
+        String currentDepVersion = sh encoding: &#39;UTF-8&#39;, returnStdout: true, script: &#39;sha256sum package.json&#39;
+        String lastDepVersion = resolveLastBuildVersion(depVersionKey)
+        echo &quot;Current package.json sha256 is $&#123;currentDepVersion&#125;, last sha256 is $&#123;lastDepVersion&#125;&quot;
+        if (currentDepVersion != lastDepVersion) &#123;
+            echo &quot;Changes found, reinstall node_modules.&quot;
+            sh &quot;npm i&quot;
+            writeLastBuildVersion(depVersionKey, currentDepVersion)
+        &#125; else &#123;
+            echo &quot;No dependency changes found, skip install dependency.&quot;
+        &#125;
+        sh &quot;npm run build&quot;
+        writeLastBuildVersion(buildVersionKey, currentVersion)
     &#125;
 &#125;
 </code></pre>
