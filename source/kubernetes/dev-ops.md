@@ -87,6 +87,15 @@ pipeline {
 
 之后直接在jenkins控制台进行打包，即可看到完整结果。
 
+## 修改时区
+
+虽然启动时修改了容器时区，但是 jenkins 默认还是会用其它的时区，这时候需要我们手动改一下。
+
+打开系统管理 -> 脚本命令行 ，输入如下内容然后执行：
+```groovy
+System.setProperty('org.apache.commons.jelly.tags.fmt.timeZone', 'Asia/Shanghai')
+```
+
 # 3. 插件推荐
 
 ## 自定义执行环境(Docker Pipeline)
@@ -164,6 +173,82 @@ stage('Maven打包') {
 }
 ```
 
+## SSH执行远程命令
 
+[SSH Pipeline Steps](https://plugins.jenkins.io/ssh-steps/)
+
+使用方式：
+```groovy
+stage('Run remote command') {
+
+    environment {
+        K8S_MAIN_NODE = credentials('test-k8s-main')
+    }
+
+    steps {
+        script {
+            def remote = [
+                    name: 'k8s-main',
+                    host: '10.10.10.10',
+                    user: K8S_MAIN_NODE_USR,
+                    password: K8S_MAIN_NODE_PSW,
+                    allowAnyHosts: true
+            ]
+            echo "Restarting server."
+            sshCommand remote:remote, command: '~/restart.sh'
+        }
+    }
+}
+```
+
+## 缓存node_modules
+
+直接写了一个函数：
+```groovy
+def resolveLastBuildVersion(String name) {
+    dir("buildVersion") {
+        result = sh encoding: 'UTF-8', returnStdout: true, script: "if [ -f \"${name}\" ];then cat ${name}; fi"
+        return result
+    }
+}
+
+def writeLastBuildVersion(String name, String hash) {
+    writeFile encoding: 'UTF-8', file: "buildVersion/${name}", text: hash
+}
+
+def buildWebProject(String project) {
+    checkoutRepo(project)
+    dir(project) {
+        String buildVersionKey = "${project}-build"
+        String depVersionKey = "${project}-dep"
+        String currentVersion = sh encoding: 'UTF-8', returnStdout: true, script: 'git rev-parse HEAD'
+        String lastBuildVersion = resolveLastBuildVersion(buildVersionKey)
+        echo "Current version is ${currentVersion}, last build version is ${lastBuildVersion}"
+        if (currentVersion == lastBuildVersion) {
+            int status = sh encoding: 'UTF-8', returnStatus: true, script: 'test -d dist'
+            int status2 = sh encoding: 'UTF-8', returnStatus: true, script: 'test -f dist/index.html'
+            if (status == 0 && status2 == 0) {
+                echo "No changes found, skip build."
+                return
+            }
+        } else {
+            echo "Changes found, starting build web project."
+        }
+
+        String currentDepVersion = sh encoding: 'UTF-8', returnStdout: true, script: 'sha256sum package.json'
+        String lastDepVersion = resolveLastBuildVersion(depVersionKey)
+        echo "Current package.json sha256 is ${currentDepVersion}, last sha256 is ${lastDepVersion}"
+        if (currentDepVersion != lastDepVersion) {
+            echo "Changes found, reinstall node_modules."
+            sh "npm i"
+            writeLastBuildVersion(depVersionKey, currentDepVersion)
+        } else {
+            echo "No dependency changes found, skip install dependency."
+        }
+        sh "npm run build"
+        writeLastBuildVersion(buildVersionKey, currentVersion)
+    }
+}
+```
 
 

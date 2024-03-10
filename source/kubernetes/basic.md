@@ -421,3 +421,74 @@ EOF
 ```shell
 kubectl describe secrets/admin-user-secret -n kubernetes-dashboard
 ```
+
+# 生命周期钩子
+
+Kubernetes 中为容器提供了两个 hook：
+
+- `PostStart`
+  此钩子函数在容器创建后将立刻执行。但是，并不能保证该钩子函数在容器的的`ENTRYPOINT`之前执行。该钩子函数没有输入参数。
+
+- `PreStop`
+  此钩子函数在容器被terminate（终止）之前执行，例如：
+    - 通过接口调用删除容器所在Pod
+    - 某些管理事件的发生：健康检查失败、资源紧缺等
+
+  如果容器已经被关闭或者进入了 completed 状态，`PreStop`钩子函数的调用将失败。该函数的执行是同步的，即，kubernetes 将在该函数完成执行之后才删除容器。该钩子函数没有输入参数。
+
+查看帮助：
+```bash
+kubectl explain pod.spec.containers.lifecycle.postStart
+
+KIND:       Pod
+VERSION:    v1
+
+FIELD: postStart <LifecycleHandler>
+
+DESCRIPTION:
+    PostStart is called immediately after a container is created. If the handler
+    fails, the container is terminated and restarted according to its restart
+    policy. Other management of the container blocks until the hook completes.
+    More info:
+    https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
+    LifecycleHandler defines a specific action that should be taken in a
+    lifecycle hook. One and only one of the fields, except TCPSocket must be
+    specified.
+    
+FIELDS:
+  exec  <ExecAction>
+    # 执行命令
+    Exec specifies the action to take.
+
+  httpGet       <HTTPGetAction>
+    # 发送一个 Get 请求
+    HTTPGet specifies the http request to perform.
+
+  tcpSocket     <TCPSocketAction>
+    Deprecated. TCPSocket is NOT supported as a LifecycleHandler and kept for
+    the backward compatibility. There are no validation of this field and
+    lifecycle hooks will fail in runtime when tcp handler is specified.
+```
+
+
+`PreStop`可选的属性和`PostStart`是一样的。
+
+## 探针
+
+k8s还提供了和生命周期钩子相似的一些属性：
+- startupProbe：启动探针(表示容器是否启动)
+- livenessProbe：存活探针(表示容器是否存活)
+- readinessProbe：就绪探针(表示容器是否能够对外提供服务)
+
+具体的值和生命周期相似。
+
+## 其它容器
+
+在 Pod `spec.containers`中可以声明容器之外，还有下列方式可以创建容器：
+- [initContainers](https://kubernetes.io/zh-cn/docs/concepts/workloads/pods/init-containers/)：初始化容器，在初始化容器运行完毕之后才会运行提供服务的容器
+
+  初始化容器如果需要给 container 添加文件，则需要以卷的方式添加。
+
+- [ephemeralcontainers](https://kubernetes.io/zh-cn/docs/concepts/workloads/pods/ephemeral-containers/：)临时容器，用于线上排错，例如容器中只有基础镜像，没有必要的排查工具，线上无法排查问题。使用包含排查工具的临时容器，就可以对 containerd 进行排查，临时容器和 Pod 共享了大部分资源。
+
+  [使用临时调试容器来进行调试](https://kubernetes.io/zh-cn/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container)
