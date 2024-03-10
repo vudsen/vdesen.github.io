@@ -13,3 +13,5 @@ categories: Rust
 - [流程控制](/rust/flow-control)
 - [方法](/rust/method)
 - [泛型和特征](/rust/generics_and_trait)
+- [集合](/rust/collections)
+- [生命周期](/rust/lifecycle)
