@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#Java" style="color: #00bcd4">Java</a>
+                <a href="/2023/03/05/java-source#Java" style="color: #ffa2c4">Java</a>
             </span>
             
         </span>
@@ -211,13 +211,13 @@
                               int maximumPoolSize,
                               long keepAliveTime,
                               TimeUnit unit,
-                              BlockingQueue&amp;lt;Runnable&amp;gt; workQueue,
+                              BlockingQueue&lt;Runnable&gt; workQueue,
                               ThreadFactory threadFactory,
                               RejectedExecutionHandler handler) &#123;
-    if (corePoolSize &amp;lt; 0 ||
-        maximumPoolSize &amp;lt;= 0 ||
-        maximumPoolSize &amp;lt; corePoolSize ||
-        keepAliveTime &amp;lt; 0)
+    if (corePoolSize &lt; 0 ||
+        maximumPoolSize &lt;= 0 ||
+        maximumPoolSize &lt; corePoolSize ||
+        keepAliveTime &lt; 0)
         throw new IllegalArgumentException();
     if (workQueue == null || threadFactory == null || handler == null)
         throw new NullPointerException();
@@ -320,7 +320,7 @@
     for (int c = ctl.get();;) &#123;
         // 检查ctl是否大于等于SHUTDOWN(常量，为0)，即判断是否进入了关闭状态
         if (runStateAtLeast(c, SHUTDOWN)
-            // 检查ctl是否大于等于STOP(常量，1&amp;lt;&amp;lt;29)，大于等于STOP时时不再接收新任务
+            // 检查ctl是否大于等于STOP(常量，1&lt;&lt;29)，大于等于STOP时时不再接收新任务
             &amp;&amp; (runStateAtLeast(c, STOP)
                 || firstTask != null
                 || workQueue.isEmpty()))
@@ -330,7 +330,7 @@
         for (;;) &#123;
             // 判断当前正在工作的线程是否超出限制
             if (workerCountOf(c)
-                &amp;gt;= ((core ? corePoolSize : maximumPoolSize) &amp; COUNT_MASK))
+                &gt;= ((core ? corePoolSize : maximumPoolSize) &amp; COUNT_MASK))
                 return false;
             // 将ctl自增，如果成功则结束最外层循环
             if (compareAndIncrementWorkerCount(c))
@@ -370,7 +370,7 @@
                     workers.add(w);
                     workerAdded = true;
                     int s = workers.size();
-                    if (s &amp;gt; largestPoolSize)
+                    if (s &gt; largestPoolSize)
                         largestPoolSize = s;
                 &#125;
             &#125; finally &#123;
@@ -396,7 +396,7 @@
     // ctl是一个原子整型，前3位为运行状态，后29位为运行中的线程数
     int c = ctl.get();
     // workerCountOf就是获取后29位
-    if (workerCountOf(c) &amp;lt; corePoolSize) &#123;
+    if (workerCountOf(c) &lt; corePoolSize) &#123;
         if (addWorker(command, true))
             return;
         c = ctl.get();
@@ -473,11 +473,11 @@
 
         // Are workers subject to culling?
         // 允许常驻线程超时 || 线程数量是否大于核心线程数
-        boolean timed = allowCoreThreadTimeOut || wc &amp;gt; corePoolSize;
+        boolean timed = allowCoreThreadTimeOut || wc &gt; corePoolSize;
 
         // 线程池线程数量超过最大值 || 当前线程开启计时并且超时
-        if ((wc &amp;gt; maximumPoolSize || (timed &amp;&amp; timedOut))
-            &amp;&amp; (wc &amp;gt; 1 || workQueue.isEmpty())) &#123;
+        if ((wc &gt; maximumPoolSize || (timed &amp;&amp; timedOut))
+            &amp;&amp; (wc &gt; 1 || workQueue.isEmpty())) &#123;
             // 删除worker
             if (compareAndDecrementWorkerCount(c))
                 return null;
@@ -641,7 +641,7 @@ protected boolean tryAcquire(int unused) &#123;
             if (min == 0 &amp;&amp; ! workQueue.isEmpty())
                 min = 1;
             // 确保worker的数量最多有corePoolSize，超过了则不再新建
-            if (workerCountOf(c) &amp;gt;= min)
+            if (workerCountOf(c) &gt;= min)
                 return; // replacement not needed
         &#125;
         // 添加一个新Worker

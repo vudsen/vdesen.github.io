@@ -220,7 +220,7 @@ public ConcurrentHashMap(int initialCapacity) &#123;
     this(initialCapacity, LOAD_FACTOR, 1);
 &#125;
 
-public ConcurrentHashMap(Map&amp;lt;? extends K, ? extends V&amp;gt; m) &#123;
+public ConcurrentHashMap(Map&lt;? extends K, ? extends V&gt; m) &#123;
     this.sizeCtl = DEFAULT_CAPACITY;
     putAll(m);
 &#125;
@@ -231,12 +231,12 @@ public ConcurrentHashMap(int initialCapacity, float loadFactor) &#123;
 
 public ConcurrentHashMap(int initialCapacity,
                          float loadFactor, int concurrencyLevel) &#123;
-    if (!(loadFactor &amp;gt; 0.0f) || initialCapacity &amp;lt; 0 || concurrencyLevel &amp;lt;= 0)
+    if (!(loadFactor &gt; 0.0f) || initialCapacity &lt; 0 || concurrencyLevel &lt;= 0)
         throw new IllegalArgumentException();
-    if (initialCapacity &amp;lt; concurrencyLevel)   // Use at least as many bins
+    if (initialCapacity &lt; concurrencyLevel)   // Use at least as many bins
         initialCapacity = concurrencyLevel;   // as estimated threads
     long size = (long)(1.0 + (long)initialCapacity / loadFactor);
-    int cap = (size &amp;gt;= (long)MAXIMUM_CAPACITY) ?
+    int cap = (size &gt;= (long)MAXIMUM_CAPACITY) ?
         MAXIMUM_CAPACITY : tableSizeFor((int)size);
     this.sizeCtl = cap;
 &#125;
@@ -263,11 +263,11 @@ public ConcurrentHashMap(int initialCapacity,
 <h2 id="2-1-initTable"><a href="#2-1-initTable" class="headerlink" title="2.1 initTable"></a>2.1 initTable</h2><pre><code class="java">/**
  * Initializes table, using the size recorded in sizeCtl.
  */
-private final Node&amp;lt;K,V&amp;gt;[] initTable() &#123;
-    Node&amp;lt;K,V&amp;gt;[] tab; int sc;
+private final Node&lt;K,V&gt;[] initTable() &#123;
+    Node&lt;K,V&gt;[] tab; int sc;
     while ((tab = table) == null || tab.length == 0) &#123;
         // 前面说过了，sizeCtl小于0表示正在初始化，这里说明有别的线程正在初始化
-        if ((sc = sizeCtl) &amp;lt; 0)
+        if ((sc = sizeCtl) &lt; 0)
             // 让当前线程主动放弃CPU
             Thread.yield(); // lost initialization race; just spin
         // 在这里进行CAS修改sizeCtl为-1
@@ -275,12 +275,12 @@ private final Node&amp;lt;K,V&amp;gt;[] initTable() &#123;
             try &#123;
                 if ((tab = table) == null || tab.length == 0) &#123;
                     // n表示新哈希表容量，默认容量还是16
-                    int n = (sc &amp;gt; 0) ? sc : DEFAULT_CAPACITY;
+                    int n = (sc &gt; 0) ? sc : DEFAULT_CAPACITY;
                     @SuppressWarnings(&quot;unchecked&quot;)
-                    Node&amp;lt;K,V&amp;gt;[] nt = (Node&amp;lt;K,V&amp;gt;[])new Node&amp;lt;?,?&amp;gt;[n];
+                    Node&lt;K,V&gt;[] nt = (Node&lt;K,V&gt;[])new Node&lt;?,?&gt;[n];
                     table = tab = nt;
                     // 这里可以理解为 sc = n * 0.75. 向右位移2位等于除以4
-                    sc = n - (n &amp;gt;&amp;gt;&amp;gt; 2);
+                    sc = n - (n &gt;&gt;&gt; 2);
                 &#125;
             &#125; finally &#123;
                 sizeCtl = sc;
@@ -291,8 +291,8 @@ private final Node&amp;lt;K,V&amp;gt;[] initTable() &#123;
     return tab;
 &#125;
 </code></pre>
-<h2 id="2-2-tabAt"><a href="#2-2-tabAt" class="headerlink" title="2.2 tabAt"></a>2.2 tabAt</h2><pre><code class="java">static final &amp;lt;K,V&amp;gt; Node&amp;lt;K,V&amp;gt; tabAt(Node&amp;lt;K,V&amp;gt;[] tab, int i) &#123;
-    return (Node&amp;lt;K,V&amp;gt;)U.getObjectAcquire(tab, ((long)i &amp;lt;&amp;lt; ASHIFT) + ABASE);
+<h2 id="2-2-tabAt"><a href="#2-2-tabAt" class="headerlink" title="2.2 tabAt"></a>2.2 tabAt</h2><pre><code class="java">static final &lt;K,V&gt; Node&lt;K,V&gt; tabAt(Node&lt;K,V&gt;[] tab, int i) &#123;
+    return (Node&lt;K,V&gt;)U.getObjectAcquire(tab, ((long)i &lt;&lt; ASHIFT) + ABASE);
 &#125;
 
 public final Object getObjectAcquire(Object o, long offset) &#123;
@@ -305,7 +305,7 @@ public final Object getObjectAcquire(Object o, long offset) &#123;
 
 public static Unsafe createUnsafe() &#123;
     try &#123;
-        Class&amp;lt;?&amp;gt; unsafeClass = Class.forName(&quot;sun.misc.Unsafe&quot;);
+        Class&lt;?&gt; unsafeClass = Class.forName(&quot;sun.misc.Unsafe&quot;);
         Field field = unsafeClass.getDeclaredField(&quot;theUnsafe&quot;);
         field.setAccessible(true);
         return (Unsafe) field.get(null);
@@ -352,15 +352,15 @@ ABASE = 16, ASHIFT = 3, scale = 8
     int hash = spread(key.hashCode());
     int binCount = 0;
     // 看到这层死循环就应该感觉到会有CAS出现
-    for (Node&amp;lt;K,V&amp;gt;[] tab = table;;) &#123;
-        Node&amp;lt;K,V&amp;gt; f; int n, i, fh; K fk; V fv;
+    for (Node&lt;K,V&gt;[] tab = table;;) &#123;
+        Node&lt;K,V&gt; f; int n, i, fh; K fk; V fv;
         if (tab == null || (n = tab.length) == 0)
             // 初始化表
             tab = initTable();
         // 这里取哈希索引和HashMap一样
         else if ((f = tabAt(tab, i = (n - 1) &amp; hash)) == null) &#123;
             // 这个位置没有元素，则尝试CAS放进去
-            if (casTabAt(tab, i, null, new Node&amp;lt;K,V&amp;gt;(hash, key, value)))
+            if (casTabAt(tab, i, null, new Node&lt;K,V&gt;(hash, key, value)))
                 break;                   // no lock when adding to empty bin
         &#125;
         // 这里后面再讲
@@ -379,10 +379,10 @@ ABASE = 16, ASHIFT = 3, scale = 8
                 // 确保这个没有被修改
                 if (tabAt(tab, i) == f) &#123;
                     // 这里要知道，如果节点是红黑树，哈希值为-2
-                    if (fh &amp;gt;= 0) &#123;
+                    if (fh &gt;= 0) &#123;
                         // 这个值代表链表的大小
                         binCount = 1;
-                        for (Node&amp;lt;K,V&amp;gt; e = f;; ++binCount) &#123;
+                        for (Node&lt;K,V&gt; e = f;; ++binCount) &#123;
                             K ek;
                             // 这里同样也是在尝试进行替换：判断hash和key是否相等
                             if (e.hash == hash &amp;&amp;
@@ -394,19 +394,19 @@ ABASE = 16, ASHIFT = 3, scale = 8
                                 break;
                             &#125;
                             // 这里检查是否遍历到链表尾部，如果到尾部了则直接插入
-                            Node&amp;lt;K,V&amp;gt; pred = e;
+                            Node&lt;K,V&gt; pred = e;
                             if ((e = e.next) == null) &#123;
-                                pred.next = new Node&amp;lt;K,V&amp;gt;(hash, key, value);
+                                pred.next = new Node&lt;K,V&gt;(hash, key, value);
                                 break;
                             &#125;
                         &#125;
                     &#125;
                     // 如果是红黑树
                     else if (f instanceof TreeBin) &#123;
-                        Node&amp;lt;K,V&amp;gt; p;
+                        Node&lt;K,V&gt; p;
                         binCount = 2;
                         // 在红黑树里进行查找
-                        if ((p = ((TreeBin&amp;lt;K,V&amp;gt;)f).putTreeVal(hash, key,
+                        if ((p = ((TreeBin&lt;K,V&gt;)f).putTreeVal(hash, key,
                                                               value)) != null) &#123;
                             oldVal = p.val;
                             if (!onlyIfAbsent)
@@ -420,7 +420,7 @@ ABASE = 16, ASHIFT = 3, scale = 8
             &#125;
             // 这里判断是否需要将链表树化
             if (binCount != 0) &#123;
-                if (binCount &amp;gt;= TREEIFY_THRESHOLD)
+                if (binCount &gt;= TREEIFY_THRESHOLD)
                     treeifyBin(tab, i);
                 if (oldVal != null)
                     return oldVal;
@@ -435,7 +435,7 @@ ABASE = 16, ASHIFT = 3, scale = 8
 </code></pre>
 <h2 id="2-3-addCount"><a href="#2-3-addCount" class="headerlink" title="2.3 addCount"></a>2.3 addCount</h2><p>这个方法比较复杂，先讲一些其它的小方法。</p>
 <h3 id="2-3-1-resizeStamp"><a href="#2-3-1-resizeStamp" class="headerlink" title="2.3.1 resizeStamp"></a>2.3.1 resizeStamp</h3><pre><code class="java">static final int resizeStamp(int n) &#123;
-    return Integer.numberOfLeadingZeros(n) | (1 &amp;lt;&amp;lt; (RESIZE_STAMP_BITS - 1));
+    return Integer.numberOfLeadingZeros(n) | (1 &lt;&lt; (RESIZE_STAMP_BITS - 1));
 &#125;
 </code></pre>
 <p>这个方法主要是获取n最高位前面有几个0，然后和后面的值相与。RESIZE_STAMP_BITS为常量：16</p>
@@ -453,16 +453,16 @@ ABASE = 16, ASHIFT = 3, scale = 8
 </ul>
 <p>同时这里用到了一个新的节点：<code>ForwardingNode</code>，这个节点继承了基础的<code>Node</code>节点，<font color=red>但是其hash值永远为MOVED，即为<code>-1</code></font>。同时，内部还保存了新的哈希表<code>nextTable</code>。根据文档翻译，这个节点是用作一个头结点，作为新哈希表的表头（A node inserted at head of bins during transfer operations.）。</p>
 <p><code>transfer</code>是并发扩容的实现，对于每个线程，<font color=red>每次会分配一块固定长度大小的区域</font>来让线程对tab进行重新hash，这个区域的大小与CPU核心数成反比，但最小为16。</p>
-<pre><code class="java">private final void transfer(Node&amp;lt;K,V&amp;gt;[] tab, Node&amp;lt;K,V&amp;gt;[] nextTab) &#123;
+<pre><code class="java">private final void transfer(Node&lt;K,V&gt;[] tab, Node&lt;K,V&gt;[] nextTab) &#123;
     int n = tab.length, stride;
     // 将n/8/CPU核心数当做区域大小，最小值为16
-    if ((stride = (NCPU &amp;gt; 1) ? (n &amp;gt;&amp;gt;&amp;gt; 3) / NCPU : n) &amp;lt; MIN_TRANSFER_STRIDE)
+    if ((stride = (NCPU &gt; 1) ? (n &gt;&gt;&gt; 3) / NCPU : n) &lt; MIN_TRANSFER_STRIDE)
         stride = MIN_TRANSFER_STRIDE; // subdivide range
     // nextTab为空，表示当前线程是第一个进行扩容的线程
     if (nextTab == null) &#123;            // initiating
         try &#123;
             @SuppressWarnings(&quot;unchecked&quot;)
-            Node&amp;lt;K,V&amp;gt;[] nt = (Node&amp;lt;K,V&amp;gt;[])new Node&amp;lt;?,?&amp;gt;[n &amp;lt;&amp;lt; 1];
+            Node&lt;K,V&gt;[] nt = (Node&lt;K,V&gt;[])new Node&lt;?,?&gt;[n &lt;&lt; 1];
             nextTab = nt;
         &#125; catch (Throwable ex) &#123;      // try to cope with OOME
             // OOM的fallback
@@ -474,19 +474,19 @@ ABASE = 16, ASHIFT = 3, scale = 8
     &#125;
     int nextn = nextTab.length;
     // 用于占位。当别的线程发现这个槽位中是 fwd 类型的节点，则跳过这个节点。
-    ForwardingNode&amp;lt;K,V&amp;gt; fwd = new ForwardingNode&amp;lt;K,V&amp;gt;(nextTab);
+    ForwardingNode&lt;K,V&gt; fwd = new ForwardingNode&lt;K,V&gt;(nextTab);
     boolean advance = true;
     boolean finishing = false; // to ensure sweep before committing nextTab
     for (int i = 0, bound = 0;;) &#123;
-        Node&amp;lt;K,V&amp;gt; f; int fh;
+        Node&lt;K,V&gt; f; int fh;
         while (advance) &#123;
             // 1. 因为advance一开始肯定为true，所以进入这个循环
             int nextIndex, nextBound;
             // --i相当于从大到小去分配区域
-            if (--i &amp;gt;= bound || finishing)
+            if (--i &gt;= bound || finishing)
                 advance = false;
             // 获取当前已经分配到的索引
-            else if ((nextIndex = transferIndex) &amp;lt;= 0) &#123;
+            else if ((nextIndex = transferIndex) &lt;= 0) &#123;
                 // 小于0表示已经扩容完了
                 i = -1;
                 advance = false;
@@ -494,7 +494,7 @@ ABASE = 16, ASHIFT = 3, scale = 8
             // 尝试接下这块区域
             else if (U.compareAndSetInt
                      (this, TRANSFERINDEX, nextIndex,
-                      nextBound = (nextIndex &amp;gt; stride ?
+                      nextBound = (nextIndex &gt; stride ?
                                    nextIndex - stride : 0))) &#123;
                 // 到这里，说明当前线程已经接下了[nextBound, nextIndex - 1]这块区域重新分配的任务
                 bound = nextBound;
@@ -505,20 +505,20 @@ ABASE = 16, ASHIFT = 3, scale = 8
         // i小于0，说明线程没拿到任务
         // 至于后面那俩，我们仔细观察即可发现：这两个发生的条件是某一个线程进行扩容时，其它线程已经扩容完了
         // 并且又开启了新一轮的扩容
-        if (i &amp;lt; 0 || i &amp;gt;= n || i + n &amp;gt;= nextn) &#123;
+        if (i &lt; 0 || i &gt;= n || i + n &gt;= nextn) &#123;
             int sc;
             // 判断扩容已经完成
             if (finishing) &#123;
                 nextTable = null;
                 table = nextTab;
                 // 这里重新分配扩容阈值，负载因子为0.75
-                sizeCtl = (n &amp;lt;&amp;lt; 1) - (n &amp;gt;&amp;gt;&amp;gt; 1);
+                sizeCtl = (n &lt;&lt; 1) - (n &gt;&gt;&gt; 1);
                 return;
             &#125;
             // 将sizeCtl - 1，在开头我们已经说了，sizeCtl低16位保存当前正在进行扩容的线程数量
             if (U.compareAndSetInt(this, SIZECTL, sc = sizeCtl, sc - 1)) &#123;
                 // 这里判断是否只有一个线程在扩容
-                if ((sc - 2) != resizeStamp(n) &amp;lt;&amp;lt; RESIZE_STAMP_SHIFT)
+                if ((sc - 2) != resizeStamp(n) &lt;&lt; RESIZE_STAMP_SHIFT)
                     // 只有一个线程扩容，且没有接到任务，说明扩容完成了
                     return;
                 // 还有别的线程在扩容，给个标记后再重新检查一遍。。
@@ -539,12 +539,12 @@ ABASE = 16, ASHIFT = 3, scale = 8
             synchronized (f) &#123;
                 // 再检查一遍
                 if (tabAt(tab, i) == f) &#123;
-                    Node&amp;lt;K,V&amp;gt; ln, hn;
-                    if (fh &amp;gt;= 0) &#123;
+                    Node&lt;K,V&gt; ln, hn;
+                    if (fh &gt;= 0) &#123;
                         // 链表转移. 这里貌似用的是尾插法.
                         int runBit = fh &amp; n;
-                        Node&amp;lt;K,V&amp;gt; lastRun = f;
-                        for (Node&amp;lt;K,V&amp;gt; p = f.next; p != null; p = p.next) &#123;
+                        Node&lt;K,V&gt; lastRun = f;
+                        for (Node&lt;K,V&gt; p = f.next; p != null; p = p.next) &#123;
                             int b = p.hash &amp; n;
                             if (b != runBit) &#123;
                                 runBit = b;
@@ -559,12 +559,12 @@ ABASE = 16, ASHIFT = 3, scale = 8
                             hn = lastRun;
                             ln = null;
                         &#125;
-                        for (Node&amp;lt;K,V&amp;gt; p = f; p != lastRun; p = p.next) &#123;
+                        for (Node&lt;K,V&gt; p = f; p != lastRun; p = p.next) &#123;
                             int ph = p.hash; K pk = p.key; V pv = p.val;
                             if ((ph &amp; n) == 0)
-                                ln = new Node&amp;lt;K,V&amp;gt;(ph, pk, pv, ln);
+                                ln = new Node&lt;K,V&gt;(ph, pk, pv, ln);
                             else
-                                hn = new Node&amp;lt;K,V&amp;gt;(ph, pk, pv, hn);
+                                hn = new Node&lt;K,V&gt;(ph, pk, pv, hn);
                         &#125;
                         setTabAt(nextTab, i, ln);
                         setTabAt(nextTab, i + n, hn);
@@ -573,13 +573,13 @@ ABASE = 16, ASHIFT = 3, scale = 8
                     &#125;
                     else if (f instanceof TreeBin) &#123;
                         // 树节点转移
-                        TreeBin&amp;lt;K,V&amp;gt; t = (TreeBin&amp;lt;K,V&amp;gt;)f;
-                        TreeNode&amp;lt;K,V&amp;gt; lo = null, loTail = null;
-                        TreeNode&amp;lt;K,V&amp;gt; hi = null, hiTail = null;
+                        TreeBin&lt;K,V&gt; t = (TreeBin&lt;K,V&gt;)f;
+                        TreeNode&lt;K,V&gt; lo = null, loTail = null;
+                        TreeNode&lt;K,V&gt; hi = null, hiTail = null;
                         int lc = 0, hc = 0;
-                        for (Node&amp;lt;K,V&amp;gt; e = t.first; e != null; e = e.next) &#123;
+                        for (Node&lt;K,V&gt; e = t.first; e != null; e = e.next) &#123;
                             int h = e.hash;
-                            TreeNode&amp;lt;K,V&amp;gt; p = new TreeNode&amp;lt;K,V&amp;gt;
+                            TreeNode&lt;K,V&gt; p = new TreeNode&lt;K,V&gt;
                                 (h, e.key, e.val, null, null);
                             if ((h &amp; n) == 0) &#123;
                                 if ((p.prev = loTail) == null)
@@ -598,10 +598,10 @@ ABASE = 16, ASHIFT = 3, scale = 8
                                 ++hc;
                             &#125;
                         &#125;
-                        ln = (lc &amp;lt;= UNTREEIFY_THRESHOLD) ? untreeify(lo) :
-                        (hc != 0) ? new TreeBin&amp;lt;K,V&amp;gt;(lo) : t;
-                        hn = (hc &amp;lt;= UNTREEIFY_THRESHOLD) ? untreeify(hi) :
-                        (lc != 0) ? new TreeBin&amp;lt;K,V&amp;gt;(hi) : t;
+                        ln = (lc &lt;= UNTREEIFY_THRESHOLD) ? untreeify(lo) :
+                        (hc != 0) ? new TreeBin&lt;K,V&gt;(lo) : t;
+                        hn = (hc &lt;= UNTREEIFY_THRESHOLD) ? untreeify(hi) :
+                        (lc != 0) ? new TreeBin&lt;K,V&gt;(hi) : t;
                         setTabAt(nextTab, i, ln);
                         setTabAt(nextTab, i + n, hn);
                         setTabAt(tab, i, fwd);
@@ -622,44 +622,44 @@ ABASE = 16, ASHIFT = 3, scale = 8
         // 这里就使用了类似LongAdder和Striped64的设计，将自增分散到多个格子里
         CounterCell c; long v; int m;
         boolean uncontended = true;
-        if (cs == null || (m = cs.length - 1) &amp;lt; 0 ||
+        if (cs == null || (m = cs.length - 1) &lt; 0 ||
             (c = cs[ThreadLocalRandom.getProbe() &amp; m]) == null ||
             !(uncontended =
               U.compareAndSetLong(c, CELLVALUE, v = c.value, v + x))) &#123;
             fullAddCount(x, uncontended);
             return;
         &#125;
-        if (check &amp;lt;= 1)
+        if (check &lt;= 1)
             return;
         // 在这里重新获取总节点数量
         s = sumCount();
     &#125;
     // 这s和b已经赋过值了
     // 这里主要判断是否需要当前线程去扩容或协助扩容
-    if (check &amp;gt;= 0) &#123;
-        Node&amp;lt;K,V&amp;gt;[] tab, nt; int n, sc;
+    if (check &gt;= 0) &#123;
+        Node&lt;K,V&gt;[] tab, nt; int n, sc;
         // 又是循环，CAS的小曲
         // 这里主要判断容量是否大于等于sizeCtl，然后进行扩容
-        while (s &amp;gt;= (long)(sc = sizeCtl) &amp;&amp; (tab = table) != null &amp;&amp;
-               (n = tab.length) &amp;lt; MAXIMUM_CAPACITY) &#123;
+        while (s &gt;= (long)(sc = sizeCtl) &amp;&amp; (tab = table) != null &amp;&amp;
+               (n = tab.length) &lt; MAXIMUM_CAPACITY) &#123;
             // 后面讲
             int rs = resizeStamp(n);
             // 判断是否有其它线程正在修改
-            if (sc &amp;lt; 0) &#123;
+            if (sc &lt; 0) &#123;
                 // 如果有，判断当前容量是否已经发生改变
                 // sc == rs + 1是用来判断当前是否没有线程在进行扩容
                 // 后面的都是用来判断扩容是否已经完成了，不需要当前线程进行协助扩容
-                if ((sc &amp;gt;&amp;gt;&amp;gt; RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 ||
+                if ((sc &gt;&gt;&gt; RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 ||
                     sc == rs + MAX_RESIZERS || (nt = nextTable) == null ||
-                    transferIndex &amp;lt;= 0)
+                    transferIndex &lt;= 0)
                     break;
                 // 协助进行扩容，将sizeCtl + 1，表示多了一个线程在进行扩容
                 if (U.compareAndSetInt(this, SIZECTL, sc, sc + 1))
                     transfer(tab, nt);
             &#125;
-            // 这里CAS修改sizeCtl为(rs &amp;lt;&amp;lt; RESIZE_STAMP_SHIFT) + 2)，表示当前线程是第一个发起扩容的
+            // 这里CAS修改sizeCtl为(rs &lt;&lt; RESIZE_STAMP_SHIFT) + 2)，表示当前线程是第一个发起扩容的
             else if (U.compareAndSetInt(this, SIZECTL, sc,
-                                        (rs &amp;lt;&amp;lt; RESIZE_STAMP_SHIFT) + 2))
+                                        (rs &lt;&lt; RESIZE_STAMP_SHIFT) + 2))
                 transfer(tab, null);
             s = sumCount();
         &#125;
@@ -668,10 +668,10 @@ ABASE = 16, ASHIFT = 3, scale = 8
 </code></pre>
 <p>关于<code>rs &lt;&lt; RESIZE_STAMP_SHIFT</code>可能不好理解，这里我们举个例子：</p>
 <pre><code class="java">int n = 16;
-int i = Integer.numberOfLeadingZeros(n) | (1 &amp;lt;&amp;lt; 15);
+int i = Integer.numberOfLeadingZeros(n) | (1 &lt;&lt; 15);
 //        System.out.println(Integer.toBinaryString());
 System.out.println(Integer.toBinaryString(i));
-System.out.println(Integer.toBinaryString(i &amp;lt;&amp;lt; 16));
+System.out.println(Integer.toBinaryString(i &lt;&lt; 16));
 </code></pre>
 <p>输出：</p>
 <pre><code class="text">1000000000011011
@@ -692,8 +692,8 @@ System.out.println(Integer.toBinaryString(i &amp;lt;&amp;lt; 16));
 
 public int size() &#123;
     long n = sumCount();
-    return ((n &amp;lt; 0L) ? 0 :
-            (n &amp;gt; (long)Integer.MAX_VALUE) ? Integer.MAX_VALUE :
+    return ((n &lt; 0L) ? 0 :
+            (n &gt; (long)Integer.MAX_VALUE) ? Integer.MAX_VALUE :
             (int)n);
 &#125;
 </code></pre>

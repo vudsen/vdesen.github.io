@@ -268,7 +268,7 @@ bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  s
 <h3 id="文件删除如何表现？"><a href="#文件删除如何表现？" class="headerlink" title="文件删除如何表现？"></a>文件删除如何表现？</h3><h2 id="合并目录：MergedDir"><a href="#合并目录：MergedDir" class="headerlink" title="合并目录：MergedDir"></a>合并目录：MergedDir</h2><h2 id="上层目录：UpperDir"><a href="#上层目录：UpperDir" class="headerlink" title="上层目录：UpperDir"></a>上层目录：UpperDir</h2><h3 id="镜像中的上层目录"><a href="#镜像中的上层目录" class="headerlink" title="镜像中的上层目录"></a>镜像中的上层目录</h3><p>测试如下Dockerfile：</p>
 <pre><code class="bash">FROM centos:centos7
 
-RUN echo &quot;eeee&quot; &amp;gt; /home/a.txt
+RUN echo &quot;eeee&quot; &gt; /home/a.txt
 RUN rm -f /home/a.txt
 
 CMD /bin/bash
@@ -313,10 +313,10 @@ c---------. 1 root root 0, 0 3月   3 16:35 a.txt
 <p>如果有多个删除呢：</p>
 <pre><code class="Dockerfile">FROM centos:centos7
 
-RUN echo &quot;eeee&quot; &amp;gt; /home/a.txt
+RUN echo &quot;eeee&quot; &gt; /home/a.txt
 RUN rm -f /home/a.txt
 RUN mkdir /home/test
-RUN echo &quot;eeee111&quot; &amp;gt; /home/test/b.txt
+RUN echo &quot;eeee111&quot; &gt; /home/test/b.txt
 RUN rm -f /home/test/b.txt
 
 CMD /bin/bash
@@ -337,7 +337,7 @@ CMD /bin/bash
 <p>可以发现<code>a.txt</code>已经被删除，但是<code>b.txt</code>仍然在最上层的 LowerDir 中，并且在 UpperDir 中，<code>b.txt</code>同样被标识为 字符设备文件。</p>
 <h3 id="容器中的上层目录"><a href="#容器中的上层目录" class="headerlink" title="容器中的上层目录"></a>容器中的上层目录</h3><p>进入运行中的nginx容器，修改其配置文件：</p>
 <pre><code class="bash">cd /etc/nginx
-echo &quot;#111&quot; &amp;gt;&amp;gt; nginx.conf 
+echo &quot;#111&quot; &gt;&gt; nginx.conf 
 </code></pre>
 <p>inspect容器：</p>
 <pre><code class="json">&#123;

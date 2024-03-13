@@ -428,7 +428,7 @@ module.exports = function (env, args) &#123;
             &#125;
         &#125;,
         output: &#123;
-            filename: (pathData) =&amp;gt; &#123;
+            filename: (pathData) =&gt; &#123;
                 return pathData.chunk.name === &#39;main&#39; ? &#39;main.cjs&#39; : &#39;libs.cjs&#39;;
             &#125;,
         &#125;,
@@ -469,7 +469,7 @@ sourceMapSupport.install()
 <pre><code class="javascript">// webpack.config.cjs
 module.exports = &#123;
   output: &#123;
-    filename: (pathData) =&amp;gt; &#123;
+    filename: (pathData) =&gt; &#123;
       return pathData.chunk.name === &#39;main&#39; ? &#39;main.cjs&#39; : &#39;libs.cjs&#39;;
     &#125;,
   &#125;,
@@ -672,7 +672,7 @@ register(&#39;./path-loader.js&#39;, import.meta.url)
 </code></pre>
 <p>那么它的路由方法就变得很牛逼了：</p>
 <pre><code class="typescript">// 实际的泛型肯定不是这么传的，因为我写的时候没用RN了，所有忘了咋用的了
-const nav = useNavigation&amp;lt;RouteDef&amp;gt;()
+const nav = useNavigation&lt;RouteDef&gt;()
 
 // 正确
 nav(&#39;home&#39;)
@@ -692,11 +692,11 @@ nav(&#39;shop&#39;, Date.now())
 <p>很牛逼啊有没有，连参数的数量都给你变了！而且还能根据属性的定义来决定参数。</p>
 <p>那么这玩意具体是咋写的呢？我仔细研究了一下，研究完后，仿佛开启了新大门！</p>
 <p>我这里直接写一个Demo来看：</p>
-<pre><code class="typescript">type EmitFuncArgs&amp;lt;Events, Key extends keyof Events&amp;gt; = void extends Events[Key]
+<pre><code class="typescript">type EmitFuncArgs&lt;Events, Key extends keyof Events&gt; = void extends Events[Key]
   ? [evt: Key]
   : [evt: Key, data: Events[Key]]
 
-type EmitFunc&amp;lt;Events&amp;gt; = &amp;lt;T extends keyof Events&amp;gt; (...args: EmitFuncArgs&amp;lt;Events, T&amp;gt;) =&amp;gt; string
+type EmitFunc&lt;Events&gt; = &lt;T extends keyof Events&gt; (...args: EmitFuncArgs&lt;Events, T&gt;) =&gt; string
 
 export interface AppEvents &#123;
   ON_LOGOUT: string

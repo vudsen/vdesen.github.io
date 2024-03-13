@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#JVM" style="color: #00a596">JVM</a>
+                <a href="/2023/03/05/java-source#JVM" style="color: #00bcd4">JVM</a>
             </span>
             
         </span>
@@ -217,7 +217,7 @@
     static final Object lock = new Object();
 
     public static void main(String[] args) throws InterruptedException &#123;
-        new Thread(() -&amp;gt; &#123;
+        new Thread(() -&gt; &#123;
            synchronized (lock) &#123;
                System.out.println(ClassLayout.parseInstance(lock).toPrintable());
                System.out.println(&quot;hello&quot;);
@@ -228,7 +228,7 @@
         Thread.sleep(10000);
         
         // 因为有锁批量重偏向，如果偏向锁还有用，在第20次获取锁时就会进行批量重偏向，偏向后指向main线程
-        for (int i = 0; i &amp;lt; 40; i++) &#123;
+        for (int i = 0; i &lt; 40; i++) &#123;
             synchronized (lock) &#123;
                 System.out.println(ClassLayout.parseInstance(lock).toPrintable());
             &#125;

@@ -537,7 +537,7 @@ select * from test where id = 1;
 <li>迭代的时候可以rehash，但是不能进行删除等操作(字典只读)，通过<code>fingerprint</code>字段来判断字典是否发生变动</li>
 </ul>
 <h2 id="3-2-间接遍历"><a href="#3-2-间接遍历" class="headerlink" title="3.2 间接遍历"></a>3.2 间接遍历</h2><p>使用<code>scan</code>命令可以间接遍历，这个命令每次会返回一个下一个需要遍历的索引值：</p>
-<pre><code class="shell">redis 127.0.0.1:6379&amp;gt; scan 0
+<pre><code class="shell">redis 127.0.0.1:6379&gt; scan 0
 1) &quot;17&quot;
 2)  1) &quot;key:12&quot;
     2) &quot;key:8&quot;
@@ -550,7 +550,7 @@ select * from test where id = 1;
     9) &quot;key:3&quot;
    10) &quot;key:7&quot;
    11) &quot;key:1&quot;
-redis 127.0.0.1:6379&amp;gt; scan 17
+redis 127.0.0.1:6379&gt; scan 17
 1) &quot;0&quot;
 2) 1) &quot;key:5&quot;
    2) &quot;key:18&quot;
@@ -619,17 +619,17 @@ redis 127.0.0.1:6379&amp;gt; scan 17
 <li><p><code>encoding</code>：编码</p>
 <ul>
 <li><p>以string来说，就有三种：<code>int</code> , <code>embstr</code> , <code>raw</code>：</p>
-<pre><code class="shell">127.0.0.1:6379&amp;gt; SET counter 1
+<pre><code class="shell">127.0.0.1:6379&gt; SET counter 1
 OK
-127.0.0.1:6379&amp;gt; OBJECT ENCODING counter
+127.0.0.1:6379&gt; OBJECT ENCODING counter
 &quot;int&quot;
-127.0.0.1:6379&amp;gt; SET name &quot;Tom&quot;
+127.0.0.1:6379&gt; SET name &quot;Tom&quot;
 OK
-127.0.0.1:6379&amp;gt; OBJECT ENCODING name
+127.0.0.1:6379&gt; OBJECT ENCODING name
 &quot;embstr&quot;
-127.0.0.1:6379&amp;gt; SETBIT bits 1 1
+127.0.0.1:6379&gt; SETBIT bits 1 1
 (integer) 0
-127.0.0.1:6379&amp;gt; OBJECT ENCODING bits
+127.0.0.1:6379&gt; OBJECT ENCODING bits
 &quot;raw&quot;
 </code></pre>
 </li>
@@ -708,7 +708,7 @@ struct __attribute__ ((__packed__)) sdshdr64 &#123;
 <li>当hash中的数据项的数目超过512的时候，也就是ziplist数据项超过1024的时候</li>
 <li>当hash中插入的任意一个value的长度超过了64的时候</li>
 </ul>
-<pre><code class="text">area        |&amp;lt;---- ziplist header ----&amp;gt;|&amp;lt;----------- entries -------------&amp;gt;|&amp;lt;-end-&amp;gt;|
+<pre><code class="text">area        |&lt;---- ziplist header ----&gt;|&lt;----------- entries -------------&gt;|&lt;-end-&gt;|
 
 size          4 bytes  4 bytes  2 bytes    ?        ?        ?        ?     1 byte
             +---------+--------+-------+--------+--------+--------+--------+-------+
@@ -927,10 +927,10 @@ sadd animals &quot;lion&quot;
     if (counter == 255) return 255;
     double r = (double)rand()/RAND_MAX;
     double baseval = counter - LFU_INIT_VAL;
-    if (baseval &amp;lt; 0) baseval = 0;
+    if (baseval &lt; 0) baseval = 0;
     // 访问次数越多，加一的概率越小
     double p = 1.0/(baseval*server.lfu_log_factor+1);
-    if (r &amp;lt; p) counter++;
+    if (r &lt; p) counter++;
     return counter;
 &#125;
 </code></pre>
@@ -1110,7 +1110,7 @@ public class ExampleConfiguration &#123;
                 if (singletonObject == null) &#123;
                     singletonObject = this.earlySingletonObjects.get(beanName);
                     if (singletonObject == null) &#123;
-                        ObjectFactory&amp;lt;?&amp;gt; singletonFactory = (ObjectFactory)this.singletonFactories.get(beanName);
+                        ObjectFactory&lt;?&gt; singletonFactory = (ObjectFactory)this.singletonFactories.get(beanName);
                         if (singletonFactory != null) &#123;
                             singletonObject = singletonFactory.getObject();
                             this.earlySingletonObjects.put(beanName, singletonObject);

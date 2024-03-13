@@ -331,7 +331,7 @@ spec:
 </ul>
 <h3 id="修改服务类型"><a href="#修改服务类型" class="headerlink" title="修改服务类型"></a>修改服务类型</h3><p>新版本的 Igress-Nginx 会默认创建一个 LoadBancler 的服务：</p>
 <pre><code class="bash">NAMESPACE              NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
-ingress-nginx          ingress-nginx-controller             LoadBalancer   10.96.228.236   &amp;lt;pending&amp;gt;     80:31635/TCP,443:31243/TCP   3h44m
+ingress-nginx          ingress-nginx-controller             LoadBalancer   10.96.228.236   &lt;pending&gt;     80:31635/TCP,443:31243/TCP   3h44m
 </code></pre>
 <p>启动后可以发现我们的 EXTERNAL-IP 这一列一直是 pending，也正因为如此，我们现在是访问不了服务的，我们需要把 LoadBalancer 改成 NodePort 才行。</p>
 <p>来看一下创建 Service的配置，照着我的注释删就行了：</p>
@@ -513,7 +513,7 @@ yum install -y nfs-utils
 
 
 # 在master 执行以下命令 
-echo &quot;/nfs/data/ *(insecure,rw,sync,no_root_squash)&quot; &amp;gt; /etc/exports
+echo &quot;/nfs/data/ *(insecure,rw,sync,no_root_squash)&quot; &gt; /etc/exports
 
 
 # 执行以下命令，启动 nfs 服务;创建共享目录

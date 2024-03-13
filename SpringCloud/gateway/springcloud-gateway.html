@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/gateway/" style="color: #00bcd4">服务网关</a>
+                <a href="/SpringCloud/gateway/" style="color: #00a596">服务网关</a>
             </span>
             
         </span>
@@ -217,10 +217,10 @@
 <p>web请求，通过一些匹配条件，定位到真正的服务节点。并在这个转发过程的前后，进行一些精细化控制。 </p>
 <p>predicate就是我们的匹配条件。而Filter，就可以理解为一个无所不能的拦截器。有了这两个元素，再加上目标URI，就可以实现一个具体的路由了.</p>
 <h1 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h1><p>导入依赖：</p>
-<pre><code class="java">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-starter-gateway&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
+<pre><code class="java">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-gateway&lt;/artifactId&gt;
+&lt;/dependency&gt;
 </code></pre>
 <p>注意不能导入<code>spring-boot-starter-web</code>，否则会报错。</p>
 <p>主启动类：</p>
@@ -268,22 +268,22 @@ public class DemogatewayApplication &#123;
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) &#123;
         return builder.routes()
-            .route(&quot;path_route&quot;, r -&amp;gt; r.path(&quot;/get&quot;)
+            .route(&quot;path_route&quot;, r -&gt; r.path(&quot;/get&quot;)
                 .uri(&quot;http://httpbin.org&quot;))
-            .route(&quot;host_route&quot;, r -&amp;gt; r.host(&quot;*.myhost.org&quot;)
+            .route(&quot;host_route&quot;, r -&gt; r.host(&quot;*.myhost.org&quot;)
                 .uri(&quot;http://httpbin.org&quot;))
-            .route(&quot;rewrite_route&quot;, r -&amp;gt; r.host(&quot;*.rewrite.org&quot;)
-                .filters(f -&amp;gt; f.rewritePath(&quot;/foo/(?&amp;lt;segment&amp;gt;.*)&quot;, &quot;/$&#123;segment&#125;&quot;))
+            .route(&quot;rewrite_route&quot;, r -&gt; r.host(&quot;*.rewrite.org&quot;)
+                .filters(f -&gt; f.rewritePath(&quot;/foo/(?&lt;segment&gt;.*)&quot;, &quot;/$&#123;segment&#125;&quot;))
                 .uri(&quot;http://httpbin.org&quot;))
-            .route(&quot;hystrix_route&quot;, r -&amp;gt; r.host(&quot;*.hystrix.org&quot;)
-                .filters(f -&amp;gt; f.hystrix(c -&amp;gt; c.setName(&quot;slowcmd&quot;)))
+            .route(&quot;hystrix_route&quot;, r -&gt; r.host(&quot;*.hystrix.org&quot;)
+                .filters(f -&gt; f.hystrix(c -&gt; c.setName(&quot;slowcmd&quot;)))
                 .uri(&quot;http://httpbin.org&quot;))
-            .route(&quot;hystrix_fallback_route&quot;, r -&amp;gt; r.host(&quot;*.hystrixfallback.org&quot;)
-                .filters(f -&amp;gt; f.hystrix(c -&amp;gt; c.setName(&quot;slowcmd&quot;).setFallbackUri(&quot;forward:/hystrixfallback&quot;)))
+            .route(&quot;hystrix_fallback_route&quot;, r -&gt; r.host(&quot;*.hystrixfallback.org&quot;)
+                .filters(f -&gt; f.hystrix(c -&gt; c.setName(&quot;slowcmd&quot;).setFallbackUri(&quot;forward:/hystrixfallback&quot;)))
                 .uri(&quot;http://httpbin.org&quot;))
-            .route(&quot;limit_route&quot;, r -&amp;gt; r
+            .route(&quot;limit_route&quot;, r -&gt; r
                 .host(&quot;*.limited.org&quot;).and().path(&quot;/anything/**&quot;)
-                .filters(f -&amp;gt; f.requestRateLimiter(c -&amp;gt; c.setRateLimiter(redisRateLimiter())))
+                .filters(f -&gt; f.requestRateLimiter(c -&gt; c.setRateLimiter(redisRateLimiter())))
                 .uri(&quot;http://httpbin.org&quot;))
             .build();
     &#125;
@@ -362,7 +362,7 @@ eureka:
 @Slf4j
 public class MyLogGatewayFilter implements GlobalFilter &#123;
     @Override
-    public Mono&amp;lt;Void&amp;gt; filter(ServerWebExchange exchange, GatewayFilterChain chain) &#123;
+    public Mono&lt;Void&gt; filter(ServerWebExchange exchange, GatewayFilterChain chain) &#123;
         log.info(&quot;*******come in, log is here&quot;);
         return chain.filter(exchange);
     &#125;

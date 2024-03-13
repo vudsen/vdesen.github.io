@@ -358,7 +358,7 @@ module.exports = function (env, args) &#123;
             &#125;
         &#125;,
         output: &#123;
-            filename: (pathData) =&amp;gt; &#123;
+            filename: (pathData) =&gt; &#123;
                 return pathData.chunk.name === &#39;main&#39; ? &#39;main.cjs&#39; : &#39;libs.cjs&#39;;
             &#125;,
         &#125;,
@@ -399,7 +399,7 @@ sourceMapSupport.install()
 <pre><code class="javascript">// webpack.config.cjs
 module.exports = &#123;
   output: &#123;
-    filename: (pathData) =&amp;gt; &#123;
+    filename: (pathData) =&gt; &#123;
       return pathData.chunk.name === &#39;main&#39; ? &#39;main.cjs&#39; : &#39;libs.cjs&#39;;
     &#125;,
   &#125;,

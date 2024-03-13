@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/service-invoke" style="color: #03a9f4">服务调用</a>
+                <a href="/SpringCloud/service-invoke" style="color: #ff7d73">服务调用</a>
             </span>
             
         </span>
@@ -206,10 +206,10 @@
         <p><a target="_blank" rel="noopener" href="https://spring.io/projects/spring-cloud-openfeign">Spring Cloud OpenFeign(官方文档)</a></p>
 <p>Feign是一个声明式的Web服务客户端，让编写Web服务客户端变得更加容易，只需创建一个接口并在接口上添加注解即可。</p>
 <h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>依赖：</p>
-<pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-starter-openfeign&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
+<pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-openfeign&lt;/artifactId&gt;
+&lt;/dependency&gt;
 </code></pre>
 <p>在消费者端，直接在接口上添加<code>@FeignClient</code>注解，然后再填上服务提供者的调用接口：</p>
 <pre><code class="java">@Service
@@ -217,7 +217,7 @@
 public interface PaymentFeignService &#123;
 
     @GetMapping(&quot;/payment/get/&#123;id&#125;&quot;)
-    CommonResult&amp;lt;Payment&amp;gt; getPaymentById(@PathVariable(&quot;id&quot;) Long id);
+    CommonResult&lt;Payment&gt; getPaymentById(@PathVariable(&quot;id&quot;) Long id);
 
 &#125;
 </code></pre>
@@ -234,7 +234,7 @@ public class OrderFeignController &#123;
 
 
     @GetMapping(&quot;/payment/&#123;id&#125;&quot;)
-    public CommonResult&amp;lt;Payment&amp;gt; queryPayment(@PathVariable Long id) &#123;
+    public CommonResult&lt;Payment&gt; queryPayment(@PathVariable Long id) &#123;
         return paymentFeignService.getPaymentById(id);
     &#125;
 

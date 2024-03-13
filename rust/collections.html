@@ -193,7 +193,7 @@
     <div class="content" v-pre id="main-content">
         <h1 id="1-动态数组-Vector"><a href="#1-动态数组-Vector" class="headerlink" title="1. 动态数组 Vector"></a>1. 动态数组 Vector</h1><h2 id="创建动态数组"><a href="#创建动态数组" class="headerlink" title="创建动态数组"></a>创建动态数组</h2><p>在 Rust 中，有多种方式可以创建动态数组。</p>
 <h3 id="Vec-new"><a href="#Vec-new" class="headerlink" title="Vec::new"></a>Vec::new</h3><p>使用 Vec::new 创建动态数组是最 rusty 的方式，它调用了 Vec 中的 new 关联函数：</p>
-<pre><code class="rust">let v: Vec&amp;lt;i32&amp;gt; = Vec::new();
+<pre><code class="rust">let v: Vec&lt;i32&gt; = Vec::new();
 </code></pre>
 <p>通过<code>Vec::new()</code>时无法传递泛型，因此只能靠类型声明来指定泛型的类型。</p>
 <p>或者在操作时，编译器会自动推断：</p>
@@ -223,8 +223,8 @@ let third: &amp;i32 = &amp;v[2];
 println!(&quot;第三个元素是 &#123;&#125;&quot;, third);
 
 match v.get(2) &#123;
-    Some(third) =&amp;gt; println!(&quot;第三个元素是 &#123;third&#125;&quot;),
-    None =&amp;gt; println!(&quot;去你的第三个元素，根本没有！&quot;),
+    Some(third) =&gt; println!(&quot;第三个元素是 &#123;third&#125;&quot;),
+    None =&gt; println!(&quot;去你的第三个元素，根本没有！&quot;),
 &#125;
 </code></pre>
 <p>使用下标索引时，可以直接拿到对应的值，而不需要进行额外的判断。使用<code>get</code>时，返回的是一个<code>Option</code>的值，需要添加额外的判断。</p>
@@ -268,7 +268,7 @@ struct Person &#123;
 &#125;
 
 impl Person &#123;
-    fn new(name: String, age: u32) -&amp;gt; Person &#123;
+    fn new(name: String, age: u32) -&gt; Person &#123;
         Person &#123; name, age &#125;
     &#125;
 &#125;
@@ -294,7 +294,7 @@ struct Person &#123;
 &#125;
 
 impl Person &#123;
-    fn new(name: String, age: u32) -&amp;gt; Person &#123;
+    fn new(name: String, age: u32) -&gt; Person &#123;
         Person &#123; name, age &#125;
     &#125;
 &#125;
@@ -319,21 +319,21 @@ fn main() &#123;
     value: i32
 &#125;
 
-impl From&amp;lt;i32&amp;gt; for Test &#123;
+impl From&lt;i32&gt; for Test &#123;
 
-    fn from(value: i32) -&amp;gt; Self &#123;
+    fn from(value: i32) -&gt; Self &#123;
         Test &#123; value &#125;
     &#125;
 &#125;
 
-impl Into&amp;lt;i32&amp;gt; for Test &#123;
-    fn into(self) -&amp;gt; i32 &#123;
+impl Into&lt;i32&gt; for Test &#123;
+    fn into(self) -&gt; i32 &#123;
         self.value
     &#125;
 &#125;
 
-impl From&amp;lt;Test&amp;gt; for Vec&amp;lt;Test&amp;gt; &#123;
-    fn from(value: Test) -&amp;gt; Self &#123;
+impl From&lt;Test&gt; for Vec&lt;Test&gt; &#123;
+    fn from(value: Test) -&gt; Self &#123;
         vec![value]
     &#125;
 &#125;
@@ -342,7 +342,7 @@ impl From&amp;lt;Test&amp;gt; for Vec&amp;lt;Test&amp;gt; &#123;
 fn main() &#123;
     let v = Test::from(1);
     // ok
-    let val: Vec&amp;lt;Test&amp;gt; = v.into();
+    let val: Vec&lt;Test&gt; = v.into();
 
     let v2 = Test::from(1);
     // ok
@@ -391,7 +391,7 @@ scores.insert(String::from(&quot;Blue&quot;), 10);
 scores.insert(String::from(&quot;Yellow&quot;), 50);
 
 let team_name = String::from(&quot;Blue&quot;);
-let score: Option&amp;lt;&amp;i32&amp;gt; = scores.get(&amp;team_name);
+let score: Option&lt;&amp;i32&gt; = scores.get(&amp;team_name);
 </code></pre>
 <p><code>get</code> 方法返回一个 <code>Option&lt;&amp;i32&gt;</code> 类型：当查询不到时，会返回一个 <code>None</code>，查询到时返回 <code>Some(&amp;i32)</code></p>
 <p>并且返回的是一个借用的值，而不是直接带着所有权返回原始的值。</p>
@@ -441,7 +441,7 @@ for (key, value) in &amp;scores &#123;
 <p>也可以通过调用函数获取默认值：</p>
 <pre><code class="rust">let v = scores.entry(&quot;Yellow&quot;).or_insert_with(50);
 
-fn random_stat_buff() -&amp;gt; u8 &#123;
+fn random_stat_buff() -&gt; u8 &#123;
     // 为了简单，我们没有使用随机，而是返回一个固定的值
     42
 &#125;
@@ -457,7 +457,7 @@ struct Person &#123;
 &#125;
 
 impl Hash for Person &#123;
-    fn hash&amp;lt;H: Hasher&amp;gt;(&amp;self, state: &amp;mut H) &#123;
+    fn hash&lt;H: Hasher&gt;(&amp;self, state: &amp;mut H) &#123;
         self.id.hash(state);
         self.phone.hash(state);
     &#125;

@@ -206,7 +206,7 @@ int MOVE[][2] = &#123;&#123;0, 1&#125;, &#123;1, 0&#125;, &#123;0, -1&#125;, &#1
 int pointer[POINTER_CNT][2];
 </code></pre>
 <p>其中<code>pointer</code>包括了我们四个点的位置，数组第二维保存了坐标，在遍历完成一次后这样对点进行移动：</p>
-<pre><code class="c++">for (int j = 0; j &amp;lt; POINTER_CNT; ++j) &#123;
+<pre><code class="c++">for (int j = 0; j &lt; POINTER_CNT; ++j) &#123;
     pointer[j][0] += MOVE[j][0];
     pointer[j][1] += MOVE[j][1];
 &#125;
@@ -214,24 +214,24 @@ int pointer[POINTER_CNT][2];
 <p>遍历处理完了，现在我们需要处理边界问题。</p>
 <p>不难发现，对于长度为<code>n</code>的矩阵，第一次遍历需要<code>n - 1</code>次，第二次遍历则是<code>n - 1 - 2</code>次，第三次则是<code>n - 1 - 2 - 2</code>次…</p>
 <p>有这个思路这道题就解出来了：</p>
-<pre><code class="c++">#include &amp;lt;iostream&amp;gt;
+<pre><code class="c++">#include &lt;iostream&gt;
 #define ll long long
 inline int read()
 &#123;
     int x=0,f=1;char ch=getchar();
-    while (ch&amp;lt;&#39;0&#39;||ch&amp;gt;&#39;9&#39;)&#123;if (ch==&#39;-&#39;) f=-1;ch=getchar();&#125;
-    while (ch&amp;gt;=&#39;0&#39;&amp;&amp;ch&amp;lt;=&#39;9&#39;)&#123;x=x*10+ch-48;ch=getchar();&#125;
+    while (ch&lt;&#39;0&#39;||ch&gt;&#39;9&#39;)&#123;if (ch==&#39;-&#39;) f=-1;ch=getchar();&#125;
+    while (ch&gt;=&#39;0&#39;&amp;&amp;ch&lt;=&#39;9&#39;)&#123;x=x*10+ch-48;ch=getchar();&#125;
     return x*f;
 &#125;
 
-template&amp;lt;typename T&amp;gt; T max(T a, T b) &#123;
-    return a &amp;gt; b ? a : b;
+template&lt;typename T&gt; T max(T a, T b) &#123;
+    return a &gt; b ? a : b;
 &#125;
-template&amp;lt;typename T&amp;gt; T max4(T a, T b, T c, T d) &#123;
+template&lt;typename T&gt; T max4(T a, T b, T c, T d) &#123;
     return max(max(a, b), max(c, d));
 &#125;
-template&amp;lt;typename T&amp;gt; T min(T a, T b) &#123;
-    return a &amp;lt; b ? a : b;
+template&lt;typename T&gt; T min(T a, T b) &#123;
+    return a &lt; b ? a : b;
 &#125;
 const int MAX_N = 102;
 const int POINTER_CNT = 4;
@@ -255,8 +255,8 @@ void reinit(int offset) &#123;
 int main()&#123;
     n = read();
     // 8 + 6 + 6 + 2 + 2 + 4
-    for (int i = 1; i &amp;lt;= n; ++i) &#123;
-        for (int j = 1; j &amp;lt;= n; ++j) &#123;
+    for (int i = 1; i &lt;= n; ++i) &#123;
+        for (int j = 1; j &lt;= n; ++j) &#123;
             matrix[i][j] = read();
         &#125;
     &#125;
@@ -265,8 +265,8 @@ int main()&#123;
     int len = n;
     int offset = 0;
     // 这里也可以用len是否小于等于0判断
-    while (pointer[0][0] &amp;lt; pointer[2][0] &amp;&amp; pointer[0][1] &amp;lt; pointer[2][1]) &#123;
-        for (int i = 1; i &amp;lt; len; ++i) &#123;
+    while (pointer[0][0] &lt; pointer[2][0] &amp;&amp; pointer[0][1] &lt; pointer[2][1]) &#123;
+        for (int i = 1; i &lt; len; ++i) &#123;
             int x1 = pointer[0][0], y1 = pointer[0][1];
             int x2 = pointer[1][0], y2 = pointer[1][1];
             int x3 = pointer[2][0], y3 = pointer[2][1];
@@ -274,7 +274,7 @@ int main()&#123;
             int val1 = matrix[x1][y1], val2 = matrix[x2][y2], val3 = matrix[x3][y3], val4 = matrix[x4][y4];
             int mx = max4(val1, val2, val3, val4);
             ans += (mx - val1) + (mx - val2) + (mx - val3) + (mx - val4);
-            for (int j = 0; j &amp;lt; POINTER_CNT; ++j) &#123;
+            for (int j = 0; j &lt; POINTER_CNT; ++j) &#123;
                 pointer[j][0] += MOVE[j][0];
                 pointer[j][1] += MOVE[j][1];
             &#125;

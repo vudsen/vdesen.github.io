@@ -214,33 +214,33 @@ public SqlSessionFactoryBean sqlSessionFactoryBean(@Qualifier(&quot;dataSource&q
 &#125;
 </code></pre>
 <p>添加上面配置后，碰到不兼容的函数可以这样处理：</p>
-<pre><code class="xml">&amp;lt;select id=&quot;maxid&quot; databaseId=&quot;pgsql&quot; resultType=&quot;int&quot;&amp;gt;
+<pre><code class="xml">&lt;select id=&quot;maxid&quot; databaseId=&quot;pgsql&quot; resultType=&quot;int&quot;&gt;
     select another_max(power_id) from tb_xx
-&amp;lt;/select&amp;gt;
-&amp;lt;!-- 给一个默认的 --&amp;gt;
-&amp;lt;select id=&quot;maxid&quot; resultType=&quot;int&quot;&amp;gt;
+&lt;/select&gt;
+&lt;!-- 给一个默认的 --&gt;
+&lt;select id=&quot;maxid&quot; resultType=&quot;int&quot;&gt;
     select max(power_id) from tb_xx
-&amp;lt;/select&amp;gt;
+&lt;/select&gt;
 </code></pre>
 <p>这样idea会爆红，可能看着有点不舒服。</p>
 <p>也可以考虑这样写：</p>
-<pre><code class="xml">&amp;lt;choose&amp;gt;
-    &amp;lt;when test=&quot;_databaseId == &#39;oracle&#39;&quot;&amp;gt;
+<pre><code class="xml">&lt;choose&gt;
+    &lt;when test=&quot;_databaseId == &#39;oracle&#39;&quot;&gt;
         xxx
-    &amp;lt;/when&amp;gt;
-    &amp;lt;when test=&quot;_databaseId == &#39;dm&#39;&quot;&amp;gt;
+    &lt;/when&gt;
+    &lt;when test=&quot;_databaseId == &#39;dm&#39;&quot;&gt;
         xxx
-    &amp;lt;/when&amp;gt;
-    &amp;lt;when test=&quot;_databaseId == &#39;mysql&#39;&quot;&amp;gt;
+    &lt;/when&gt;
+    &lt;when test=&quot;_databaseId == &#39;mysql&#39;&quot;&gt;
         xxx
-    &amp;lt;/when&amp;gt;
-    &amp;lt;when test=&quot;_databaseId == &#39;informix&#39; or _databaseId == &#39;gbase8s&#39;&quot;&amp;gt;
+    &lt;/when&gt;
+    &lt;when test=&quot;_databaseId == &#39;informix&#39; or _databaseId == &#39;gbase8s&#39;&quot;&gt;
         xxx
-    &amp;lt;/when&amp;gt;
-    &amp;lt;otherwise&amp;gt;
+    &lt;/when&gt;
+    &lt;otherwise&gt;
         xxx
-    &amp;lt;/otherwise&amp;gt;
-&amp;lt;/choose&amp;gt;
+    &lt;/otherwise&gt;
+&lt;/choose&gt;
 </code></pre>
 <p>两种都可以，如果太复杂了建议用第一种。</p>
 <hr>

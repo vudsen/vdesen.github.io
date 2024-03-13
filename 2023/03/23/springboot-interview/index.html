@@ -262,7 +262,7 @@ public class ExampleConfiguration &#123;
                 if (singletonObject == null) &#123;
                     singletonObject = this.earlySingletonObjects.get(beanName);
                     if (singletonObject == null) &#123;
-                        ObjectFactory&amp;lt;?&amp;gt; singletonFactory = (ObjectFactory)this.singletonFactories.get(beanName);
+                        ObjectFactory&lt;?&gt; singletonFactory = (ObjectFactory)this.singletonFactories.get(beanName);
                         if (singletonFactory != null) &#123;
                             singletonObject = singletonFactory.getObject();
                             this.earlySingletonObjects.put(beanName, singletonObject);

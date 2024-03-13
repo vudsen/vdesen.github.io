@@ -201,7 +201,7 @@
 impl Circle &#123;
     // new是Circle的关联函数，因为它的第一个参数不是self，且new并不是关键字
     // 这种方法往往用于初始化当前结构体的实例
-    fn new(x: f64, y: f64, radius: f64) -&amp;gt; Circle &#123;
+    fn new(x: f64, y: f64, radius: f64) -&gt; Circle &#123;
         Circle &#123;
             x: x,
             y: y,
@@ -210,7 +210,7 @@ impl Circle &#123;
     &#125;
 
     // Circle的方法，&amp;self表示借用当前的Circle结构体
-    fn area(&amp;self) -&amp;gt; f64 &#123;
+    fn area(&amp;self) -&gt; f64 &#123;
         std::f64::consts::PI * (self.radius * self.radius)
     &#125;
 &#125;
@@ -224,7 +224,7 @@ struct Rectangle &#123;
 &#125;
 
 impl Rectangle &#123;
-    fn area(&amp;self) -&amp;gt; u32 &#123;
+    fn area(&amp;self) -&gt; u32 &#123;
         self.width * self.height
     &#125;
 &#125;
@@ -247,7 +247,7 @@ fn main() &#123;
 </ul>
 <h1 id="2-关联函数"><a href="#2-关联函数" class="headerlink" title="2. 关联函数"></a>2. 关联函数</h1><p>参数中不包含 <code>self</code> 的函数就是关联函数，注意是函数而不是方法。</p>
 <pre><code class="rust">impl Rectangle &#123;
-    fn new(w: u32, h: u32) -&amp;gt; Rectangle &#123;
+    fn new(w: u32, h: u32) -&gt; Rectangle &#123;
         Rectangle &#123; width: w, height: h &#125;
     &#125;
 &#125;
@@ -256,14 +256,14 @@ fn main() &#123;
 <p>因为是函数，所以不能用<code>.</code>来调用，只能通过<code>::</code>来调用，例如<code>String::from</code>。</p>
 <h1 id="3-多个impl定义"><a href="#3-多个impl定义" class="headerlink" title="3. 多个impl定义"></a>3. 多个impl定义</h1><p>Rust 允许我们为一个结构体定义多个 impl 块，目的是提供更多的灵活性和代码组织性，例如当方法多了后，可以把相关的方法组织在同一个 impl 块中，那么就可以形成多个 impl 块，各自完成一块儿目标：</p>
 <pre><code class="rust">impl Rectangle &#123;
-    fn area(&amp;self) -&amp;gt; u32 &#123;
+    fn area(&amp;self) -&gt; u32 &#123;
         self.width * self.height
     &#125;
 &#125;
 
 impl Rectangle &#123;
-    fn can_hold(&amp;self, other: &amp;Rectangle) -&amp;gt; bool &#123;
-        self.width &amp;gt; other.width &amp;&amp; self.height &amp;gt; other.height
+    fn can_hold(&amp;self, other: &amp;Rectangle) -&gt; bool &#123;
+        self.width &gt; other.width &amp;&amp; self.height &gt; other.height
     &#125;
 &#125;
 </code></pre>

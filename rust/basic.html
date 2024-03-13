@@ -249,7 +249,7 @@
 <p>该代码的断言为否，会导致程序失败。</p>
 <p>若需要比较，可以考虑使用如下方式：</p>
 <pre><code class="rust">fn main() &#123;
-  assert!((0.1_f64 + 0.2 - 0.3).abs() &amp;lt; 0.00001);
+  assert!((0.1_f64 + 0.2 - 0.3).abs() &lt; 0.00001);
 &#125;
 </code></pre>
 <h2 id="NaN"><a href="#NaN" class="headerlink" title="NaN"></a>NaN</h2><p>Rust 的浮点数类型使用 <code>NaN</code> (not a number)来处理数学上未定义的结果。</p>
@@ -274,12 +274,12 @@ let f: bool = false;
 </code></pre>
 <p>单元类型就是 <code>()</code>，可以理解为<code>void</code>，例如main函数的返回值就是单元类型<code>()</code>，单元类型的优势是它完全不占用任何内存，可以当做一个占位符使用。</p>
 <h1 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h1><p>基本格式：</p>
-<pre><code class="rust">fn add(i: i32, j: i32) -&amp;gt; i32 &#123;
+<pre><code class="rust">fn add(i: i32, j: i32) -&gt; i32 &#123;
   // 这里没有用分号结尾。
   i + j
 &#125;
 
-fn add(i: i32, j: i32) -&amp;gt; i32 &#123;
+fn add(i: i32, j: i32) -&gt; i32 &#123;
   return i + j;
 &#125;
 </code></pre>
@@ -294,7 +294,7 @@ fn add(i: i32, j: i32) -&amp;gt; i32 &#123;
     dead_end();
 &#125;
 
-fn dead_end() -&amp;gt; i32 &#123;
+fn dead_end() -&gt; i32 &#123;
   panic!(&quot;你已经到了穷途末路，崩溃吧！&quot;);
 &#125;
 </code></pre>
@@ -345,7 +345,7 @@ fn makes_copy(some_integer: i32) &#123; // some_integer 进入作用域
 &#125; // 这里, s3 移出作用域并被丢弃。s2 也移出作用域，但已被移走，
   // 所以什么也不会发生。s1 移出作用域并被丢弃
 
-fn gives_ownership() -&amp;gt; String &#123;             // gives_ownership 将返回值移动给
+fn gives_ownership() -&gt; String &#123;             // gives_ownership 将返回值移动给
                                              // 调用它的函数
 
     let some_string = String::from(&quot;hello&quot;); // some_string 进入作用域.
@@ -354,7 +354,7 @@ fn gives_ownership() -&amp;gt; String &#123;             // gives_ownership 将�
 &#125;
 
 // takes_and_gives_back 将传入字符串并返回该值
-fn takes_and_gives_back(a_string: String) -&amp;gt; String &#123; // a_string 进入作用域
+fn takes_and_gives_back(a_string: String) -&gt; String &#123; // a_string 进入作用域
 
     a_string  // 返回 a_string 并移出给调用的函数
 &#125;

@@ -265,7 +265,7 @@
 <h2 id="1-3-while循环"><a href="#1-3-while循环" class="headerlink" title="1.3 while循环"></a>1.3 while循环</h2><pre><code class="rust">fn main() &#123;
     let mut n = 0;
 
-    while n &amp;lt;= 5 &#123;
+    while n &lt;= 5 &#123;
         println!(&quot;&#123;&#125;!&quot;, n);
 
         n = n + 1;
@@ -294,7 +294,7 @@
     let mut count = 0;
     &#39;outer: loop &#123;
         &#39;inner1: loop &#123;
-            if count &amp;gt;= 20 &#123;
+            if count &gt;= 20 &#123;
                 // 这只会跳出 inner1 循环
                 break &#39;inner1; // 这里使用 `break` 也是一样的
             &#125;
@@ -302,7 +302,7 @@
         &#125;
         count += 5;
         &#39;inner2: loop &#123;
-            if count &amp;gt;= 30 &#123;
+            if count &gt;= 30 &#123;
                 break &#39;outer;
             &#125;
             continue &#39;outer;
@@ -322,11 +322,11 @@
 fn main() &#123;
     let dire = Direction::South;
     match dire &#123;
-        Direction::East =&amp;gt; println!(&quot;East&quot;),
-        Direction::North | Direction::South =&amp;gt; &#123;
+        Direction::East =&gt; println!(&quot;East&quot;),
+        Direction::North | Direction::South =&gt; &#123;
             println!(&quot;South or North&quot;);
         &#125;,
-        _ =&amp;gt; println!(&quot;West&quot;),
+        _ =&gt; println!(&quot;West&quot;),
     &#125;;
 &#125;
 </code></pre>
@@ -339,13 +339,13 @@ fn main() &#123;
 <p>其实 match 跟其他语言中的 switch 非常像，_ 类似于 switch 中的 default，如果没有默认，则match必须要覆盖所有的值，不然会报错。</p>
 <p>match匹配的通用形式：</p>
 <pre><code class="rust">match target &#123;
-    模式1 =&amp;gt; 表达式1,
-    模式2 =&amp;gt; &#123;
+    模式1 =&gt; 表达式1,
+    模式2 =&gt; &#123;
         语句1;
         语句2;
         表达式2
     &#125;,
-    _ =&amp;gt; 表达式3
+    _ =&gt; 表达式3
 &#125;
 </code></pre>
 <p>match可以用于返回值：</p>
@@ -356,15 +356,15 @@ fn main() &#123;
     Quarter,
 &#125;
 
-fn value_in_cents(coin: Coin) -&amp;gt; u8 &#123;
+fn value_in_cents(coin: Coin) -&gt; u8 &#123;
     match coin &#123;
-        Coin::Penny =&amp;gt;  &#123;
+        Coin::Penny =&gt;  &#123;
             println!(&quot;Lucky penny!&quot;);
             1
         &#125;,
-        Coin::Nickel =&amp;gt; 5,
-        Coin::Dime =&amp;gt; 10,
-        Coin::Quarter =&amp;gt; 25,
+        Coin::Nickel =&gt; 5,
+        Coin::Dime =&gt; 10,
+        Coin::Quarter =&gt; 25,
     &#125;
 &#125;
 </code></pre>
@@ -377,8 +377,8 @@ fn value_in_cents(coin: Coin) -&amp;gt; u8 &#123;
 fn main() &#123;
     let ip1 = IpAddr::Ipv6;
     let ip_str = match ip1 &#123;
-        IpAddr::Ipv4 =&amp;gt; &quot;127.0.0.1&quot;,
-        _ =&amp;gt; &quot;::1&quot;,
+        IpAddr::Ipv4 =&gt; &quot;127.0.0.1&quot;,
+        _ =&gt; &quot;::1&quot;,
     &#125;;
 
     println!(&quot;&#123;&#125;&quot;, ip_str);
@@ -400,12 +400,12 @@ enum Coin &#123;
 &#125;
 </code></pre>
 <p>其中 Coin::Quarter 成员还存放了一个值，可以通过模式绑定取到这个值：</p>
-<pre><code class="rust">fn value_in_cents(coin: Coin) -&amp;gt; u8 &#123;
+<pre><code class="rust">fn value_in_cents(coin: Coin) -&gt; u8 &#123;
     match coin &#123;
-        Coin::Penny =&amp;gt; 1,
-        Coin::Nickel =&amp;gt; 5,
-        Coin::Dime =&amp;gt; 10,
-        Coin::Quarter(state) =&amp;gt; &#123;
+        Coin::Penny =&gt; 1,
+        Coin::Nickel =&gt; 5,
+        Coin::Dime =&gt; 10,
+        Coin::Quarter(state) =&gt; &#123;
             println!(&quot;State quarter from &#123;:?&#125;!&quot;, state);
             25
         &#125;,
@@ -415,11 +415,11 @@ enum Coin &#123;
 <h3 id="2-1-2-通配符"><a href="#2-1-2-通配符" class="headerlink" title="2.1.2 _通配符"></a>2.1.2 _通配符</h3><p>通配符提供了一种默认的处理方式：</p>
 <pre><code class="rust">let some_u8_value = 0u8;
 match some_u8_value &#123;
-    1 =&amp;gt; println!(&quot;one&quot;),
-    3 =&amp;gt; println!(&quot;three&quot;),
-    5 =&amp;gt; println!(&quot;five&quot;),
-    7 =&amp;gt; println!(&quot;seven&quot;),
-    _ =&amp;gt; (),
+    1 =&gt; println!(&quot;one&quot;),
+    3 =&gt; println!(&quot;three&quot;),
+    5 =&gt; println!(&quot;five&quot;),
+    7 =&gt; println!(&quot;seven&quot;),
+    _ =&gt; (),
 &#125;
 </code></pre>
 <p>如果不使用通配符，则需要覆盖所有情况。</p>
@@ -435,16 +435,16 @@ enum Direction &#123;
 fn main() &#123;
     let dire = Direction::South;
     match dire &#123;
-        Direction::East =&amp;gt; println!(&quot;East&quot;),
-        other =&amp;gt; println!(&quot;other direction: &#123;:?&#125;&quot;, other),
+        Direction::East =&gt; println!(&quot;East&quot;),
+        other =&gt; println!(&quot;other direction: &#123;:?&#125;&quot;, other),
     &#125;;
 &#125;
 </code></pre>
 <h2 id="2-2-if-let匹配"><a href="#2-2-if-let匹配" class="headerlink" title="2.2 if let匹配"></a>2.2 if let匹配</h2><p>有时会遇到只有一个模式的值需要被处理，其它值直接忽略的场景，如果用 match 来处理就要写成下面这样：</p>
 <pre><code class="rust">let v = Some(3u8);
 match v &#123;
-    Some(3) =&amp;gt; println!(&quot;three&quot;),
-    _ =&amp;gt; (),
+    Some(3) =&gt; println!(&quot;three&quot;),
+    _ =&gt; (),
 &#125;
 </code></pre>
 <p>为了减少代码量，可以使用<code>if let</code>的方式来替换：</p>
@@ -458,7 +458,7 @@ match v &#123;
 assert!(matches!(foo, &#39;A&#39;..=&#39;Z&#39; | &#39;a&#39;..=&#39;z&#39;));
 
 let bar = Some(4);
-assert!(matches!(bar, Some(x) if x &amp;gt; 2));
+assert!(matches!(bar, Some(x) if x &gt; 2));
 </code></pre>
 <h2 id="2-4-while-let-条件循环"><a href="#2-4-while-let-条件循环" class="headerlink" title="2.4 while let 条件循环"></a>2.4 while let 条件循环</h2><p>一个与 if let 类似的结构是 while let 条件循环，它允许只要模式匹配就一直进行 while 循环。下面展示了一个使用 while let 的例子：</p>
 <pre><code class="rust">// Vec是动态数组

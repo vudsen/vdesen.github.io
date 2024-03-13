@@ -233,7 +233,7 @@ openssl req -new -key server.key -out server.csr
 # 使用ip
 openssl req -new -key server.key  -subj &quot;/CN=192.168.0.202&quot; -out server.csr
 # https://goharbor.io/docs/2.9.0/install-config/configure-https/
-cat &amp;gt; v3.ext &amp;lt;&amp;lt;-EOF
+cat &gt; v3.ext &lt;&lt;-EOF
 authorityKeyIdentifier=keyid,issuer
 basicConstraints=CA:FALSE
 keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
@@ -296,7 +296,7 @@ ctr: failed to resolve reference &quot;my.registry/registry:latest&quot;: failed
 # 修改为你自己的域名
 mkdir /etc/containerd/your.domain
 
-cat &amp;gt; /etc/containerd/your.domain/hosts.toml &amp;lt;&amp;lt;-EOF
+cat &gt; /etc/containerd/your.domain/hosts.toml &lt;&lt;-EOF
 server = &quot;https://your.domain&quot;
 
 [host.&quot;https://your.domain&quot;]

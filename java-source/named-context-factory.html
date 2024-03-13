@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/2023/03/05/java-source#Spring-Cloud" style="color: #00bcd4">SpringCloud</a>
+                <a href="/2023/03/05/java-source#Spring-Cloud" style="color: #ffa2c4">SpringCloud</a>
             </span>
             
         </span>
@@ -311,9 +311,9 @@ public class NamedContextTest &#123;
 
         private final String name;
 
-        private final Class&amp;lt;?&amp;gt;[] configurations;
+        private final Class&lt;?&gt;[] configurations;
 
-        public MySpecification(String name, Class&amp;lt;?&amp;gt;[] configurations) &#123;
+        public MySpecification(String name, Class&lt;?&gt;[] configurations) &#123;
             this.name = name;
             this.configurations = configurations;
         &#125;
@@ -324,13 +324,13 @@ public class NamedContextTest &#123;
         &#125;
 
         @Override
-        public Class&amp;lt;?&amp;gt;[] getConfiguration() &#123;
+        public Class&lt;?&gt;[] getConfiguration() &#123;
             return configurations;
         &#125;
     &#125;
 
 
-    static class MyNamedContextFactory extends NamedContextFactory&amp;lt;MySpecification&amp;gt; &#123;
+    static class MyNamedContextFactory extends NamedContextFactory&lt;MySpecification&gt; &#123;
         private static final String PROPERTY_NAME = &quot;test.context.name&quot;;
 
         public MyNamedContextFactory(Class defaultConfigType) &#123;
@@ -350,7 +350,7 @@ public class NamedContextTest &#123;
 <p>可以发现我们的配置类是<font color="red">不需要</font>被注册进IOC容器里的，比如<code>BaseConfig</code>我们就没有注册(没有加<code>@Component</code>什么的)，正常情况下里面的bean是拿不到的。</p>
 <p>那么关于怎么去实现配置隔离呢？其实就可以直接在我们的<code>ClientCommonConfig</code>下手，可以发现我们能够在<code>Environment</code>拿到当前容器的名字，我们也可以根据名字拿到对应的配置(自动注入配置类)，然后单独设置对应的<code>ClientCommonConfig</code>！</p>
 <h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h2 id="1-getInstance"><a href="#1-getInstance" class="headerlink" title="1. getInstance"></a>1. getInstance</h2><p>其中一个比较重要的就是<code>getInstance</code>方法了:</p>
-<pre><code class="java">public &amp;lt;T&amp;gt; T getInstance(String name, Class&amp;lt;T&amp;gt; type) &#123;
+<pre><code class="java">public &lt;T&gt; T getInstance(String name, Class&lt;T&gt; type) &#123;
     AnnotationConfigApplicationContext context = this.getContext(name);
 
     try &#123;
@@ -376,10 +376,10 @@ protected AnnotationConfigApplicationContext getContext(String name) &#123;
 <h2 id="2-配置类是怎么被注入的"><a href="#2-配置类是怎么被注入的" class="headerlink" title="2. 配置类是怎么被注入的"></a>2. 配置类是怎么被注入的</h2><p>我们在前面，会给容器注册一个<code>BaseConfig</code>，以及后面我们给<code>client</code>，以及每个子容器添加配置类时，都会发现这些类上并没有被加上<code>@Compnoent</code>或<code>@Configuration</code>这些类，但最后这些类还是被注入了，这里来研究一下是怎么实现的。</p>
 <p>先来看<code>AnnotationConfigApplicationContext#register</code>方法：</p>
 <pre><code class="java">@Override
-public void register(Class&amp;lt;?&amp;gt;... componentClasses) &#123;
+public void register(Class&lt;?&gt;... componentClasses) &#123;
     Assert.notEmpty(componentClasses, &quot;At least one component class must be specified&quot;);
     StartupStep registerComponentClass = this.getApplicationStartup().start(&quot;spring.context.component-classes.register&quot;)
-    .tag(&quot;classes&quot;, () -&amp;gt; Arrays.toString(componentClasses));
+    .tag(&quot;classes&quot;, () -&gt; Arrays.toString(componentClasses));
     this.reader.register(componentClasses);
     registerComponentClass.end();
 &#125;

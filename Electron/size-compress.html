@@ -202,7 +202,7 @@ exports.default = async function(context) &#123;
 
   fs.readdir(localeDir, function(err, files) &#123;
     if (!(files &amp;&amp; files.length)) return
-    for (let i = 0, len = files.length; i &amp;lt; len; i++) &#123;
+    for (let i = 0, len = files.length; i &lt; len; i++) &#123;
       const match = files[i].match(/zh-CN\.pak/) //只保留中文
       if (match === null) &#123;
         fs.unlinkSync(localeDir + files[i])

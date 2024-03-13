@@ -199,10 +199,10 @@
 <pre><code class="bash">consul agent -dev
 </code></pre>
 <p>启动后可以通过<a href="http://localhost:8500来访问首页">http://localhost:8500来访问首页</a></p>
-<h3 id="1-1-导入依赖"><a href="#1-1-导入依赖" class="headerlink" title="1.1 导入依赖"></a>1.1 导入依赖</h3><pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-starter-consul-discovery&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
+<h3 id="1-1-导入依赖"><a href="#1-1-导入依赖" class="headerlink" title="1.1 导入依赖"></a>1.1 导入依赖</h3><pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-consul-discovery&lt;/artifactId&gt;
+&lt;/dependency&gt;
 </code></pre>
 <h3 id="1-2-添加配置"><a href="#1-2-添加配置" class="headerlink" title="1.2 添加配置"></a>1.2 添加配置</h3><pre><code class="yaml">application:
     name: consul-provider-payment
@@ -245,7 +245,7 @@ public class ApplicationConextConfig &#123;
 <h3 id="2-1-远程调用"><a href="#2-1-远程调用" class="headerlink" title="2.1 远程调用"></a>2.1 远程调用</h3><pre><code class="java">@RestController
 public class OrderConsulController &#123;
 
-    public static final String URL = &quot;&amp;lt;http://consul-provider-payment&amp;gt;&quot;;
+    public static final String URL = &quot;&lt;http://consul-provider-payment&gt;&quot;;
 
     private RestTemplate restTemplate;
 

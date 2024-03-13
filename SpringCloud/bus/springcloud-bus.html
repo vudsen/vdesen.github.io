@@ -194,7 +194,7 @@
             
             <span class="tag">
                 
-                <a href="/SpringCloud/bus" style="color: #ff7d73">服务总线</a>
+                <a href="/SpringCloud/bus" style="color: #03a9f4">服务总线</a>
             </span>
             
         </span>
@@ -208,10 +208,10 @@
 <p>SpringCloud Config-Client实例都监听MQ中同一个topic(默认为<code>springCloudBus</code>)。当一个服务刷新数据的时候，它会把这个信息放入到Topic中，这样其它监听同一个Topic的服务就能得到通知，然后去更新自身的配置。</p>
 <p>SpringCloud Bus目前仅支持RabbitMQ和Kafaka。</p>
 <h1 id="1-简单使用"><a href="#1-简单使用" class="headerlink" title="1. 简单使用"></a>1. 简单使用</h1><h2 id="1-1-配置"><a href="#1-1-配置" class="headerlink" title="1.1 配置"></a>1.1 配置</h2><h3 id="1-1-1-配置中心配置"><a href="#1-1-1-配置中心配置" class="headerlink" title="1.1.1 配置中心配置"></a>1.1.1 配置中心配置</h3><p>添加依赖：</p>
-<pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-starter-bus-amqp&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
+<pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-bus-amqp&lt;/artifactId&gt;
+&lt;/dependency&gt;
 </code></pre>
 <p>配置文件添加配置：</p>
 <pre><code class="yaml">server:
@@ -249,10 +249,10 @@ management:
         include: &#39;busrefresh&#39;
 </code></pre>
 <h3 id="1-1-2-客户端配置"><a href="#1-1-2-客户端配置" class="headerlink" title="1.1.2 客户端配置"></a>1.1.2 客户端配置</h3><p>同样添加相同的依赖:</p>
-<pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-starter-bus-amqp&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
+<pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-bus-amqp&lt;/artifactId&gt;
+&lt;/dependency&gt;
 </code></pre>
 <p>添加rabbitmq支持：</p>
 <pre><code class="yaml">spring:

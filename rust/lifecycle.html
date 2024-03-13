@@ -230,8 +230,8 @@
                           // --+       |
 &#125;                         // ----------+
 </code></pre>
-<h2 id="函数中的生命周期"><a href="#函数中的生命周期" class="headerlink" title="函数中的生命周期"></a>函数中的生命周期</h2><pre><code class="rust">fn longest(x: &amp;str, y: &amp;str) -&amp;gt; &amp;str &#123;
-    if x.len() &amp;gt; y.len() &#123;
+<h2 id="函数中的生命周期"><a href="#函数中的生命周期" class="headerlink" title="函数中的生命周期"></a>函数中的生命周期</h2><pre><code class="rust">fn longest(x: &amp;str, y: &amp;str) -&gt; &amp;str &#123;
+    if x.len() &gt; y.len() &#123;
         x
     &#125; else &#123;
         y
@@ -248,9 +248,9 @@ fn main() &#123;
 </code></pre>
 <p>这段代码看似没有问题，实际上编译期就会报错：</p>
 <pre><code class="log">error[E0106]: missing lifetime specifier
- --&amp;gt; src/main.rs:9:33
+ --&gt; src/main.rs:9:33
   |
-9 | fn longest(x: &amp;str, y: &amp;str) -&amp;gt; &amp;str &#123;
+9 | fn longest(x: &amp;str, y: &amp;str) -&gt; &amp;str &#123;
   |               ----     ----     ^ expected named lifetime parameter // 参数需要一个生命周期
   |
   = help: this function&#39;s return type contains a borrowed value, but the signature does not say whether it is
@@ -258,7 +258,7 @@ fn main() &#123;
   = 帮助： 该函数的返回值是一个引用类型，但是函数签名无法说明，该引用是借用自 `x` 还是 `y`
 help: consider introducing a named lifetime parameter // 考虑引入一个生命周期
   |
-9 | fn longest&amp;lt;&#39;a&amp;gt;(x: &amp;&#39;a str, y: &amp;&#39;a str) -&amp;gt; &amp;&#39;a str &#123;
+9 | fn longest&lt;&#39;a&gt;(x: &amp;&#39;a str, y: &amp;&#39;a str) -&gt; &amp;&#39;a str &#123;
   |           ^^^^    ^^^^^^^     ^^^^^^^     ^^^
 </code></pre>
 <p>因为在此处编译器无法确定返回值的生命周期，因为两个参数的生命周期可能并不一样。</p>
@@ -270,12 +270,12 @@ help: consider introducing a named lifetime parameter // 考虑引入一个生�
 &amp;&#39;a mut i32 // 具有显式生命周期的可变引用
 </code></pre>
 <p>例如下面的函数声明：</p>
-<pre><code class="rust">fn useless&amp;lt;&#39;a&amp;gt;(first: &amp;&#39;a i32, second: &amp;&#39;a i32) &#123;&#125;
+<pre><code class="rust">fn useless&lt;&#39;a&gt;(first: &amp;&#39;a i32, second: &amp;&#39;a i32) &#123;&#125;
 </code></pre>
 <p>此处生命周期标注仅仅说明，这两个参数 first 和 second 至少活得和’a 一样久，实际上，<code>&#39;a</code>的声明周期是<code>first</code>和<code>second</code>这两个的交集。</p>
 <p>再例如之前的例子，加上生命周期后：</p>
-<pre><code class="rust">fn longest&amp;lt;&#39;a&amp;gt;(x: &amp;&#39;a str, y: &amp;&#39;a str) -&amp;gt; &amp;&#39;a str &#123;
-    if x.len() &amp;gt; y.len() &#123;
+<pre><code class="rust">fn longest&lt;&#39;a&gt;(x: &amp;&#39;a str, y: &amp;&#39;a str) -&gt; &amp;&#39;a str &#123;
+    if x.len() &gt; y.len() &#123;
         x
     &#125; else &#123;
         y
@@ -297,7 +297,7 @@ help: consider introducing a named lifetime parameter // 考虑引入一个生�
 &#125;
 </code></pre>
 <h2 id="深入了解"><a href="#深入了解" class="headerlink" title="深入了解"></a>深入了解</h2><p>生命周期的声明不需要为全部的变量提供：</p>
-<pre><code class="rust">fn longest&amp;lt;&#39;a&amp;gt;(x: &amp;&#39;a str, y: &amp;str) -&amp;gt; &amp;&#39;a str &#123;
+<pre><code class="rust">fn longest&lt;&#39;a&gt;(x: &amp;&#39;a str, y: &amp;str) -&gt; &amp;&#39;a str &#123;
     x
 &#125;
 </code></pre>
@@ -309,7 +309,7 @@ help: consider introducing a named lifetime parameter // 考虑引入一个生�
 <li>函数体中某个新建引用的生命周期</li>
 </ul>
 <p>如果是后者，则是典型的悬垂引用，此时是无法通过编译的，只能考虑返回所有权而不是引用。</p>
-<h1 id="结构体中的生命周期"><a href="#结构体中的生命周期" class="headerlink" title="结构体中的生命周期"></a>结构体中的生命周期</h1><pre><code class="rust">struct ImportantExcerpt&amp;lt;&#39;a&amp;gt; &#123;
+<h1 id="结构体中的生命周期"><a href="#结构体中的生命周期" class="headerlink" title="结构体中的生命周期"></a>结构体中的生命周期</h1><pre><code class="rust">struct ImportantExcerpt&lt;&#39;a&gt; &#123;
     part: &amp;&#39;a str,
 &#125;
 
@@ -325,7 +325,7 @@ fn main() &#123;
 <p>从 main 函数实现来看，ImportantExcerpt 的生命周期从第 4 行开始，到 main 函数末尾结束，而该结构体引用的字符串从第一行开始，也是到 main 函数末尾结束，可以得出结论结构体引用的字符串活得比结构体久，这符合了编译器对生命周期的要求，因此编译通过。</p>
 <p>例如如下代码无法通过编译：</p>
 <pre><code class="rust">#[derive(Debug)]
-struct ImportantExcerpt&amp;lt;&#39;a&amp;gt; &#123;
+struct ImportantExcerpt&lt;&#39;a&gt; &#123;
     part: &amp;&#39;a str,
 &#125;
 
@@ -343,7 +343,7 @@ fn main() &#123;
 </code></pre>
 <p>观察代码，可以看出结构体比它引用的字符串活得更久，引用字符串在内部语句块末尾 } 被释放后，println! 依然在外面使用了该结构体，因此会导致无效的引用。</p>
 <h1 id="生命周期消除"><a href="#生命周期消除" class="headerlink" title="生命周期消除"></a>生命周期消除</h1><p>对于编译器来说，每一个引用类型都有一个生命周期，在大部分情况下，编译器会自动识别并标注：</p>
-<pre><code class="rust">fn first_word(s: &amp;str) -&amp;gt; &amp;str &#123;
+<pre><code class="rust">fn first_word(s: &amp;str) -&gt; &amp;str &#123;
     let bytes = s.as_bytes();
 
     for (i, &amp;item) in bytes.iter().enumerate() &#123;
@@ -375,20 +375,20 @@ fn main() &#123;
 </li>
 </ol>
 <h1 id="方法中的生命周期"><a href="#方法中的生命周期" class="headerlink" title="方法中的生命周期"></a>方法中的生命周期</h1><p>方法的生命周期和泛型声明相似：</p>
-<pre><code class="rust">struct ImportantExcerpt&amp;lt;&#39;a&amp;gt; &#123;
+<pre><code class="rust">struct ImportantExcerpt&lt;&#39;a&gt; &#123;
     part: &amp;&#39;a str,
 &#125;
 
-impl&amp;lt;&#39;a&amp;gt; ImportantExcerpt&amp;lt;&#39;a&amp;gt; &#123;
-    fn level(&amp;self) -&amp;gt; i32 &#123;
+impl&lt;&#39;a&gt; ImportantExcerpt&lt;&#39;a&gt; &#123;
+    fn level(&amp;self) -&gt; i32 &#123;
         3
     &#125;
 &#125;
 </code></pre>
 <ul>
 <li>impl 中必须使用结构体的完整名称，包括 &lt;’a&gt;，因为生命周期标注也是结构体类型的一部分！</li>
-<li>方法签名中，往往不需要标注生命周期，得益于生命周期消除的第一和第三规则：<pre><code class="rust">impl&amp;lt;&#39;a&amp;gt; ImportantExcerpt&amp;lt;&#39;a&amp;gt; &#123;
-    fn announce_and_return_part(&amp;self, announcement: &amp;str) -&amp;gt; &amp;str &#123;
+<li>方法签名中，往往不需要标注生命周期，得益于生命周期消除的第一和第三规则：<pre><code class="rust">impl&lt;&#39;a&gt; ImportantExcerpt&lt;&#39;a&gt; &#123;
+    fn announce_and_return_part(&amp;self, announcement: &amp;str) -&gt; &amp;str &#123;
         println!(&quot;Attention please: &#123;&#125;&quot;, announcement);
         self.part
     &#125;
@@ -396,8 +396,8 @@ impl&amp;lt;&#39;a&amp;gt; ImportantExcerpt&amp;lt;&#39;a&amp;gt; &#123;
 </code></pre>
 </li>
 </ul>
-<h2 id="复杂用法"><a href="#复杂用法" class="headerlink" title="复杂用法"></a>复杂用法</h2><pre><code class="rust">impl&amp;lt;&#39;a&amp;gt; ImportantExcerpt&amp;lt;&#39;a&amp;gt; &#123;
-    fn announce_and_return_part&amp;lt;&#39;b&amp;gt;(&amp;&#39;a self, announcement: &amp;&#39;b str) -&amp;gt; &amp;&#39;b str &#123;
+<h2 id="复杂用法"><a href="#复杂用法" class="headerlink" title="复杂用法"></a>复杂用法</h2><pre><code class="rust">impl&lt;&#39;a&gt; ImportantExcerpt&lt;&#39;a&gt; &#123;
+    fn announce_and_return_part&lt;&#39;b&gt;(&amp;&#39;a self, announcement: &amp;&#39;b str) -&gt; &amp;&#39;b str &#123;
         println!(&quot;Attention please: &#123;&#125;&quot;, announcement);
         self.part
     &#125;
@@ -405,8 +405,8 @@ impl&amp;lt;&#39;a&amp;gt; ImportantExcerpt&amp;lt;&#39;a&amp;gt; &#123;
 </code></pre>
 <p>该代码编译器会报错，因为编译器无法知道 ‘a 和 ‘b 的关系，因为<code>self.part</code>的生命周期为<code>&#39;a</code>，而返回值的生命周期应该为<code>&#39;b</code>。</p>
 <p>如果想要让该代码通过编译，则需要让<code>&#39;a</code>的生命周期大于<code>&#39;b</code>的生命周期即可：</p>
-<pre><code class="rust">impl&amp;lt;&#39;a: &#39;b, &#39;b&amp;gt; ImportantExcerpt&amp;lt;&#39;a&amp;gt; &#123;
-    fn announce_and_return_part(&amp;&#39;a self, announcement: &amp;&#39;b str) -&amp;gt; &amp;&#39;b str &#123;
+<pre><code class="rust">impl&lt;&#39;a: &#39;b, &#39;b&gt; ImportantExcerpt&lt;&#39;a&gt; &#123;
+    fn announce_and_return_part(&amp;&#39;a self, announcement: &amp;&#39;b str) -&gt; &amp;&#39;b str &#123;
         println!(&quot;Attention please: &#123;&#125;&quot;, announcement);
         self.part
     &#125;
@@ -414,8 +414,8 @@ impl&amp;lt;&#39;a&amp;gt; ImportantExcerpt&amp;lt;&#39;a&amp;gt; &#123;
 </code></pre>
 <p><code>&#39;a: &#39;b</code>，是生命周期约束语法，跟泛型约束非常相似，用于说明 ‘a 必须比 ‘b 活得久。</p>
 <p>也可以通过<code>where</code>进行声明：</p>
-<pre><code class="rust">impl&amp;lt;&#39;a&amp;gt; ImportantExcerpt&amp;lt;&#39;a&amp;gt; &#123;
-    fn announce_and_return_part&amp;lt;&#39;b&amp;gt;(&amp;&#39;a self, announcement: &amp;&#39;b str) -&amp;gt; &amp;&#39;b str
+<pre><code class="rust">impl&lt;&#39;a&gt; ImportantExcerpt&lt;&#39;a&gt; &#123;
+    fn announce_and_return_part&lt;&#39;b&gt;(&amp;&#39;a self, announcement: &amp;&#39;b str) -&gt; &amp;&#39;b str
     where
         &#39;a: &#39;b,
     &#123;

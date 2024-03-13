@@ -243,12 +243,11 @@ let a = b;
 <blockquote>
 <p>其实这里我当初也没明白，我都用双引号来给字符串了，而且又是UTF-8，长度怎么就不明白呢？</p>
 <p>到后面查了很多资料才明白了，首先是因为<code>str</code>类型的字符串它没有保存长度，而<code>&amp;str</code>保存了长度，具体为什么不保存长度我也不知道，网上也没有搜到相关内容，个人猜测是为了字符串复用？然后我们知道Rust的GC是自动的，变量退出作用域自动被回收，但是回收的前提是你需要知道这个变量在内存的什么位置，以及它的大小，而<code>str</code>类型是没有保存大小的，如果直接放到变量中使用，是无法进行内存回收的，因为不知道其具体大小，例如下面的代码：</p>
-<pre><code class="rust">&amp;gt; fn test(val: str) &#123;
-&amp;gt;   // xxx   
-&amp;gt; &#125;
-&amp;gt; ```
-我们在这里获取了`str`的所有权，在函数结束时就需要将其回收，而在这里无法确定str的大小，因此无法进行回收。
+<pre><code class="rust">fn test(val: str) &#123;
+  // xxx   
+&#125;
 </code></pre>
+<p>我们在这里获取了<code>str</code>的所有权，在函数结束时就需要将其回收，而在这里无法确定str的大小，因此无法进行回收。</p>
 </blockquote>
 <h2 id="1-3-字符串索引"><a href="#1-3-字符串索引" class="headerlink" title="1.3 字符串索引"></a>1.3 字符串索引</h2><p>在rust中，使用索引访问字符串的某个字符会导致报错：</p>
 <pre><code class="rust">let s1 = String::from(&quot;hello&quot;);
@@ -258,7 +257,7 @@ let h = s1[0];
 <pre><code class="log">3 |     let h = s1[0];
   |             ^^^^^ `String` cannot be indexed by `&#123;integer&#125;`
   |
-  = help: the trait `Index&amp;lt;&#123;integer&#125;&amp;gt;` is not implemented for `String`
+  = help: the trait `Index&lt;&#123;integer&#125;&gt;` is not implemented for `String`
 </code></pre>
 <p>在字符串底层的数据存储格式实际上是一个<code>u8</code>数组，而UTF-8中，每种类型的字符所占的字节都不一样，所以无法使用<br>索引来取值。</p>
 <h2 id="1-4-字符串操作"><a href="#1-4-字符串操作" class="headerlink" title="1.4 字符串操作"></a>1.4 字符串操作</h2><h3 id="1-4-1-追加"><a href="#1-4-1-追加" class="headerlink" title="1.4.1 追加"></a>1.4.1 追加</h3><ul>
@@ -270,10 +269,10 @@ let h = s1[0];
     let mut s = String::from(&quot;Hello &quot;);
 
     s.push_str(&quot;rust&quot;);
-    println!(&quot;追加字符串 push_str() -&amp;gt; &#123;&#125;&quot;, s);
+    println!(&quot;追加字符串 push_str() -&gt; &#123;&#125;&quot;, s);
 
     s.push(&#39;!&#39;);
-    println!(&quot;追加字符 push() -&amp;gt; &#123;&#125;&quot;, s);
+    println!(&quot;追加字符 push() -&gt; &#123;&#125;&quot;, s);
 &#125;
 </code></pre>
 <h3 id="1-4-2-插入"><a href="#1-4-2-插入" class="headerlink" title="1.4.2 插入"></a>1.4.2 插入</h3><ul>
@@ -284,9 +283,9 @@ let h = s1[0];
 <pre><code class="rust">fn main() &#123;
     let mut s = String::from(&quot;Hello rust!&quot;);
     s.insert(5, &#39;,&#39;);
-    println!(&quot;插入字符 insert() -&amp;gt; &#123;&#125;&quot;, s);
+    println!(&quot;插入字符 insert() -&gt; &#123;&#125;&quot;, s);
     s.insert_str(6, &quot; I like&quot;);
-    println!(&quot;插入字符串 insert_str() -&amp;gt; &#123;&#125;&quot;, s);
+    println!(&quot;插入字符串 insert_str() -&gt; &#123;&#125;&quot;, s);
 &#125;
 </code></pre>
 <h3 id="1-4-3-替换"><a href="#1-4-3-替换" class="headerlink" title="1.4.3 替换"></a>1.4.3 替换</h3><ul>
@@ -342,8 +341,8 @@ string_truncate.truncate(3);
     let mut result = result + &quot;!&quot;; // `result + &quot;!&quot;` 中的 `result` 是不可变的
     result += &quot;!!!&quot;;
 
-    // 连接字符串 + -&amp;gt; hello rust!!!!
-    println!(&quot;连接字符串 + -&amp;gt; &#123;&#125;&quot;, result);
+    // 连接字符串 + -&gt; hello rust!!!!
+    println!(&quot;连接字符串 + -&gt; &#123;&#125;&quot;, result);
 &#125;
 </code></pre>
 <p>对于以下代码会导致报错：</p>
@@ -358,7 +357,7 @@ string_truncate.truncate(3);
 &#125;
 </code></pre>
 <p>看起来很难理解，其实换一下就知道了，<code>add</code>的类型定义为：</p>
-<pre><code class="rust">fn add(self, s: &amp;str) -&amp;gt; String &#123;&#125;
+<pre><code class="rust">fn add(self, s: &amp;str) -&gt; String &#123;&#125;
 </code></pre>
 <p>我们换成add来看：</p>
 <pre><code class="rust">let a = &quot;ss&quot;.to_string();
@@ -397,8 +396,8 @@ println!(&quot;&#123;&#125;&quot;, a);
     // 使用\忽略换行符
     let long_string = &quot;String literals
                         can span multiple lines.
-                        The linebreak and indentation here -&amp;gt;\
-                        &amp;lt;- can be escaped too!&quot;;
+                        The linebreak and indentation here -&gt;\
+                        &lt;- can be escaped too!&quot;;
     println!(&quot;&#123;&#125;&quot;, long_string);
 &#125;
 </code></pre>
@@ -499,7 +498,7 @@ user1.email = String::from(&quot;anotheremail@example.com&quot;);
 <p>只有将结构体声明为可变的才能修改其字段，rust不允许结构体部分字段可变。</p>
 <hr>
 <p>rust支持跟TypeScript一样的简化操作：</p>
-<pre><code class="rust">fn build_user(email: String, username: String) -&amp;gt; User &#123;
+<pre><code class="rust">fn build_user(email: String, username: String) -&gt; User &#123;
     User &#123;
         // email: email,
         email,
@@ -537,7 +536,7 @@ println!(&quot;&#123;:?&#125;&quot;, user1);
 <pre><code class="rust">#[derive(Debug)]
 struct File &#123;
     name: String,
-    data: Vec&amp;lt;u8&amp;gt;,
+    data: Vec&lt;u8&gt;,
 &#125;
 </code></pre>
 <p>在内存中的结构为：<br><img lazy="https://selfb.asia/blog/v2-8cc4ed8cd06d60f974d06ca2199b8df5_1440w.png" alt="File内存结构"></p>
@@ -666,7 +665,7 @@ fn main() &#123;
 </code></pre>
 <h2 id="4-2-空值"><a href="#4-2-空值" class="headerlink" title="4.2 空值"></a>4.2 空值</h2><p>在Java或其它语言中，<code>null</code>表示一个空值，它可以被赋给任何对象，如果尝试访问一个空对象的任何属性或方法，则会造成空指针异常导致程序崩溃。</p>
 <p><strong>因此rust舍弃了空值，而改为使用<code>Option</code>枚举变量来表述这种结果</strong>：</p>
-<pre><code class="rust">enum Option&amp;lt;T&amp;gt; &#123;
+<pre><code class="rust">enum Option&lt;T&gt; &#123;
     Some(T),
     None,
 &#125;
@@ -676,7 +675,7 @@ fn main() &#123;
 <pre><code class="rust">let some_number = Some(5);
 let some_string = Some(&quot;a string&quot;);
 
-let absent_number: Option&amp;lt;i32&amp;gt; = None;
+let absent_number: Option&lt;i32&gt; = None;
 </code></pre>
 <h1 id="5-数组"><a href="#5-数组" class="headerlink" title="5. 数组"></a>5. 数组</h1><p>在 Rust 中，最常用的数组有两种，第一种是速度很快但是长度固定的 <code>array</code>，第二种是可动态增长的但是有性能损耗的 <code>Vector</code>。</p>
 <h2 id="5-1-创建数组"><a href="#5-1-创建数组" class="headerlink" title="5.1 创建数组"></a>5.1 创建数组</h2><p>创建一个数组:</p>

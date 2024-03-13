@@ -206,10 +206,10 @@
         <p><a target="_blank" rel="noopener" href="https://spring.io/projects/spring-cloud-config">官方文档：Spring Cloud Config</a></p>
 <p>SpringCloud Config为微服务架构中的微服务提供集中化的外部配置支持，配置服务器为<font color=red>各个不同微服务应用</font>的所有环境提供了一个<font color=red>中心化的外部配置</font>。</p>
 <h1 id="1-简单使用"><a href="#1-简单使用" class="headerlink" title="1. 简单使用"></a>1. 简单使用</h1><h2 id="1-1-服务端"><a href="#1-1-服务端" class="headerlink" title="1.1 服务端"></a>1.1 服务端</h2><p>导入配置：</p>
-<pre><code class="yaml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-config-server&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
+<pre><code class="yaml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-config-server&lt;/artifactId&gt;
+&lt;/dependency&gt;
 </code></pre>
 <p>添加配置：</p>
 <pre><code class="yaml">server:
@@ -267,14 +267,14 @@ eureka:
 <li>profiles：环境(dev&#x2F;test&#x2F;prod)</li>
 </ul>
 <h2 id="1-2-客户端"><a href="#1-2-客户端" class="headerlink" title="1.2 客户端"></a>1.2 客户端</h2><p>添加依赖:</p>
-<pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-starter-config&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
-&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.cloud&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-cloud-starter-bootstrap&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
+<pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-config&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-bootstrap&lt;/artifactId&gt;
+&lt;/dependency&gt;
 </code></pre>
 <p>添加配置文件<code>bootstrap.yml</code>。</p>
 <p><code>bootstrap.yml</code>是系统级的，优先级更高，<code>application.yaml</code>是用户级别的资源配置项。</p>
@@ -330,10 +330,10 @@ public class ConfigClientController &#123;
 </code></pre>
 <h3 id="1-2-1-客户端动态刷新问题"><a href="#1-2-1-客户端动态刷新问题" class="headerlink" title="1.2.1 客户端动态刷新问题"></a>1.2.1 客户端动态刷新问题</h3><p>在仓库修改配置后，配置中心能够及时的感应到变化，而在客户端则只能重启才能拿到最新的值。</p>
 <p>导入配置：</p>
-<pre><code class="xml">&amp;lt;dependency&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.boot&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-boot-starter-actuator&amp;lt;/artifactId&amp;gt;
-&amp;lt;/dependency&amp;gt;
+<pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;
 </code></pre>
 <p>添加配置：</p>
 <pre><code class="yaml"># 需要写在application.yaml里
