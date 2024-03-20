@@ -1,0 +1,486 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>返回值和错误处理 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="后面一辈子的博客都在这了！" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 7.1.1"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>返回值和错误处理</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/3/15
+        </span>
+        
+        <span class="category">
+            <a href="/2023/12/04/Rust/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                Rust
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="panic"><a href="#panic" class="headerlink" title="panic"></a>panic</h1><p>当出现 panic! 时，程序提供了两种方式来处理终止流程：<strong>栈展开</strong>和<strong>直接终止</strong>。</p>
+<p>其中，默认的方式就是 <code>栈展开</code>，这意味着 Rust 会回溯栈上数据和函数调用，因此也意味着更多的善后工作，好处是可以给出充分的报错信息和栈调用信息，便于事后的问题复盘。<code>直接终止</code>，顾名思义，不清理数据就直接退出程序，善后工作交与操作系统来负责。</p>
+<p>使用<code>直接终止</code>的方式可以减少发行包的大小。</p>
+<p><strong>当线程 panic 后，只有对应的线程会退出，并不会影响到主线程</strong>。</p>
+<h2 id="触发方式"><a href="#触发方式" class="headerlink" title="触发方式"></a>触发方式</h2><h3 id="被动触发"><a href="#被动触发" class="headerlink" title="被动触发"></a>被动触发</h3><p>先来看一段简单又熟悉的代码:</p>
+<pre><code class="rust">fn main() &#123;
+    let v = vec![1, 2, 3];
+
+    v[99];
+&#125;
+</code></pre>
+<p>该代码发生了数组越界异常，因此在运行后会报错：</p>
+<pre><code class="bash">$ cargo run
+   Compiling panic v0.1.0 (file:///projects/panic)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.27s
+     Running `target/debug/panic`
+thread &#39;main&#39; panicked at &#39;index out of bounds: the len is 3 but the index is 99&#39;, src/main.rs:4:5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</code></pre>
+<h3 id="主动触发"><a href="#主动触发" class="headerlink" title="主动触发"></a>主动触发</h3><p>使用 <code>panic!</code> 宏可以主动触发。当调用执行该宏时，程序会打印出一个错误信息，展开报错点往前的函数调用堆栈，最后退出程序。</p>
+<pre><code class="rust">fn main() &#123;
+    panic!(&quot;crash and burn&quot;);
+&#125;
+</code></pre>
+<p>运行后输出：</p>
+<pre><code class="bash">thread &#39;main&#39; panicked at &#39;crash and burn&#39;, src/main.rs:2:5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</code></pre>
+<h2 id="backtrace-栈展开"><a href="#backtrace-栈展开" class="headerlink" title="backtrace 栈展开"></a>backtrace 栈展开</h2><p>在真实场景中，错误往往涉及到很长的调用链甚至会深入第三方库，如果没有栈展开技术，错误将难以跟踪处理。</p>
+<p>例如下面的代码：</p>
+<pre><code class="rust">fn main() &#123;
+    let v = vec![1, 2, 3];
+
+    hello(&amp;v);
+&#125;
+
+fn hello(val: &amp;Vec&lt;i32&gt;) &#123;
+    val[99];
+&#125;
+</code></pre>
+<p>运行后报错信息：</p>
+<pre><code class="bash">thread &#39;main&#39; panicked at src/main.rs:8:8:
+index out of bounds: the len is 3 but the index is 99
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</code></pre>
+<p>可以发现报错信息中只提供了行数，并没有给出具体的调用栈。</p>
+<p>如果需要知到详细的调用栈，则需要按照提示，添加环境变量使用<code>RUST_BACKTRACE=1 cargo run</code>或者<code>$env:RUST_BACKTRACE=1 ; cargo run</code>来运行程序：</p>
+<pre><code class="bash">thread &#39;main&#39; panicked at src/main.rs:8:8:
+index out of bounds: the len is 3 but the index is 99
+stack backtrace:
+   0: rust_begin_unwind
+             at /rustc/07dca489ac2d933c78d3c5158e3f43beefeb02ce/library/std/src/panicking.rs:645:5
+   1: core::panicking::panic_fmt
+             at /rustc/07dca489ac2d933c78d3c5158e3f43beefeb02ce/library/core/src/panicking.rs:72:14
+   2: core::panicking::panic_bounds_check
+             at /rustc/07dca489ac2d933c78d3c5158e3f43beefeb02ce/library/core/src/panicking.rs:208:5
+   3: &lt;usize as core::slice::index::SliceIndex&lt;[T]&gt;&gt;::index
+             at /rustc/07dca489ac2d933c78d3c5158e3f43beefeb02ce/library/core/src/slice/index.rs:255:10
+   4: core::slice::index::&lt;impl core::ops::index::Index&lt;I&gt; for [T]&gt;::index
+             at /rustc/07dca489ac2d933c78d3c5158e3f43beefeb02ce/library/core/src/slice/index.rs:18:9
+   5: &lt;alloc::vec::Vec&lt;T,A&gt; as core::ops::index::Index&lt;I&gt;&gt;::index
+             at /rustc/07dca489ac2d933c78d3c5158e3f43beefeb02ce/library/alloc/src/vec/mod.rs:2770:9
+   6: playground::hello
+             at ./src/main.rs:8:8
+   7: playground::main
+             at ./src/main.rs:4:5
+   8: core::ops::function::FnOnce::call_once
+             at /rustc/07dca489ac2d933c78d3c5158e3f43beefeb02ce/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+</code></pre>
+<p>上面的代码就是一次栈展开(也称栈回溯)，它包含了函数调用的顺序，要获取到栈回溯信息，还需要开启 <code>debug</code> 标志，该标志在使用 <code>cargo run</code> 或者 <code>cargo build</code> 时自动开启（这两个操作默认是 <code>Debug</code> 运行方式）</p>
+<h1 id="可恢复的错误-Result"><a href="#可恢复的错误-Result" class="headerlink" title="可恢复的错误 Result"></a>可恢复的错误 Result</h1><p>可恢复的错误一般用 <code>Result&lt;T, E&gt;</code>，定义如下：</p>
+<pre><code class="rust">enum Result&lt;T, E&gt; &#123;
+    Ok(T),
+    Err(E),
+&#125;
+</code></pre>
+<p>泛型参数 <code>T</code> 代表成功时存入的正确值的类型，存放方式是 <code>Ok(T)</code>，<code>E</code> 代表错误时存入的错误值，存放方式是 <code>Err(E)</code>。</p>
+<p>例如下面的代码：</p>
+<pre><code class="rust">use std::fs::File;
+
+fn main() &#123;
+    let f: Result&lt;std::fs::File, std::io::Error&gt; = File::open(&quot;hello.txt&quot;);
+
+    let f = match f &#123;
+        Ok(file) =&gt; file,
+        Err(error) =&gt; &#123;
+            panic!(&quot;Problem opening the file: &#123;:?&#125;&quot;, error)
+        &#125;,
+    &#125;;
+&#125;
+</code></pre>
+<p>代码中对打开文件后的 <code>Result&lt;T, E&gt;</code> 类型进行匹配取值，如果是成功，则将 <code>Ok(file)</code> 中存放的的文件句柄 <code>file</code> 赋值给 <code>f</code>，如果失败，则将 <code>Err(error)</code> 中存放的错误信息 <code>error</code> 使用 <code>panic</code> 抛出来，进而结束程序。</p>
+<h2 id="对错误的返回进行处理"><a href="#对错误的返回进行处理" class="headerlink" title="对错误的返回进行处理"></a>对错误的返回进行处理</h2><p>我们还可以对预期中的错误进行处理以保证程序正常运行：</p>
+<pre><code class="rust">use std::fs::File;
+use std::io::ErrorKind;
+
+fn main() &#123;
+    let f = File::open(&quot;hello.txt&quot;);
+
+    let f = match f &#123;
+        Ok(file) =&gt; file,
+        Err(error) =&gt; match error.kind() &#123;
+            ErrorKind::NotFound =&gt; match File::create(&quot;hello.txt&quot;) &#123;
+                Ok(fc) =&gt; fc,
+                Err(e) =&gt; panic!(&quot;Problem creating the file: &#123;:?&#125;&quot;, e),
+            &#125;,
+            other_error =&gt; panic!(&quot;Problem opening the file: &#123;:?&#125;&quot;, other_error),
+        &#125;,
+    &#125;;
+&#125;
+</code></pre>
+<p>上面代码在匹配出 <code>error</code> 后，又对 <code>error</code> 进行了详细的匹配解析，最终结果：</p>
+<ul>
+<li>如果是文件不存在错误 <code>ErrorKind::NotFound</code>，就创建文件，这里创建文件 <code>File::create</code> 也是返回 <code>Result</code>，因此继续用 <code>match</code> 对其结果进行处理：创建成功，将新的文件句柄赋值给 <code>f</code>，如果失败，则 <code>panic</code></li>
+<li>剩下的错误，一律 <code>panic</code></li>
+</ul>
+<h2 id="unwrap-和-expect"><a href="#unwrap-和-expect" class="headerlink" title="unwrap 和 expect"></a>unwrap 和 expect</h2><p>某些情况下，我们确信某些操作并不会发生<code>Error</code>，而且也并不想去写 <code>match</code> 来处理 <code>Error</code>，那么就可以直接使用 <code>unwrap</code> 来直接将 <code>Ok(T)</code> 中的值取出来：</p>
+<pre><code class="rust">use std::fs::File;
+
+fn main() &#123;
+    let f = File::open(&quot;hello.txt&quot;).unwrap();
+&#125;
+</code></pre>
+<p>如果真的发生了 <code>Error</code>，那么程序将会直接 <code>panic</code>。</p>
+<p><code>expect</code> 和 <code>unwrap</code> 类似，但是 <code>expect</code> 可以让我们带上自定义的错误提示信息：</p>
+<pre><code class="rust">use std::fs::File;
+
+fn main() &#123;
+    let f = File::open(&quot;hello.txt&quot;).expect(&quot;Failed to open hello.txt&quot;);
+&#125;
+</code></pre>
+<h2 id="错误传播"><a href="#错误传播" class="headerlink" title="错误传播"></a>错误传播</h2><p>如果当前代码<em>不知道怎么处理</em>或者<em>不需要处理</em>某次调用发生的错误，那么它可以考虑直接将错误传递给上层的调用函数。</p>
+<p>例如以下函数从文件中读取用户名，然后将结果进行返回：</p>
+<pre><code class="rust">use std::fs::File;
+use std::io::&#123;self, Read&#125;;
+
+fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; &#123;
+    // 打开文件，f是`Result&lt;文件句柄,io::Error&gt;`
+    let f = File::open(&quot;hello.txt&quot;);
+
+    let mut f = match f &#123;
+        // 打开文件成功，将file句柄赋值给f
+        Ok(file) =&gt; file,
+        // 打开文件失败，将错误返回(向上传播)
+        Err(e) =&gt; return Err(e),
+    &#125;;
+    // 创建动态字符串s
+    let mut s = String::new();
+    // 从f文件句柄读取数据并写入s中
+    match f.read_to_string(&amp;mut s) &#123;
+        // 读取成功，返回Ok封装的字符串
+        Ok(_) =&gt; Ok(s),
+        // 将错误向上传播
+        Err(e) =&gt; Err(e),
+    &#125;
+&#125;
+</code></pre>
+<p>有几点需要注意：</p>
+<ul>
+<li>该函数返回一个 <code>Result&lt;String, io::Error&gt;</code> 类型，当读取用户名成功时，返回 <code>Ok(String)</code>，失败时，返回 <code>Err(io:Error)</code></li>
+<li><code>File::open</code> 和 <code>f.read_to_string</code> 返回的 <code>Result&lt;T, E&gt;</code> 中的 <code>E</code> 就是 <code>io::Error</code></li>
+</ul>
+<p>由此可见，该函数将 <code>io::Error</code> 的错误往上进行传播，该函数的调用者最终会对 <code>Result&lt;String,io::Error&gt;</code> 进行再处理，至于怎么处理就是调用者的事，如果是错误，它可以选择继续向上传播错误，也可以直接 <code>panic</code>。</p>
+<h2 id="宏"><a href="#宏" class="headerlink" title="? 宏"></a>? 宏</h2><pre><code class="rust">use std::fs::File;
+use std::io;
+use std::io::Read;
+
+fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; &#123;
+    let mut f = File::open(&quot;hello.txt&quot;)?;
+    let mut s = String::new();
+    f.read_to_string(&amp;mut s)?;
+    Ok(s)
+&#125;
+</code></pre>
+<p><code>?</code>与<code>unwarp</code>类似，但是在发生错误时并不会 <code>panic</code>，而是将错误向上传递。</p>
+<h3 id="自动类型转换"><a href="#自动类型转换" class="headerlink" title="自动类型转换"></a>自动类型转换</h3><p><code>?</code> 还能够做到自动类型转换，其原理就是实现了 <code>From</code> 特征。</p>
+<pre><code class="rust">fn open_file() -&gt; Result&lt;File, Box&lt;dyn std::error::Error&gt;&gt; &#123;
+    let mut f = File::open(&quot;hello.txt&quot;)?;
+    Ok(f)
+&#125;
+</code></pre>
+<p>可以发现，上面的<code>?</code>宏直接帮我们把 <code>std::io::Error</code> 转换成 <code>Box&lt;dyn std::error::Error&gt;</code> 传递出去了。</p>
+<h3 id="链式调用"><a href="#链式调用" class="headerlink" title="链式调用"></a>链式调用</h3><p><code>?</code> 还能实现链式调用：</p>
+<pre><code class="rust">use std::fs::File;
+use std::io;
+use std::io::Read;
+
+fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; &#123;
+    let mut s = String::new();
+
+    File::open(&quot;hello.txt&quot;)?.read_to_string(&amp;mut s)?;
+
+    Ok(s)
+&#125;
+</code></pre>
+<h3 id="用于-Option-的返回"><a href="#用于-Option-的返回" class="headerlink" title="用于 Option 的返回"></a>用于 Option 的返回</h3><pre><code class="rust">fn first(arr: &amp;[i32]) -&gt; Option&lt;&amp;i32&gt; &#123;
+   let v = arr.get(0)?;
+   Some(v)
+&#125;
+</code></pre>
+<p>在上面的代码中，如果 <code>arr.get(0)</code> 不为 <code>None</code>，则会把得到的值赋给 <code>v</code>，如果为 <code>None</code>，则函数直接返回一个<code>None</code>，不走后面的逻辑。</p>
+<p>如果在返回值中可能存在错误，则可以省略<code>?</code>：</p>
+<pre><code class="rust">fn add_two(n_str: &amp;str) -&gt; Result&lt;i32, ParseIntError&gt; &#123;
+    //  n_str.parse::&lt;i32&gt;()?.map(|i| i + 2)
+    n_str.parse::&lt;i32&gt;().map(|i| i + 2)
+&#125;
+</code></pre>
+<h2 id="and-then-和-map"><a href="#and-then-和-map" class="headerlink" title="and_then 和 map"></a>and_then 和 map</h2><p><code>Result</code>有两个常用方法：<a target="_blank" rel="noopener" href="https://doc.rust-lang.org/stable/std/result/enum.Result.html#method.and_then">and_then</a>和<a target="_blank" rel="noopener" href="https://doc.rust-lang.org/stable/std/result/enum.Result.html#method.map">map</a>。</p>
+<p>例如下面的函数是将传入的字符串解析为数字后，将值加2返回：</p>
+<pre><code class="rust">fn add_two(n_str: &amp;str) -&gt; Result&lt;i32, ParseIntError&gt; &#123;
+   n_str.parse::&lt;i32&gt;().map(|num| num +2)
+&#125;
+</code></pre>
+<p>可以发现<code>map</code>能直接获取到 Ok 中的值，如果失败，则会直接返回对应的 <code>Error</code>。</p>
+<p><code>and_then</code>与<code>map</code>相似，但一般用于嵌套调用：</p>
+<pre><code class="rust">fn multiply1(n1_str: &amp;str, n2_str: &amp;str) -&gt; Result&lt;i32, ParseIntError&gt; &#123;
+    n1_str.parse::&lt;i32&gt;().and_then(| n1 | &#123;
+        n2_str.parse::&lt;i32&gt;().map(| n2 | n2 * n1)
+    &#125;)
+&#125;
+</code></pre>
+<p>上面的函数的作用是将两个数字字符串相乘。</p>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;<a target="_blank" rel="noopener" href="https://github.com/IceOfSummer">IceOfSummer</a>
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/IceOfSummer/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>
