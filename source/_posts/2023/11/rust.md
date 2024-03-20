@@ -15,3 +15,4 @@ categories: Rust
 - [泛型和特征](/rust/generics_and_trait)
 - [集合](/rust/collections)
 - [生命周期](/rust/lifecycle)
+- [错误处理](/rust/exception-handle)
