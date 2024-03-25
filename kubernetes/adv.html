@@ -261,15 +261,50 @@ FIELDS:
 <li>有序的、优雅的部署和缩放。【按顺序地增加副本、减少副本，并在减少副本时执行清理】</li>
 <li>有序的、自动的滚动更新。【按顺序自动地执行滚动更新】</li>
 </ul>
-<h2 id="创建-StatefulSet"><a href="#创建-StatefulSet" class="headerlink" title="创建 StatefulSet"></a>创建 StatefulSet</h2><h2 id="使用下面的-yaml-创建-StatefulSet：-yamlapiVersion-apps-v1kind-StatefulSetmetadata-name-stateful-nginx-namespace-defaultspec-selector-matchLabels-app-ss-nginx-指定加入到哪一个网络中-serviceName-“nginx”-replicas-3-template-metadata-labels-app-ss-nginx-spec-containers-name-nginx-image-nginx-ports-containerPort-80-name-web"><a href="#使用下面的-yaml-创建-StatefulSet：-yamlapiVersion-apps-v1kind-StatefulSetmetadata-name-stateful-nginx-namespace-defaultspec-selector-matchLabels-app-ss-nginx-指定加入到哪一个网络中-serviceName-“nginx”-replicas-3-template-metadata-labels-app-ss-nginx-spec-containers-name-nginx-image-nginx-ports-containerPort-80-name-web" class="headerlink" title="使用下面的 yaml 创建 StatefulSet：&#96;&#96;&#96;yamlapiVersion: apps&#x2F;v1kind: StatefulSetmetadata:  name: stateful-nginx  namespace: defaultspec:  selector:    matchLabels:      app: ss-nginx  # 指定加入到哪一个网络中  serviceName: “nginx”  replicas: 3  template:    metadata:      labels:        app: ss-nginx    spec:      containers:      - name: nginx        image: nginx        ports:        - containerPort: 80          name: web "></a>使用下面的 yaml 创建 StatefulSet：<br>&#96;&#96;&#96;yaml<br>apiVersion: apps&#x2F;v1<br>kind: StatefulSet<br>metadata:<br>  name: stateful-nginx<br>  namespace: default<br>spec:<br>  selector:<br>    matchLabels:<br>      app: ss-nginx<br>  # 指定加入到哪一个网络中<br>  serviceName: “nginx”<br>  replicas: 3<br>  template:<br>    metadata:<br>      labels:<br>        app: ss-nginx<br>    spec:<br>      containers:<br>      - name: nginx<br>        image: nginx<br>        ports:<br>        - containerPort: 80<br>          name: web </h2><p>apiVersion: v1<br>kind: Service<br>metadata:<br>  name: nginx<br>  namespace: default<br>spec:<br>  selector:<br>    app: ss-nginx<br>  type: ClusterIP</p>
-<h1 id="指定为无头服务"><a href="#指定为无头服务" class="headerlink" title="指定为无头服务"></a>指定为无头服务</h1><p>  clusterIP: None<br>  ports:</p>
-<ul>
-<li>name: nginx<br>protocol: TCP<br>port: 80<br>targetPort: 80</li>
-</ul>
-<pre><code>
-启动完成后查看 Pod：
-```bash
-[root@k8s-main statefulSet]# kubectl get pods -owide
+<h2 id="创建-StatefulSet"><a href="#创建-StatefulSet" class="headerlink" title="创建 StatefulSet"></a>创建 StatefulSet</h2><p>使用下面的 yaml 创建 StatefulSet：</p>
+<pre><code class="yaml">apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: stateful-nginx
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: ss-nginx 
+  # 指定加入到哪一个网络中
+  serviceName: &quot;nginx&quot;
+  replicas: 3 
+  template:
+    metadata:
+      labels:
+        app: ss-nginx 
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+          name: web 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: default
+spec:
+  selector:
+    app: ss-nginx
+  type: ClusterIP
+  # 指定为无头服务
+  clusterIP: None
+  ports:
+  - name: nginx
+    protocol: TCP
+    port: 80
+    targetPort: 80
+</code></pre>
+<p>启动完成后查看 Pod：</p>
+<pre><code class="bash">[root@k8s-main statefulSet]# kubectl get pods -owide
 NAME                                      READY   STATUS    RESTARTS        AGE     IP               NODE        NOMINATED NODE   READINESS GATES
 stateful-nginx-0                          1/1     Running   0               6m13s   172.16.36.122    k8s-node1   &lt;none&gt;           &lt;none&gt;
 stateful-nginx-1                          1/1     Running   0               5m53s   172.16.169.143   k8s-node2   &lt;none&gt;           &lt;none&gt;
