@@ -86,6 +86,7 @@ FIELDS:
 ## 创建 StatefulSet
 
 使用下面的 yaml 创建 StatefulSet：
+
 ```yaml
 apiVersion: apps/v1
 kind: StatefulSet
