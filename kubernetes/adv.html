@@ -1,0 +1,419 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>高级 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="后面一辈子的博客都在这了！" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 7.1.1"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>高级</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/3/18
+        </span>
+        
+        <span class="category">
+            <a href="/2024/02/08/k8s">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                k8s
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="DaemonSet"><a href="#DaemonSet" class="headerlink" title="DaemonSet"></a>DaemonSet</h1><p>DaemonSet 控制器确保所有 (或一部分，默认主节点除外) 的节点都运行了一个指定的 Pod 副本。</p>
+<ul>
+<li>每当向集群中添加一个节点时，指定的 Pod 副本也将添加到该节点上</li>
+<li>当节点从集群中移除时，Pod也就被垃圾回收了</li>
+<li>删除一个 DaemonSet 可以清理所有由其创建的 Pod</li>
+</ul>
+<p>典型使用场景有：</p>
+<ul>
+<li>在每个节点上运行集群的存储守护进程，例如glusterd、ceph</li>
+<li>在每个节点上运行日志收集守护进程，例如fluentd、logstash</li>
+<li>在每个节点上运行监控守护进程，例如PrometheusNodeExporter、SysdigAgent、collectd、DynatraceOneAgent、APPDynamics Agent、Datadog agent、New Relic agent、Ganglia gmond、Instana Agent 等</li>
+</ul>
+<blockquote>
+<p>DaemonSet 简称 ds</p>
+</blockquote>
+<pre><code class="bash">[root@k8s-main dashboard]# kubectl explain ds.spec
+GROUP:      apps
+KIND:       DaemonSet
+VERSION:    v1
+
+FIELD: spec &lt;DaemonSetSpec&gt;
+
+DESCRIPTION:
+    The desired behavior of this daemon set. More info:
+    https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+    DaemonSetSpec is the specification of a daemon set.
+    
+FIELDS:
+  minReadySeconds       &lt;integer&gt;
+    The minimum number of seconds for which a newly created DaemonSet pod should
+    be ready without any of its container crashing, for it to be considered
+    available. Defaults to 0 (pod will be considered available as soon as it is
+    ready).
+
+  revisionHistoryLimit  &lt;integer&gt;
+    The number of old history to retain to allow rollback. This is a pointer to
+    distinguish between explicit zero and not specified. Defaults to 10.
+
+  selector      &lt;LabelSelector&gt; -required-
+    A label query over pods that are managed by the daemon set. Must match in
+    order to be controlled. It must match the pod template&#39;s labels. More info:
+    https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors
+
+  template      &lt;PodTemplateSpec&gt; -required-
+    An object that describes the pod that will be created. The DaemonSet will
+    create exactly one copy of this pod on every node that matches the
+    template&#39;s node selector (or on every node if no node selector is
+    specified). The only allowed template.spec.restartPolicy value is &quot;Always&quot;.
+    More info:
+    https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller#pod-template
+
+  updateStrategy        &lt;DaemonSetUpdateStrategy&gt;
+    An update strategy to replace existing DaemonSet pods with new pods.
+</code></pre>
+<p><code>spec</code>下所有的属性都和 Deployment 可用的属性一样，但是不能指定副本数量，因为默认会为每个 Node 部署一个。</p>
+<h1 id="StatefulSet"><a href="#StatefulSet" class="headerlink" title="StatefulSet"></a>StatefulSet</h1><p>有状态副本集。</p>
+<blockquote>
+<p>无状态应用：网络可能会变(ip)，存储可能会变，顺序可能会变(例如三个Mysql，一个主节点，要求主节点必须先启动，但无状态应会随机启动)</p>
+<p>有状态应用：网络不变，存储不变，顺序不变</p>
+</blockquote>
+<p>有如下需求的应用程序，StatefulSet 非常适用：</p>
+<ul>
+<li>稳定、唯一的网络标识（dnsname)<ul>
+<li>StatefulSet 通过与其相关的无头服务为每个pod提供DNS解析条目。假如无头服务的DNS条目为：<code>$(service name).$(namespace).svc.cluster.local</code>,那么pod的解析条目就是<code>$(pod name).$(service name).$(namespace).svc.cluster.local</code>，每个pod name也是唯一的。</li>
+</ul>
+</li>
+<li>稳定的、持久的存储：【每个Pod始终对应各自的存储路径（PersistantVolumeClaimTemplate）】</li>
+<li>有序的、优雅的部署和缩放。【按顺序地增加副本、减少副本，并在减少副本时执行清理】</li>
+<li>有序的、自动的滚动更新。【按顺序自动地执行滚动更新】</li>
+</ul>
+<h2 id="创建-StatefulSet"><a href="#创建-StatefulSet" class="headerlink" title="创建 StatefulSet"></a>创建 StatefulSet</h2><h2 id="使用下面的-yaml-创建-StatefulSet：-yamlapiVersion-apps-v1kind-StatefulSetmetadata-name-stateful-nginx-namespace-defaultspec-selector-matchLabels-app-ss-nginx-指定加入到哪一个网络中-serviceName-“nginx”-replicas-3-template-metadata-labels-app-ss-nginx-spec-containers-name-nginx-image-nginx-ports-containerPort-80-name-web"><a href="#使用下面的-yaml-创建-StatefulSet：-yamlapiVersion-apps-v1kind-StatefulSetmetadata-name-stateful-nginx-namespace-defaultspec-selector-matchLabels-app-ss-nginx-指定加入到哪一个网络中-serviceName-“nginx”-replicas-3-template-metadata-labels-app-ss-nginx-spec-containers-name-nginx-image-nginx-ports-containerPort-80-name-web" class="headerlink" title="使用下面的 yaml 创建 StatefulSet：&#96;&#96;&#96;yamlapiVersion: apps&#x2F;v1kind: StatefulSetmetadata:  name: stateful-nginx  namespace: defaultspec:  selector:    matchLabels:      app: ss-nginx  # 指定加入到哪一个网络中  serviceName: “nginx”  replicas: 3  template:    metadata:      labels:        app: ss-nginx    spec:      containers:      - name: nginx        image: nginx        ports:        - containerPort: 80          name: web "></a>使用下面的 yaml 创建 StatefulSet：<br>&#96;&#96;&#96;yaml<br>apiVersion: apps&#x2F;v1<br>kind: StatefulSet<br>metadata:<br>  name: stateful-nginx<br>  namespace: default<br>spec:<br>  selector:<br>    matchLabels:<br>      app: ss-nginx<br>  # 指定加入到哪一个网络中<br>  serviceName: “nginx”<br>  replicas: 3<br>  template:<br>    metadata:<br>      labels:<br>        app: ss-nginx<br>    spec:<br>      containers:<br>      - name: nginx<br>        image: nginx<br>        ports:<br>        - containerPort: 80<br>          name: web </h2><p>apiVersion: v1<br>kind: Service<br>metadata:<br>  name: nginx<br>  namespace: default<br>spec:<br>  selector:<br>    app: ss-nginx<br>  type: ClusterIP</p>
+<h1 id="指定为无头服务"><a href="#指定为无头服务" class="headerlink" title="指定为无头服务"></a>指定为无头服务</h1><p>  clusterIP: None<br>  ports:</p>
+<ul>
+<li>name: nginx<br>protocol: TCP<br>port: 80<br>targetPort: 80</li>
+</ul>
+<pre><code>
+启动完成后查看 Pod：
+```bash
+[root@k8s-main statefulSet]# kubectl get pods -owide
+NAME                                      READY   STATUS    RESTARTS        AGE     IP               NODE        NOMINATED NODE   READINESS GATES
+stateful-nginx-0                          1/1     Running   0               6m13s   172.16.36.122    k8s-node1   &lt;none&gt;           &lt;none&gt;
+stateful-nginx-1                          1/1     Running   0               5m53s   172.16.169.143   k8s-node2   &lt;none&gt;           &lt;none&gt;
+stateful-nginx-2                          1/1     Running   0               5m35s   172.16.36.104    k8s-node1   &lt;none&gt;           &lt;none&gt;
+</code></pre>
+<p>可以发现如下几点：</p>
+<ul>
+<li>StatefulSet 创建的 Pod，名称都是有规律的从 0 开始递增，并且在创建时，也会先从 0 开始创建。</li>
+<li>StatefulSet 创建的 Pod 虽然有自己的 Ip，<strong>但并不是固定的</strong>，删除 Pod 后会发现 Ip会变化。</li>
+</ul>
+<p>之后使用 <code>nslookup</code> 解析域名：</p>
+<pre><code class="bash">[root@k8s-main yum.repos.d]# nslookup nginx.default.svc.cluster.local 10.96.0.10
+Server:         10.96.0.10
+Address:        10.96.0.10#53
+
+Name:   nginx.default.svc.cluster.local
+Address: 172.16.36.122
+Name:   nginx.default.svc.cluster.local
+Address: 172.16.169.143
+Name:   nginx.default.svc.cluster.local
+Address: 172.16.36.104
+</code></pre>
+<p>可以发现，当我们不指定 Pod 名称时，此时会通过 DNS 做负载均衡，客户端会随机访问一个 Pod，并且把解析结果缓存。</p>
+<p>当指定 Pod 后：</p>
+<pre><code class="bash">[root@k8s-main yum.repos.d]# nslookup stateful-nginx-1.nginx.default.svc.cluster.local 10.96.0.10
+Server:         10.96.0.10
+Address:        10.96.0.10#53
+
+Name:   stateful-nginx-1.nginx.default.svc.cluster.local
+Address: 172.16.169.143
+</code></pre>
+<h2 id="Headless-Service"><a href="#Headless-Service" class="headerlink" title="Headless Service"></a>Headless Service</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/services-networking/service/#headless-services">无头服务</a></p>
+<p>当服务不需要负载均衡，也不需要单独的 Service IP时，可以通过显式设置集群 IP (spec.clusterIP) 的值为 “None” 来创建无头服务(Headless Service)。</p>
+<p>无头服务的作用是为 Pod 提供一个固定的地址，应用场景：</p>
+<ul>
+<li>希望直接在应用侧做负载均衡，而不是通过 kube-proxy 实现负载均衡。</li>
+<li>数据库主从部署，要求主节点 Ip 必须固定。</li>
+</ul>
+<p>指定无头服务后，可以通过全地址访问：<code>$(podName).$(serviceName).$(namespace).svc.cluster.local</code></p>
+<h1 id="Job"><a href="#Job" class="headerlink" title="Job"></a>Job</h1><p>Kubernetes 中的 Job 对象将创建一个或多个 Pod，并确保指定数量的 Pod 可以成功执行到进程正常结束：</p>
+<ul>
+<li>当 Job 创建的 Pod 执行成功并正常结束时，Job 将记录成功结束的 Pod 数量。</li>
+<li>当成功结束的 Pod 达到指定的数量时，Job 将完成执行。</li>
+<li>删除 Job 对象时，将清理掉由 Job 创建的 Pod。</li>
+</ul>
+<p>创建一个Job：</p>
+<pre><code class="yaml">apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-01
+  namespace: default
+  labels:
+    app: job-01
+spec:
+  template: # Pod 模板
+    metadata: 
+      name: pod-job-test
+      labels:
+        app: job-01
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: job-01
+        image: busybox
+        command: [&#39;sh&#39;, &#39;-c&#39;, &#39;&quot;sleep 5s;echo \&quot;done\&quot;&quot;&#39;]
+  # 最大失败次数
+  backoffLimit: 4
+  # Pod 最大执行时间
+  activeDeadlineSeconds: 100
+  # Pod 运行成功几次才算成功
+  completions: 4
+  # Pod 并行数
+  parallelism: 2
+  ttlSecondsAfterFinished:
+    # 在job执行完成后多久，自动删除Pod, 单位为妙，设置为0时将会理解删除
+    ttlSecondsAfterFinished: 0
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;<a target="_blank" rel="noopener" href="https://github.com/IceOfSummer">IceOfSummer</a>
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/IceOfSummer/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>

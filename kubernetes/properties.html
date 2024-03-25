@@ -1,0 +1,406 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>常用yaml属性 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="后面一辈子的博客都在这了！" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 7.1.1"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>常用yaml属性</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/3/14
+        </span>
+        
+        <span class="category">
+            <a href="/2024/02/08/k8s">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                k8s
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <p>本篇只讲<code>spec</code>下的属性用法。</p>
+<h1 id="Deployment"><a href="#Deployment" class="headerlink" title="Deployment"></a>Deployment</h1><h2 id="revisionHistoryLimit"><a href="#revisionHistoryLimit" class="headerlink" title="revisionHistoryLimit"></a>revisionHistoryLimit</h2><p>旧的ReplicaSet的最大保存数量，默认是 10</p>
+<h2 id="progressDeadlineSeconds"><a href="#progressDeadlineSeconds" class="headerlink" title="progressDeadlineSeconds"></a>progressDeadlineSeconds</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/workloads/controllers/deployment/#progress-deadline-seconds">进度期限秒数</a></p>
+<p>部署的最终期限，如果一次部署超过该时间，则会直接失败，同时会在失败原因中添加 ProgressDeadlineExceeded，如果部署由于某些原因导致容器崩溃，deployment也会在该时间内不断重试，直到时间结束，时间结束后，部署就会停止，默认是 600 秒。</p>
+<h2 id="paused"><a href="#paused" class="headerlink" title="paused"></a>paused</h2><p>暂停部署，被暂停的部署不会主动产生RS。</p>
+<p>可以使用命令暂停一个部署：</p>
+<pre><code class="bash">kubectl rollout pause &lt;deployment&gt;
+</code></pre>
+<h2 id="minReadySeconds"><a href="#minReadySeconds" class="headerlink" title="minReadySeconds"></a>minReadySeconds</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/workloads/controllers/deployment/#min-ready-seconds">最短就绪时间</a></p>
+<p>最短就绪时间(单位：秒)，Pod在创建后并经过该秒数后才会被认定为<strong>可用</strong>(是可用，而不是就绪，就绪靠容器探针来决定)，默认是0。</p>
+<h2 id="strategy"><a href="#strategy" class="headerlink" title="strategy"></a>strategy</h2><p>指定新Pod如何来替换旧Pod的策略。</p>
+<pre><code class="yaml">spec:
+    strategy:
+        // 使用重新创建(一口气全部删了重创) / 滚动更新(每次只删一部分) 
+        type: Recreate / RollingUpdate
+        // 如果使用滚动更新，则可以使用该参数进行更详细的配置
+        rollingUpdate: 
+            // 一次最多新创几个Pod，可以写具体的数量，也可以写百分比，例如 20%
+            maxSurge: &lt;IntOrString&gt;
+
+            // 最大不可用数量，同样也可以写具体的数量或者百分比
+            // 例如有 100 个副本，最大不可用为 30%，
+            // 即算上新创的和旧的 Pod 一起，最少得有 70 个副本在集群中
+            // 即一口气最多杀 30 个 Pod
+            maxUnavailable: &lt;IntOrString&gt;
+</code></pre>
+<h1 id="Pod"><a href="#Pod" class="headerlink" title="Pod"></a>Pod</h1><h2 id="containers"><a href="#containers" class="headerlink" title="containers"></a>containers</h2><h3 id="lifecycle"><a href="#lifecycle" class="headerlink" title="lifecycle"></a>lifecycle</h3><p>容器的声明周期钩子，可以在容器启动后(<code>postStart</code>)和容器停止前(<code>preStop</code>)来进行相关操作。</p>
+<p>两种所能用的参数相同，都是<code>LifecycleHandler</code>。</p>
+<pre><code class="yaml">spec:
+    containers:
+        - lifecycle:
+            postStart:
+                // 执行一连串指令，指令只会被简单执行，无法使用管道符等特殊符号
+                // 如果有特殊需求，需要自己调用shell脚本来使用
+                exec: 
+                    command: &lt;string[]&gt;
+
+                // 发送一个 GET 请求
+                httpGet:
+                    // 要连接的host，默认是当前 Pod 的 ip，一般不用填
+                    host: &lt;string&gt;
+                    // 请求头
+                    httpHeaders: &lt;[]HTTPHeader&gt;
+                        - name: Accept
+                        - value: application/json
+                    // 请求路径
+                    path: &lt;string&gt;
+                    // 端口号，也可以直接使用服务的名称
+                    port: &lt;IntOrString&gt;
+                    // 协议
+                    scheme: &lt;&#39;HTTP&#39; | &#39;HTTPS&#39;&gt;
+
+                // 新版本已经标记为废弃，未来将会移除
+                tcpSocket: &lt;TCPSocketAction&gt;
+                
+</code></pre>
+<h3 id="probe"><a href="#probe" class="headerlink" title="probe"></a>probe</h3><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/workloads/pods/pod-lifecycle/#container-probes">容器探针</a></p>
+<p>探针有三种：</p>
+<ul>
+<li><p><code>startupProbe</code>：启动探针</p>
+<p>  指示容器中的应用是否已经启动。如果提供了启动探针，则所有其他探针都会被 禁用，直到此探针成功为止。如果启动探测失败，kubelet 将杀死容器， 而容器依其重启策略进行重启。 如果容器没有提供启动探测，则默认状态为 Success。</p>
+</li>
+<li><p><code>readinessProbe</code>：就绪探针</p>
+<p>  指示容器是否准备好为请求提供服务。如果就绪态探测失败， 端点控制器将从与 Pod 匹配的所有服务的端点列表中删除该 Pod 的 IP 地址。 初始延迟之前的就绪态的状态值默认为 Failure。 如果容器不提供就绪态探针，则默认状态为 Success。</p>
+</li>
+<li><p><code>livenessProbe</code>：存活探针</p>
+<p>  指示容器是否正在运行。如果存活态探测失败，则 kubelet 会杀死容器， 并且容器将根据其重启策略决定未来。如果容器不提供存活探针， 则默认状态为 Success。</p>
+</li>
+</ul>
+<p>三者能使用的参数相同，都是<code>Probe</code>。</p>
+<pre><code class="yaml">spec:
+    containers:
+        - startupProbe:
+            // 执行一连串指令，如果指令返回码为 0，则代表成功
+            exec:
+                command: &lt;string[]&gt;
+
+            // 当失败多少次后，标记当前探针探测失败，默认是 3
+            failureThreshold: &lt;integer&gt;
+
+            // 调用一个 grpc 接口
+            grpc: &lt;GRPCAction&gt;
+                // 端口
+                port: &lt;integer&gt;
+                // 服务名称 
+                // https://github.com/grpc/grpc/blob/master/doc/health-checking.md
+                service: &lt;string&gt;
+
+            httpGet: 
+                // 要连接的host，默认是当前 Pod 的 ip
+                host: &lt;string&gt;
+                // 请求头
+                httpHeaders: &lt;[]HTTPHeader&gt;
+                    - name: Accept
+                    - value: application/json
+                // 请求路径
+                path: &lt;string&gt;
+                // 端口号，也可以直接使用服务的名称
+                port: &lt;IntOrString&gt;
+                // 协议
+                scheme: &lt;&#39;HTTP&#39; | &#39;HTTPS&#39;&gt;
+
+            // 容器启动后多少秒才开始检测
+            initialDelaySeconds: &lt;integer&gt;
+
+            // 每多少秒探测一次，默认是 1
+            periodSeconds: &lt;integer&gt;
+
+            // 探测到几次成功后才算真正的成功，默认是 1
+            successThreshold: &lt;integer&gt;
+
+            tcpSocket:
+                // 端口，可以指定为服务名称
+                port: &lt;IntOrString&gt;
+                // 要访问的host，默认是当前pod ip
+                host: &lt;string&gt;
+
+            // Pod最长停止时间，如果超过该时间，Pod将会被强制杀死，默认是 1
+            terminationGracePeriodSeconds: &lt;integer&gt;
+
+            // 探针每次执行的超时时间，默认是 1
+            timeoutSeconds: &lt;integer&gt;
+</code></pre>
+<h1 id="StatefulSet"><a href="#StatefulSet" class="headerlink" title="StatefulSet"></a>StatefulSet</h1><p>Deployment 可用的，StatefulSet 也都可以使用。</p>
+<h2 id="podManagementPolicy"><a href="#podManagementPolicy" class="headerlink" title="podManagementPolicy"></a>podManagementPolicy</h2><p>Pod 管理策略，用于控制 Pod 创建以及扩缩容策略。</p>
+<p>可以使用下面两个值：</p>
+<ul>
+<li><code>OrderedReady</code>：默认，从pod-0开始创建，然后pod-1、pod-2、… (删除时则是倒着删除)。</li>
+<li><code>Parallel</code>：并行创建，所有 Pod 一口气创建。</li>
+</ul>
+<h2 id="updateStrategy"><a href="#updateStrategy" class="headerlink" title="updateStrategy"></a>updateStrategy</h2><p>更新策略。</p>
+<pre><code class="yaml">spec:
+    updateStrategy:
+        # 可选值: `RollingUpdate` 滚动更新(默认)或者 `OnDelete`
+        type: &lt;string&gt;
+
+        # 如果使用滚动更新，则可以使用下面的配置
+        rollingUpdate:
+            # 分区升级，例如该值为 2，则更新时只会更新索引值大于等于 2 的 pod
+            partition: &lt;integer&gt;
+            # 最大不可用
+            maxUnavailable: &lt;IntOrString&gt;
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;<a target="_blank" rel="noopener" href="https://github.com/IceOfSummer">IceOfSummer</a>
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/IceOfSummer/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>

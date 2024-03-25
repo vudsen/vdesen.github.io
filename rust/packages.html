@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>K8s | IceOfSummerの博客</title>
+        <title>包和模块 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="后面一辈子的博客都在这了！" />
         <meta name="keywords" content="" />
@@ -167,22 +167,22 @@
 
                 <div class="article">
     <div>
-        <h1>K8s</h1>
+        <h1>包和模块</h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2024/2/8
+            2024/3/20
         </span>
         
         <span class="category">
-            <a href="/categories/k8s/">
+            <a href="/2023/12/04/Rust/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
-                k8s
+                Rust
             </a>
         </span>
         
@@ -191,19 +191,85 @@
     
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
-        <h1 id="课程笔记"><a href="#课程笔记" class="headerlink" title="课程笔记"></a>课程笔记</h1><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV13Q4y1C7hS">云原生Java架构师的第一课K8s+Docker+KubeSphere+DevOps</a></p>
+        <h1 id="Package-和-Crate"><a href="#Package-和-Crate" class="headerlink" title="Package 和 Crate"></a>Package 和 Crate</h1><blockquote>
+<p>crate！我第一眼看成了 create…</p>
+</blockquote>
+<p><code>crate</code>(箱) 是 Rust 的最小编译单元，一个 <code>package</code> 中包含一个活多个 <code>crate</code>，<code>crate</code>可以是一个二进制项目，或者一个库。</p>
+<p><code>package</code>(包) 是由 <code>Cargo.toml</code> 文件定义的，它包含了项目的元数据（如名称、版本、作者等）以及项目的依赖配置。</p>
+<h2 id="典型的-Package-结构"><a href="#典型的-Package-结构" class="headerlink" title="典型的 Package 结构"></a>典型的 Package 结构</h2><pre><code class="text">.
+├── Cargo.toml
+├── Cargo.lock
+├── src
+│   ├── main.rs
+│   ├── lib.rs
+│   └── bin
+│       └── main1.rs
+│       └── main2.rs
+├── tests
+│   └── some_integration_tests.rs
+├── benches
+│   └── simple_bench.rs
+└── examples
+    └── simple_example.rs
+</code></pre>
+<p>在一个系统中：</p>
 <ul>
-<li><a href="/kubernetes/basic">基础</a></li>
-<li><a href="/kubernetes/core">进阶</a></li>
-<li><a href="/kubernetes/adv">高级</a></li>
-<li><a href="/kubernetes/kubesphere">Kubesphere基础</a></li>
+<li>只能包含0或1个类库箱(library crates)</li>
+<li>可以包含任意多个二进制箱(binary crates)</li>
+<li>至少有一个箱(Crate), 可以是类库箱(library crates), 也可以是二进制箱(binary crates)</li>
 </ul>
-<h1 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h1><ul>
-<li><a href="/kubernetes/self-registry">搭建私有镜像仓库</a></li>
-<li><a href="/kubernetes/dev-ops">DevOps</a></li>
-<li><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/tasks/run-application/horizontal-pod-autoscale/">Pod水平自动扩缩</a></li>
-<li><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/tasks/inject-data-application/environment-variable-expose-pod-information/">通过环境变量将 Pod 信息呈现给容器</a></li>
-<li><a href="/kubernetes/properties">常用属性</a></li>
+<h1 id="模块-Module"><a href="#模块-Module" class="headerlink" title="模块 Module"></a>模块 Module</h1><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/164556350">【翻译】关于Rust模块系统的清晰解释</a>。</p>
+<p>首先上面的博客中，最重要的一点：<strong>我们需要显式地在Rust中构建模块树——在文件系统树和模块树之间不存在隐式的转换。</strong></p>
+<p>什么意思呢？比如你在 Java 中定义了一个类：<code>abc.xyz.Hello</code>，然后你在该项目的任何地方都能够直接使用<code>abc.xyz.Hello</code>，你不用去哪里声明我这里有这样一个类。</p>
+<p>而在 <code>rust</code> 中，<strong>必须在 <code>crate</code> 入口文件中使用 <code>mod 模块名</code> 来手动导入模块</strong>。</p>
+<p>例如在下面的文件结构中：</p>
+<pre><code class="text">project
+└── src
+    ├── front_of_house
+    │   ├── mod.rs
+    │   └── hosting.rs
+    ├── product
+    │   ├── mod.rs
+    │   └── provider.rs
+    └── main.rs
+</code></pre>
+<pre><code class="rust">// main.rs
+mod front_of_house;
+// 尝试不导入 product
+// mod product;
+
+fn main() &#123;
+    print(&quot;&#123;&#125;&quot;, front_of_house::hosting::seat_at_table());
+&#125;
+</code></pre>
+<pre><code class="rust">// hosting.rs
+pub fn add_to_waitlist() &#123;&#125;
+
+pub fn seat_at_table() -&gt; String &#123;
+    crate::product::provider::give()
+&#125;
+</code></pre>
+<pre><code class="rust">// provider.rs
+pub fn give() -&gt; String &#123;
+    String::from(&quot;eeee&quot;)
+&#125;
+</code></pre>
+<p>如果在 <code>main.rs</code> 中不写<code>mod product;</code>，则会报这样的错：</p>
+<pre><code class="log">   Compiling hello-world v0.1.0 (/workspace/hello-world)
+error[E0433]: failed to resolve: could not find `product` in the crate root
+ --&gt; src/front_of_house/hosting.rs:4:12
+  |
+4 |     crate::product::provider::give()
+  |            ^^^^^^^ could not find `product` in the crate root
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `hello-world` (bin &quot;hello-world&quot;) due to previous error
+</code></pre>
+<p>只有添加上 <code>mod product;</code> 才能成功运行。</p>
+<h2 id="使用相对路径导入模块"><a href="#使用相对路径导入模块" class="headerlink" title="使用相对路径导入模块"></a>使用相对路径导入模块</h2><p>除了使用 <code>crate</code> 作为根路径以绝对路径的方式来导入模块外，还可以使用 <code>self</code> 或 <code>super</code> 以相对路径的方式导入模块。</p>
+<ul>
+<li><code>self</code> 类似于路径中的 <code>./</code></li>
+<li><code>super</code> 类似路径中的 <code>../</code></li>
 </ul>
 
     </div>
