@@ -16,3 +16,5 @@ categories: Rust
 - [集合](/rust/collections)
 - [生命周期](/rust/lifecycle)
 - [错误处理](/rust/exception-handle)
+- [包和模块](/rust/packages)
+- [注释和文档](/rust/rust-doc)
