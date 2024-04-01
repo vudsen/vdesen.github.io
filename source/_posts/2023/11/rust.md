@@ -18,3 +18,4 @@ categories: Rust
 - [错误处理](/rust/exception-handle)
 - [包和模块](/rust/packages)
 - [注释和文档](/rust/rust-doc)
+- [格式化输出](/rust/output-format)
