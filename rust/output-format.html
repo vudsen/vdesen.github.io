@@ -1,0 +1,583 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>格式化输出 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="后面一辈子的博客都在这了！" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 7.1.1"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>格式化输出</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/3/29
+        </span>
+        
+        <span class="category">
+            <a href="/2023/12/04/rust/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                Rust
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h1><p>下面是格式化的嘴基本用法：</p>
+<pre><code class="rust">println!(&quot;Hello&quot;);                 // =&gt; &quot;Hello&quot;
+println!(&quot;Hello, &#123;&#125;!&quot;, &quot;world&quot;);   // =&gt; &quot;Hello, world!&quot;
+println!(&quot;The number is &#123;&#125;&quot;, 1);   // =&gt; &quot;The number is 1&quot;
+println!(&quot;&#123;:?&#125;&quot;, (3, 4));          // =&gt; &quot;(3, 4)&quot;
+println!(&quot;&#123;value&#125;&quot;, value=4);      // =&gt; &quot;4&quot;
+println!(&quot;&#123;&#125; &#123;&#125;&quot;, 1, 2);           // =&gt; &quot;1 2&quot;
+println!(&quot;&#123;:04&#125;&quot;, 42);             // =&gt; &quot;0042&quot; with leading zeros
+</code></pre>
+<p>可以看到 <code>println!</code> 宏接受的是可变参数，第一个参数是一个字符串常量，它表示最终输出字符串的格式，包含其中形如 <code>&#123;&#125;</code> 的符号是<strong>占位符</strong>，会被 <code>println!</code> 后面的参数依次替换。</p>
+<h2 id="print-，println-，format"><a href="#print-，println-，format" class="headerlink" title="print!，println!，format!"></a>print!，println!，format!</h2><p>它们是 Rust 中用来格式化输出的三大金刚，用途如下：</p>
+<ul>
+<li><code>print!</code> 将格式化文本输出到标准输出，不带换行符</li>
+<li><code>println!</code> 同上，但是在行的末尾添加换行符</li>
+<li><code>format!</code> 将格式化文本输出到 String 字符串</li>
+</ul>
+<p>在实际项目中，最常用的是 println! 及 format!，前者常用来调试输出，后者常用来生成格式化的字符串：</p>
+<pre><code class="rust">fn main() &#123;
+    let s = &quot;hello&quot;;
+    println!(&quot;&#123;&#125;, world&quot;, s);
+    let s1 = format!(&quot;&#123;&#125;, world&quot;, s);
+    print!(&quot;&#123;&#125;&quot;, s1);
+    print!(&quot;&#123;&#125;\n&quot;, &quot;!&quot;);
+&#125;
+</code></pre>
+<p>其中，<code>s1</code> 是通过 <code>format!</code> 生成的 <code>String</code> 字符串，最终输出如下：</p>
+<pre><code class="text">hello, world
+hello, world!
+</code></pre>
+<h2 id="eprint-，eprintln"><a href="#eprint-，eprintln" class="headerlink" title="eprint!，eprintln!"></a>eprint!，eprintln!</h2><p><code>eprint!</code>，<code>eprintln!</code> 和 <code>print!</code>，<code>println!</code>的使用方法一样，唯一的区别是前者向标准错误流输出，而后者往标准输出流输出。</p>
+<pre><code class="rust">eprintln!(&quot;Error: Could not complete task&quot;)
+</code></pre>
+<p>它们仅应该被用于输出错误信息和进度信息，其它场景都应该使用 <code>print!</code> 系列。</p>
+<h1 id="占位符高级用法"><a href="#占位符高级用法" class="headerlink" title="占位符高级用法"></a>占位符高级用法</h1><p>与其它语言常用的 <code>%d</code>，<code>%s</code>不同，<code>Rust</code> 特立独行地选择了 {} 作为格式化占位符。</p>
+<p>与 <code>&#123;&#125;</code> 类似，<code>&#123;:?&#125;</code> 也是占位符：</p>
+<ul>
+<li><code>&#123;&#125;</code> 适用于实现了 <code>std::fmt::Display</code> 特征的类型，用来以更优雅、更友好的方式格式化文本，例如展示给用户。</li>
+<li><code>&#123;:?&#125;</code> 适用于实现了 <code>std::fmt::Debug</code> 特征的类型，用于调试场景。</li>
+</ul>
+<p>为了方便我们调试，大多数 Rust 类型都实现了 <code>Debug</code> 特征或者支持派生该特征：</p>
+<pre><code class="rust">#[derive(Debug)]
+struct Person &#123;
+    name: String,
+    age: u8
+&#125;
+
+fn main() &#123;
+    let i = 3.1415926;
+    let s = String::from(&quot;hello&quot;);
+    let v = vec![1, 2, 3];
+    let p = Person&#123;name: &quot;sunface&quot;.to_string(), age: 18&#125;;
+    println!(&quot;&#123;:?&#125;, &#123;:?&#125;, &#123;:?&#125;, &#123;:?&#125;&quot;, i, s, v, p);
+&#125;
+</code></pre>
+<h2 id=""><a href="#" class="headerlink" title="{:#?}"></a>{:#?}</h2><p>与大部分类型实现了 <code>Debug</code> 不同，实现了 <code>Display</code> 特征的 Rust 类型并没有那么多，往往需要我们自定义想要的格式化方式：</p>
+<pre><code class="rust">let i = 3.1415926;
+let s = String::from(&quot;hello&quot;);
+let v = vec![1, 2, 3];
+let p = Person &#123;
+    name: &quot;sunface&quot;.to_string(),
+    age: 18,
+&#125;;
+// v 和 p 无法被打印
+println!(&quot;&#123;&#125;, &#123;&#125;, &#123;&#125;, &#123;&#125;&quot;, i, s, v, p);
+</code></pre>
+<p><code>&#123;:#?&#125;</code> 与 <code>&#123;:?&#125;</code> 几乎一样，唯一的区别在于它能更优美地输出内容：</p>
+<pre><code class="rust">// &#123;:?&#125;
+[1, 2, 3], Person &#123; name: &quot;sunface&quot;, age: 18 &#125;
+
+// &#123;:#?&#125;
+[
+    1,
+    2,
+    3,
+], Person &#123;
+    name: &quot;sunface&quot;,
+&#125;
+</code></pre>
+<h2 id="为自定义类型实现-Display-特征"><a href="#为自定义类型实现-Display-特征" class="headerlink" title="为自定义类型实现 Display 特征"></a>为自定义类型实现 Display 特征</h2><pre><code class="rust">struct Person &#123;
+    name: String,
+    age: u8,
+&#125;
+
+use std::fmt;
+impl fmt::Display for Person &#123;
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result &#123;
+        write!(
+            f,
+            &quot;大佬在上，请受我一拜，小弟姓名&#123;&#125;，年芳&#123;&#125;，家里无田又无车，生活苦哈哈&quot;,
+            self.name, self.age
+        )
+    &#125;
+&#125;
+fn main() &#123;
+    let p = Person &#123;
+        name: &quot;sunface&quot;.to_string(),
+        age: 18,
+    &#125;;
+    println!(&quot;&#123;&#125;&quot;, p);
+&#125;
+</code></pre>
+<p>如上所示，只要实现 Display 特征中的 fmt 方法，即可为自定义结构体 Person 添加自定义输出：</p>
+<pre><code class="text">大佬在上，请受我一拜，小弟姓名sunface，年芳18，家里无田又无车，生活苦哈哈
+</code></pre>
+<h2 id="为外部类型实现-Display-特征"><a href="#为外部类型实现-Display-特征" class="headerlink" title="为外部类型实现 Display 特征"></a>为外部类型实现 Display 特征</h2><p>在 Rust 中，无法直接为外部类型实现外部特征，但是可以使用 <code>newtype</code> 解决此问题：</p>
+<pre><code class="rust">struct Array(Vec&lt;i32&gt;);
+
+use std::fmt;
+impl fmt::Display for Array &#123;
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result &#123;
+        write!(f, &quot;数组是：&#123;:?&#125;&quot;, self.0)
+    &#125;
+&#125;
+fn main() &#123;
+    let arr = Array(vec![1, 2, 3]);
+    println!(&quot;&#123;&#125;&quot;, arr);
+&#125;
+</code></pre>
+<p><code>Array</code> 就是我们的 <code>newtype</code>，它将想要格式化输出的 <code>Vec</code> 包裹在内，最后只要为 <code>Array</code> 实现 <code>Display</code> 特征，即可进行格式化输出：</p>
+<pre><code class="text">数组是：[1, 2, 3]
+</code></pre>
+<h2 id="位置参数"><a href="#位置参数" class="headerlink" title="位置参数"></a>位置参数</h2><p>除了按照依次顺序使用值去替换占位符之外，还能让指定位置的参数去替换某个占位符，例如 {1}，表示用第二个参数替换该占位符(索引从 0 开始)：</p>
+<pre><code class="rust">fn main() &#123;
+    println!(&quot;&#123;&#125;&#123;&#125;&quot;, 1, 2); // =&gt;&quot;12&quot;
+    println!(&quot;&#123;1&#125;&#123;0&#125;&quot;, 1, 2); // =&gt;&quot;21&quot;
+    // =&gt; Alice, this is Bob. Bob, this is Alice
+    println!(&quot;&#123;0&#125;, this is &#123;1&#125;. &#123;1&#125;, this is &#123;0&#125;&quot;, &quot;Alice&quot;, &quot;Bob&quot;);
+    println!(&quot;&#123;1&#125;&#123;&#125;&#123;0&#125;&#123;&#125;&quot;, 1, 2); // =&gt; 2112
+&#125;
+</code></pre>
+<h2 id="具名参数"><a href="#具名参数" class="headerlink" title="具名参数"></a>具名参数</h2><p>除了像上面那样指定位置外，我们还可以为参数指定名称：</p>
+<pre><code class="rust">fn main() &#123;
+    println!(&quot;&#123;argument&#125;&quot;, argument = &quot;test&quot;); // =&gt; &quot;test&quot;
+    println!(&quot;&#123;name&#125; &#123;&#125;&quot;, 1, name = 2); // =&gt; &quot;2 1&quot;
+    println!(&quot;&#123;a&#125; &#123;c&#125; &#123;b&#125;&quot;, a = &quot;a&quot;, b = &#39;b&#39;, c = 3); // =&gt; &quot;a 3 b&quot;
+&#125;
+</code></pre>
+<p>需要注意的是，<strong>带名称的参数必须放在不带名称参数的后面</strong>，例如下面代码将报错：</p>
+<pre><code class="rust">println!(&quot;&#123;abc&#125; &#123;1&#125;&quot;, abc = &quot;def&quot;, 2);
+</code></pre>
+<pre><code class="text">error: positional arguments cannot follow named arguments
+ --&gt; src/main.rs:4:36
+   |
+ 4 | println!(&quot;&#123;abc&#125; &#123;1&#125;&quot;, abc = &quot;def&quot;, 2);
+   |                             -----  ^ positional arguments must be before named arguments
+   |                             |
+   |                             named argument
+</code></pre>
+<h2 id="格式化参数"><a href="#格式化参数" class="headerlink" title="格式化参数"></a>格式化参数</h2><p>格式化输出，意味着对输出格式会有更多的要求，例如只输出浮点数的小数点后两位：</p>
+<pre><code class="rust">fn main() &#123;
+    let v = 3.1415926;
+    // Display =&gt; 3.14
+    println!(&quot;&#123;:.2&#125;&quot;, v);
+    // Debug =&gt; 3.14
+    println!(&quot;&#123;:.2?&#125;&quot;, v);
+&#125;
+</code></pre>
+<p>上面代码只输出小数点后两位。同时我们还展示了 <code>&#123;&#125;</code> 和 <code>&#123;:?&#125;</code> 的用法，后面如无特殊区别，就只针对 <code>&#123;&#125;</code> 提供格式化参数说明。</p>
+<h3 id="宽度"><a href="#宽度" class="headerlink" title="宽度"></a>宽度</h3><p>宽度用来指示输出目标的长度，如果长度不够，则进行填充和对齐。</p>
+<h4 id="字符串填充"><a href="#字符串填充" class="headerlink" title="字符串填充"></a>字符串填充</h4><p>字符串格式化默认使用空格进行填充，并且进行左对齐。</p>
+<pre><code class="rust">fn main() &#123;
+    //-----------------------------------
+    // 以下全部输出 &quot;Hello x    !&quot;
+    // 为&quot;x&quot;后面填充空格，补齐宽度5
+    println!(&quot;Hello &#123;:5&#125;!&quot;, &quot;x&quot;);
+    // 使用参数5来指定宽度
+    println!(&quot;Hello &#123;:1$&#125;!&quot;, &quot;x&quot;, 5);
+    // 使用x作为占位符输出内容，同时使用5作为宽度
+    println!(&quot;Hello &#123;1:0$&#125;!&quot;, 5, &quot;x&quot;);
+    // 使用有名称的参数作为宽度
+    println!(&quot;Hello &#123;:width$&#125;!&quot;, &quot;x&quot;, width = 5);
+    //-----------------------------------
+
+    // 使用参数5为参数x指定宽度，同时在结尾输出参数5 =&gt; Hello x    !5
+    println!(&quot;Hello &#123;:1$&#125;!&#123;&#125;&quot;, &quot;x&quot;, 5);
+&#125;
+</code></pre>
+<p>输出：</p>
+<pre><code class="text">Hello x    !
+Hello x    !
+Hello x    !
+Hello x    !
+Hello x    !5
+</code></pre>
+<h4 id="数字填充"><a href="#数字填充" class="headerlink" title="数字填充"></a>数字填充</h4><p>数字格式化默认也是使用空格进行填充，但与字符串左对齐不同的是，数字是右对齐。</p>
+<pre><code class="rust">fn main() &#123;
+    // 宽度是5 =&gt; Hello     5!
+    println!(&quot;Hello &#123;:5&#125;!&quot;, 5);
+    // 显式的输出正号 =&gt; Hello +5!
+    println!(&quot;Hello &#123;:+&#125;!&quot;, 5);
+    // 宽度5，使用0进行填充 =&gt; Hello 00005!
+    println!(&quot;Hello &#123;:05&#125;!&quot;, 5);
+    // 负号也要占用一位宽度 =&gt; Hello -0005!
+    println!(&quot;Hello &#123;:05&#125;!&quot;, -5);
+&#125;
+</code></pre>
+<p>输出：</p>
+<pre><code class="text">Hello     5!
+Hello +5!
+Hello 00005!
+Hello -0005!
+</code></pre>
+<p>注意<code>println!(&quot;Hello &#123;:05&#125;!&quot;, 5)</code>，这个写法只能给数字用，字符串是用不了的。</p>
+<h3 id="对齐"><a href="#对齐" class="headerlink" title="对齐"></a>对齐</h3><pre><code class="rust">fn main() &#123;
+    // 以下全部都会补齐5个字符的长度
+    // 左对齐 =&gt; Hello x    !
+    println!(&quot;Hello &#123;:&lt;5&#125;!&quot;, &quot;x&quot;);
+    // 右对齐 =&gt; Hello     x!
+    println!(&quot;Hello &#123;:&gt;5&#125;!&quot;, &quot;x&quot;);
+    // 居中对齐 =&gt; Hello   x  !
+    println!(&quot;Hello &#123;:^5&#125;!&quot;, &quot;x&quot;);
+
+    // 对齐并使用指定符号填充 =&gt; Hello x&amp;&amp;&amp;&amp;!
+    // 指定符号填充的前提条件是必须有对齐字符
+    println!(&quot;Hello &#123;:&amp;&lt;5&#125;!&quot;, &quot;x&quot;);
+    println!(&quot;Hello &#123;:好^5&#125;!&quot;, &quot;x&quot;);
+&#125;
+</code></pre>
+<p>输出：</p>
+<pre><code class="text">Hello x    !
+Hello     x!
+Hello   x  !
+Hello x&amp;&amp;&amp;&amp;!
+Hello 好好x好好!
+</code></pre>
+<h3 id="精度"><a href="#精度" class="headerlink" title="精度"></a>精度</h3><p>精度可以用于控制浮点数的精度或者字符串的长度：</p>
+<pre><code class="rust">fn main() &#123;
+    let v = 3.1415926;
+    // 保留小数点后两位 =&gt; 3.14
+    println!(&quot;&#123;:.2&#125;&quot;, v);
+    // 带符号保留小数点后两位 =&gt; +3.14
+    println!(&quot;&#123;:+.2&#125;&quot;, v);
+    // 不带小数 =&gt; 3
+    println!(&quot;&#123;:.0&#125;&quot;, v);
+    // 通过参数来设定精度 =&gt; 3.1416，相当于&#123;:.4&#125;
+    println!(&quot;&#123;:.1$&#125;&quot;, v, 4);
+
+    let s = &quot;hi我是Sunface孙飞&quot;;
+    // 保留字符串前三个字符 =&gt; hi我
+    println!(&quot;&#123;:.3&#125;&quot;, s);
+    // &#123;:.*&#125;接收两个参数，第一个是精度，第二个是被格式化的值 =&gt; Hello abc!
+    println!(&quot;Hello &#123;:.*&#125;!&quot;, 3, &quot;abcdefg&quot;);
+&#125;
+</code></pre>
+<p>输出：</p>
+<pre><code class="text">3.14
++3.14
+3
+3.1416
+hi我
+Hello abc!
+</code></pre>
+<h3 id="进制"><a href="#进制" class="headerlink" title="进制"></a>进制</h3><p>可以使用 <code>#</code> 号来控制数字的进制输出：</p>
+<ul>
+<li><code>#b</code>, 二进制</li>
+<li><code>#o</code>, 八进制</li>
+<li><code>#x</code>, 小写十六进制</li>
+<li><code>#X</code>, 大写十六进制</li>
+<li><code>x</code>, 不带前缀的小写十六进制</li>
+</ul>
+<pre><code class="rust">fn main() &#123;
+    // 二进制 =&gt; 0b11011!
+    println!(&quot;&#123;:#b&#125;!&quot;, 27);
+    // 八进制 =&gt; 0o33!
+    println!(&quot;&#123;:#o&#125;!&quot;, 27);
+    // 十进制 =&gt; 27!
+    println!(&quot;&#123;&#125;!&quot;, 27);
+    // 小写十六进制 =&gt; 0x1b!
+    println!(&quot;&#123;:#x&#125;!&quot;, 27);
+    // 大写十六进制 =&gt; 0x1B!
+    println!(&quot;&#123;:#X&#125;!&quot;, 27);
+
+    // 不带前缀的十六进制 =&gt; 1b!
+    println!(&quot;&#123;:x&#125;!&quot;, 27);
+
+    // 使用0填充二进制，宽度为10 =&gt; 0b00011011!
+    println!(&quot;&#123;:#010b&#125;!&quot;, 27);
+&#125;
+</code></pre>
+<p>输出：</p>
+<pre><code class="text">0b11011!
+0o33!
+27!
+0x1b!
+0x1B!
+1b!
+0b00011011!
+</code></pre>
+<h3 id="捕获上下文变量"><a href="#捕获上下文变量" class="headerlink" title="捕获上下文变量"></a>捕获上下文变量</h3><pre><code class="rust">fn get_person() -&gt; String &#123;
+    String::from(&quot;sunface&quot;)
+&#125;
+fn main() &#123;
+    let person = get_person();
+    // 直接使用 person 变量
+    println!(&quot;Hello, &#123;person&#125;!&quot;);
+&#125;
+</code></pre>
+<p>甚至还可以将环境中的值用于格式化参数:</p>
+<pre><code class="rust">let (width, precision) = get_format();
+for (name, score) in get_scores() &#123;
+  println!(&quot;&#123;name&#125;: &#123;score:width$.precision$&#125;&quot;);
+&#125;
+</code></pre>
+<h3 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h3><h4 id="指数"><a href="#指数" class="headerlink" title="指数"></a>指数</h4><pre><code class="rust">fn main() &#123;
+    println!(&quot;&#123;:2e&#125;&quot;, 1000000000); // =&gt; 1e9
+    println!(&quot;&#123;:2E&#125;&quot;, 1000000000); // =&gt; 1E9
+&#125;
+</code></pre>
+<h4 id="指针地址"><a href="#指针地址" class="headerlink" title="指针地址"></a>指针地址</h4><pre><code class="rust">let v= vec![1, 2, 3];
+println!(&quot;&#123;:p&#125;&quot;, v.as_ptr()) // =&gt; 0x600002324050
+</code></pre>
+<h4 id="转义"><a href="#转义" class="headerlink" title="转义"></a>转义</h4><p>有时需要输出 <code>&#123;</code> 和 <code>&#125;</code>，但这两个字符是特殊字符，需要进行转义：</p>
+<pre><code class="rust">fn main() &#123;
+    // &quot;&#123;&#123;" 转义为 '&#123;'   "&#125;&#125;&quot; 转义为 &#39;&#125;&#39;   &quot;\&quot;&quot; 转义为 &#39;&quot;&#39;
+    // =&gt; Hello &quot;&#123;World&#125;&quot; 
+    println!(&quot; Hello \&quot;&#123;&#123;World&#125;&#125;\&quot; &quot;);
+
+    // 下面代码会报错，因为占位符&#123;&#125;只有一个右括号&#125;，左括号被转义成字符串的内容
+    // println!(&quot; 
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;<a target="_blank" rel="noopener" href="https://github.com/IceOfSummer">IceOfSummer</a>
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/IceOfSummer/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>
