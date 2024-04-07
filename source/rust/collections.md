@@ -3,7 +3,7 @@ title: 集合
 date: 2023-01-21 22:40:14
 categories:
   data:
-    - { name: "Rust", path: "/2023/12/04/Rust/" }
+    - { name: "Rust", path: "/2023/12/04/rust/" }
 ---
 
 # 1. 动态数组 Vector

@@ -4,7 +4,7 @@ title: 流程控制
 date: 2023-12-26 23:30:14
 categories:
   data:
-    - { name: "Rust", path: "/2023/12/04/Rust/" }
+    - { name: "Rust", path: "/2023/12/04/rust/" }
 ---
 
 # 1. 基础

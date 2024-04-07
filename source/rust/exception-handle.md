@@ -3,7 +3,7 @@ title: 返回值和错误处理
 date: 2024-03-15 17:05:24
 categories:
   data:
-    - { name: "Rust", path: "/2023/12/04/Rust/" }
+    - { name: "Rust", path: "/2023/12/04/rust/" }
 ---
 
 
