@@ -3,7 +3,7 @@ title: 泛型和特征
 date: 2024-01-13 22:08:54
 categories:
   data:
-    - { name: "Rust", path: "/2023/12/04/Rust/" }
+    - { name: "Rust", path: "/2023/12/04/rust/" }
 ---
 
 # 1. 泛型

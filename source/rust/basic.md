@@ -3,7 +3,7 @@ title: Rust基础
 date: 2023-12-04 09:48:25
 categories:
   data:
-    - { name: "Rust", path: "/2023/12/04/Rust/" }
+    - { name: "Rust", path: "/2023/12/04/rust/" }
 ---
 
 # 数值类型

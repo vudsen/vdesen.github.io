@@ -3,7 +3,7 @@ title: 生命周期
 date: 2023-01-30 23:09:10
 categories:
   data:
-    - { name: "Rust", path: "/2023/12/04/Rust/" }
+    - { name: "Rust", path: "/2023/12/04/rust/" }
 ---
 
 # 悬垂指针和生命周期

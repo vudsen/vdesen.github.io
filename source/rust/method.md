@@ -3,7 +3,7 @@ title: 方法 Method
 date: 2024-01-12 22:27:54
 categories:
   data:
-    - { name: "Rust", path: "/2023/12/04/Rust/" }
+    - { name: "Rust", path: "/2023/12/04/rust/" }
 ---
 
 # 1. 定义方法
