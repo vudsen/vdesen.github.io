@@ -37,7 +37,7 @@ theme_config:
         #    theme: <icon-theme>
         #    link: <link-url>
     friendLinks:
-        {}
+        lovelyJason: https://www.qdovo.com/
         # <name>: <link-url>
   giscus:
     enable: true
