@@ -19,3 +19,4 @@ categories: Rust
 - [包和模块](/rust/packages)
 - [注释和文档](/rust/rust-doc)
 - [格式化输出](/rust/output-format)
+- [单元测试和集成测试](/rust/test)
