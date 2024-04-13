@@ -1,0 +1,514 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>自动化测试 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="后面一辈子的博客都在这了！" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 7.1.1"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>自动化测试</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/4/9
+        </span>
+        
+        <span class="category">
+            <a href="/2023/12/04/rust/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                Rust
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="单元测试"><a href="#单元测试" class="headerlink" title="单元测试"></a>单元测试</h1><p>当使用 Cargo 创建一个 lib 类型的包时，它会为我们自动生成一个测试模块。先来创建一个 lib 类型的 adder 包：</p>
+<pre><code class="bash">cargo new adder --lib
+cd adder
+</code></pre>
+<p>创建成功后，在 <em>src&#x2F;lib.rs</em> 文件中可以发现如下代码:</p>
+<pre><code class="rust">#[cfg(test)]
+mod tests &#123;
+    #[test]
+    fn it_works() &#123;
+        assert_eq!(2 + 2, 4);
+    &#125;
+&#125;
+</code></pre>
+<p>其中，<code>tests</code> 就是一个测试模块，<code>it_works</code> 则是我们的主角：测试函数。</p>
+<p>经过 <code>test</code> 标记的函数就可以被测试执行器发现，并进行运行。当然，在测试模块 <code>tests</code> 中，还可以定义非测试函数，这些函数可以用于设置环境或执行一些通用操作：例如为部分测试函数提供某个通用的功能，这种功能就可以抽象为一个非测试函数。</p>
+<p>使用<code>cargo test</code>运行所有的测试用例。Rust 在默认情况下会为每一个测试函数启动单独的线程去处理，当主线程 main 发现有一个测试线程死掉时，main 会将相应的测试标记为失败。</p>
+<h2 id="期望-panic"><a href="#期望-panic" class="headerlink" title="期望 panic"></a>期望 panic</h2><p>当一个函数在给定的参数下希望能够 panic，则需要添加 <code>should_panic</code> 来告诉 rust:</p>
+<pre><code class="rust">pub struct Guess &#123;
+    value: i32,
+&#125;
+
+impl Guess &#123;
+    pub fn new(value: i32) -&gt; Guess &#123;
+        if value &lt; 1 || value &gt; 100 &#123;
+            panic!(&quot;Guess value must be between 1 and 100, got &#123;&#125;.&quot;, value);
+        &#125;
+
+        Guess &#123; value &#125;
+    &#125;
+&#125;
+
+#[cfg(test)]
+mod tests &#123;
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn greater_than_100() &#123;
+        Guess::new(200);
+    &#125;
+&#125;
+</code></pre>
+<p>上面是一个简单的猜数字游戏，Guess 结构体的 new 方法在传入的值不在 [1,100] 之间时，会直接 panic，而在测试函数 greater_than_100 中，我们传入的值 200 显然没有落入该区间，因此 new 方法会直接 panic，为了测试这个预期的 panic 行为，我们使用 #[should_panic] 对其进行了标注。</p>
+<h3 id="expected"><a href="#expected" class="headerlink" title="expected"></a>expected</h3><p>虽然 panic 被成功测试到，但是如果代码发生的 panic 和我们预期的 panic 不符合呢？因为一段糟糕的代码可能会在不同的代码行生成不同的 panic。</p>
+<p>鉴于此，我们可以使用可选的参数 expected 来说明预期的 panic 长啥样：</p>
+<pre><code class="rust">// --snip--
+impl Guess &#123;
+    pub fn new(value: i32) -&gt; Guess &#123;
+        if value &lt; 1 &#123;
+            panic!(
+                &quot;Guess value must be greater than or equal to 1, got &#123;&#125;.&quot;,
+                value
+            );
+        &#125; else if value &gt; 100 &#123;
+            panic!(
+                &quot;Guess value must be less than or equal to 100, got &#123;&#125;.&quot;,
+                value
+            );
+        &#125;
+
+        Guess &#123; value &#125;
+    &#125;
+&#125;
+
+#[cfg(test)]
+mod tests &#123;
+    use super::*;
+
+    #[test]
+    #[should_panic(expected = &quot;Guess value must be less than or equal to 100&quot;)]
+    fn greater_than_100() &#123;
+        Guess::new(200);
+    &#125;
+&#125;
+</code></pre>
+<h2 id="使用-Result"><a href="#使用-Result" class="headerlink" title="使用 Result"></a>使用 Result</h2><p>当测试函数的返回 <code>Result</code> 时，若发生错误，测试也将失败：</p>
+<pre><code class="rust">#[cfg(test)]
+mod tests &#123;
+    #[test]
+    fn it_works() -&gt; Result&lt;(), String&gt; &#123;
+        if 2 + 2 == 3 &#123;
+            Ok(())
+        &#125; else &#123;
+            Err(String::from(&quot;two plus two does not equal four&quot;))
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<pre><code class="log">---- tests::it_works stdout ----
+Error: &quot;two plus two does not equal four&quot;
+
+
+failures:
+    tests::it_works
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+</code></pre>
+<h2 id="传递命令行参数"><a href="#传递命令行参数" class="headerlink" title="传递命令行参数"></a>传递命令行参数</h2><p>使用<code>cargo test --help</code>可以查看帮助：</p>
+<pre><code class="bash">$ cargo test --help
+Execute all unit and integration tests and build examples of a local package
+
+Usage: cargo.exe test [OPTIONS] [TESTNAME] [-- [args]...]
+</code></pre>
+<p>可以发现如果需要输入命令行参数，需要加上<code>--</code>，然后右边就全部会被视为命令行参数。</p>
+<h3 id="限制运行的线程数"><a href="#限制运行的线程数" class="headerlink" title="限制运行的线程数"></a>限制运行的线程数</h3><p>当运行多个测试函数时，默认情况下是为每个测试都生成一个线程，然后通过主线程来等待它们的完成和结果。并行测试最大的问题就在于共享状态的修改，因为难以控制测试的运行顺序，因此如果多个测试共享一个数据，那么对该数据的使用也将变得不可控制。</p>
+<p>其中的一个解决方法就是限制所有测试只能一个接着一个的运行：</p>
+<pre><code class="bash">cargo test -- --test-threads=1
+</code></pre>
+<p>除此之外，也可以把每个测试写入独立的文件中。</p>
+<h3 id="显示打印输出"><a href="#显示打印输出" class="headerlink" title="显示打印输出"></a>显示打印输出</h3><p>默认情况下，如果测试通过，那写入标准输出的内容是不会显示在测试结果中的。</p>
+<p>如果需要查看标准输出的内容，使用下面的启动命令即可：</p>
+<pre><code class="rust">cargo test -- --show-output
+</code></pre>
+<h2 id="指定运行一部分测试"><a href="#指定运行一部分测试" class="headerlink" title="指定运行一部分测试"></a>指定运行一部分测试</h2><pre><code class="rust">// lib.rs
+pub fn add_two(a: i32) -&gt; i32 &#123;
+    a + 2
+&#125;
+
+#[cfg(test)]
+mod tests &#123;
+    use super::*;
+
+    #[test]
+    fn add_two_and_two() &#123;
+        assert_eq!(4, add_two(2));
+    &#125;
+
+    #[test]
+    fn add_three_and_two() &#123;
+        assert_eq!(5, add_two(3));
+    &#125;
+
+    #[test]
+    fn one_hundred() &#123;
+        assert_eq!(102, add_two(100));
+    &#125;
+&#125;
+</code></pre>
+<h3 id="运行单个测试"><a href="#运行单个测试" class="headerlink" title="运行单个测试"></a>运行单个测试</h3><p>运行单个测试只需要将指定的测试函数名作为参数即可：</p>
+<pre><code class="bash">$ cargo test one_hundred
+running 1 test
+test tests::one_hundred ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+</code></pre>
+<p>默认情况下只会测试 <code>lib.rs</code> 中的内容，在这里就是<code>tests</code>模块。</p>
+<p>但是只能指定一个函数，无法指定多个，例如下面的命令:</p>
+<pre><code class="bash">cargo test one_hundred,add_two_and_two
+cargo test one_hundred add_two_and_two
+</code></pre>
+<p>这两种方式统统不行，此时就需要使用名称过滤的方式来实现了。</p>
+<h3 id="通过名称来过滤测试"><a href="#通过名称来过滤测试" class="headerlink" title="通过名称来过滤测试"></a>通过名称来过滤测试</h3><p>可以通过指定部分名称的方式来过滤运行相应的测试:</p>
+<pre><code class="bash">$ cargo test add
+running 2 tests
+test tests::add_three_and_two ... ok
+test tests::add_two_and_two ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+</code></pre>
+<p>实际上只要函数名包含我们指定的字符串就会被执行：</p>
+<pre><code class="rust">$ cargo test and
+running 2 tests
+test tests::add_two_and_two ... ok
+test tests::add_three_and_two ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+</code></pre>
+<h3 id="忽略部分测试"><a href="#忽略部分测试" class="headerlink" title="忽略部分测试"></a>忽略部分测试</h3><p>使用<code>#[ignore]</code>可以将测试函数表示为<em>被忽略</em>:</p>
+<pre><code class="rust">#[test]
+fn it_works() &#123;
+    assert_eq!(2 + 2, 4);
+&#125;
+
+#[test]
+#[ignore]
+fn expensive_test() &#123;
+    // 这里的代码需要几十秒甚至几分钟才能完成
+&#125;
+</code></pre>
+<p>正常执行测试不会运行被忽略的函数：</p>
+<pre><code class="rust">$ cargo test
+running 2 tests
+test expensive_test ... ignored
+test it_works ... ok
+
+test result: ok. 1 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests adder
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+</code></pre>
+<p>如果需要执行被忽略的测试函数，则可以使用下面的命令：</p>
+<pre><code class="rust">cargo test -- --ignored
+</code></pre>
+<h1 id="dev-dependencies"><a href="#dev-dependencies" class="headerlink" title="dev-dependencies"></a>dev-dependencies</h1><p>Rust 能够引入只在开发测试场景使用的外部依赖。</p>
+<p>其中一个例子就是 <a target="_blank" rel="noopener" href="https://docs.rs/crate/pretty_assertions/latest">pretty_assertions</a>，它可以用来扩展标准库中的 assert_eq! 和 assert_ne!，例如提供彩色字体的结果对比。</p>
+<p>在 <code>Cargo.toml</code> 文件中添加以下内容来引入 <code>pretty_assertions</code>：</p>
+<pre><code class="rust"># standard crate data is left out
+[dev-dependencies]
+pretty_assertions = &quot;1&quot;
+</code></pre>
+<p>然后在<code>src/lib.rs</code>中添加：</p>
+<pre><code class="rust">pub fn add(a: i32, b: i32) -&gt; i32 &#123;
+    a + b
+&#125;
+
+#[cfg(test)]
+mod tests &#123;
+    use super::*;
+    use pretty_assertions::assert_eq; // 该包仅能用于测试
+
+    #[test]
+    fn test_add() &#123;
+        assert_eq!(add(2, 3), 5);
+    &#125;
+&#125;
+</code></pre>
+<h1 id="集成测试"><a href="#集成测试" class="headerlink" title="集成测试"></a>集成测试</h1><p>与单元测试的同吃同住不同，集成测试的代码是在一个单独的目录下的。由于它们使用跟其它模块一样的方式去调用你想要测试的代码，因此只能调用通过 pub 定义的 API，这一点与单元测试有很大的不同。</p>
+<p>如果说单元测试是对代码单元进行测试，那集成测试则是对某一个功能或者接口进行测试，因此单元测试的通过，并不意味着集成测试就能通过：局部上反映不出的问题，在全局上很可能会暴露出来。</p>
+<h2 id="test-目录"><a href="#test-目录" class="headerlink" title="test 目录"></a>test 目录</h2><p>项目中的 test 目录，就是用来存放集成测试文件的。首先来创建一个集成测试文件 <code>tests/integration_test.rs</code>:</p>
+<pre><code class="rust">use adder;
+
+#[test]
+fn it_adds_two() &#123;
+    assert_eq!(4, adder::add_two(2));
+&#125;
+</code></pre>
+<p>执行测试：</p>
+<pre><code class="rust">cargo test --test
+</code></pre>
+<p>如果不加<code>--test</code>，则会执行所有单元测试、集成测试和文档测试。</p>
+<h2 id="共享模块"><a href="#共享模块" class="headerlink" title="共享模块"></a>共享模块</h2><p>在集成测试的 tests 目录下，每一个文件都是一个独立的包，这种组织方式可以很好的帮助我们理清测试代码的关系，但是如果想要在多个文件中共享同一个功能，则需要创建一个<code>mod.rs</code>。</p>
+<p>例如 <code>tests/common/mod.rs</code> 而不是 <code>tests/common.rs</code>， 后者仍然会被当做一个测试文件，而前者则是我们的共享模块。</p>
+<pre><code class="rust">use adder;
+
+mod common;
+
+#[test]
+fn it_adds_two() &#123;
+    common::setup();
+    assert_eq!(4, adder::add_two(2));
+&#125;
+</code></pre>
+<p>总结来说，tests 目录下的子目录中的文件不会被当作独立的包，也不会有测试输出。</p>
+<h1 id="断言-assertion"><a href="#断言-assertion" class="headerlink" title="断言 assertion"></a>断言 assertion</h1><p>常用的断言：</p>
+<ul>
+<li><code>assert!</code>, <code>assert_eq!</code>, <code>assert_ne!</code>, 它们会在所有模式下运行</li>
+<li><code>debug_assert!</code>, <code>debug_assert_eq!</code>, <code>debug_assert_ne!</code>, 它们只会在 Debug 模式下运行</li>
+</ul>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;<a target="_blank" rel="noopener" href="https://github.com/IceOfSummer">IceOfSummer</a>
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/IceOfSummer/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>
