@@ -1,0 +1,568 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>生命周期 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="后面一辈子的博客都在这了！" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 7.1.1"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>生命周期</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/4/13
+        </span>
+        
+        <span class="category">
+            <a href="/2023/12/04/rust/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                Rust
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="不太聪明的生命周期检查"><a href="#不太聪明的生命周期检查" class="headerlink" title="不太聪明的生命周期检查"></a>不太聪明的生命周期检查</h1><h2 id="例子-1"><a href="#例子-1" class="headerlink" title="例子 1"></a>例子 1</h2><pre><code class="rust">#[derive(Debug)]
+struct Foo;
+
+impl Foo &#123;
+    fn mutate_and_share(&amp;mut self) -&gt; &amp;Self &#123;
+        &amp;*self
+    &#125;
+    fn share(&amp;self) &#123;&#125;
+&#125;
+
+fn main() &#123;
+    let mut foo: Foo = Foo;
+    let loan: &amp;Foo = foo.mutate_and_share();
+    foo.share();
+    println!(&quot;&#123;:?&#125;&quot;, loan);
+&#125;
+</code></pre>
+<p>在这段代码中，<code>mutate_and_share</code> 将当前的 <code>Foo</code> 引用解引用，然后返回一个新的引用回去，在这里这个新的引用被赋值给了 <code>loan</code> 参数。</p>
+<p>此时 <code>loan</code> 是一个不可变借用，之后的 <code>foo.share()</code> 同样也进行了不可变借用。</p>
+<p>在最后，使用 <code>println</code> 打印了 <code>loan</code>，因为多个不可变借用可以同时存在，因此代码应该通过编译。</p>
+<p>但是运行后编译器报错：</p>
+<pre><code class="bash">error[E0502]: cannot borrow `foo` as immutable because it is also borrowed as mutable
+  --&gt; src\main.rs:31:5
+   |
+30 |     let loan = foo.mutate_and_share();
+   |                --- mutable borrow occurs here
+31 |     foo.share();
+   |     ^^^ immutable borrow occurs here
+32 |     println!(&quot;&#123;:?&#125;&quot;, loan);
+   |                      ---- mutable borrow later used here
+</code></pre>
+<p>第一眼看过去肯定是懵逼的，对函数进行生命周期标识后会更好理解：</p>
+<pre><code class="rust">struct Foo;
+
+impl Foo &#123;
+    fn mutate_and_share&lt;&#39;a&gt;(&amp;&#39;a mut self) -&gt; &amp;&#39;a Self &#123;
+        &amp;&#39;a *self
+    &#125;
+    fn share&lt;&#39;a&gt;(&amp;&#39;a self) &#123;&#125;
+&#125;
+
+fn main() &#123;
+    &#39;b: &#123;
+        let mut foo: Foo = Foo;
+        &#39;c: &#123;
+            let loan: &amp;&#39;c Foo = Foo::mutate_and_share::&lt;&#39;c&gt;(&amp;&#39;c mut foo);
+            &#39;d: &#123;
+                Foo::share::&lt;&#39;d&gt;(&amp;&#39;d foo);
+            &#125;
+            println!(&quot;&#123;:?&#125;&quot;, loan);
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>因为我们在调用 <code>mutate_and_share</code> 时，对 <code>foo</code> 进行了可变借用，然而返回出来的引用，也就是 <code>loan</code>，它的生命周期和 <code>foo</code> 是保持一致的，即在 <code>println</code> 时，foo的不可变借用仍然存在。</p>
+<p>如果将代码改成下面的样子就可以正常通过编译并运行：</p>
+<pre><code class="rust">#[derive(Debug)]
+struct Foo;
+
+impl Foo &#123;
+    fn mutate_and_share(&amp;mut self) -&gt; &amp;Self &#123;
+        &amp;*self
+    &#125;
+    fn share(&amp;self) &#123;&#125;
+&#125;
+
+fn main() &#123;
+    let mut foo = Foo;
+    let loan = foo.mutate_and_share();
+    &#123;
+        foo.share();
+    &#125;
+    let loan = foo.mutate_and_share();
+    println!(&quot;&#123;:?&#125;&quot;, loan);
+&#125;
+</code></pre>
+<h2 id="例子-2"><a href="#例子-2" class="headerlink" title="例子 2"></a>例子 2</h2><pre><code class="rust">#![allow(unused)]
+fn main() &#123;
+    use std::collections::HashMap;
+    use std::hash::Hash;
+    fn get_default&lt;&#39;m, K, V&gt;(map: &amp;&#39;m mut HashMap&lt;K, V&gt;, key: K) -&gt; &amp;&#39;m mut V
+    where
+        K: Clone + Eq + Hash,
+        V: Default,
+    &#123;
+        match map.get_mut(&amp;key) &#123;
+            Some(value) =&gt; value,
+            None =&gt; &#123;
+                map.insert(key.clone(), V::default());
+                map.get_mut(&amp;key).unwrap()
+            &#125;
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>运行之后：</p>
+<pre><code class="bash">error[E0499]: cannot borrow `*map` as mutable more than once at a time
+  --&gt; src\main.rs:30:17
+   |
+22 |       fn get_default&lt;&#39;m, K, V&gt;(map: &amp;&#39;m mut HashMap&lt;K, V&gt;, key: K) -&gt; &amp;&#39;m mut V
+   |                      -- lifetime `&#39;m` defined here
+...
+27 |           match map.get_mut(&amp;key) &#123;
+   |           -     --- first mutable borrow occurs here
+   |  _________|
+   | |
+28 | |             Some(value) =&gt; value,
+29 | |             None =&gt; &#123;
+30 | |                 map.insert(key.clone(), V::default());
+   | |                 ^^^ second mutable borrow occurs here
+31 | |                 map.get_mut(&amp;key).unwrap()
+32 | |             &#125;
+33 | |         &#125;
+   | |_________- returning this value requires that `*map` is borrowed for `&#39;m`
+</code></pre>
+<p>可以发现 <code>match</code> 中的变量一直活到了 <code>match</code> 结束，也就是说对 <code>map</code> 的可变借用一直持续到了 <code>match</code> 结束，因此在 <code>match</code> 里面，不能再进行任何借用。</p>
+<p>可以修改为如下的代码：</p>
+<pre><code class="rust">#![allow(unused)]
+fn main() &#123;
+    use std::collections::HashMap;
+    use std::hash::Hash;
+    fn get_default&lt;&#39;m, K, V&gt;(map: &amp;&#39;m mut HashMap&lt;K, V&gt;, key: K) -&gt; &amp;&#39;m mut V
+    where
+        K: Clone + Eq + Hash,
+        V: Default,
+    &#123;
+        if let None = map.get_mut(&amp;key) &#123;
+          map.insert(key.clone(), V::default());
+        &#125;
+        map.get_mut(&amp;key).unwrap()
+    &#125;
+&#125;
+</code></pre>
+<p>上面的代码避免了将 <code>map.get_mut</code> 的值赋值给某个变量，以防它获得较大的生命周期。</p>
+<h2 id="例子-3"><a href="#例子-3" class="headerlink" title="例子 3"></a>例子 3</h2><p>来看下面这段神奇的代码：</p>
+<pre><code class="rust">#[derive(Debug)]
+struct Life&lt;&#39;a&gt; &#123;
+    val: &amp;&#39;a str
+&#125;
+
+impl&lt;&#39;a&gt; Life&lt;&#39;a&gt; &#123;
+    
+    fn mut_brrow(&amp;&#39;a mut self) &#123; &#125;
+
+&#125;
+
+fn main() &#123;
+    let mut life = Life &#123;
+        val: &quot;eee&quot;
+    &#125;;
+
+    &#123;
+        let mut_ref = &amp;mut life;
+        mut_ref.mut_brrow();
+    &#125;
+
+    println!(&quot;&#123;:?&#125;&quot;, life);
+&#125;
+</code></pre>
+<p>运行后报错：</p>
+<pre><code class="bash">error[E0502]: cannot borrow `life` as immutable because it is also borrowed as mutable
+  --&gt; src\main.rs:22:22
+   |
+18 |         let mut_ref = &amp;mut life;
+   |                       --------- mutable borrow occurs here
+...
+22 |     println!(&quot;&#123;:?&#125;&quot;, life);
+   |                      ^^^^
+   |                      |
+   |                      immutable borrow occurs here
+   |                      mutable borrow later used here
+   |
+</code></pre>
+<p>但是一旦你把 <code>mut_brrow</code> 入参的生命周期标识删除：<code>fn mut_brrow(&amp;mut self)</code>。这段代码就可以正常运行…</p>
+<p>我们在这这里给它标上生命周期标识<code>&#39;a</code>，就表示 <code>mut_ref</code> 活的跟 <code>life</code> 一样久，虽然它实际并没有活这么久，在大括号结束后它就被回收了，但是 Rust 编译器并不这么认为。。</p>
+<h1 id="生命周期约束-HRTB"><a href="#生命周期约束-HRTB" class="headerlink" title="生命周期约束 HRTB"></a>生命周期约束 HRTB</h1><p>生命周期约束跟特征约束类似，都是通过形如 ‘a: ‘b 的语法，来说明两个生命周期的长短关系。</p>
+<h2 id="‘a-‘b"><a href="#‘a-‘b" class="headerlink" title="‘a &gt;&#x3D; ‘b"></a>‘a &gt;&#x3D; ‘b</h2><p>假设有两个引用 &amp;’a i32 和 &amp;’b i32，它们的生命周期分别是 ‘a 和 ‘b，若 ‘a &gt;&#x3D; ‘b，则可以定义 ‘a:’b，表示 ‘a 至少要活得跟 ‘b 一样久。</p>
+<pre><code class="rust">struct DoubleRef&lt;&#39;a, &#39;b:&#39;a, T&gt; &#123;
+    r: &amp;&#39;a T,
+    s: &amp;&#39;b T
+&#125;
+</code></pre>
+<p>例如上述代码定义一个结构体，它拥有两个引用字段，类型都是泛型 T，每个引用都拥有自己的生命周期，由于我们使用了生命周期约束 ‘b: ‘a，因此 ‘b 必须活得比 ‘a 久，也就是结构体中的 s 字段引用的值必须要比 r 字段引用的值活得要久。</p>
+<h2 id="T-‘a"><a href="#T-‘a" class="headerlink" title="T: ‘a"></a>T: ‘a</h2><p>表示类型 T 必须比 ‘a 活得要久：</p>
+<pre><code class="rust">struct Ref&lt;&#39;a, T: &#39;a&gt; &#123;
+    r: &amp;&#39;a T
+&#125;
+</code></pre>
+<p>因为结构体字段 r 引用了 T，因此 r 的生命周期 ‘a 必须要比 T 的生命周期更短(被引用者的生命周期必须要比引用长)。</p>
+<p>从 1.31 版本开始，编译器可以自动推导 T: ‘a 类型的约束，因此我们只需这样写即可：</p>
+<pre><code class="rust">struct Ref&lt;&#39;a, T&gt; &#123;
+    r: &amp;&#39;a T
+&#125;
+</code></pre>
+<h1 id="闭包函数的消除规则"><a href="#闭包函数的消除规则" class="headerlink" title="闭包函数的消除规则"></a>闭包函数的消除规则</h1><p>来看下面一段代码：</p>
+<pre><code class="rust">fn fn_elision(x: &amp;i32) -&gt; &amp;i32 &#123; x &#125;
+
+fn main() &#123;
+    let closure_slision = |x: &amp;i32| -&gt; &amp;i32 &#123; x &#125;;
+&#125;
+</code></pre>
+<p>运行之后可以发现，我们声明的函数没有报错，但是声明的闭包函数却报错了：</p>
+<pre><code class="bash">error: lifetime may not live long enough
+  --&gt; src\main.rs:20:47
+   |
+20 |     let closure_slision = |x: &amp;i32| -&gt; &amp;i32 &#123; x &#125;;
+   |                               -        -      ^ returning this value requires that `&#39;1` must outlive `&#39;2`
+   |                               |        |
+   |                               |        let&#39;s call the lifetime of this reference `&#39;2`
+   |                               let&#39;s call the lifetime of this reference `&#39;1`
+</code></pre>
+<p>然而实际上，结论是：<strong>这个问题，可能很难被解决，建议大家遇到后，还是老老实实用正常的函数，不要秀闭包了。</strong></p>
+<p>对于函数的生命周期而言，它的消除规则之所以能生效是因为它的生命周期完全体现在签名的引用类型上，在函数体中无需任何体现：</p>
+<pre><code class="rust">fn fn_elision(x: &amp;i32) -&gt; &amp;i32 &#123;..&#125;
+</code></pre>
+<p>因此编译器可以做各种编译优化，也很容易根据参数和返回值进行生命周期的分析，最终得出消除规则。</p>
+<p>但是对于闭包，它的生命周期分散在参数和闭包函数体中(主要是它没有确切的返回值签名)，编译器就必须深入到闭包函数体中，去分析和推测生命周期，复杂度因此急剧提升。</p>
+<blockquote>
+<p><strong>用 Fn 特征解决闭包生命周期</strong></p>
+<pre><code class="rust">fn main() &#123;
+   let closure_slision = fun(|x: &amp;i32| -&gt; &amp;i32 &#123; x &#125;);
+   assert_eq!(*closure_slision(&amp;45), 45);
+   // Passed !
+&#125;
+</code></pre>
+</blockquote>
+<blockquote>
+<p>fn fun&lt;T, F: Fn(&amp;T) -&gt; &amp;T&gt;(f: F) -&gt; F {<br>   f<br>}</p>
+<pre><code>
+</code></pre>
+</blockquote>
+<h1 id="NLL-Non-Lexical-Lifetime"><a href="#NLL-Non-Lexical-Lifetime" class="headerlink" title="NLL (Non-Lexical Lifetime)"></a>NLL (Non-Lexical Lifetime)</h1><p>引用的生命周期正常来说应该从借用开始一直持续到作用域结束，但是这种规则会让多引用共存的情况变得更复杂：</p>
+<pre><code class="rust">fn main() &#123;
+   let mut s = String::from(&quot;hello&quot;);
+
+    let r1 = &amp;s;
+    let r2 = &amp;s;
+    println!(&quot;&#123;&#125; and &#123;&#125;&quot;, r1, r2);
+    // 新编译器中，r1,r2作用域在这里结束
+
+    let r3 = &amp;mut s;
+    println!(&quot;&#123;&#125;&quot;, r3);
+&#125;
+</code></pre>
+<p>按照上述规则，这段代码将会报错，因为 r1 和 r2 的不可变引用将持续到 main 函数结束，而在此范围内，我们又借用了 r3 的可变引用，这违反了借用的规则：要么多个不可变借用，要么一个可变借用。</p>
+<p>好在，该规则从 1.31 版本引入 NLL 后，就变成了：<strong>引用的生命周期从借用处开始，一直持续到最后一次使用的地方</strong>。</p>
+<p>再来看一段关于 NLL 的代码解释：</p>
+<pre><code class="rust">let mut u = 0i32;
+let mut v = 1i32;
+let mut w = 2i32;
+
+// lifetime of `a` = α ∪ β ∪ γ
+let mut a = &amp;mut u;     // --+ α. lifetime of `&amp;mut u`  --+ lexical &quot;lifetime&quot; of `&amp;mut u`,`&amp;mut u`, `&amp;mut w` and `a`
+use(a);                 //   |                            |
+*a = 3; // &lt;-----------------+                            |
+...                     //                                |
+a = &amp;mut v;             // --+ β. lifetime of `&amp;mut v`    |
+use(a);                 //   |                            |
+*a = 4; // &lt;-----------------+                            |
+...                     //                                |
+a = &amp;mut w;             // --+ γ. lifetime of `&amp;mut w`    |
+use(a);                 //   |                            |
+*a = 5; // &lt;-----------------+ &lt;--------------------------+
+</code></pre>
+<p>这段代码一目了然，a 有三段生命周期：α，β，γ，每一段生命周期都随着当前值的最后一次使用而结束。</p>
+<h1 id="Reborrow-再借用"><a href="#Reborrow-再借用" class="headerlink" title="Reborrow 再借用"></a>Reborrow 再借用</h1><p>先来看一段代码：</p>
+<pre><code class="rust">#[derive(Debug)]
+struct Point &#123;
+    x: i32,
+    y: i32,
+&#125;
+
+impl Point &#123;
+    fn move_to(&amp;mut self, x: i32, y: i32) &#123;
+        self.x = x;
+        self.y = y;
+    &#125;
+&#125;
+
+fn main() &#123;
+    let mut p = Point &#123; x: 0, y: 0 &#125;;
+    let r = &amp;mut p;
+    let rr: &amp;Point = &amp;*r;
+
+    println!(&quot;&#123;:?&#125;&quot;, rr);
+    r.move_to(10, 10);
+    println!(&quot;&#123;:?&#125;&quot;, r);
+&#125;
+</code></pre>
+<p>以上代码，大家可能会觉得可变引用 r 和不可变引用 rr 同时存在会报错吧？但是事实上并不会，原因在于 rr 是对 r 的再借用。</p>
+<p>对于再借用而言，rr 再借用时不会破坏借用规则，但是你不能在它的生命周期内再使用原来的借用 r，来看看对上段代码的分析：</p>
+<pre><code class="rust">fn main() &#123;
+    let mut p = Point &#123; x: 0, y: 0 &#125;;
+    let r = &amp;mut p;
+    // reborrow! 此时对`r`的再借用不会导致跟上面的借用冲突
+    let rr: &amp;Point = &amp;*r;
+
+    // 再借用`rr`最后一次使用发生在这里，在它的生命周期中，我们并没有使用原来的借用`r`，因此不会报错
+    println!(&quot;&#123;:?&#125;&quot;, rr);
+
+    // 再借用结束后，才去使用原来的借用`r`
+    r.move_to(10, 10);
+    println!(&quot;&#123;:?&#125;&quot;, r);
+&#125;
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;<a target="_blank" rel="noopener" href="https://github.com/IceOfSummer">IceOfSummer</a>
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/IceOfSummer/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>

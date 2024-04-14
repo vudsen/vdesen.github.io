@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>高级 | IceOfSummerの博客</title>
+        <title>高级应用 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="后面一辈子的博客都在这了！" />
         <meta name="keywords" content="" />
@@ -167,7 +167,7 @@
 
                 <div class="article">
     <div>
-        <h1>高级</h1>
+        <h1>高级应用</h1>
     </div>
     <div class="info">
         <span class="date">
@@ -382,6 +382,12 @@ spec:
     # 在job执行完成后多久，自动删除Pod, 单位为妙，设置为0时将会理解删除
     ttlSecondsAfterFinished: 0
 </code></pre>
+<h2 id="清理已经完成的-Job"><a href="#清理已经完成的-Job" class="headerlink" title="清理已经完成的 Job"></a>清理已经完成的 Job</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/workloads/controllers/ttlafterfinished/">已完成 Job 的自动清理</a></p>
+<p>通过指定 Job 的 <code>spec.ttlSecondsAfterFinished</code> 字段来自动清理已结束的 Job。</p>
+<p>通过参数 <code>--cascade=orphan</code>，kubectl delete 命令也可以选择不同的级联删除策略：</p>
+<pre><code class="bash">kubectl delete replicaset xxx --cascade=orphan
+</code></pre>
+<p>上面的命令将删除 rs，但是不删除对应的 Pod。</p>
 
     </div>
     
