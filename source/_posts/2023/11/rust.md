@@ -20,3 +20,9 @@ categories: Rust
 - [注释和文档](/rust/rust-doc)
 - [格式化输出](/rust/output-format)
 - [单元测试和集成测试](/rust/test)
+
+---
+
+高级:
+
+- [生命周期](/rust/advance/lifecycle)
