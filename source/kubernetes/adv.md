@@ -1,5 +1,5 @@
 ---
-title: 高级
+title: 高级应用
 date: 2024-03-18 22:24:10
 categories: 
   data:
@@ -227,3 +227,16 @@ spec:
     ttlSecondsAfterFinished: 0
 ```
 
+## 清理已经完成的 Job
+
+[已完成 Job 的自动清理](https://kubernetes.io/zh-cn/docs/concepts/workloads/controllers/ttlafterfinished/)
+
+通过指定 Job 的 `spec.ttlSecondsAfterFinished` 字段来自动清理已结束的 Job。
+
+通过参数 `--cascade=orphan`，kubectl delete 命令也可以选择不同的级联删除策略：
+
+```bash
+kubectl delete replicaset xxx --cascade=orphan
+```
+
+上面的命令将删除 rs，但是不删除对应的 Pod。
