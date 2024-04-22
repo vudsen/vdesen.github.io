@@ -405,3 +405,46 @@ fn main() {
 ```
 
 
+# Box::leak
+
+`Box::leak` 可以消费掉Box并且强制目标值从内存中泄漏。
+
+## 'static 生命周期
+
+使用 `Box::leak` 可以将变量变成 `'static` 生命周期，例如把一个 `String` 转换成一个具有 `'static` 生命周期的 `&str` 类型:
+
+```rust
+fn intern_str() -> &'static str {
+    let mut s = String::new();
+    s.push_str("Hello World");
+
+    Box::leak(s.into_boxed_str())
+}
+```
+
+在正常情况下，我们创建的 `String` 只能通过返回的形式把所有权交出去，而在这里，通过 `Box::leak` 不仅返回了一个 `&str`，而且它还是 `'static` 类型的！
+
+## 给全局变量赋值
+
+```rust
+#[derive(Debug)]
+struct Config {
+    a: String,
+    b: String
+}
+
+static mut config: Option<&mut Config> = None;
+
+fn main() {
+    let c = Box::new(Config {
+        a: "A".to_string(),
+        b: "B".to_string()
+    });
+    unsafe {
+        // 在这里给 config 赋值需要值拥有 'static 的生命周期.
+        config = Some(Box::leak(c));
+
+        println!("{:?}", config);
+    }
+}
+```
