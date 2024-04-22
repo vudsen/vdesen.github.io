@@ -1,0 +1,812 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>函数式编程 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="后面一辈子的博客都在这了！" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 7.1.1"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>函数式编程</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/4/16
+        </span>
+        
+        <span class="category">
+            <a href="/2023/12/04/rust/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                Rust
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="闭包"><a href="#闭包" class="headerlink" title="闭包"></a>闭包</h1><p>闭包是一种<strong>匿名函数，它可以赋值给变量也可以作为参数传递给其它函数，不同于函数的是，它允许捕获调用者作用域中的值</strong>:</p>
+<pre><code class="rust">fn main() &#123;
+   let x = 1;
+   let sum = |y| x + y;
+
+    assert_eq!(3, sum(2));
+&#125;
+</code></pre>
+<p>上面的代码展示了非常简单的闭包 sum，它拥有一个入参 y，同时捕获了作用域中的 x 的值，因此调用 sum(2) 意味着将 2（参数 y）跟 1（x）进行相加，最终返回它们的和：3。</p>
+<p>Rust 闭包的形式定义：</p>
+<pre><code class="rust">|param1, param2,...| &#123;
+    语句1;
+    语句2;
+    返回表达式
+&#125;
+</code></pre>
+<p>如果只有一个返回表达式的话，定义可以简化为：</p>
+<pre><code class="rust">|param1| 返回表达式
+</code></pre>
+<h2 id="闭包的类型推导"><a href="#闭包的类型推导" class="headerlink" title="闭包的类型推导"></a>闭包的类型推导</h2><p>Rust 是静态语言，因此所有的变量都具有类型，但是得益于编译器的强大类型推导能力，在很多时候我们并不需要显式地去声明类型，但是显然函数并不在此列，必须手动为函数的所有参数和返回值指定类型，原因在于函数往往会作为 API 提供给你的用户，因此你的用户必须在使用时知道传入参数的类型和返回值类型。</p>
+<p>与函数相反，闭包并不会作为 API 对外提供，因此它可以享受编译器的类型推导能力，无需标注参数和返回值的类型。</p>
+<p>为了增加代码可读性，有时候我们会显式地给类型进行标注，出于同样的目的，也可以给闭包标注类型：</p>
+<pre><code class="rust">let sum = |x: i32, y: i32| -&gt; i32 &#123;
+    x + y
+&#125;
+</code></pre>
+<p>与之相比，不标注类型的闭包声明会更简洁些：let sum &#x3D; |x, y| x + y，需要注意的是，针对 sum 闭包，如果你只进行了声明，但是没有使用，编译器会提示你为 x, y 添加类型标注，因为它缺乏必要的上下文：</p>
+<pre><code class="rust">let sum  = |x, y| x + y;
+let v = sum(1, 2);
+</code></pre>
+<p>这里我们使用了 sum，同时把 1 传给了 x，2 传给了 y，因此编译器才可以推导出 x,y 的类型为 i32。</p>
+<p><strong>当编译器推导出一种类型后，它就会一直使用该类型</strong>：</p>
+<pre><code class="rust">let example_closure = |x| x;
+
+let s = example_closure(String::from(&quot;hello&quot;));
+let n = example_closure(5);
+</code></pre>
+<p>首先，在 s 中，编译器为 x 推导出类型 String，但是紧接着 n 试图用 5 这个整型去调用闭包，跟编译器之前推导的 String 类型不符，因此报错：</p>
+<pre><code class="bash">error[E0308]: mismatched types
+ --&gt; src/main.rs:5:29
+  |
+5 |     let n = example_closure(5);
+  |                             ^
+  |                             |
+  |                             expected struct `String`, found integer // 期待String类型，却发现一个整数
+  |                             help: try using a conversion method: `5.to_string()`
+</code></pre>
+<h2 id="结构体中的闭包"><a href="#结构体中的闭包" class="headerlink" title="结构体中的闭包"></a>结构体中的闭包</h2><p>假设我们要实现一个简易缓存，功能是获取一个值，然后将其缓存起来，那么可以这样设计：</p>
+<ul>
+<li>一个闭包用于获取值</li>
+<li>一个变量，用于存储该值</li>
+</ul>
+<p>可以使用结构体来代表缓存对象，最终设计如下：</p>
+<pre><code class="rust">struct Cacher&lt;T&gt;
+where
+    T: Fn(u32) -&gt; u32,
+&#123;
+    query: T,
+    value: Option&lt;u32&gt;,
+&#125;
+</code></pre>
+<p>这里使用泛型而不是直接在 <code>query</code> 上声明闭包是因为：<strong>每一个闭包实例都有独属于自己的类型，即使于两个签名一模一样的闭包，它们的类型也是不同的。</strong></p>
+<p>而标准库提供的 <code>Fn</code> 系列特征，再结合特征约束，就能很好的解决了这个问题. <code>T: Fn(u32) -&gt; u32</code> 意味着 <code>query</code> 的类型是 <code>T</code>，该类型必须实现了相应的闭包特征 <code>Fn(u32) -&gt; u32</code>。</p>
+<blockquote>
+<p>需要注意的是，其实 Fn 特征不仅仅适用于闭包，还适用于函数，因此上面的 query 字段除了使用闭包作为值外，还能使用一个具名的函数来作为它的值</p>
+</blockquote>
+<p>接着，为缓存实现方法：</p>
+<pre><code class="rust">impl&lt;T&gt; Cacher&lt;T&gt;
+where
+    T: Fn(u32) -&gt; u32,
+&#123;
+    fn new(query: T) -&gt; Cacher&lt;T&gt; &#123;
+        Cacher &#123;
+            query,
+            value: None,
+        &#125;
+    &#125;
+
+    // 先查询缓存值 `self.value`，若不存在，则调用 `query` 加载
+    fn value(&amp;mut self, arg: u32) -&gt; u32 &#123;
+        match self.value &#123;
+            Some(v) =&gt; v,
+            None =&gt; &#123;
+                let v = (self.query)(arg);
+                self.value = Some(v);
+                v
+            &#125;
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<h2 id="捕获作用域的值"><a href="#捕获作用域的值" class="headerlink" title="捕获作用域的值"></a>捕获作用域的值</h2><pre><code class="rust">fn main() &#123;
+    let x = 4;
+
+    let equal_to_x = |z| z == x;
+
+    let y = 4;
+
+    assert!(equal_to_x(y));
+&#125;
+</code></pre>
+<p>上面代码中，<code>x</code> 并不是闭包 <code>equal_to_x</code> 的参数，但是它依然可以去使用 <code>x</code>，因为 <code>equal_to_x</code> 在 <code>x</code> 的作用域范围内。</p>
+<p>对于函数来说，就算定义在 main 函数体中，它也不能访问 x：</p>
+<pre><code class="rust">fn main() &#123;
+    let x = 4;
+
+    fn equal_to_x(z: i32) -&gt; bool &#123;
+        z == x
+    &#125;
+
+    let y = 4;
+
+    assert!(equal_to_x(y));
+&#125;
+</code></pre>
+<p>报错如下：</p>
+<pre><code class="bash">error[E0434]: can&#39;t capture dynamic environment in a fn item // 在函数中无法捕获动态的环境
+ --&gt; src/main.rs:5:14
+  |
+5 |         z == x
+  |              ^
+  |
+  = help: use the `|| &#123; ... &#125;` closure form instead // 使用闭包替代
+</code></pre>
+<p>当闭包从环境中捕获一个值时，会分配内存去存储这些值。对于有些场景来说，这种额外的内存分配会成为一种负担。与之相比，函数就不会去捕获这些环境值，因此定义和使用函数不会拥有这种内存负担。</p>
+<h2 id="三种闭包函数特征"><a href="#三种闭包函数特征" class="headerlink" title="三种闭包函数特征"></a>三种闭包函数特征</h2><p>闭包捕获变量有三种途径，恰好对应函数参数的三种传入方式：转移所有权、可变借用、不可变借用，因此相应的 Fn 特征也有三种。</p>
+<h3 id="FnOnce"><a href="#FnOnce" class="headerlink" title="FnOnce"></a>FnOnce</h3><p><code>FnOnce</code>，该类型的闭包会拿走被捕获变量的所有权。Once 顾名思义，说明该闭包只能运行一次：</p>
+<pre><code class="rust">fn fn_once&lt;F&gt;(func: F)
+where
+    F: FnOnce(usize) -&gt; bool,
+&#123;
+    println!(&quot;&#123;&#125;&quot;, func(3));
+    println!(&quot;&#123;&#125;&quot;, func(4));
+&#125;
+
+fn main() &#123;
+    let x = vec![1, 2, 3];
+    fn_once(|z|&#123;z == x.len()&#125;)
+&#125;
+</code></pre>
+<p>仅实现 FnOnce 特征的闭包在调用时会转移所有权，所以显然不能对已失去所有权的闭包变量进行二次调用：</p>
+<pre><code class="bash">error[E0382]: use of moved value: `func`
+ --&gt; src\main.rs:6:20
+  |
+1 | fn fn_once&lt;F&gt;(func: F)
+  |               ---- move occurs because `func` has type `F`, which does not implement the `Copy` trait
+                  // 因为`func`的类型是没有实现`Copy`特性的 `F`，所以发生了所有权的转移
+...
+5 |     println!(&quot;&#123;&#125;&quot;, func(3));
+  |                    ------- `func` moved due to this call // 转移在这
+6 |     println!(&quot;&#123;&#125;&quot;, func(4));
+  |                    ^^^^ value used here after move // 转移后再次用
+  |
+</code></pre>
+<p>实际上为闭包加上 <code>Copy</code> 特征就可以二次调用：</p>
+<pre><code class="rust">fn fn_once&lt;F&gt;(func: F)
+where
+    F: FnOnce(usize) -&gt; bool + Copy,// 改动在这里
+&#123;
+    println!(&quot;&#123;&#125;&quot;, func(3));
+    println!(&quot;&#123;&#125;&quot;, func(4));
+&#125;
+
+fn main() &#123;
+    let x = vec![1, 2, 3];
+    fn_once(|z|&#123;z == x.len()&#125;)
+&#125;
+</code></pre>
+<p>上面代码中，func 的类型 F 实现了 Copy 特征，调用时使用的将是它的拷贝，所以并没有发生所有权的转移，可以正常运行。</p>
+<p>如果你想强制闭包取得捕获变量的所有权，可以在参数列表前添加 move 关键字，这种用法通常用于闭包的生命周期大于捕获变量的生命周期时，例如将闭包返回或移入其他线程：</p>
+<pre><code class="rust">use std::thread;
+let v = vec![1, 2, 3];
+let handle = thread::spawn(move || &#123;
+    println!(&quot;Here&#39;s a vector: &#123;:?&#125;&quot;, v);
+&#125;);
+handle.join().unwrap();
+</code></pre>
+<p>如果闭包捕获的参数实现了 <code>Copy</code> 特征，那么则会出现一点不一样的情况：</p>
+<pre><code class="rust">fn main() &#123;
+    let mut count = 0;
+
+    let mut inc = move || &#123;
+        count += 1;
+        println!(&quot;`count`: &#123;&#125;&quot;, count);
+    &#125;;
+
+    inc();
+
+    let _reborrow = &amp;count; 
+
+    inc();
+
+    // The closure no longer needs to borrow `&amp;mut count`. Therefore, it is
+    // possible to reborrow without an error
+    let _count_reborrowed = &amp;mut count; 
+
+    assert_eq!(count, 0);
+&#125;
+</code></pre>
+<p>输出：</p>
+<pre><code class="bash">`count`: 1
+`count`: 2
+</code></pre>
+<p>代码成功退出，说明了在闭包中对 <code>count</code> 进行了复制，并且和外面的 <code>count</code> 一点关联都没有了，最后可以发现我们的 <code>count</code> 仍然是 0，而闭包中的 <code>count</code> 可以正常递增。</p>
+<h3 id="FnMut"><a href="#FnMut" class="headerlink" title="FnMut"></a>FnMut</h3><p><code>FnMut</code>，它以可变借用的方式捕获了环境中的值，因此可以修改该值：</p>
+<pre><code class="rust">fn main() &#123;
+    let mut s = String::new();
+
+    // 注意这里需要加上 mut
+    let mut update_string =  |str| s.push_str(str);
+    update_string(&quot;hello&quot;);
+
+    println!(&quot;&#123;:?&#125;&quot;,s);
+&#125;
+</code></pre>
+<h3 id="Fn"><a href="#Fn" class="headerlink" title="Fn"></a>Fn</h3><p><code>Fn</code> 特征，它以不可变借用的方式捕获环境中的值:</p>
+<pre><code class="rust">fn main() &#123;
+    let mut s = String::new();
+
+    let update_string =  |str| s.push_str(str);
+
+    exec(update_string);
+
+    println!(&quot;&#123;:?&#125;&quot;,s);
+&#125;
+
+fn exec&lt;&#39;a, F: Fn(&amp;&#39;a str)&gt;(mut f: F)  &#123;
+    f(&quot;hello&quot;)
+&#125;
+</code></pre>
+<p>运行后:</p>
+<pre><code class="rust">error[E0525]: expected a closure that implements the `Fn` trait, but this closure only implements `FnMut`
+ --&gt; src/main.rs:4:26  // 期望闭包实现的是`Fn`特征，但是它只实现了`FnMut`特征
+  |
+4 |     let update_string =  |str| s.push_str(str);
+  |                          ^^^^^^-^^^^^^^^^^^^^^
+  |                          |     |
+  |                          |     closure is `FnMut` because it mutates the variable `s` here
+  |                          this closure implements `FnMut`, not `Fn` //闭包实现的是FnMut，而不是Fn
+5 |
+6 |     exec(update_string);
+  |     ---- the requirement to implement `Fn` derives from here
+</code></pre>
+<p>因为在闭包函数中我们会修改 <code>s</code>，因此 <code>update_string</code> 是 <code>FnMut</code> 类型的闭包函数。</p>
+<p>如果不对 <code>s</code> 进行修改：</p>
+<pre><code class="rust">fn main() &#123;
+    let s = &quot;hello, &quot;.to_string();
+
+    let update_string =  |str| println!(&quot;&#123;&#125;,&#123;&#125;&quot;,s,str);
+
+    exec(update_string);
+
+    println!(&quot;&#123;:?&#125;&quot;,s);
+&#125;
+
+fn exec&lt;&#39;a, F: Fn(String) -&gt; ()&gt;(f: F)  &#123;
+    f(&quot;world&quot;.to_string())
+&#125;
+</code></pre>
+<p>在这里，因为无需改变 s，因此闭包中只对 s 进行了不可变借用，那么在 exec 中，将其标记为 Fn 特征就完全正确。</p>
+<h3 id="三种-Fn-的关系"><a href="#三种-Fn-的关系" class="headerlink" title="三种 Fn 的关系"></a>三种 Fn 的关系</h3><p>实际上，一个闭包并不仅仅实现某一种 Fn 特征，规则如下：</p>
+<ul>
+<li>所有的闭包都自动实现了 FnOnce 特征，因此任何一个闭包都至少可以被调用一次</li>
+<li>没有移出所捕获变量的所有权的闭包自动实现了 FnMut 特征</li>
+<li>不需要对捕获变量进行改变的闭包自动实现了 Fn 特征</li>
+</ul>
+<pre><code class="rust">fn main() &#123;
+    let s = String::new();
+
+    let update_string =  || println!(&quot;&#123;&#125;&quot;,s);
+
+    exec(update_string);
+    exec1(update_string);
+    exec2(update_string);
+&#125;
+
+fn exec&lt;F: FnOnce()&gt;(f: F)  &#123;
+    f()
+&#125;
+
+fn exec1&lt;F: FnMut()&gt;(mut f: F)  &#123;
+    f()
+&#125;
+
+fn exec2&lt;F: Fn()&gt;(f: F)  &#123;
+    f()
+&#125;
+</code></pre>
+<p>虽然，闭包只是对 <code>s</code> 进行了不可变借用，实际上，它可以适用于任何一种 <code>Fn</code> 特征：三个 <code>exec</code> 函数说明了一切。</p>
+<h2 id="闭包作为函数返回值"><a href="#闭包作为函数返回值" class="headerlink" title="闭包作为函数返回值"></a>闭包作为函数返回值</h2><pre><code class="rust">fn factory() -&gt; Fn(i32) -&gt; i32 &#123;
+    let num = 5;
+
+    |x| x + num
+&#125;
+
+let f = factory();
+
+let answer = f(1);
+assert_eq!(6, answer);
+</code></pre>
+<p>上述代码，看着很正常，实际编译时会报错：</p>
+<pre><code class="bash">fn factory&lt;T&gt;() -&gt; Fn(i32) -&gt; i32 &#123;
+  |                    ^^^^^^^^^^^^^^ doesn&#39;t have a size known at compile-time // 该类型在编译器没有固定的大小
+
+help: use `impl Fn(i32) -&gt; i32` as the return type, as all return paths are of type `[closure@src/main.rs:11:5: 11:21]`, which implements `Fn(i32) -&gt; i32`
+  |
+8 | fn factory&lt;T&gt;() -&gt; impl Fn(i32) -&gt; i32 &#123;
+</code></pre>
+<p>Rust 要求函数的参数和返回类型，必须有固定的内存大小，例如 <code>i32</code> 就是 4 个字节，引用类型是 8 个字节，总之，绝大部分类型都有固定的大小，但是不包括特征，因为特征类似接口，对于编译器来说，无法知道它后面藏的真实类型是什么，因为也无法得知具体的大小。</p>
+<p>因此在这里编译器也提示我们使用 <code>impl Fn(i32) -&gt; i32</code>，但是这种方式只能返回一种类型：</p>
+<pre><code class="rust">fn factory(x:i32) -&gt; impl Fn(i32) -&gt; i32 &#123;
+
+    let num = 5;
+
+    if x &gt; 1&#123;
+        move |x| x + num
+    &#125; else &#123;
+        move |x| x - num
+    &#125;
+&#125;
+</code></pre>
+<p>运行后编译器报错：</p>
+<pre><code class="bash">error[E0308]: `if` and `else` have incompatible types
+  --&gt; src/main.rs:15:9
+   |
+12 | /     if x &gt; 1&#123;
+13 | |         move |x| x + num
+   | |         ---------------- expected because of this
+14 | |     &#125; else &#123;
+15 | |         move |x| x - num
+   | |         ^^^^^^^^^^^^^^^^ expected closure, found a different closure
+16 | |     &#125;
+   | |_____- `if` and `else` have incompatible types
+   |
+
+= help: consider boxing your closure and/or using it as a trait object
+</code></pre>
+<p>这时编译器又提示使用 <code>Box</code>：</p>
+<pre><code class="rust">fn factory(x:i32) -&gt; Box&lt;dyn Fn(i32) -&gt; i32&gt; &#123;
+    let num = 5;
+
+    if x &gt; 1&#123;
+        Box::new(move |x| x + num)
+    &#125; else &#123;
+        Box::new(move |x| x - num)
+    &#125;
+&#125;
+</code></pre>
+<p>至此，闭包作为函数返回值就已完美解决。</p>
+<h1 id="迭代器"><a href="#迭代器" class="headerlink" title="迭代器"></a>迭代器</h1><h2 id="For-循环与迭代器"><a href="#For-循环与迭代器" class="headerlink" title="For 循环与迭代器"></a>For 循环与迭代器</h2><p>在 rust 中的一个 <code>for</code> 循环如下：</p>
+<pre><code class="rust">let arr = [1, 2, 3];
+for v in arr &#123;
+    println!(&quot;&#123;&#125;&quot;,v);
+&#125;
+</code></pre>
+<p>Rust 没有使用索引，它把 <code>arr</code> 数组当成一个迭代器，直接去遍历其中的元素，从哪里开始，从哪里结束，都无需操心。</p>
+<p>虽然数组可以遍历，但是它并不是一个迭代器！它能迭代的原因是因为它实现了 <code>IntoIterator</code> 特征，只要实现了这个特征的类型都可以被 <code>for</code> 遍历。</p>
+<p>类似的还有：</p>
+<pre><code class="rust">for i in 1..10 &#123;
+    println!(&quot;&#123;&#125;&quot;, i);
+&#125;
+</code></pre>
+<p>直接对数值序列进行迭代，也是很常见的使用方式。</p>
+<p>IntoIterator 特征拥有一个 into_iter 方法，因此我们还可以显式的把数组转换成迭代器：</p>
+<pre><code class="rust">let arr = [1, 2, 3];
+for v in arr.into_iter() &#123;
+    println!(&quot;&#123;&#125;&quot;, v);
+&#125;
+</code></pre>
+<h2 id="手动遍历"><a href="#手动遍历" class="headerlink" title="手动遍历"></a>手动遍历</h2><p><code>Iterator</code> 特征部分结构如下：</p>
+<pre><code class="rust">pub trait Iterator &#123;
+    type Item;
+
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt;;
+
+    // 省略其余有默认实现的方法
+&#125;
+</code></pre>
+<p>其中的 <code>next</code> 方法，就是控制如何从集合中取值，最终返回值的类型是关联类型 <code>Item</code>。</p>
+<p>而 <code>for</code> 循环也正是不断调用迭代器上的 <code>next</code> 方法，来获取迭代器中的元素。</p>
+<p>我们也可以手动调用：</p>
+<pre><code class="rust">fn main() &#123;
+    let arr = [1, 2, 3];
+    let mut arr_iter = arr.into_iter();
+
+    assert_eq!(arr_iter.next(), Some(1));
+    assert_eq!(arr_iter.next(), Some(2));
+    assert_eq!(arr_iter.next(), Some(3));
+    assert_eq!(arr_iter.next(), None);
+&#125;
+</code></pre>
+<p>通过调用其上的 <code>next</code> 方法，我们获取了 <code>arr</code> 中的元素，有两点需要注意：</p>
+<ul>
+<li><code>next</code> 方法返回的是 <code>Option</code> 类型，当有值时返回 <code>Some(i32)</code>，无值时返回 <code>None</code></li>
+<li>遍历是按照迭代器中元素的排列顺序依次进行的，因此我们严格按照数组中元素的顺序取出了 <code>Some(1)</code>，<code>Some(2)</code>，<code>Some(3)</code></li>
+<li>手动迭代必须将迭代器声明为 <code>mut</code> 可变，因为调用 <code>next</code> 会改变迭代器其中的状态数据（当前遍历的位置等），而 <code>for</code> 循环去迭代则无需标注 <code>mut</code>，因为它会帮我们自动完成</li>
+</ul>
+<p>模拟 <code>for</code> 循环：</p>
+<pre><code class="rust">let values = vec![1, 2, 3];
+
+&#123;
+    let result = match IntoIterator::into_iter(values) &#123;
+        mut iter =&gt; loop &#123;
+            match iter.next() &#123;
+                Some(x) =&gt; &#123; println!(&quot;&#123;&#125;&quot;, x); &#125;,
+                None =&gt; break,
+            &#125;
+        &#125;,
+    &#125;;
+    result
+&#125;
+</code></pre>
+<p><code>IntoIterator::into_iter</code> 是使用完全限定的方式去调用 <code>into_iter</code> 方法，这种调用方式跟 <code>values.into_iter()</code> 是等价的。</p>
+<p>同时我们使用了 <code>loop</code> 循环配合 <code>next</code> 方法来遍历迭代器中的元素，当迭代器返回 <code>None</code> 时，跳出循环。</p>
+<h2 id="IntoIterator-特征"><a href="#IntoIterator-特征" class="headerlink" title="IntoIterator 特征"></a>IntoIterator 特征</h2><h3 id="into-iter-iter-iter-mut"><a href="#into-iter-iter-iter-mut" class="headerlink" title="into_iter, iter, iter_mut"></a>into_iter, iter, iter_mut</h3><p>除了 <code>into_iter</code> 外，还有 <code>iter</code> 和 <code>iter_mut</code> 另外两个方法：</p>
+<ul>
+<li>into_iter 会夺走所有权</li>
+<li>iter 是不可变借用</li>
+<li>iter_mut 是可变借用</li>
+</ul>
+<p>具体用例如下：</p>
+<pre><code class="rust">fn main() &#123;
+    let values = vec![1, 2, 3];
+
+    for v in values.into_iter() &#123;
+        println!(&quot;&#123;&#125;&quot;, v)
+    &#125;
+
+    // 下面的代码将报错，因为 values 的所有权在上面 `for` 循环中已经被转移走
+    // println!(&quot;&#123;:?&#125;&quot;,values);
+
+    let values = vec![1, 2, 3];
+    let _values_iter = values.iter();
+
+    // 不会报错，因为 values_iter 只是借用了 values 中的元素
+    println!(&quot;&#123;:?&#125;&quot;, values);
+
+    let mut values = vec![1, 2, 3];
+    // 对 values 中的元素进行可变借用
+    let mut values_iter_mut = values.iter_mut();
+
+    // 取出第一个元素，并修改为0
+    if let Some(v) = values_iter_mut.next() &#123;
+        *v = 0;
+    &#125;
+
+    // 输出[0, 2, 3]
+    println!(&quot;&#123;:?&#125;&quot;, values);
+&#125;
+</code></pre>
+<h2 id="消费者与适配器"><a href="#消费者与适配器" class="headerlink" title="消费者与适配器"></a>消费者与适配器</h2><p>消费者是迭代器上的方法，它会消费掉迭代器中的元素，然后返回其类型的值，这些消费者都有一个共同的特点：在它们的定义中，都依赖 <code>next</code> 方法来消费元素，因此这也是为什么迭代器要实现 <code>Iterator</code> 特征，而该特征必须要实现 <code>next</code> 方法的原因。</p>
+<h3 id="消费者适配器"><a href="#消费者适配器" class="headerlink" title="消费者适配器"></a>消费者适配器</h3><p>只要迭代器上的某个方法 A 在其内部调用了 <code>next</code> 方法，那么 A 就被称为消费性适配器：因为 <code>next</code> 方法会消耗掉迭代器上的元素，所以方法 A 的调用也会消耗掉迭代器上的元素。</p>
+<p>其中一个例子是 <code>sum</code> 方法，它会拿走迭代器的所有权，然后通过不断调用 <code>next</code> 方法对里面的元素进行求和：</p>
+<pre><code class="rust">fn main() &#123;
+    let v1 = vec![1, 2, 3];
+
+    let v1_iter = v1.iter();
+
+    let total: i32 = v1_iter.sum();
+
+    assert_eq!(total, 6);
+
+    // v1_iter 是借用了 v1，因此 v1 可以照常使用
+    println!(&quot;&#123;:?&#125;&quot;,v1);
+
+    // 以下代码会报错，因为 `sum` 拿到了迭代器 `v1_iter` 的所有权
+    println!(&quot;&#123;:?&#125;&quot;,v1_iter);
+&#125;
+</code></pre>
+<p>运行后，只有最后一段代码报错：</p>
+<pre><code class="bash">error[E0382]: borrow of moved value: `v1_iter`
+    --&gt; src/main.rs:14:21
+     |
+4    |     let v1_iter = v1.iter();
+     |         ------- move occurs because `v1_iter` has type `std::slice::Iter&lt;&#39;_, i32&gt;`, which does not implement the `Copy` trait
+5    |
+6    |     let total: i32 = v1_iter.sum();
+     |                              ----- `v1_iter` moved due to this method call
+...
+14   |     println!(&quot;&#123;:?&#125;&quot;,v1_iter);
+     |                     ^^^^^^^ value borrowed here after move
+     |
+note: `std::iter::Iterator::sum` takes ownership of the receiver `self`, which moves `v1_iter`
+</code></pre>
+<h3 id="迭代器适配器"><a href="#迭代器适配器" class="headerlink" title="迭代器适配器"></a>迭代器适配器</h3><p>迭代器适配器会返回一个新的迭代器，与消费者适配器不同，迭代器适配器是惰性的，意味着你需要一个消费者适配器来收尾，最终将迭代器转换成一个具体的值：</p>
+<pre><code class="rust">let v1: Vec&lt;i32&gt; = vec![1, 2, 3];
+
+let v2: Vec&lt;_&gt; = v1.iter().map(|x| x + 1).collect();
+
+assert_eq!(v2, vec![2, 3, 4]);
+</code></pre>
+<p>这里的 <code>map</code> 方法是一个迭代者适配器，它是惰性的，不产生任何行为，因此我们还需要一个消费者适配器(<code>collect</code>)进行收尾。</p>
+<p>上面代码中，使用了 <code>collect</code> 方法，该方法就是一个消费者适配器，使用它可以将一个迭代器中的元素收集到指定类型中，这里我们为 <code>v2</code> 标注了 <code>Vec&lt;_&gt;</code> 类型，就是为了告诉 <code>collect</code>：请把迭代器中的元素消费掉，然后把值收集成 <code>Vec&lt;_&gt;</code> 类型，至于为何使用 <code>_</code>，因为编译器会帮我们自动推导。</p>
+<p>再来看看如何使用 collect 收集成 HashMap 集合：</p>
+<pre><code class="rust">use std::collections::HashMap;
+fn main() &#123;
+    let names = [&quot;sunface&quot;, &quot;sunfei&quot;];
+    let ages = [18, 18];
+    let folks: HashMap&lt;_, _&gt; = names.into_iter().zip(ages.into_iter()).collect();
+
+    println!(&quot;&#123;:?&#125;&quot;,folks);
+&#125;
+</code></pre>
+<p><code>zip</code> 是一个迭代器适配器，它的作用就是将两个迭代器的内容压缩到一起，形成 <code>Iterator&lt;Item=(ValueFromA, ValueFromB)&gt;</code> 这样的新的迭代器，在此处就是形如 <code>[(name1, age1), (name2, age2)]</code> 的迭代器。</p>
+<p>然后再通过 <code>collect</code> 将新迭代器中<code>(K, V)</code> 形式的值收集成 <code>HashMap&lt;K, V&gt;</code>，同样的，这里必须显式声明类型，然后 <code>HashMap</code> 内部的 <code>KV</code> 类型可以交给编译器去推导，最终编译器会推导出 <code>HashMap&lt;&amp;str, i32&gt;</code>。</p>
+<h2 id="实现-Iterator-特征"><a href="#实现-Iterator-特征" class="headerlink" title="实现 Iterator 特征"></a>实现 Iterator 特征</h2><p>首先创建一个计数器：</p>
+<pre><code class="rust">struct Counter &#123;
+    count: u32,
+&#125;
+
+impl Counter &#123;
+    fn new() -&gt; Counter &#123;
+        Counter &#123; count: 0 &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>之后为其实现 <code>Iterator</code> 特征：</p>
+<pre><code class="rust">impl Iterator for Counter &#123;
+    type Item = u32;
+
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; &#123;
+        if self.count &lt; 5 &#123;
+            self.count += 1;
+            Some(self.count)
+        &#125; else &#123;
+            None
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>首先，将该特征的关联类型设置为 <code>u32</code>，由于我们的计数器保存的 <code>count</code> 字段就是 <code>u32</code> 类型， 因此在 <code>next</code> 方法中，最后返回的是实际上是 <code>Option&lt;u32&gt;</code> 类型。</p>
+<p>每次调用 <code>next</code> 方法，都会让计数器的值加一，然后返回最新的计数值，一旦计数大于 <code>5</code>，就返回 <code>None</code>。</p>
+<p>最后，使用我们新建的 <code>Counter</code> 进行迭代：</p>
+<pre><code class="rust"> let mut counter = Counter::new();
+
+assert_eq!(counter.next(), Some(1));
+assert_eq!(counter.next(), Some(2));
+assert_eq!(counter.next(), Some(3));
+assert_eq!(counter.next(), Some(4));
+assert_eq!(counter.next(), Some(5));
+assert_eq!(counter.next(), None);
+
+let sum: u32 = Counter::new()
+    .zip(Counter::new().skip(1))
+    .map(|(a, b)| a * b)
+    .filter(|x| x % 3 == 0)
+    .sum();
+assert_eq!(18, sum);
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;<a target="_blank" rel="noopener" href="https://github.com/IceOfSummer">IceOfSummer</a>
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/IceOfSummer/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>

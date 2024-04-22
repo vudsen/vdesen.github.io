@@ -496,6 +496,37 @@ fn main() &#123;
     println!(&quot;&#123;:?&#125;&quot;, r);
 &#125;
 </code></pre>
+<h1 id="Box-leak"><a href="#Box-leak" class="headerlink" title="Box::leak"></a>Box::leak</h1><p><code>Box::leak</code> 可以消费掉Box并且强制目标值从内存中泄漏。</p>
+<h2 id="‘static-生命周期"><a href="#‘static-生命周期" class="headerlink" title="‘static 生命周期"></a>‘static 生命周期</h2><p>使用 <code>Box::leak</code> 可以将变量变成 <code>&#39;static</code> 生命周期，例如把一个 <code>String</code> 转换成一个具有 <code>&#39;static</code> 生命周期的 <code>&amp;str</code> 类型:</p>
+<pre><code class="rust">fn intern_str() -&gt; &amp;&#39;static str &#123;
+    let mut s = String::new();
+    s.push_str(&quot;Hello World&quot;);
+
+    Box::leak(s.into_boxed_str())
+&#125;
+</code></pre>
+<p>在正常情况下，我们创建的 <code>String</code> 只能通过返回的形式把所有权交出去，而在这里，通过 <code>Box::leak</code> 不仅返回了一个 <code>&amp;str</code>，而且它还是 <code>&#39;static</code> 类型的！</p>
+<h2 id="给全局变量赋值"><a href="#给全局变量赋值" class="headerlink" title="给全局变量赋值"></a>给全局变量赋值</h2><pre><code class="rust">#[derive(Debug)]
+struct Config &#123;
+    a: String,
+    b: String
+&#125;
+
+static mut config: Option&lt;&amp;mut Config&gt; = None;
+
+fn main() &#123;
+    let c = Box::new(Config &#123;
+        a: &quot;A&quot;.to_string(),
+        b: &quot;B&quot;.to_string()
+    &#125;);
+    unsafe &#123;
+        // 在这里给 config 赋值需要值拥有 &#39;static 的生命周期.
+        config = Some(Box::leak(c));
+
+        println!(&quot;&#123;:?&#125;&quot;, config);
+    &#125;
+&#125;
+</code></pre>
 
     </div>
     
