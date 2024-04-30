@@ -162,3 +162,177 @@ metadata:
     - 使用 `pod-host-name.service-name`
   - 不同命名空间
     - 使用 `pod-host-name.service-name.namespace`
+
+## 无头服务
+
+无头服务除了可以给有状态副本集使用外，还有一些其它的用处。
+
+> [无头服务](https://kubernetes.io/zh-cn/docs/concepts/services-networking/service/#headless-services)
+
+### 配置外部资源
+
+由于数据库等对性能等要求比较高的中间件，一般都不会容器化部署，而且一般会有很多服务使用同一个数据库。
+
+虽然可以直接在配置文件中直接指定数据库的 Ip 地址，但是一旦发生变动，每个服务都需要跟着改动。
+
+此时就可以使用无头服务，**每个配置文件只需要配置成服务的名称就可以访问数据库，而不需要关心数据库具体是哪个 Ip 地址**。
+
+创建一个无头服务：
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata: 
+  name: db-svc
+spec:
+  clusterIP: None
+  ports:
+  - name: foo
+    port: 10000
+
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: db-svc
+subsets:
+  - addresses:
+      - ip: 192.168.11.13 # 任意外网地址
+    ports:
+      - port: 3306 # 端口
+```
+
+> `Endpoints` 和 `Service` 名字和命名空间必须相同。
+
+使用 `Endpoints` 搭配 `Service` 使用，即可完成我们的需求。
+
+而且相比于直接配置 `Service` 的 `externalName`，这里可以配置多个 Ip，并且自带负载均衡。
+
+# Ingress
+
+为什么需要 Ingress：
+
+- Service 可以使用 NodePort 暴露集群外访问端口，但是性能低下不安全
+- 缺少在 *应用层* 的统一访问入口
+
+> Ingress目前已停止更新。新的功能正在集成至[网关 API](https://kubernetes.io/zh-cn/docs/concepts/services-networking/gateway/) 中。
+
+![架构图](https://selfb.asia/images/2024/04/k8s-ingress.webp)
+
+
+## 安装 Ingress Nginx
+
+[Ingress Nginx 文档](https://kubernetes.io/zh-cn/docs/concepts/services-networking/gateway/)
+
+`Ingress Nginx` 是由 K8s 官方团队制作的，专门用于适配 Nginx 的组件。
+
+还有一款产品叫 `Nginx Ingress`，它是 Nginx 官方做的，分为开源版和 `Nginx Plus` 版(**收费**)。
+
+打开文档，下载 yaml 并编辑：https://kubernetes.github.io/ingress-nginx/deploy/#bare-metal-clusters
+
+需要做如下修改：
+
+- 将名称为`ingress-nginx-controller`的服务的类型(spec.type)改为 `ClusterIp`。
+- 将名称为`ingress-nginx-controller`的部署的类型(kind)从 `Deploy` 改为 `DaemonSet`，并且将网络模式改为主机模式(`spec.template.spec.hostNetwork` = `true`)。
+- 修改镜像连接：
+  - `registry.aliyuncs.com/google_containers/nginx-ingress-controller:v1.8.1`
+  - `registry.aliyuncs.com/google_containers/kube-webhook-certgen:v20230407`
+
+> 实际有很多种部署方式，可以按需求使用：[裸金属服务器部署建议](https://kubernetes.github.io/ingress-nginx/deploy/baremetal)
+> 一般有下面几种：
+> - 使用 MetalLB 做 LoadBalancer
+> - Pod 使用主机网络模式
+> - 使用 NodePort 暴露 nginx-controller 服务
+> - 使用 NodePort 暴露业务服务，然后使用某个能够对外暴露的负载均衡器进行负载均衡
+
+## Ingress 配置
+
+`Ingress Nginx` 安装完后，它会自动监听我们的 Ingress 配置并实时应用，我们只需要配置 Ingress 就可以了。
+
+> 可以声明多个 Ingress，每个 Ingress 会合并，而不是覆盖。
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress  
+spec:
+  # 如果只需要暴露一个http和https端口，直接填默认的 `nginx` 就行，如果需要配置多个端口，则需要特殊处理
+  ingressClassName: <string>
+
+  # 默认后端服务, 如果没有路径匹配，则使用默认服务
+  defaultBackend: IngressBackend
+
+  # 定义转发规则
+  rules: 
+    # 访问域名
+    - host: <string>
+      http: 
+        # 定义具体访问路径
+        paths: <[]HTTPIngressPath>
+        
+          # 指定后端
+          backend: <IngressBackend>
+            # 使用后端服务
+            service:
+              # 服务名称
+              name: <string>
+              port: 
+                # 名称，不填使用端口号作为名称
+                name: <string>
+                # 使用服务的哪个端口
+                number: <number> 
+
+            # 使用后端资源
+            resource: <TypedLocalObjectReference>
+
+          # 精确匹配/自定义匹配(由ingress-class实现)/前缀匹配
+          pathType: Exact/ImplementationSpecific/Prefix
+
+          # 访问路径
+          path: <string>
+          
+
+  # 定义安全链接
+  tls: IngressTLS[]
+```
+
+## 添加注解
+
+[Annotations](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations)
+
+在 Ingress 的 `metadata.annotations` 中可以配置一系列注解，可以通过注解开启一些高级功能。
+
+```yaml
+kind: Ingress
+metadata:
+  name: my-ingress
+  annotations:
+    # 限制每秒最多只能处理一个请求
+    nginx.ingress.kubernetes.io/limit-rps: "1"
+```
+
+注意文档中虽然有些注解要求的是 `number` 类型，**但是在配置文件中，仍然要写成字符串**。
+
+## 常用文档
+
+- [全局配置文件](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/)
+- [添加请求头](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/)
+
+# 网关 API
+
+[文档](https://gateway-api.sigs.k8s.io/guides/)
+
+根据文件应用一个 yaml 后，将会创建 4 个自定义资源：
+
+```shell
+[root@k8s-main api-gateway]# kubectl apply -f standard-install.yaml 
+customresourcedefinition.apiextensions.k8s.io/gatewayclasses.gateway.networking.k8s.io created
+customresourcedefinition.apiextensions.k8s.io/gateways.gateway.networking.k8s.io created
+customresourcedefinition.apiextensions.k8s.io/httproutes.gateway.networking.k8s.io created
+customresourcedefinition.apiextensions.k8s.io/referencegrants.gateway.networking.k8s.io created
+```
+
+之后需要选择 API 网关的实现类，可以在这里找到：[implementations](https://gateway-api.sigs.k8s.io/implementations)
+
+这里我用的是 [nginx-gateway-fabric](https://docs.nginx.com/nginx-gateway-fabric)
+
+照着文档直接部署即可，后面会有一个 deploy 里面，有两个镜像都用了 ghcr.io 里面的，这个域名国内是访问不到的，我这里是搭梯子拉下来然后推送到私有仓库里面了。

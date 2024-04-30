@@ -209,7 +209,6 @@ curl -O https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1
 
 - `registry.aliyuncs.com/google_containers/nginx-ingress-controller:v1.8.1`
 - `registry.aliyuncs.com/google_containers/kube-webhook-certgen:v20230407`
-- `registry.aliyuncs.com/google_containers/kube-webhook-certgen:v20230407`
 
 
 ### 修改服务类型
