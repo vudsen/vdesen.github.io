@@ -28,3 +28,4 @@ categories: Rust
 - [生命周期](/rust/advance/lifecycle)
 - [函数式编程](/rust/advance/functional-programming)
 - [深入类型](/rust/advance/type)
+- [智能指针](/rust/advance/smart-pointer)
