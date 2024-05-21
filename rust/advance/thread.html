@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>Ribbon | IceOfSummerの博客</title>
+        <title>多线程并发编程 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="后面一辈子的博客都在这了！" />
         <meta name="keywords" content="" />
@@ -167,116 +167,85 @@
 
                 <div class="article">
     <div>
-        <h1>Ribbon</h1>
+        <h1>多线程并发编程</h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2023/3/5
+            2024/5/20
         </span>
         
         <span class="category">
-            <a href="/2023/03/04/SpringCloud/">
+            <a href="/2023/12/04/rust/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
-                SpringCloud
+                Rust
             </a>
         </span>
         
-        
-        <span class="tags">
-            <span class="icon">
-                <i class="fa-solid fa-tags fa-fw"></i>
-            </span>
-            
-            <span class="tag">
-                
-                <a href="/SpringCloud/loadbalance" style="color: #00a596">负载均衡</a>
-            </span>
-            
-        </span>
         
     </div>
     
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
-        <p>Spring Cloud Ribbon是基于Netflix Ribbon实现的一套<font color="red">客户端负载均衡的工具</font>。</p>
-<p>简单的说，Ribbon是Netflix发布的开源项目，主要功能是提供<font color="red">客户端的软件负载均衡算法和服务调用</font>。Ribbon客户端组件提供一系列完善的配置项如连接超时重试等。简单的说，就是在配置文件中列出Load Balancer(简称LB)后面所有的机器，Ribbon会自动的基于某种规则(如简单轮询，随机连接等)去连接这些机器。</p>
-<p><font color="red">Ribbon目前已经进入维护模式(即只修Bug，不出新东西): <a target="_blank" rel="noopener" href="https://github.com/Netflix/ribbon">Netflix&#x2F;ribbon(github.com)</a></font></p>
+        <h1 id="使用线程"><a href="#使用线程" class="headerlink" title="使用线程"></a>使用线程</h1><h2 id="创建线程"><a href="#创建线程" class="headerlink" title="创建线程"></a>创建线程</h2><p>使用 <code>thread::spawn</code> 可以创建线程：</p>
+<pre><code class="rust">use std::thread;
+use std::time::Duration;
+
+fn main() &#123;
+    thread::spawn(|| &#123;
+        for i in 1..10 &#123;
+            println!(&quot;hi number &#123;&#125; from the spawned thread!&quot;, i);
+            thread::sleep(Duration::from_millis(1));
+        &#125;
+    &#125;);
+
+    for i in 1..5 &#123;
+        println!(&quot;hi number &#123;&#125; from the main thread!&quot;, i);
+        thread::sleep(Duration::from_millis(1));
+    &#125;
+&#125;
+</code></pre>
+<p>有几点值得注意：</p>
 <ul>
-<li><a href="/SpringCloud/loadbalance/spring-cloud-loadbalancer.md">SpringCloudLoadbalancer</a></li>
+<li>线程内部的代码使用闭包来执行</li>
+<li><code>main</code> 线程一旦结束，程序就立刻结束，因此需要保持它的存活，直到其它子线程完成自己的任务</li>
+<li><code>thread::sleep</code> 会让当前线程休眠指定的时间，随后其它线程会被调度运行（上一节并发与并行中有简单介绍过），因此就算你的电脑只有一个 <code>CPU</code> 核心，该程序也会表现的如同多 <code>CPU</code> 核心一般，这就是并发！</li>
 </ul>
-<p><strong>负载均衡:</strong></p>
-<p>​	将用户的请求平摊地分配到多个服务商，从而达到系统的HA(高可用)。常见的负载均衡软件有Nginx，LVS，硬件F5等。</p>
-<p><strong>Ribbon VS Nginx</strong>：</p>
-<p>​	Nginx是服务器负载均衡，客户端所有请求都会交给Nginx，然后由Nginx实现转发请求。即负载均衡是由服务端实现的，可以叫做<code>集中式LB</code>。</p>
-<p>​	Ribbon本地负载均衡，在调用微服务接口时，会在注册中心获取注册的服务器列表后缓存到本地，从而在本地实现RPC远程服务调用技术，可以叫做<code>进程内LB</code>。</p>
-<h2 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h2><p>导入依赖</p>
-<pre><code class="xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-cloud-starter-netflix-ribbon&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre>
-<p>之后添加配置类：</p>
-<pre><code class="java">import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+<p>并且这段代码的每次运行结果都将不一样！</p>
+<h2 id="等待子线程结束"><a href="#等待子线程结束" class="headerlink" title="等待子线程结束"></a>等待子线程结束</h2><p>在某些情况下，某个线程需要等待其它线程执行完成后才能继续，例如在上面的例子中，我们希望主线程在子线程执行完后再执行后面的打印过程。</p>
+<p>可以使用 <code>thread::spawn</code> 的返回值 <code>JoinHandle</code>，调用它的 <code>join</code> 方法：</p>
+<pre><code class="rust">use std::thread;
+use std::time::Duration;
 
-@Configuration
-public class ApplicationConextConfig &#123;
+fn main() &#123;
+    let handle = thread::spawn(|| &#123;
+        for i in 1..5 &#123;
+            println!(&quot;hi number &#123;&#125; from the spawned thread!&quot;, i);
+            thread::sleep(Duration::from_millis(1));
+        &#125;
+    &#125;);
 
-    @Bean
-    // 添加负载均衡
-    @LoadBalanced
-    public RestTemplate restTemplate() &#123;
-        return new RestTemplate();
-    &#125;
+    handle.join().unwrap();
 
-&#125;
-</code></pre>
-<p>默认的策略是轮询方法，将域名替换成服务名即可进行调用。</p>
-<h2 id="替换负载均衡算法-已经失效"><a href="#替换负载均衡算法-已经失效" class="headerlink" title="替换负载均衡算法(已经失效)"></a>替换负载均衡算法(已经失效)</h2><blockquote>
-<p>旧版中spring-cloud-starter-netflix-eureka-client自带ribbon相关依赖，但是新版本(3.x)已经没有了，并且官方推荐使用spring-cloud-loadbalancer，<font color="red">在新版本中使用ribbon可能(一定)会有兼容性问题</font></p>
-</blockquote>
-<p>负载均衡算法主要由<code>AbstractLoadBalancerRule</code>子类实现：</p>
-<p><img lazy="https://selfb.asia/public/SpringCloud/2023-2-0-d06ac3b8-44b8-479d-8ab6-de9bad94c485.png" alt="impl"></p>
-<ul>
-<li><font color="skyblue">RoundRobinRule</font>: 轮询</li>
-<li><font color="skyblue">RandomRule</font>: 随机</li>
-<li><font color="skyblue">RetryRule</font>: 先按照RoundRobinRule策略获取服务，如果获取服务失败则在指定时间内会进行重试，获取可用的服务</li>
-<li><font color="skyblue">WeightedResponseTimeRule</font>: 对RoundRobinRule的扩展，服务的权重越大，越容易被选中</li>
-<li><font color="skyblue">BestAvailableRule</font>: 会先过滤掉由于多次访问故障的服务，然后选中一个并发量最小的服务</li>
-<li><font color="skyblue">AvailabilityFilteringRule</font>: 先过滤掉故障实例，再选中并发较小的实例</li>
-<li><font color="skyblue">ZoneAvoidanceRule</font>: 默认规则，复合判断Server所在区域的性能和Server的可用性来选择服务器</li>
-</ul>
-<p>在文档里说过，配置类不应在启动类所在的包里：<a target="_blank" rel="noopener" href="https://www.springcloud.cc/spring-cloud-dalston.html#spring-cloud-ribbon">Spring Cloud Dalston 中文文档 参考手册 中文版</a>(想找Spring官方文档，结果没找到)</p>
-<p>之后直接配置既可：</p>
-<pre><code class="java">package pers.xds.lbrule;
-
-@Configuration
-public class MySelfRule &#123;
-
-    @Bean
-    public IRule myRule() &#123;
-        return new RandomRule();
-    &#125;
-
-&#125;
-</code></pre>
-<p>之后在主类配置：</p>
-<pre><code class="java">package pers.xds.springcloud;
-
-@SpringBootApplication
-@EnableEurekaClient
-// 这里代表客户端要访问的服务，必须大写
-@RibbonClient(name = &quot;CLOUD-PAYMENT-SERVICE&quot;, configuration = MySelfRule.class)
-public class OrderMain80 &#123;
-
-    public static void main(String[] args) &#123;
-        SpringApplication.run(OrderMain80.class, args);
+    for i in 1..5 &#123;
+        println!(&quot;hi number &#123;&#125; from the main thread!&quot;, i);
+        thread::sleep(Duration::from_millis(1));
     &#125;
 &#125;
+</code></pre>
+<p>通过调用 <code>handle.join</code>，可以让当前线程阻塞，直到它等待的子线程的结束，在上面代码中，由于 <code>main</code> 线程会被阻塞，因此它直到子线程结束后才会输出自己的 <code>1..5</code>：</p>
+<pre><code class="log">hi number 1 from the spawned thread!
+hi number 2 from the spawned thread!
+hi number 3 from the spawned thread!
+hi number 4 from the spawned thread!
+hi number 1 from the main thread!
+hi number 2 from the main thread!
+hi number 3 from the main thread!
+hi number 4 from the main thread!
 </code></pre>
 
     </div>

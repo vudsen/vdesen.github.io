@@ -1,0 +1,506 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>循环引用与自引用 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="后面一辈子的博客都在这了！" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 7.1.1"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>循环引用与自引用</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/5/4
+        </span>
+        
+        <span class="category">
+            <a href="/2023/12/04/rust/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                Rust
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="Weak-与循环引用"><a href="#Weak-与循环引用" class="headerlink" title="Weak 与循环引用"></a>Weak 与循环引用</h1><h2 id="制造循环引用"><a href="#制造循环引用" class="headerlink" title="制造循环引用"></a>制造循环引用</h2><p>关于循环引用，如果没有充足的 Rust 经验，可能都无法造出一份代码来再现它：</p>
+<pre><code class="rust">use crate::ListNode::&#123;Next, Nil&#125;;
+use std::cell::RefCell;
+use std::rc::Rc;
+
+#[derive(Debug)]
+enum ListNode &#123;
+    Next(i32, RefCell&lt;Rc&lt;ListNode&gt;&gt;),
+    Nil,
+&#125;
+
+impl ListNode &#123;
+    fn tail(&amp;self) -&gt; Option&lt;&amp;RefCell&lt;Rc&lt;ListNode&gt;&gt;&gt; &#123;
+        match self &#123;
+            Next(_, item) =&gt; Some(item),
+            Nil =&gt; None,
+        &#125;
+    &#125;
+&#125;
+
+impl Drop for ListNode &#123;
+    fn drop(&amp;mut self) &#123;
+        match self &#123;
+            Next(val, _) =&gt; &#123;
+                println!(&quot;I am dropped my value is &#123;val&#125;!&quot;)
+            &#125;
+            Nil =&gt; &#123;
+                println!(&quot;I am dropped without value!&quot;)
+            &#125;
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>这里是一个简单链表的实现，每一个 <code>ListNode</code> 代表一个链表节点。</p>
+<p>使用：</p>
+<pre><code class="rust">fn main() &#123;
+    let a = Rc::new(Next(5, RefCell::new(Rc::new(Nil))));
+
+    println!(&quot;a的初始化rc计数 = &#123;&#125;&quot;, Rc::strong_count(&amp;a));
+    println!(&quot;a指向的节点 = &#123;:?&#125;&quot;, a.tail());
+
+    // 创建`b`到`a`的引用
+    let b = Rc::new(Next(10, RefCell::new(Rc::clone(&amp;a))));
+
+    println!(&quot;在b创建后，a的rc计数 = &#123;&#125;&quot;, Rc::strong_count(&amp;a));
+    println!(&quot;b的初始化rc计数 = &#123;&#125;&quot;, Rc::strong_count(&amp;b));
+    println!(&quot;b指向的节点 = &#123;:?&#125;&quot;, b.tail());
+
+    // 利用RefCell的可变性，创建了`a`到`b`的引用
+    if let Some(link) = a.tail() &#123;
+        *link.borrow_mut() = Rc::clone(&amp;b);
+    &#125;
+
+    println!(&quot;在更改a后，b的rc计数 = &#123;&#125;&quot;, Rc::strong_count(&amp;b));
+    println!(&quot;在更改a后，a的rc计数 = &#123;&#125;&quot;, Rc::strong_count(&amp;a));
+
+    // 下面一行println!将导致循环引用
+    // 我们可怜的8MB大小的main线程栈空间将被它冲垮，最终造成栈溢出
+    // println!(&quot;a next item = &#123;:?&#125;&quot;, a.tail());
+&#125;
+</code></pre>
+<p>这个类型定义看着复杂，使用起来更复杂！不过排除这些因素，我们可以清晰看出：</p>
+<ul>
+<li>在创建了 <code>a</code> 后，紧接着就使用 <code>a</code> 创建了 <code>b</code>，因此 <code>b</code> 引用了 <code>a</code></li>
+<li>然后我们又利用 <code>Rc</code> 克隆了 <code>b</code>，然后通过 <code>RefCell</code> 的可变性，让 <code>a</code> 引用了 <code>b</code></li>
+</ul>
+<p>至此成功创建了循环引用 <code>a</code> -&gt; <code>b</code> -&gt; <code>a</code> -&gt; <code>b</code> ····</p>
+<p>代码输出：</p>
+<pre><code class="log">a的初始化rc计数 = 1
+a指向的节点 = Some(RefCell &#123; value: Nil &#125;)
+在b创建后，a的rc计数 = 2
+b的初始化rc计数 = 1
+b指向的节点 = Some(RefCell &#123; value: Next(5, RefCell &#123; value: Nil &#125;) &#125;)
+I am dropped without value!
+在更改a后，b的rc计数 = 2
+在更改a后，a的rc计数 = 2
+</code></pre>
+<p>可以发现 <code>a</code> 和 <code>b</code> 并没有释放，其中也没有它们的 <code>Drop</code> 打印。</p>
+<p>在 <code>main</code> 函数结束前，<code>a</code> 和 <code>b</code> 的引用计数均是 <code>2</code>，随后 <code>b</code> 触发 <code>Drop</code>，此时引用计数会变为 <code>1</code>，并不会归 <code>0</code>，因此 <code>b</code> 所指向内存不会被释放，同理可得 <code>a</code> 指向的内存也不会被释放，最终发生了内存泄漏。</p>
+<p>下面一张图很好的展示了这种引用循环关系：</p>
+<p><img lazy="https://selfb.asia/images/2024/05/v2-2dbfc981f05019bf70bf81c93f956c35_1440w.webp" alt="循环引用"></p>
+<h2 id="Weak"><a href="#Weak" class="headerlink" title="Weak"></a>Weak</h2><p><code>Weak</code> 非常类似于 <code>Rc</code>，但是与 <code>Rc</code> 持有所有权不同，<code>Weak</code> 不持有所有权，它仅仅保存一份指向数据的弱引用：如果你想要访问数据，需要通过 <code>Weak</code> 指针的 <code>upgrade</code> 方法实现，该方法返回一个类型为 <code>Option&lt;Rc&lt;T&gt;&gt;</code> 的值。</p>
+<p>弱引用不计入所有权，因此它无法阻止所引用的内存值被释放掉，而且 <code>Weak</code> 本身不对值的存在性做任何担保，引用的值还存在就返回 <code>Some</code>，不存在就返回 <code>None</code>。</p>
+<table>
+<thead>
+<tr>
+<th>Weak</th>
+<th>Rc</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>不计数</td>
+<td>引用计数</td>
+</tr>
+<tr>
+<td>不拥有所有权</td>
+<td>拥有值的所有权</td>
+</tr>
+<tr>
+<td>不阻止值被释放(drop)</td>
+<td>所有权计数归零，才能 drop</td>
+</tr>
+<tr>
+<td>引用的值存在返回 Some，不存在返回 None</td>
+<td>引用的值必定存在</td>
+</tr>
+<tr>
+<td>通过 upgrade 取到 Option&lt;Rc<T>&gt;，然后再取值</td>
+<td>通过 Deref 自动解引用，取值无需任何操作</td>
+</tr>
+</tbody></table>
+<p><code>Weak</code> 使用方式简单总结下：对于父子引用关系，可以让父节点通过 <code>Rc</code> 来引用子节点，然后让子节点通过 Weak 来引用父节点。</p>
+<p>一个非常简单的例子：</p>
+<pre><code class="rust">use std::rc::Rc;
+
+fn main() &#123;
+    // 创建Rc，持有一个值5
+    let five = Rc::new(5);
+
+    // 通过Rc，创建一个Weak指针
+    let weak_five = Rc::downgrade(&amp;five);
+
+    // Weak引用的资源依然存在，取到值5
+    let strong_five: Option&lt;Rc&lt;_&gt;&gt; = weak_five.upgrade();
+    assert_eq!(*strong_five.unwrap(), 5);
+
+    // 手动释放资源`five`
+    drop(five);
+
+    // Weak引用的资源已不存在，因此返回None
+    let strong_five: Option&lt;Rc&lt;_&gt;&gt; = weak_five.upgrade();
+    assert_eq!(strong_five, None);
+&#125;
+</code></pre>
+<h1 id="结构体中的自引用"><a href="#结构体中的自引用" class="headerlink" title="结构体中的自引用"></a>结构体中的自引用</h1><h2 id="正常的自引用"><a href="#正常的自引用" class="headerlink" title="正常的自引用"></a>正常的自引用</h2><pre><code class="rust">struct SelfRef&lt;&#39;a&gt; &#123;
+    value: String,
+
+    // 该引用指向上面的value
+    pointer_to_value: &amp;&#39;a str,
+&#125;
+
+fn main()&#123;
+    let s = &quot;aaa&quot;.to_string();
+    let v = SelfRef &#123;
+        value: s,
+        pointer_to_value: &amp;s
+    &#125;;
+&#125;
+</code></pre>
+<p>运行后报错：</p>
+<pre><code class="log"> let v = SelfRef &#123;
+12 |         value: s,
+   |                - value moved here
+13 |         pointer_to_value: &amp;s
+   |                           ^^ value borrowed here after move
+</code></pre>
+<p>因为我们试图同时使用值和值的引用，最终所有权转移和借用一起发生了。所以这里无论如何是无法实现的。</p>
+<h2 id="使用-Option-实现自引用"><a href="#使用-Option-实现自引用" class="headerlink" title="使用 Option 实现自引用"></a>使用 Option 实现自引用</h2><p>可以使用 <code>Option</code> 分两步来实现：</p>
+<pre><code class="rust">#[derive(Debug)]
+struct WhatAboutThis&lt;&#39;a&gt; &#123;
+    name: String,
+    nickname: Option&lt;&amp;&#39;a str&gt;,
+&#125;
+
+fn main() &#123;
+    let mut tricky = WhatAboutThis &#123;
+        name: &quot;Annabelle&quot;.to_string(),
+        nickname: None,
+    &#125;;
+    tricky.nickname = Some(&amp;tricky.name[..4]);
+
+    println!(&quot;&#123;:?&#125;&quot;, tricky);
+&#125;
+</code></pre>
+<p>虽然上述代码可以执行，但是限制较多，例如它无法从一个函数创建并返回：</p>
+<pre><code class="rust">fn creator&lt;&#39;a&gt;() -&gt; WhatAboutThis&lt;&#39;a&gt; &#123;
+    let mut tricky = WhatAboutThis &#123;
+        name: &quot;Annabelle&quot;.to_string(),
+        nickname: None,
+    &#125;;
+    tricky.nickname = Some(&amp;tricky.name[..4]);
+
+    tricky
+&#125;
+</code></pre>
+<p>报错：</p>
+<pre><code class="log">error[E0515]: cannot return value referencing local data `tricky.name`
+  --&gt; src/main.rs:24:5
+   |
+22 |     tricky.nickname = Some(&amp;tricky.name[..4]);
+   |                             ----------- `tricky.name` is borrowed here
+23 |
+24 |     tricky
+   |     ^^^^^^ returns a value referencing data owned by the current function
+</code></pre>
+<p>其实从函数签名就能看出来端倪，<code>&#39;a</code> 生命周期是凭空产生的，而且编译器也无法根据入参推断，所以报错了。</p>
+<h2 id="无法被移动的-Pin"><a href="#无法被移动的-Pin" class="headerlink" title="无法被移动的 Pin"></a>无法被移动的 Pin</h2><p><code>Pin</code> 可以固定住一个值，防止该值在内存中被移动。</p>
+<p>通过开头我们知道，自引用最麻烦的就是创建引用的同时，值的所有权会被转移，而通过 <code>Pin</code> 就可以很好的防止这一点：</p>
+<pre><code class="rust">use std::marker::PhantomPinned;
+use std::pin::Pin;
+use std::ptr::NonNull;
+
+// 下面是一个自引用数据结构体，因为 slice 字段是一个指针，指向了 data 字段
+// 我们无法使用普通引用来实现，因为违背了 Rust 的编译规则
+// 因此，这里我们使用了一个裸指针，通过 NonNull 来确保它不会为 null
+struct Unmovable &#123;
+    data: String,
+    slice: NonNull&lt;String&gt;,
+    _pin: PhantomPinned,
+&#125;
+
+impl Unmovable &#123;
+    // 为了确保函数返回时数据的所有权不会被转移，我们将它放在堆上，唯一的访问方式就是通过指针
+    fn new(data: String) -&gt; Pin&lt;Box&lt;Self&gt;&gt; &#123;
+        let res = Unmovable &#123;
+            data,
+            // 只有在数据到位时，才创建指针，否则数据会在开始之前就被转移所有权
+            slice: NonNull::dangling(),
+            _pin: PhantomPinned,
+        &#125;;
+        let mut boxed = Box::pin(res);
+
+        let slice = NonNull::from(&amp;boxed.data);
+        // 这里其实安全的，因为修改一个字段不会转移整个结构体的所有权
+        unsafe &#123;
+            let mut_ref: Pin&lt;&amp;mut Self&gt; = Pin::as_mut(&amp;mut boxed);
+            Pin::get_unchecked_mut(mut_ref).slice = slice;
+        &#125;
+        boxed
+    &#125;
+&#125;
+
+fn main() &#123;
+    let unmoved = Unmovable::new(&quot;hello&quot;.to_string());
+    // 只要结构体没有被转移，那指针就应该指向正确的位置，而且我们可以随意移动指针
+    let mut still_unmoved = unmoved;
+    assert_eq!(still_unmoved.slice, NonNull::from(&amp;still_unmoved.data));
+
+    // 因为我们的类型没有实现 `Unpin` 特征，下面这段代码将无法编译
+    // let mut new_unmoved = Unmovable::new(&quot;world&quot;.to_string());
+    // std::mem::swap(&amp;mut *still_unmoved, &amp;mut *new_unmoved);
+&#125;
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;<a target="_blank" rel="noopener" href="https://github.com/IceOfSummer">IceOfSummer</a>
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/IceOfSummer/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>
