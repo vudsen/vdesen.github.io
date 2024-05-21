@@ -295,6 +295,83 @@ spec:
   tls: IngressTLS[]
 ```
 
+## 测试
+
+使用下面的 `yaml` 创建测试应用：
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-app-1
+  labels:
+    app: nginx-app
+spec:
+  containers:
+  - name: my-container
+    image: nginx:stable-alpine3.19
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-app-2
+  labels:
+    app: nginx-app
+spec:
+  containers:
+  - name: my-container
+    image: nginx:stable-alpine3.19
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-app-3
+  labels:
+    app: nginx-app
+spec:
+  containers:
+  - name: my-container
+    image: nginx:stable-alpine3.19
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: nginx-app-svc
+spec:
+  selector:
+    app: nginx-app
+  ports:
+  - name: foo
+    port: 10000
+    targetPort: 80
+```
+
+创建完 nginx 后建议进入容器修改首页内容，好查看负载均衡效果。
+
+创建 ingress：
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-app-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: nginx-app.local.test
+      http:
+        paths:
+          - backend:
+              service:
+                name: nginx-app-svc
+                port:
+                  number: 10000
+            pathType: Prefix
+            path: '/'
+```
+
+
 ## 添加注解
 
 [Annotations](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations)
@@ -312,10 +389,137 @@ metadata:
 
 注意文档中虽然有些注解要求的是 `number` 类型，**但是在配置文件中，仍然要写成字符串**。
 
+### 路径重写
+
+[rewrite](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#rewrite)
+
+现有如下场景：
+
+- 访问路径以 `/api` 开头时，将请求转发到后端服务器。
+- 如果以其它路径开头，将请求转发到前端服务器。
+
+使用下面的配置即可实现：
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  name: rewrite
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: rewrite.bar.com
+    http:
+      paths:
+      - path: /api(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: http-svc
+            port: 
+              number: 80
+```
+
+### 会话保持-Session亲和性
+
+[session-affinity](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#session-affinity)
+
+当客户端第一次访问时，ingress-nginx 会返回给浏览器一个 Cookie，之后浏览器只需要带着 Cookie 就可以保证后面的访问的 Pod 都是同一个。
+
+只需要在 yaml 中添加一个注解即可实现：
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: session-affinity
+  namespace: default
+  annotations: 
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+```
+
+默认会在客户端创建一个名称为 `INGRESSCOOKIE` 的 Cookie，可以通过注解 `nginx.ingress.kubernetes.io/session-cookie-name` 修改。
+
+## 配置SSL
+
+Ingress 可以非常简单的配置 SSL。
+
+首先使用 `Secret` 保存 SSL 证书：
+```bash
+kubectl create secret tls ssl-name --key your-key.key --cert your-cert.cert
+```
+
+之后在 Ingress 配置中使用证书：
+```yaml
+spec:
+  tls:
+    - hosts:
+      - yourhost.com
+      secretName: ssl-name
+```
+
+
 ## 常用文档
 
 - [全局配置文件](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/)
 - [添加请求头](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/)
+- [金丝雀部署](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#canary)
+
+# 网络策略
+
+[网络策略](https://kubernetes.io/zh-cn/docs/concepts/services-networking/network-policies/)
+
+Pod 之间互通，是通过如下三个标识符的组合来辨识的：
+
+1. 其它被允许的Pods（例外：Pod无法阻塞对自身的访问）
+2. 被允许的名称空间
+3. IP组块（例外：与Pod运行所在的节点的通信总是被允许的，无论Pod或节点的IP地址）
+
+![Pod网络策略](https://selfb.asia/images/2024/05/QQ%E6%88%AA%E5%9B%BE20240521225315.webp)
+
+默认情况下，Pod网络都是非隔离的（non-isolated），可以接受来自任何请求方的网络请求。如果一个 `NetworkPolicy` 的标签选择器选中了某个 `Pod`，则该 `Pod` 将变成隔离的（isolated），并将拒绝任何不被 `NetworkPolicy`许可的网络连接。
+
+`NetworkPolicy` 是每个命名空间独有的。
+
+下面一个创建网络策略的例子：
+```yaml
+apiVersion: v1
+kind: Ingress
+metadata:
+  name: networkpol
+  namespace: default
+spec:
+  # pod 选择器，必填
+  podSelector: 
+    matchLabels:
+      name: busybox
+  # 策略类型
+  policyTypes:
+    # 入站规则
+    - "Ingress"
+    # 出站规则
+    - "Egress"
+  # 入站白名单
+  ingress:
+    # 哪些资源可以访问
+    from: 
+      # 哪些命名空间可以访问，不填为所有命名空间
+      - namespaceSelector: <LabelSelector>
+      # 只有选中的Pod才能访问，如果指定了namespaceSelector，只会选中对应名称空间的Pod，否则则是当前命名空间的Pod
+      - podSelector: <LabelSelector>
+    # 可以访问Pod的哪些端口
+    ports:
+      - 80
+  # 出站白名单
+  egress:
+    # 同spec.ingress.from
+    to: <[]NetworkPolicyPeer>
+    ports:
+      # 限制出流量能够访问的端口，例如这里配的80，则只能访问外网服务的80端口
+      - port: 80
+```
 
 # 网关 API
 
@@ -336,3 +540,9 @@ customresourcedefinition.apiextensions.k8s.io/referencegrants.gateway.networking
 这里我用的是 [nginx-gateway-fabric](https://docs.nginx.com/nginx-gateway-fabric)
 
 照着文档直接部署即可，后面会有一个 deploy 里面，有两个镜像都用了 ghcr.io 里面的，这个域名国内是访问不到的，我这里是搭梯子拉下来然后推送到私有仓库里面了。
+
+可以用我的镜像学习用一下：
+
+- `ccr.ccs.tencentyun.com/icebing-repo/nginxinc-nginx-gateway-fabric:1.2.0`
+- `ccr.ccs.tencentyun.com/icebing-repo/nginxinc-nginx-gateway-fabric-nginx:1.2.0`
+
