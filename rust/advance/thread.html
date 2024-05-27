@@ -247,6 +247,640 @@ hi number 2 from the main thread!
 hi number 3 from the main thread!
 hi number 4 from the main thread!
 </code></pre>
+<h2 id="在线程闭包中使用-move"><a href="#在线程闭包中使用-move" class="headerlink" title="在线程闭包中使用 move"></a>在线程闭包中使用 move</h2><p>首先，来看看在一个线程中直接使用另一个线程中的数据会如何：</p>
+<pre><code class="rust">use std::thread;
+
+fn main() &#123;
+    let v = vec![1, 2, 3];
+
+    let handle = thread::spawn(|| &#123;
+        println!(&quot;Here&#39;s a vector: &#123;:?&#125;&quot;, v);
+    &#125;);
+
+    handle.join().unwrap();
+&#125;
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="log">  |
+6 |     let handle = thread::spawn(|| &#123;
+  |                                ^^ may outlive borrowed value `v`
+7 |         println!(&quot;Here&#39;s a vector: &#123;:?&#125;&quot;, v);
+  |                                           - `v` is borrowed here
+  |
+note: function requires argument type to outlive `&#39;static`
+ --&gt; src/main.rs:6:18
+  |
+6 |       let handle = thread::spawn(|| &#123;
+  |  __________________^
+7 | |         println!(&quot;Here&#39;s a vector: &#123;:?&#125;&quot;, v);
+8 | |     &#125;);
+  | |______^
+help: to force the closure to take ownership of `v` (and any other referenced variables), use the `move` keyword
+  |
+6 |     let handle = thread::spawn(move || &#123;
+  |                                ++++
+</code></pre>
+<p>其实代码本身并没有什么问题，问题在于 Rust 无法确定新的线程会活多久，即使使用了 <code>join</code> 来确保变量 <code>v</code> 在线程执行完前不会被释放，但是对于编译器来说，不确定性还是太大了。</p>
+<p>此时编译器提示可使用 <code>move</code> 来拿走所有权：</p>
+<pre><code class="rust">use std::thread;
+
+fn main() &#123;
+    let v = vec![1, 2, 3];
+
+    let handle = thread::spawn(move || &#123;
+        println!(&quot;Here&#39;s a vector: &#123;:?&#125;&quot;, v);
+    &#125;);
+
+    handle.join().unwrap();
+
+    // 下面代码会报错borrow of moved value: `v`
+    // println!(&quot;&#123;:?&#125;&quot;,v);
+&#125;
+</code></pre>
+<p>如上所示，很简单的代码，而且 Rust 的所有权机制保证了数据使用上的安全：v 的所有权被转移给新的线程后，main 线程将无法继续使用：最后一行代码将报错。</p>
+<h2 id="线程屏障"><a href="#线程屏障" class="headerlink" title="线程屏障"></a>线程屏障</h2><p>在 <code>Rust</code> 中，可以使用 <code>Barrier</code> 让多个线程都执行到某个点后，才继续一起往后执行：</p>
+<pre><code class="rust">use std::sync::&#123;Arc, Barrier&#125;;
+use std::thread;
+
+fn main() &#123;
+    let mut handles = Vec::with_capacity(6);
+    let barrier = Arc::new(Barrier::new(6));
+
+    for _ in 0..6 &#123;
+        let b = barrier.clone();
+        handles.push(thread::spawn(move|| &#123;
+            println!(&quot;before wait&quot;);
+            b.wait();
+            println!(&quot;after wait&quot;);
+        &#125;));
+    &#125;
+
+    for handle in handles &#123;
+        handle.join().unwrap();
+    &#125;
+&#125;
+</code></pre>
+<p>这段代码中创建了一个 <code>Barrier</code>，并且带有一个初始的计数器：<code>6</code>。每调用一次 <code>wait</code> 计数器都将减一并阻塞当前线程，当计数器减为 <code>0</code> 的时候，恢复所有被阻塞的线程。</p>
+<h2 id="线程局部变量-Thread-Local-Variable"><a href="#线程局部变量-Thread-Local-Variable" class="headerlink" title="线程局部变量(Thread Local Variable)"></a>线程局部变量(Thread Local Variable)</h2><h3 id="标准库-thread-local"><a href="#标准库-thread-local" class="headerlink" title="标准库 thread_local"></a>标准库 thread_local</h3><p>使用 <code>thread_local</code> 宏可以初始化线程局部变量，然后在线程内部使用该变量的 <code>with</code> 方法获取变量值：</p>
+<pre><code class="rust">use std::cell::RefCell;
+use std::thread;
+
+#![allow(unused)]
+fn main() &#123;
+    thread_local!(static FOO: RefCell&lt;u32&gt; = RefCell::new(1));
+
+    FOO.with(|f| &#123;
+        assert_eq!(*f.borrow(), 1);
+        *f.borrow_mut() = 2;
+    &#125;);
+
+    // 每个线程开始时都会拿到线程局部变量的FOO的初始值
+    let t = thread::spawn(move|| &#123;
+        FOO.with(|f| &#123;
+            assert_eq!(*f.borrow(), 1);
+            *f.borrow_mut() = 3;
+        &#125;);
+    &#125;);
+
+    // 等待线程完成
+    t.join().unwrap();
+
+    // 尽管子线程中修改为了3，我们在这里依然拥有main线程中的局部值：2
+    FOO.with(|f| &#123;
+        assert_eq!(*f.borrow(), 2);
+    &#125;);
+&#125;
+</code></pre>
+<h3 id="三方库-thread-local"><a href="#三方库-thread-local" class="headerlink" title="三方库 thread-local"></a>三方库 thread-local</h3><p>除了标准库外，一位大神还开发了 <a target="_blank" rel="noopener" href="https://github.com/Amanieu/thread_local-rs">thread-local</a> 库，它允许每个线程持有值的独立拷贝：</p>
+<pre><code class="rust">#![allow(unused)]
+fn main() &#123;
+use thread_local::ThreadLocal;
+use std::sync::Arc;
+use std::cell::Cell;
+use std::thread;
+
+let tls = Arc::new(ThreadLocal::new());
+let mut v = vec![];
+// 创建多个线程
+for _ in 0..5 &#123;
+    let tls2 = tls.clone();
+    let handle = thread::spawn(move || &#123;
+        // 将计数器加1
+        // 请注意，由于线程 ID 在线程退出时会被回收，因此一个线程有可能回收另一个线程的对象
+        // 这只能在线程退出后发生，因此不会导致任何竞争条件
+        let cell = tls2.get_or(|| Cell::new(0));
+        cell.set(cell.get() + 1);
+    &#125;);
+    v.push(handle);
+&#125;
+for handle in v &#123;
+    handle.join().unwrap();
+&#125;
+// 一旦所有子线程结束，收集它们的线程局部变量中的计数器值，然后进行求和
+let tls = Arc::try_unwrap(tls).unwrap();
+let total = tls.into_iter().fold(0, |x, y| &#123;
+    // 打印每个线程局部变量中的计数器值，发现不一定有5个线程，
+    // 因为一些线程已退出，并且其他线程会回收退出线程的对象
+    println!(&quot;x: &#123;&#125;, y: &#123;&#125;&quot;, x, y.get());
+    x + y.get()
+&#125;);
+
+// 和为5
+assert_eq!(total, 5);
+&#125;
+</code></pre>
+<p>该库不仅仅使用了值的拷贝，而且还能自动把多个拷贝汇总到一个迭代器中，最后进行求和。</p>
+<h2 id="用条件控制线程的挂起和执行"><a href="#用条件控制线程的挂起和执行" class="headerlink" title="用条件控制线程的挂起和执行"></a>用条件控制线程的挂起和执行</h2><p>条件变量(Condition Variables)经常和 <code>Mutex</code> 一起使用，可以让线程挂起，直到某个条件发生后再继续执行：</p>
+<pre><code class="rust">use std::thread;
+use std::sync::&#123;Arc, Mutex, Condvar&#125;;
+use std::time::Duration;
+
+fn main() &#123;
+    let pair = Arc::new((Mutex::new(false), Condvar::new()));
+    let pair2 = pair.clone();
+
+    thread::spawn(move|| &#123;
+        let (lock, cvar) = &amp;*pair2;
+        println!(&quot;3. trying to acquired lock in thread...&quot;);
+        let mut started = lock.lock().unwrap();
+        println!(&quot;4. changing started&quot;);
+        *started = true;
+        cvar.notify_one();
+        println!(&quot;5. sleep 5 sec in thread...&quot;);
+        thread::sleep(Duration::from_secs(5));
+    &#125;);
+
+    let (lock, cvar) = &amp;*pair;
+    let mut started = lock.lock().unwrap();
+    println!(&quot;1. &#123;started&#125;&quot;);
+    while !*started &#123;
+        println!(&quot;2. sleep 5 sec...&quot;);
+        thread::sleep(Duration::from_secs(5));
+        // 暂时释放当前锁.
+        started = cvar.wait(started).unwrap();
+    &#125;
+
+    println!(&quot;6. started changed&quot;);
+&#125;
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="log">1. false
+2. sleep 5 sec...
+3. trying to acquired lock in thread...
+4. changing started
+false
+5. sleep 5 sec in thread...
+6. started changed
+</code></pre>
+<p>上述代码流程如下：</p>
+<ol>
+<li><code>main</code> 线程首先进入 <code>while</code> 循环，调用 <code>wait</code> 方法挂起等待子线程的通知，并释放了锁 <code>started</code>。</li>
+<li>子线程获取到锁，并将其修改为 <code>true</code>，然后调用条件变量的 <code>notify_one</code> 方法来通知主线程继续执行</li>
+</ol>
+<h2 id="只被调用一次的函数"><a href="#只被调用一次的函数" class="headerlink" title="只被调用一次的函数"></a>只被调用一次的函数</h2><p>有时，我们会需要某个函数在多线程环境下只被调用一次，例如初始化全局变量，无论是哪个线程先调用函数来初始化，都会保证全局变量只会被初始化一次，随后的其它线程调用就会忽略该函数：</p>
+<pre><code class="rust">use std::thread;
+use std::sync::Once;
+
+static mut VAL: usize = 0;
+static INIT: Once = Once::new();
+
+fn main() &#123;
+    let handle1 = thread::spawn(move || &#123;
+        INIT.call_once(|| &#123;
+            unsafe &#123;
+                VAL = 1;
+            &#125;
+        &#125;);
+    &#125;);
+
+    let handle2 = thread::spawn(move || &#123;
+        INIT.call_once(|| &#123;
+            unsafe &#123;
+                VAL = 2;
+            &#125;
+        &#125;);
+    &#125;);
+
+    handle1.join().unwrap();
+    handle2.join().unwrap();
+
+    println!(&quot;&#123;&#125;&quot;, unsafe &#123; VAL &#125;);
+&#125;
+</code></pre>
+<p>代码运行的结果取决于哪个线程先调用 <code>INIT.call_once</code> （虽然代码具有先后顺序，但是线程的初始化顺序并无法被保证！因为线程初始化是异步的，且耗时较久），若 <code>handle1</code> 先，则输出 <code>1</code>，否则输出 <code>2</code>。</p>
+<p><code>call_once</code>方法执行初始化过程一次，并且只执行一次。如果当前有另一个初始化过程正在运行，线程将阻止该方法被调用。当这个函数返回时，保证一些初始化已经运行并完成，它还保证由执行的闭包所执行的任何内存写入都能被其他线程在这时可靠地观察到。</p>
+<h1 id="线程间的消息传递"><a href="#线程间的消息传递" class="headerlink" title="线程间的消息传递"></a>线程间的消息传递</h1><p>Rust 是在标准库里提供了消息通道(<code>channel</code>)来进行消息传递。</p>
+<h2 id="多发送者，单接收者"><a href="#多发送者，单接收者" class="headerlink" title="多发送者，单接收者"></a>多发送者，单接收者</h2><p>标准库提供了通道 <code>std::sync::mpsc</code>其中 <code>mpsc</code>是 <code>multiple producer, single consumer</code> 的缩写，代表了该通道支持多个发送者，但是只支持唯一的接收者：</p>
+<pre><code class="rust">use std::sync::mpsc;
+use std::thread;
+
+fn main() &#123;
+    // 创建一个消息通道, 返回一个元组：(发送者，接收者)
+    let (tx, rx) = mpsc::channel();
+
+    // 创建线程，并发送消息
+    thread::spawn(move || &#123;
+        // 发送一个数字1, send方法返回Result&lt;T,E&gt;，通过unwrap进行快速错误处理
+        tx.send(1).unwrap();
+
+        // 下面代码将报错，因为编译器自动推导出通道传递的值是i32类型，那么Option&lt;i32&gt;类型将产生不匹配错误
+        // tx.send(Some(1)).unwrap()
+    &#125;);
+
+    // 在主线程中接收子线程发送的消息并输出
+    println!(&quot;receive &#123;&#125;&quot;, rx.recv().unwrap());
+&#125;
+</code></pre>
+<p>以上代码并不复杂，但仍有几点需要注意：</p>
+<ul>
+<li><code>tx</code>, <code>rx</code> 对应发送者和接收者，它们的类型由编译器自动推导: <code>tx.send(1)</code> 发送了整数，因此它们分别是 <code>mpsc::Sender&lt;i32&gt;</code> 和 <code>mpsc::Receiver&lt;i32&gt;</code> 类型，需要注意，由于内部是泛型实现，一旦类型被推导确定，该通道就只能传递对应类型的值, 例如此例中非 <code>i32</code> 类型的值将导致编译错误</li>
+<li>接收消息的操作 <code>rx.recv()</code> 会阻塞当前线程，直到读取到值，或者通道被关闭</li>
+<li>需要使用 <code>move</code> 将 <code>tx</code> 的所有权转移到子线程的闭包中</li>
+</ul>
+<p>在注释中提到 <code>send</code> 方法返回一个 <code>Result&lt;T, E&gt;</code>，说明它有可能返回一个错误，例如接收者被 <code>drop</code> 导致了发送的值不会被任何人接收，此时继续发送毫无意义，因此返回一个错误最为合适。</p>
+<p>同样的，对于 <code>recv</code> 方法来说，当发送者关闭时，它也会接收到一个错误，用于说明不会再有任何值被发送过来。</p>
+<p><code>Sender</code> 可以使用 <code>clone</code> 方法复制，然后分给其它线程，但是需要注意，如果克隆了多个 <code>Sender</code> 并且没有被全部回收，那么将造成死锁：</p>
+<pre><code class="rust">use std::sync::mpsc;
+use std::thread;
+
+fn main() &#123;
+    // 创建一个消息通道, 返回一个元组：(发送者，接收者)
+    let (tx, rx) = mpsc::channel::&lt;i32&gt;();
+
+    let tx2 = tx.clone();
+    // 创建线程，并发送消息
+    thread::spawn(move || &#123;
+        println!(&quot;&#123;:?&#125;&quot;, tx2);
+    &#125;);
+
+    // 在主线程中接收子线程发送的消息并输出
+    println!(&quot;receive &#123;&#125;&quot;, rx.recv().unwrap());
+&#125;
+</code></pre>
+<p>例如在上面的代码中，复制了一个 <code>tx2</code> 给了另外一个线程，但是它并没有发送消息，在线程结束后被回收，但是对于原始的 <code>tx</code> 变量，在 <code>main</code> 方法结束前都不会被释放，所以此时调用 <code>rx.recv()</code> 仍然会阻塞，并且永远不会结束。</p>
+<h3 id="不阻塞的-try-recv-方法"><a href="#不阻塞的-try-recv-方法" class="headerlink" title="不阻塞的 try_recv 方法"></a>不阻塞的 try_recv 方法</h3><p>除了上述 <code>recv</code> 方法，还可以使用 <code>try_recv</code> 尝试接收一次消息，该方法并不会阻塞线程，当通道中没有消息时，它会立刻返回一个错误：</p>
+<pre><code class="rust">use std::sync::mpsc;
+use std::thread;
+
+fn main() &#123;
+    let (tx, rx) = mpsc::channel();
+
+    thread::spawn(move || &#123;
+        tx.send(1).unwrap();
+    &#125;);
+
+    println!(&quot;receive &#123;:?&#125;&quot;, rx.try_recv());
+&#125;
+</code></pre>
+<p>由于子线程的创建需要时间，因此 <code>println!</code> 和 <code>try_recv</code> 方法会先执行，而此时子线程的消息还未被发出。<code>try_recv</code> 会尝试立即读取一次消息，因为消息没有发出，此次读取最终会报错，且主线程运行结束。</p>
+<h2 id="同步和异步通道"><a href="#同步和异步通道" class="headerlink" title="同步和异步通道"></a>同步和异步通道</h2><p>Rust 标准库的 <code>mpsc</code> 通道其实分为两种类型：同步和异步。</p>
+<h3 id="异步通道"><a href="#异步通道" class="headerlink" title="异步通道"></a>异步通道</h3><p>无论接收者是否正在接收消息，消息发送者在发送消息时都不会阻塞:</p>
+<pre><code class="rust">use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+fn main() &#123;
+    let (tx, rx)= mpsc::channel();
+
+    let handle = thread::spawn(move || &#123;
+        println!(&quot;发送之前&quot;);
+        tx.send(1).unwrap();
+        println!(&quot;发送之后&quot;);
+    &#125;);
+
+    println!(&quot;睡眠之前&quot;);
+    thread::sleep(Duration::from_secs(3));
+    println!(&quot;睡眠之后&quot;);
+
+    println!(&quot;receive &#123;&#125;&quot;, rx.recv().unwrap());
+    handle.join().unwrap();
+&#125;
+</code></pre>
+<p>运行后输出如下:</p>
+<pre><code class="log">睡眠之前
+发送之前
+发送之后
+//···睡眠3秒
+睡眠之后
+receive 1
+</code></pre>
+<h3 id="同步通道"><a href="#同步通道" class="headerlink" title="同步通道"></a>同步通道</h3><p>与异步通道相反，同步通道<strong>发送消息是阻塞的，只有在消息被接收后才解除阻塞</strong>:</p>
+<pre><code class="rust">use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+fn main() &#123;
+    // 设置消息最多缓存 n 条，前 n - 1 条消息发送时不会阻塞，只有在第 n 条消息发送时，才会阻塞。
+    let (tx, rx)= mpsc::sync_channel(0);
+
+    let handle = thread::spawn(move || &#123;
+        println!(&quot;发送之前&quot;);
+        tx.send(1).unwrap();
+        println!(&quot;发送之后&quot;);
+    &#125;);
+
+    println!(&quot;睡眠之前&quot;);
+    thread::sleep(Duration::from_secs(3));
+    println!(&quot;睡眠之后&quot;);
+
+    println!(&quot;receive &#123;&#125;&quot;, rx.recv().unwrap());
+    handle.join().unwrap();
+&#125;
+</code></pre>
+<p>运行后输出如下：</p>
+<pre><code class="log">睡眠之前
+发送之前
+//···睡眠3秒
+睡眠之后
+receive 1
+发送之后
+</code></pre>
+<p>可以看出，主线程由于睡眠被阻塞导致无法接收消息，因此子线程的发送也一直被阻塞，直到主线程结束睡眠并成功接收消息后，发送才成功：发送之后的输出是在 <code>receive 1</code> 之后，说明只有接收消息彻底成功后，发送消息才算完成。</p>
+<h2 id="多发送者，多接收者"><a href="#多发送者，多接收者" class="headerlink" title="多发送者，多接收者"></a>多发送者，多接收者</h2><p>如果需要 <code>mpmc</code>(多发送者，多接收者)或者需要更高的性能，可以考虑第三方库:</p>
+<ul>
+<li><code>crossbeam-channel</code>, 老牌强库，功能较全，性能较强，之前是独立的库，但是后面合并到了 <code>crossbeam</code> 主仓库中</li>
+<li><code>flume</code>, 官方给出的性能数据某些场景要比 <code>crossbeam</code> 更好些</li>
+</ul>
+<h1 id="线程同步：锁、Condvar和信号量"><a href="#线程同步：锁、Condvar和信号量" class="headerlink" title="线程同步：锁、Condvar和信号量"></a>线程同步：锁、Condvar和信号量</h1><h2 id="互斥锁-Mutex"><a href="#互斥锁-Mutex" class="headerlink" title="互斥锁 Mutex"></a>互斥锁 Mutex</h2><p><code>Mutex</code>让多个线程并发的访问同一个值变成了排队访问：同一时间，只允许一个线程 <code>A</code> 访问该值，其它线程需要等待 <code>A</code> 访问完成后才能继续。</p>
+<pre><code class="rust">use std::sync::Mutex;
+
+fn main() &#123;
+    // 使用`Mutex`结构体的关联函数创建新的互斥锁实例
+    let m = Mutex::new(5);
+
+    &#123;
+        // 获取锁，然后deref为`m`的引用
+        // lock返回的是Result
+        let mut num = m.lock().unwrap();
+        *num = 6;
+        // 锁自动被drop
+    &#125;
+
+    println!(&quot;m = &#123;:?&#125;&quot;, m);
+&#125;
+</code></pre>
+<p>要访问内部的数据，需要使用方法 <code>m.lock()</code> 向 <code>m</code> 申请一个锁, 该方法会阻塞当前线程，直到获取到锁，因此当多个线程同时访问该数据时，只有一个线程能获取到锁，其它线程只能阻塞着等待，这样就保证了数据能被安全的修改！</p>
+<p>获取 <code>m.lock()</code> 会返回一个 <code>MutexGuard</code> 对象，它保存了加锁的数据，它实现了下面两个关键特征：</p>
+<ul>
+<li><code>Drop</code>：离开作用域后，立即释放锁。</li>
+<li><code>Deref</code>: 能够解引用获取内部的值。</li>
+</ul>
+<h3 id="多线程中使用-Mutex"><a href="#多线程中使用-Mutex" class="headerlink" title="多线程中使用 Mutex"></a>多线程中使用 Mutex</h3><p>因为创建线程需要拿走变量的所有权，而 <code>Mutex</code> 没有实现 <code>Clone</code> 特征，只好考虑使用 <code>Rc</code> 实现：</p>
+<pre><code class="rust">use std::rc::Rc;
+use std::sync::Mutex;
+use std::thread;
+
+fn main() &#123;
+    // 通过`Rc`实现`Mutex`的多所有权
+    let counter = Rc::new(Mutex::new(0));
+    let mut handles = vec![];
+
+    for _ in 0..10 &#123;
+        let counter = Rc::clone(&amp;counter);
+        // 创建子线程，并将`Mutex`的所有权拷贝传入到子线程中
+        let handle = thread::spawn(move || &#123;
+            let mut num = counter.lock().unwrap();
+
+            *num += 1;
+        &#125;);
+        handles.push(handle);
+    &#125;
+
+    // 等待所有子线程完成
+    for handle in handles &#123;
+        handle.join().unwrap();
+    &#125;
+
+    // 输出最终的计数结果
+    println!(&quot;Result: &#123;&#125;&quot;, *counter.lock().unwrap());
+&#125;
+</code></pre>
+<p>但是很遗憾，上面的代码会报错：</p>
+<pre><code class="log">error[E0277]: `Rc&lt;Mutex&lt;i32&gt;&gt;` cannot be sent between threads safely
+   --&gt; src\main.rs:13:36
+    |
+13  |           let handle = thread::spawn(move || &#123;
+    |                        ------------- ^------
+    |                        |             |
+    |  ______________________|_____________within this `&#123;closure@src\main.rs:13:36: 13:43&#125;`
+    | |                      |
+    | |                      required by a bound introduced by this call
+14  | |             let mut num = counter.lock().unwrap();
+15  | |
+16  | |             *num += 1;
+17  | |         &#125;);
+    | |_________^ `Rc&lt;Mutex&lt;i32&gt;&gt;` cannot be sent between threads safely
+    |
+    = help: within `&#123;closure@src\main.rs:13:36: 13:43&#125;`, the trait `Send` is not implemented for `Rc&lt;Mutex&lt;i32&gt;&gt;`
+note: required because it&#39;s used within this closure
+</code></pre>
+<p>错误中提到了一个关键点：<code>Rc&lt;T&gt;</code> 无法在线程中传输，因为它没有实现 <code>Send</code> 特征，而该特征可以确保数据在线程中安全的传输。</p>
+<p>好在，<code>Arc&lt;T&gt;</code> 实现了这个特征:</p>
+<pre><code class="rust">use std::sync::&#123;Arc, Mutex&#125;;
+use std::thread;
+
+fn main() &#123;
+    let counter = Arc::new(Mutex::new(0));
+    let mut handles = vec![];
+
+    for _ in 0..10 &#123;
+        let counter = Arc::clone(&amp;counter);
+        let handle = thread::spawn(move || &#123;
+            let mut num = counter.lock().unwrap();
+
+            *num += 1;
+        &#125;);
+        handles.push(handle);
+    &#125;
+
+    for handle in handles &#123;
+        handle.join().unwrap();
+    &#125;
+
+    println!(&quot;Result: &#123;&#125;&quot;, *counter.lock().unwrap());
+&#125;
+</code></pre>
+<p>也正因为如此，<code>Rc&lt;T&gt;/RefCell&lt;T&gt;</code> 用于单线程内部可变性，<code>Arc&lt;T&gt;/Mutex&lt;T&gt;</code> 用于多线程内部可变性。</p>
+<h3 id="当持有锁时-panic"><a href="#当持有锁时-panic" class="headerlink" title="当持有锁时 panic"></a>当持有锁时 panic</h3><p><code>m.lock()</code> 方法也有可能报错，例如当前正在持有锁的线程 <code>panic</code> 了。在这种情况下，其它线程不可能再获得锁，因此 <code>lock</code> 方法会返回一个错误:</p>
+<pre><code class="rust">use std::sync::&#123;Arc, LockResult, Mutex&#125;;
+use std::thread;
+use std::thread::sleep;
+use std::time::Duration;
+
+fn main() &#123;
+    let counter = Arc::new(Mutex::new(0));
+    let mut handles = vec![];
+
+    for i in 0..10 &#123;
+        let counter = Arc::clone(&amp;counter);
+        let handle = thread::spawn(move || &#123;
+            for _ in 0..3 &#123;
+                match counter.lock() &#123;
+                    Ok(mut num) =&gt; &#123;
+                        *num += 1;
+                        if i == 5 &#123;
+                            panic!(&quot;panic&quot;)
+                        &#125;
+                        println!(&quot;[&#123;i&#125;] acquire lock success&quot;);
+                        break
+                    &#125;,
+                    Err(e) =&gt; &#123;
+                        println!(&quot;[&#123;i&#125;] try get lock failed: &#123;e&#125;&quot;);
+                        sleep(Duration::from_secs(1));
+                    &#125;
+                &#125; ;
+            &#125;
+        &#125;);
+        handles.push(handle);
+    &#125;
+
+    for handle in handles &#123;
+        handle.join();
+    &#125;
+
+    match counter.lock() &#123;
+        Ok(num) =&gt; &#123;
+            println!(&quot;&#123;num&#125;&quot;)
+        &#125;
+        Err(err) =&gt; &#123;
+            println!(&quot;&#123;err&#125;&quot;);
+        &#125;
+    &#125;;
+&#125;
+</code></pre>
+<p>上面的方法创建了 10 个线程，每个线程都将会对 <code>Mutex</code> 中的值加一，但是第 5 个线程会直接 panic 掉。其它 9 个线程正常执行，理论上此时最后的结果应该为 9。</p>
+<p>但是实际运行后，由于一个线程的 panic，导致其它线程都无法再使用锁，因此在最后尝试获取锁打印对应的值时，会获取一个失败的结果。</p>
+<h2 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h2><h3 id="单线程死锁"><a href="#单线程死锁" class="headerlink" title="单线程死锁"></a>单线程死锁</h3><p>没错，单线程也能死锁，<code>Mutex</code>不支持重入(一个线程获取到锁后，再次尝试获取锁)：</p>
+<pre><code class="rust">use std::sync::Mutex;
+
+fn main() &#123;
+    let data = Mutex::new(0);
+    let d1 = data.lock();
+    let d2 = data.lock();
+&#125; // d1锁在此处释放
+</code></pre>
+<p>此时获取了锁 <code>d1</code> 但是在获取 <code>d2</code> 时将会造成死锁。</p>
+<h3 id="多线程死锁"><a href="#多线程死锁" class="headerlink" title="多线程死锁"></a>多线程死锁</h3><p>多线程死锁就很常规了，就是两个或多个线程互相持有了对方所需要的锁。例如线程 A 需要 <code>mutex1</code>，持有了 <code>mutex2</code>，但是线程 B 需要 <code>mutex2</code> 但是持有了 <code>mutex1</code>，此时就会造成死锁。</p>
+<p>可以考虑使用 <code>try_lock</code> 方法来尝试获取一次锁，如果无法获取会返回一个错误，因此不会发生阻塞。</p>
+<h2 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h2><p><code>Mutex</code> 会对每次读写都进行加锁，但某些时候，我们需要大量的并发读，<code>Mutex</code> 就无法满足需求了，此时就可以使用 <code>RwLock</code>:</p>
+<pre><code class="rust">use std::sync::RwLock;
+
+fn main() &#123;
+    let lock = RwLock::new(5);
+
+    // 同一时间允许多个读
+    &#123;
+        let r1 = lock.read().unwrap();
+        let r2 = lock.read().unwrap();
+        assert_eq!(*r1, 5);
+        assert_eq!(*r2, 5);
+    &#125; // 读锁在此处被drop
+
+    // 同一时间只允许一个写
+    &#123;
+        let mut w = lock.write().unwrap();
+        *w += 1;
+        assert_eq!(*w, 6);
+
+        // 以下代码会阻塞发生死锁，因为读和写不允许同时存在
+        // 写锁w直到该语句块结束才被释放，因此下面的读锁依然处于`w`的作用域中
+        // let r1 = lock.read();
+        // println!(&quot;&#123;:?&#125;&quot;,r1);
+    &#125;// 写锁在此处被drop
+&#125;
+</code></pre>
+<p>RwLock在使用上和Mutex区别不大，只有在多个读的情况下不阻塞程序，其他如读写、写读、写写情况下均会对后获取锁的操作进行阻塞。</p>
+<p>也可以使用 <code>try_write</code> 和 <code>try_read</code> 来尝试进行一次写&#x2F;读，若失败则返回错误。</p>
+<p>简单总结下<code>RwLock</code>:</p>
+<ul>
+<li>同时允许多个读，但最多只能有一个写</li>
+<li>读和写不能同时存在</li>
+<li>读可以使用 <code>read</code>、<code>try_read</code>，写 <code>write</code>、<code>try_write</code>, 在实际项目中，<code>try_xxx</code>会安全的多</li>
+</ul>
+<h2 id="三方库提供的锁实现"><a href="#三方库提供的锁实现" class="headerlink" title="三方库提供的锁实现"></a>三方库提供的锁实现</h2><p>标准库在设计时总会存在取舍，因为往往性能并不是最好的，如果你追求性能，可以使用三方库提供的并发原语:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://crates.io/crates/parking_lot">parking_lot</a>, 功能更完善、稳定，社区较为活跃，star 较多，更新较为活跃</li>
+<li><a target="_blank" rel="noopener" href="https://crates.io/crates/spin">spin</a>, 在多数场景中性能比parking_lot高一点，最近没怎么更新</li>
+</ul>
+<p>如果不是追求特别极致的性能，建议选择前者。</p>
+<h2 id="用条件变量-Condvar-控制线程的同步"><a href="#用条件变量-Condvar-控制线程的同步" class="headerlink" title="用条件变量(Condvar)控制线程的同步"></a>用条件变量(Condvar)控制线程的同步</h2><p><code>Mutex</code> 用于解决资源安全访问的问题，但是我们还需要一个手段来解决资源访问顺序的问题。而 Rust 考虑到了这一点，为我们提供了条件变量(Condition Variables)，它经常和 Mutex 一起使用，可以让线程挂起，直到某个条件发生后再继续执行:</p>
+<pre><code class="rust">use std::sync::&#123;Arc,Mutex,Condvar&#125;;
+use std::thread::&#123;spawn,sleep&#125;;
+use std::time::Duration;
+
+fn main() &#123;
+    let flag = Arc::new(Mutex::new(false));
+    let cond = Arc::new(Condvar::new());
+    let cflag = flag.clone();
+    let ccond = cond.clone();
+
+    let hdl = spawn(move || &#123;
+        let mut lock = cflag.lock().unwrap();
+        let mut counter = 0;
+
+        while counter &lt; 3 &#123;
+            while !*lock &#123;
+                // wait方法会接收一个MutexGuard&lt;&#39;a, T&gt;，且它会自动地暂时释放这个锁，使其他线程可以拿到锁并进行数据更新。
+                // 同时当前线程在此处会被阻塞，直到被其他地方notify后，它会将原本的MutexGuard&lt;&#39;a, T&gt;还给我们，即重新获取到了锁，同时唤醒了此线程。
+                lock = ccond.wait(lock).unwrap();
+            &#125;
+            
+            *lock = false;
+
+            counter += 1;
+            println!(&quot;inner counter: &#123;&#125;&quot;, counter);
+        &#125;
+    &#125;);
+
+    let mut counter = 0;
+    loop &#123;
+        sleep(Duration::from_millis(1000));
+        *flag.lock().unwrap() = true;
+        counter += 1;
+        if counter &gt; 3 &#123;
+            break;
+        &#125;
+        println!(&quot;outside counter: &#123;&#125;&quot;, counter);
+        cond.notify_one();
+    &#125;
+    hdl.join().unwrap();
+    println!(&quot;&#123;:?&#125;&quot;, flag);
+&#125;
+</code></pre>
+<p>例子中通过主线程来触发子线程实现交替打印输出：</p>
+<pre><code class="log">outside counter: 1
+inner counter: 1
+outside counter: 2
+inner counter: 2
+outside counter: 3
+inner counter: 3
+Mutex &#123; data: true, poisoned: false, .. &#125;
+</code></pre>
+<h2 id="信号量-Semaphore"><a href="#信号量-Semaphore" class="headerlink" title="信号量 Semaphore"></a>信号量 Semaphore</h2><p>在多线程中，另一个重要的概念就是信号量，使用它可以让我们精准的控制当前正在运行的任务最大数量。</p>
+<p>本来 Rust 在标准库中有提供一个<a target="_blank" rel="noopener" href="https://doc.rust-lang.org/1.8.0/std/sync/struct.Semaphore.html">信号量实现</a>, 但是由于各种原因这个库现在已经不再推荐使用了，因此我们推荐使用 tokio 中提供的 Semaphore 实现: <a target="_blank" rel="noopener" href="https://github.com/tokio-rs/tokio/blob/master/tokio/src/sync/semaphore.rs">tokio::sync::Semaphore</a>。</p>
+<pre><code class="rust">use std::sync::Arc;
+use tokio::sync::Semaphore;
+
+#[tokio::main]
+async fn main() &#123;
+    let semaphore = Arc::new(Semaphore::new(3));
+    let mut join_handles = Vec::new();
+
+    for _ in 0..5 &#123;
+        let permit = semaphore.clone().acquire_owned().await.unwrap();
+        join_handles.push(tokio::spawn(async move &#123;
+            //
+            // 在这里执行任务...
+            //
+            drop(permit);
+        &#125;));
+    &#125;
+
+    for handle in join_handles &#123;
+        handle.await.unwrap();
+    &#125;
+&#125;
+</code></pre>
+<p>上面代码创建了一个容量为 3 的信号量，当正在执行的任务超过 3 时，剩下的任务需要等待正在执行任务完成并减少信号量后到 3 以内时，才能继续执行。</p>
+<p>这里的关键其实说白了就在于：信号量的申请和归还，使用前需要申请信号量，如果容量满了，就需要等待；使用后需要释放信号量，以便其它等待者可以继续。</p>
 
     </div>
     

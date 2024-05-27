@@ -454,22 +454,57 @@ spec:
   # 定义安全链接
   tls: IngressTLS[]
 </code></pre>
-<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><h2 id="使用下面的-yaml-创建测试应用：-yamlapiVersion-v1kind-Podmetadata-name-nginx-app-1-labels-app-nginx-appspec-containers-name-my-container-image-nginx-stable-alpine3-19"><a href="#使用下面的-yaml-创建测试应用：-yamlapiVersion-v1kind-Podmetadata-name-nginx-app-1-labels-app-nginx-appspec-containers-name-my-container-image-nginx-stable-alpine3-19" class="headerlink" title="使用下面的 yaml 创建测试应用：&#96;&#96;&#96;yamlapiVersion: v1kind: Podmetadata:  name: nginx-app-1  labels:    app: nginx-appspec:  containers:  - name: my-container    image: nginx:stable-alpine3.19"></a>使用下面的 <code>yaml</code> 创建测试应用：<br>&#96;&#96;&#96;yaml<br>apiVersion: v1<br>kind: Pod<br>metadata:<br>  name: nginx-app-1<br>  labels:<br>    app: nginx-app<br>spec:<br>  containers:<br>  - name: my-container<br>    image: nginx:stable-alpine3.19</h2><p>apiVersion: v1<br>kind: Pod<br>metadata:<br>  name: nginx-app-2<br>  labels:<br>    app: nginx-app<br>spec:<br>  containers:</p>
-<ul>
-<li>name: my-container<br>image: nginx:stable-alpine3.19</li>
-</ul>
-<hr>
-<h2 id="apiVersion-v1kind-Podmetadata-name-nginx-app-3-labels-app-nginx-appspec-containers-name-my-container-image-nginx-stable-alpine3-19"><a href="#apiVersion-v1kind-Podmetadata-name-nginx-app-3-labels-app-nginx-appspec-containers-name-my-container-image-nginx-stable-alpine3-19" class="headerlink" title="apiVersion: v1kind: Podmetadata:  name: nginx-app-3  labels:    app: nginx-appspec:  containers:  - name: my-container    image: nginx:stable-alpine3.19"></a>apiVersion: v1<br>kind: Pod<br>metadata:<br>  name: nginx-app-3<br>  labels:<br>    app: nginx-app<br>spec:<br>  containers:<br>  - name: my-container<br>    image: nginx:stable-alpine3.19</h2><p>apiVersion: v1<br>kind: Service<br>metadata:<br>  name: nginx-app-svc<br>spec:<br>  selector:<br>    app: nginx-app<br>  ports:</p>
-<ul>
-<li>name: foo<br>port: 10000<br>targetPort: 80</li>
-</ul>
-<pre><code>
-创建完 nginx 后建议进入容器修改首页内容，好查看负载均衡效果。
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>使用下面的 <code>yaml</code> 创建测试应用：</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-app-1
+  labels:
+    app: nginx-app
+spec:
+  containers:
+  - name: my-container
+    image: nginx:stable-alpine3.19
+---
 
-创建 ingress：
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-app-2
+  labels:
+    app: nginx-app
+spec:
+  containers:
+  - name: my-container
+    image: nginx:stable-alpine3.19
 
-```yaml
-apiVersion: networking.k8s.io/v1
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-app-3
+  labels:
+    app: nginx-app
+spec:
+  containers:
+  - name: my-container
+    image: nginx:stable-alpine3.19
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: nginx-app-svc
+spec:
+  selector:
+    app: nginx-app
+  ports:
+  - name: foo
+    port: 10000
+    targetPort: 80
+</code></pre>
+<p>创建完 nginx 后建议进入容器修改首页内容，好查看负载均衡效果。</p>
+<p>创建 ingress：</p>
+<pre><code class="yaml">apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nginx-app-ingress
