@@ -298,6 +298,7 @@ spec:
 ## 测试
 
 使用下面的 `yaml` 创建测试应用：
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -399,6 +400,7 @@ metadata:
 - 如果以其它路径开头，将请求转发到前端服务器。
 
 使用下面的配置即可实现：
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -484,6 +486,7 @@ Pod 之间互通，是通过如下三个标识符的组合来辨识的：
 `NetworkPolicy` 是每个命名空间独有的。
 
 下面一个创建网络策略的例子：
+
 ```yaml
 apiVersion: v1
 kind: Ingress
