@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>Hystrix | IceOfSummerの博客</title>
+        <title>存储 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="后面一辈子的博客都在这了！" />
         <meta name="keywords" content="" />
@@ -167,189 +167,167 @@
 
                 <div class="article">
     <div>
-        <h1>Hystrix</h1>
+        <h1>存储</h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2023/3/7
+            2024/5/28
         </span>
         
         <span class="category">
-            <a href="/2023/03/04/SpringCloud/">
+            <a href="/2024/02/08/k8s">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
-                SpringCloud
+                k8s
             </a>
         </span>
         
-        
-        <span class="tags">
-            <span class="icon">
-                <i class="fa-solid fa-tags fa-fw"></i>
-            </span>
-            
-            <span class="tag">
-                
-                <a href="/SpringCloud/service-degradation" style="color: #03a9f4">服务降级</a>
-            </span>
-            
-        </span>
         
     </div>
     
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
-        <p><font color="red">Hystrix目前已经进入维护模式</font></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/Netflix/Hystrix">Netflix&#x2F;Hystrix (github.com)</a></p>
-<h1 id="入门使用"><a href="#入门使用" class="headerlink" title="入门使用"></a>入门使用</h1><p>导入依赖：</p>
-<pre><code class="xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-cloud-starter-netflix-hystrix&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre>
-<p>配置文件和基础的服务提供者一样。</p>
-<p>主启动类添加注解：<code>@EnableCircuitBreaker</code></p>
-<p>之后在服务类中添加相关注解：</p>
-<pre><code class="java">@HystrixCommand(fallbackMethod = &quot;paymentInfoTimeout_TimeoutHandler&quot;, commandProperties = &#123;
-        // 设置3秒超时
-        @HystrixProperty(name = &quot;execution.isolation.thread.timeoutInMilliseconds&quot;, value = &quot;3000&quot;)
-&#125;)
-public String paymentInfoTimeout(Integer id) &#123;
-    final int timeout = 5000;
-    try &#123;
-        Thread.sleep(timeout);
-    &#125; catch (InterruptedException e) &#123;
-        throw new RuntimeException(e);
-    &#125;
-    return &quot;线程池:   &quot; + Thread.currentThread().getName() + &quot; paymentInfoTimeout, id: &quot; + id + &quot;\ttimeout = &quot; + timeout;
-&#125;
+        <h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/configuration/overview/">配置最佳实践</a></p>
+<h2 id="Secret"><a href="#Secret" class="headerlink" title="Secret"></a>Secret</h2><p><code>Secret</code> 对象类型用来保存敏感信息，例如密码、OAuth 令牌和 SSH 密钥。将这些信息放在 <code>Secret</code> 中会更加的灵活和安全。</p>
+<p>k8s可以创建三种类型的 <code>Secret</code>:</p>
+<pre><code class="bash">$ kubectl create secret --help
 
-// fallback
-public String paymentInfoTimeout_TimeoutHandler(Integer id) &#123;
-    return &quot;paymentInfoTimeout_TimeoutHandler: &quot; + id;
-&#125;
+Available Commands:
+  docker-registry   创建一个给 Docker registry 使用的 Secret
+  generic           Create a secret from a local file, directory, or literal value
+  tls               创建一个 TLS secret
 </code></pre>
-<p>不管是超时还是出现异常，都会调用<code>fallback</code>指定的方法。</p>
-<p>这个设置在客户端或服务端都是一样的。</p>
-<h1 id="全局配置fallback"><a href="#全局配置fallback" class="headerlink" title="全局配置fallback"></a>全局配置fallback</h1><p>一般在如下情况会触发降级：</p>
+<h3 id="docker-registry"><a href="#docker-registry" class="headerlink" title="docker-registry"></a>docker-registry</h3><p>创建一个 docker 镜像的拉取秘钥。</p>
+<p>用法：</p>
+<pre><code class="bash">$ kubectl create secret docker-registry NAME --docker-username=user --docker-password=password --docker-email=email \
+    [--docker-server=string] [--from-file=[key=]source] [--dry-run=server|client|none] [options]
+</code></pre>
+<p>一般只需要提供如下参数：</p>
 <ul>
-<li>程序运行异常</li>
-<li>超时</li>
-<li>服务熔断触发服务降级</li>
-<li>并发量过高(线程池&#x2F;信号量是否用完)</li>
+<li><code>docker-username</code>: 用户名</li>
+<li><code>docker-password</code>： 密码</li>
+<li><code>docker-server</code>：私有仓库服务器</li>
 </ul>
-<p>给某个类配置：</p>
-<pre><code class="java">import com.netflix.hystrix.contrib.javanica.annotation.DefaultProperties;
-
-@RestController
-@Slf4j
-@DefaultProperties(defaultFallback = &quot;paymentFallback&quot;)
-public class PaymentHystrixController &#123;
-    
-    public String paymentFallback() &#123;
-        return &quot;服务运行异常，请稍后再试&quot;;
-    &#125;
-    
-    // ...
-    
-&#125;
+<p>创建完成后，可以直接在 Pod 的 <code>spec.imagePullSecrets</code> 中使用：</p>
+<pre><code class="yaml">kind: Pod
+spec:
+    imagePullSecrets:
+        - name: secret-name1
+        - name: secret-name2
 </code></pre>
-<p>还有更加优雅的配置方法：</p>
-<pre><code class="java">@Service
-@FeignClient(value = &quot;CLOUD-PROVIDER-HYSTRIX-PAYMENT&quot;, fallback = PaymentServiceFallback.class)
-public interface PaymentHystrixService &#123;
-
-    @GetMapping(&quot;/payment/hystrix/ok/&#123;id&#125;&quot;)
-    String paymentInfoSuccess(@PathVariable Integer id);
-
-
-    @GetMapping(&quot;/payment/hystrix/timeout/&#123;id&#125;&quot;)
-    String paymentInfoTimeout(@PathVariable Integer id);
-
-&#125;
-
-
-public class PaymentServiceFallback implements PaymentHystrixService &#123;
-    @Override
-    public String paymentInfoSuccess(Integer id) &#123;
-        return &quot;paymentInfoSuccess_fallback&quot;;
-    &#125;
-
-    @Override
-    public String paymentInfoTimeout(Integer id) &#123;
-        return &quot;paymentInfoTimeout_fallback&quot;;
-    &#125;
-&#125;
-</code></pre>
-<p>这样就不用把业务代码和异常代码混合在一起了。</p>
-<p>但是在使用前必须要添加配置：</p>
-<pre><code class="yaml">feign:
-  circuitbreaker:
-    enabled: true
-</code></pre>
-<h1 id="服务熔断"><a href="#服务熔断" class="headerlink" title="服务熔断"></a>服务熔断</h1><p>在触发服务熔断后，服务器会拒绝所有请求，然后使用服务降级的方法返回友好提示。</p>
-<p>熔断机制是应对雪崩效应的一种微服务链路保护机制。当扇出链路的某个微服务出错不可用或者响应时间太长时，会进行服务的降级，进而熔断该节点微服务的调用，快速返回错误的响应信息。</p>
-<p>当检测到该节点微服务调用响应正常后，恢复调用链路。</p>
-<pre><code class="java">@HystrixCommand(fallbackMethod = &quot;paymentCircuitBreaker_fallback&quot;, commandProperties = &#123;
-    // 是否开启断路器
-    @HystrixProperty(name = HystrixPropertiesManager.CIRCUIT_BREAKER_ENABLED, value = &quot;true&quot;),
-    // 请求次数阈值
-    @HystrixProperty(name = &quot;circuitBreaker.requestVolumeThreshold&quot;, value = &quot;10&quot;),
-    // 时间窗口期, 在触发熔断后，多久恢复HALF_OPEN状态，之后会放行一个请求，根据执行结果决定是否恢复正常
-    @HystrixProperty(name = &quot;circuitBreaker.sleepWindowInMilliseconds&quot;, value = &quot;1000000&quot;),
-    // 失败率达到多少后熔断
-    @HystrixProperty(name = &quot;circuitBreaker.errorThresholdPercentage&quot;, value = &quot;60&quot;),
-&#125;)
-public String paymentCircuitBreaker(Integer id) &#123;
-    if (id &lt; 0) &#123;
-        throw new RuntimeException(&quot;id 不能为负数&quot;);
-    &#125;
-    return Thread.currentThread().getName() + &quot;\t调用成功，流水号: &quot; + UUID.randomUUID();
-&#125;
-
-public String paymentCircuitBreaker_fallback(Integer id) &#123;
-    return &quot;paymentCircuitBreaker_fallback, id: &quot; + id;
-&#125;
-</code></pre>
-<p>具体的配置列表：<a target="_blank" rel="noopener" href="https://github.com/Netflix/Hystrix/wiki/Configuration">https://github.com/Netflix/Hystrix/wiki/Configuration</a></p>
-<p>在触发熔断后，服务参数即使正确，也会一直返回降级的内容。</p>
-<p>熔断类型：</p>
-<ul>
-<li><strong>CLOSE</strong>：熔断关闭，不会对服务进行熔断</li>
-<li><strong>OPEN</strong>：请求不再进行当前服务的调用，直接进行服务降级，在经过一定时间后转换为HALF_OPEN状态</li>
-<li><strong>HALF_OPEN</strong>：此时放行部分请求，根据返回结果绝定是否继续开启熔断</li>
-</ul>
-<p>常用参数：</p>
+<h3 id="generic"><a href="#generic" class="headerlink" title="generic"></a>generic</h3><p><code>generic</code> 的 <code>secret</code> 一般有下面的几种类型：</p>
 <table>
 <thead>
 <tr>
-<th>配置名称</th>
-<th>说明</th>
+<th>内置类型</th>
+<th>用法</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>circuitBreaker.requestVolumeThreshold</td>
-<td>在一个时间窗口内，至少失败多少次会触发熔断</td>
+<td>Opaque</td>
+<td>用户定义的任意数据</td>
 </tr>
 <tr>
-<td>circuitBreaker.sleepWindowInMilliseconds</td>
-<td>在熔断后，恢复为HALF_OPEN的时间</td>
+<td>kubernetes.io&#x2F;service-account-token</td>
+<td>服务账号令牌</td>
 </tr>
 <tr>
-<td>circuitBreaker.errorThresholdPercentage</td>
-<td>当错误百分比高于该值时，应触发熔断</td>
+<td>kubernetes.io&#x2F;dockercfg</td>
+<td>~&#x2F;.dockercfg文件的序列化形式</td>
+</tr>
+<tr>
+<td>kubernetes.io&#x2F;dockerconfigjson</td>
+<td>~&#x2F;.docker&#x2F;config.json 文件的序列化形式</td>
+</tr>
+<tr>
+<td>kubernetes.io&#x2F;basic-auth</td>
+<td>用于基本身份认证的凭据</td>
+</tr>
+<tr>
+<td>kubernetes.io&#x2F;ssh-auth</td>
+<td>用于SSH身份认证的凭据</td>
+</tr>
+<tr>
+<td>kubernetes.io&#x2F;tls</td>
+<td>用于TLS客户端或者服务器端的数据</td>
+</tr>
+<tr>
+<td>bootstrap.kubernetes.io&#x2F;token</td>
+<td>启动引导令牌数据</td>
 </tr>
 </tbody></table>
-<h1 id="HystrixDashboard"><a href="#HystrixDashboard" class="headerlink" title="HystrixDashboard"></a>HystrixDashboard</h1><p>导入依赖：</p>
-<pre><code class="xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-cloud-starter-netflix-hystrix-dashboard&lt;/artifactId&gt;
-&lt;/dependency&gt;
+<p>常见用例：</p>
+<pre><code class="bash">kubectl create secret generic dev-db-secret --from-literal=username=devuser --from-iteral=password=abc123
+
+## 生成如下的yaml
+apiVersion: v1
+kind: Secret
+metadata: 
+  name dev-db-secret
+data:
+  password: &lt;base64: devuser&gt;
+  username: &lt;base64: abc123&gt;
 </code></pre>
+<h3 id="使用Secret"><a href="#使用Secret" class="headerlink" title="使用Secret"></a>使用Secret</h3><p>可以通过环境变量使用 Secret:</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-secret
+spec:
+  containers:
+    - name: pod-secret
+      image: busybox
+      command: [&quot;sh&quot;, &quot;echo&quot;, &quot;$MY_SECRET_ENV&quot;]
+      env:
+        # 通过环境变量使用Secret
+        - name: MY_SECRET_ENV
+          valueFrom:
+            secretKeyRef:
+              name: &lt;secret-name&gt;
+              key: &lt;secret-key&gt;
+</code></pre>
+<h2 id="引用配置"><a href="#引用配置" class="headerlink" title="引用配置"></a>引用配置</h2><p>使用<code>kubectl explain pod.spec.containers.env.valueFrom</code>既可查看所有能够引用的类型。</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-test
+spec:
+  containers:
+    - name: pod-test
+      image: busybox
+      resources:
+        limits:
+          cpu: 5m
+      env:
+        - name: SECRET_REF
+          valueFrom:
+            # 引用一个 Secret
+            secretKeyRef:
+              name: &lt;secret-name&gt;
+              key: &lt;secret-key&gt;
+        - name: FIELD_REF
+          valueFrom:
+            # 引用一个属性
+            fieldRef:
+              fieldPath: metadata.name
+        - name: RESOURCE_REF
+          valueFrom:
+            # 引用一个资源
+            resourceFieldRef:
+              containerName: pod-test
+              resource: limit.cpu
+</code></pre>
+<ul>
+<li>filedRef可用值：metadata.name, metadata.namespace, <code>metadata.labels[&#39;&lt;KEY&gt;&#39;]</code>, <code>metadata.annotations[&#39;&lt;KEY&gt;&#39;]</code>, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs</li>
+<li>resourceFieldRef可用值: limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage</li>
+</ul>
+<blockquote>
+<p>环境变量引用的方式不会被自动更新</p>
+</blockquote>
 
     </div>
     
