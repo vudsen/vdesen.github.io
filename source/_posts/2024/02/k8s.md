@@ -12,7 +12,11 @@ categories: "k8s"
 - [基础](/kubernetes/basic)
 - [进阶](/kubernetes/core)
 - [高级应用](/kubernetes/adv)
-- [K8s网络](/kubernetes/network)
+
+---
+
+- [网络](/kubernetes/network)
+- [存储](/kubernetes/storage)
 - ~~[Kubesphere基础](/kubernetes/kubesphere)~~
 
 # 其它
