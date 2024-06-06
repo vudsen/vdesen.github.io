@@ -191,7 +191,187 @@
     
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
-        
+        <h1 id="组合器"><a href="#组合器" class="headerlink" title="组合器"></a>组合器</h1><p>在 Rust 中，组合器用于对返回结果的类型进行变换：例如使用 <code>ok_or</code> 将一个 <code>Option</code> 类型转换成 <code>Result</code> 类型。</p>
+<h2 id="or-和-and"><a href="#or-和-and" class="headerlink" title="or() 和 and()"></a>or() 和 and()</h2><p>跟布尔关系的与&#x2F;或很像，这两个方法会对两个表达式做逻辑组合，最终返回 <code>Option</code> &#x2F; <code>Result</code>。</p>
+<ul>
+<li><code>or()</code>，表达式按照顺序求值，若任何一个表达式的结果是 <code>Some</code> 或 <code>Ok</code>，则该值会立刻返回，否则返回 <code>or</code> 中指定的参数。<pre><code class="rust">let some1 = Some(&quot;some1&quot;);
+let some2 = Some(&quot;some2&quot;);
+let none: Option&lt;&amp;str&gt; = None;
+
+assert_eq!(some1.or(some2), some1); // Some1 or Some2 = Some1
+assert_eq!(some1.or(none), some1);  // Some or None = Some
+assert_eq!(none.or(some1), some1);  // None or Some = Some
+assert_eq!(none.or(none), none);    // None1 or None2 = None2
+</code></pre>
+</li>
+<li><code>and()</code>，如果自身为 <code>None</code> 或者 <code>Err</code> 则返回自身，否则返回 <code>and()</code> 中的参数<pre><code class="rust">let some1 = Some(&quot;some1&quot;);
+let some2 = Some(&quot;some2&quot;);
+let none: Option&lt;&amp;str&gt; = None;
+
+assert_eq!(some1.and(some2), some2); // Some1 and Some2 = Some2
+assert_eq!(some1.and(none), none);   // Some and None = None
+assert_eq!(none.and(some1), none);   // None and Some = None
+assert_eq!(none.and(none), none);    // None1 and None2 = None1
+</code></pre>
+</li>
+</ul>
+<p>对于 <code>Options</code>， 还有 <code>xor</code> 可用，它会在仅有一个值为 <code>&#39;true&#39;</code> 时，返回该值。</p>
+<p>实际可以把 <code>Some</code> 和 <code>Ok</code> 看做 <code>true</code>，<code>None</code> 和 <code>Err</code> 看做 <code>false</code>:</p>
+<p>当进行逻辑判断时，最后一次的成功判断，则为返回的值。</p>
+<p>例如 <code>Some1 or Some2</code>，在判断 <code>Some1</code> 时，就可以知道整个表达式都是 <code>true</code> 了，因此此时 <code>Some1</code> 为返回的值。</p>
+<p>再例如 <code>Some1 and Some2</code>，此时需要比较两个值，最后比较的是 <code>Some2</code> 因此 <code>Some2</code> 为返回的值。</p>
+<h2 id="or-else-和-and-then"><a href="#or-else-和-and-then" class="headerlink" title="or_else() 和 and_then()"></a>or_else() 和 and_then()</h2><p>它们跟 <code>or()</code> 和 <code>and()</code> 类似，唯一的区别在于，它们的第二个表达式是一个闭包。</p>
+<pre><code class="rust">fn main() &#123;
+    // or_else with Option
+    let some1 = Some(&quot;some1&quot;);
+    let some2 = Some(&quot;some2&quot;);
+    let fn_some2 = || Some(&quot;some2&quot;); // 类似于: let fn_some = || -&gt; Option&lt;&amp;str&gt; &#123; Some(&quot;some2&quot;) &#125;;
+
+    let none: Option&lt;&amp;str&gt; = None;
+    let fn_none = || None;
+
+    assert_eq!(some1.or_else(fn_some2), some1);  // Some1 or_else Some2 = Some1
+    assert_eq!(some1.or_else(fn_none), some1);  // Some or_else None = Some
+    assert_eq!(none.or_else(fn_some2), some2);   // None or_else Some = Some
+    assert_eq!(none.or_else(fn_none), None); // None1 or_else None2 = None2
+&#125;
+</code></pre>
+<p><code>and_then()</code> 可以获取前一个表达式的值： </p>
+<pre><code class="rust">fn main() &#123;
+    // and_then with Option
+    let some1 = Some(&quot;some1&quot;);
+    let some2 = Some(&quot;some2&quot;);
+    let fn_some2 = |_| Some(&quot;some2&quot;); // 类似于: let fn_some = |_| -&gt; Option&lt;&amp;str&gt; &#123; Some(&quot;some2&quot;) &#125;;
+
+    let n: Option&lt;&amp;str&gt; = None;
+    let fn_none = |_| None;
+
+    assert_eq!(some1.and_then(fn_some2), some2); // Some1 and_then Some2 = Some2
+    assert_eq!(some1.and_then(fn_none), n);  // Some and_then None = None
+    assert_eq!(n.and_then(fn_some2), n);   // None and_then Some = None
+    assert_eq!(n.and_then(fn_none), n);   // None1 and_then None2 = None1
+&#125;
+</code></pre>
+<h2 id="filter"><a href="#filter" class="headerlink" title="filter"></a>filter</h2><p><code>filter</code> 用于对 <code>Option</code> 进行过滤，当 <code>Option</code> 值为 <code>None</code> 时，直接返回，否则调用闭包函数进行过滤，当闭包函数返回 <code>true</code> 时，才返回 <code>Some</code> 中的值，否则返回 <code>None</code>。</p>
+<pre><code class="rust">fn main() &#123;
+    let s1 = Some(3);
+    let s2 = Some(6);
+    let n = None;
+
+    let fn_is_even = |x: &amp;i8| x % 2 == 0;
+
+    assert_eq!(s1.filter(fn_is_even), n);  // Some(3) -&gt; 3 is not even -&gt; None
+    assert_eq!(s2.filter(fn_is_even), s2); // Some(6) -&gt; 6 is even -&gt; Some(6)
+    assert_eq!(n.filter(fn_is_even), n);   // None -&gt; no value -&gt; None
+&#125;
+</code></pre>
+<h2 id="map-和-map-err"><a href="#map-和-map-err" class="headerlink" title="map() 和 map_err()"></a>map() 和 map_err()</h2><p><code>map</code> 可以将 <code>Some</code> 或 <code>Ok</code> 中的值映射为另一个：</p>
+<pre><code class="rust">fn main() &#123;
+    let s1 = Some(&quot;abcde&quot;);
+    let s2 = Some(5);
+
+    let n1: Option&lt;&amp;str&gt; = None;
+    let n2: Option&lt;usize&gt; = None;
+
+    let o1: Result&lt;&amp;str, &amp;str&gt; = Ok(&quot;abcde&quot;);
+    let o2: Result&lt;usize, &amp;str&gt; = Ok(5);
+
+    let e1: Result&lt;&amp;str, &amp;str&gt; = Err(&quot;abcde&quot;);
+    let e2: Result&lt;usize, &amp;str&gt; = Err(&quot;abcde&quot;);
+
+    let fn_character_count = |s: &amp;str| s.chars().count();
+
+    assert_eq!(s1.map(fn_character_count), s2); // Some1 map = Some2
+    assert_eq!(n1.map(fn_character_count), n2); // None1 map = None2
+
+    assert_eq!(o1.map(fn_character_count), o2); // Ok1 map = Ok2
+    assert_eq!(e1.map(fn_character_count), e2); // Err1 map = Err2
+&#125;
+</code></pre>
+<p><code>map_err</code> 则是将 <code>Err</code> 中的值转换成另外一个，在面对 <code>Ok</code> 时将直接返回：</p>
+<pre><code class="rust">fn main() &#123;
+    let o1: Result&lt;&amp;str, &amp;str&gt; = Ok(&quot;abcde&quot;);
+    let o2: Result&lt;&amp;str, isize&gt; = Ok(&quot;abcde&quot;);
+
+    let e1: Result&lt;&amp;str, &amp;str&gt; = Err(&quot;404&quot;);
+    let e2: Result&lt;&amp;str, isize&gt; = Err(404);
+
+    let fn_character_count = |s: &amp;str| -&gt; isize &#123; s.parse().unwrap() &#125;; // 该函数返回一个 isize
+
+    assert_eq!(o1.map_err(fn_character_count), o2); // Ok1 map = Ok2
+    assert_eq!(e1.map_err(fn_character_count), e2); // Err1 map = Err2
+&#125;
+</code></pre>
+<h2 id="map-or-和-map-or-else"><a href="#map-or-和-map-or-else" class="headerlink" title="map_or() 和 map_or_else()"></a>map_or() 和 map_or_else()</h2><p><code>map_or</code> 在 <code>map</code> 的基础上提供了一个默认值:</p>
+<pre><code class="rust">fn main() &#123;
+    const V_DEFAULT: u32 = 1;
+
+    let s: Result&lt;u32, ()&gt; = Ok(10);
+    let n: Option&lt;u32&gt; = None;
+    let fn_closure = |v: u32| v + 2;
+
+    assert_eq!(s.map_or(V_DEFAULT, fn_closure), 12);
+    assert_eq!(n.map_or(V_DEFAULT, fn_closure), V_DEFAULT);
+&#125;
+</code></pre>
+<p>当 <code>map_or</code> 处理 <code>None</code> 时，将会返回第一个参数作为默认值。</p>
+<p><code>map_or_else</code> 与 <code>map_or</code> 类似，但是它是通过一个闭包来提供默认值:</p>
+<pre><code class="rust">fn main() &#123;
+    let s = Some(10);
+    let n: Option&lt;i8&gt; = None;
+
+    let fn_closure = |v: i8| v + 2;
+    let fn_default = || 1;
+
+    assert_eq!(s.map_or_else(fn_default, fn_closure), 12);
+    assert_eq!(n.map_or_else(fn_default, fn_closure), 1);
+
+    let o = Ok(10);
+    let e = Err(5);
+    let fn_default_for_result = |v: i8| v + 1; // 闭包可以对 Err 中的值进行处理，并返回一个新值
+
+    assert_eq!(o.map_or_else(fn_default_for_result, fn_closure), 12);
+    assert_eq!(e.map_or_else(fn_default_for_result, fn_closure), 6);
+&#125;
+</code></pre>
+<h2 id="ok-or-and-ok-or-else"><a href="#ok-or-and-ok-or-else" class="headerlink" title="ok_or() and ok_or_else()"></a>ok_or() and ok_or_else()</h2><p>这两个组合器可以将 <code>Some(v)</code> 转换成 <code>Ok(v)</code>，<code>None</code> 转化为 <code>Err(err)</code>:</p>
+<pre><code class="rust">fn main() &#123;
+    const ERR_DEFAULT: &amp;str = &quot;error message&quot;;
+
+    let s = Some(&quot;abcde&quot;);
+    let n: Option&lt;&amp;str&gt; = None;
+
+    let o: Result&lt;&amp;str, &amp;str&gt; = Ok(&quot;abcde&quot;);
+    let e: Result&lt;&amp;str, &amp;str&gt; = Err(ERR_DEFAULT);
+
+    assert_eq!(s.ok_or(ERR_DEFAULT), o); // Some(T) -&gt; Ok(T)
+    assert_eq!(n.ok_or(ERR_DEFAULT), e); // None -&gt; Err(default)
+&#125;
+</code></pre>
+<p><code>ok_or_else</code> 则是提供了懒加载错误的方式：</p>
+<pre><code class="rust">fn main() &#123;
+    let s = Some(&quot;abcde&quot;);
+    let n: Option&lt;&amp;str&gt; = None;
+    let fn_err_message = || &quot;error message&quot;;
+
+    let o: Result&lt;&amp;str, &amp;str&gt; = Ok(&quot;abcde&quot;);
+    let e: Result&lt;&amp;str, &amp;str&gt; = Err(&quot;error message&quot;);
+
+    assert_eq!(s.ok_or_else(fn_err_message), o); // Some(T) -&gt; Ok(T)
+    assert_eq!(n.ok_or_else(fn_err_message), e); // None -&gt; Err(default)
+&#125;
+</code></pre>
+<h1 id="归一化不同的错误类型"><a href="#归一化不同的错误类型" class="headerlink" title="归一化不同的错误类型"></a>归一化不同的错误类型</h1><h2 id="自定义错误类型"><a href="#自定义错误类型" class="headerlink" title="自定义错误类型"></a>自定义错误类型</h2><p>为了帮助我们更好的定义错误，Rust 在标准库中提供了一些可复用的特征，例如 <code>std::error::Error</code> 特征：</p>
+<pre><code class="rust">use std::fmt::&#123;Debug, Display&#125;;
+
+pub trait Error: Debug + Display &#123;
+    fn source(&amp;self) -&gt; Option&lt;&amp;(Error + &#39;static)&gt; &#123; ... &#125;
+&#125;
+</code></pre>
+<p>虽然 <code>Result</code> 中并没有强制要求 <code>Err</code> 的参数实现 <code>Error</code> 特征，但是对于一个错误来说，实现 <code>Error</code> 特征可以统一接口，为错误类型提供了一个标准化的接口，使得不同的错误类型可以以一致的方式被处理和操作。</p>
+<p>要想实现 <code>Error</code> 特征，则必须实现 <code>Debug</code> 和 <code>Display</code> 特征。</p>
+<p><code>Error::source()</code> 方法一般是可选的，如果不实现，默认返回 <code>None</code>，这个方法一般用于返回内部错误，例如这个错误可能是由多个其它错误，或者某个子错误造成的，则可以通过该方法获取更原始的错误信息，进而方便问题的定位。</p>
+
     </div>
     
     

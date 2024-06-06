@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>K8s | IceOfSummerの博客</title>
+        <title>自动引用绑定 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="后面一辈子的博客都在这了！" />
         <meta name="keywords" content="" />
@@ -167,22 +167,22 @@
 
                 <div class="article">
     <div>
-        <h1>K8s</h1>
+        <h1>自动引用绑定</h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2024/2/8
+            2024/6/6
         </span>
         
         <span class="category">
-            <a href="/categories/k8s/">
+            <a href="/2023/12/04/rust/">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
-                k8s
+                Rust
             </a>
         </span>
         
@@ -191,25 +191,24 @@
     
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
-        <h1 id="课程笔记"><a href="#课程笔记" class="headerlink" title="课程笔记"></a>课程笔记</h1><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV13Q4y1C7hS">云原生Java架构师的第一课K8s+Docker+KubeSphere+DevOps</a></p>
-<ul>
-<li><a href="/kubernetes/basic">基础</a></li>
-<li><a href="/kubernetes/core">进阶</a></li>
-<li><a href="/kubernetes/adv">高级应用</a></li>
-</ul>
-<hr>
-<ul>
-<li><a href="/kubernetes/network">网络</a></li>
-<li><a href="/kubernetes/storage">存储</a></li>
-<li><del><a href="/kubernetes/kubesphere">Kubesphere基础</a></del></li>
-</ul>
-<h1 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h1><ul>
-<li><a href="/kubernetes/self-registry">搭建私有镜像仓库</a></li>
-<li><a href="/kubernetes/dev-ops">DevOps</a></li>
-<li><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/tasks/run-application/horizontal-pod-autoscale/">Pod水平自动扩缩</a></li>
-<li><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/tasks/inject-data-application/environment-variable-expose-pod-information/">通过环境变量将 Pod 信息呈现给容器</a></li>
-<li><a href="/kubernetes/properties">常用属性</a></li>
-</ul>
+        <h1 id="自动引用绑定"><a href="#自动引用绑定" class="headerlink" title="自动引用绑定"></a>自动引用绑定</h1><h2 id="自动解引用"><a href="#自动解引用" class="headerlink" title="自动解引用"></a>自动解引用</h2><p>来看下面的代码：</p>
+<pre><code class="rust">#[derive(Debug)]
+enum CustomError &#123;
+    ParseError(ParseIntError),
+    ReadError(IoError),
+&#125;
+
+impl Error for CustomError &#123;
+    fn source(&amp;self) -&gt; Option&lt;&amp;(dyn Error + &#39;static)&gt; &#123;
+        match *self &#123;
+            CustomError::ParseError(ref e) =&gt; Some(e),
+            CustomError::ReadError(ref e) =&gt; Some(e),
+        &#125;
+    &#125;
+&#125;
+
+// 省略了无关代码
+</code></pre>
 
     </div>
     

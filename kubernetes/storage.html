@@ -328,6 +328,139 @@ spec:
 <blockquote>
 <p>环境变量引用的方式不会被自动更新</p>
 </blockquote>
+<h1 id="PVC"><a href="#PVC" class="headerlink" title="PVC"></a>PVC</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/storage/persistent-volumes">持久卷</a></p>
+<p>PVC 用于抽象存储，当 Pod 需要使用一块空间时只需要申请就可以了，并不需要关心这块存储是如何实现的，只需提供自己所需要的空间，K8s就能够自动进行分配。</p>
+<h2 id="申请一块存储空间"><a href="#申请一块存储空间" class="headerlink" title="申请一块存储空间"></a>申请一块存储空间</h2><blockquote>
+<p>kubectl explain pod.spec.volumes.persistentVolumeClaim</p>
+</blockquote>
+<pre><code class="yaml">apiVerson: v1
+kind: Pod
+spec:
+  volumes:
+    - name: pvc
+      # 申请一个持久卷，关联一个PV(PersistentVolume)
+      persistentVolumeClaim:  
+        # 指定一份申请书 (PVC)
+        claimName: my-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  storageClassName: &lt;storage-class-name&gt;
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      # 申请 50 MB
+      storage: 50m
+</code></pre>
+<h2 id="创建-PV-池"><a href="#创建-PV-池" class="headerlink" title="创建 PV 池"></a>创建 PV 池</h2><h3 id="静态供应"><a href="#静态供应" class="headerlink" title="静态供应"></a>静态供应</h3><p>PV 池可以提前被创建好，使用下面的 yaml 就可以创建一个 PV:</p>
+<pre><code class="yaml">apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-pv
+spec: 
+  # 可以填任意名称
+  storageClassName: my-storage-class-name
+  capacity:
+    # 存储空间
+    storage: 10m
+  accessModes:
+    - ReadWriteOnce
+  # 使用 hostPath 存储
+  hostPath:
+    path: &quot;/mnt/data&quot;
+  # 或者使用 nfs 存储
+  nfs:
+    server: 10.0.0.1
+    path: /nfs/data/abc
+</code></pre>
+<p><code>storageClassName</code> 用于分组，一个 <code>storageClassName</code> 下可以创建多个 PV。</p>
+<h3 id="动态供应"><a href="#动态供应" class="headerlink" title="动态供应"></a>动态供应</h3><p>动态供应，则是把应该由运维手动创建的 PV 转交给 provisioner(供应商) 来进行创建。</p>
+<hr>
+<p>使用 nfs 进行供应：<a target="_blank" rel="noopener" href="https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner">文档</a></p>
+<p>使用手动部署方式，进入仓库的 <code>/deploy</code> 文件夹，里面的 <code>class.yaml</code>、<code>deployment.yaml</code> 和 <code>rbac.yaml</code>.</p>
+<pre><code class="yaml">apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-client
+provisioner: k8s-sigs.io/nfs-subdir-external-provisioner # or choose another name, must match deployment&#39;s env PROVISIONER_NAME&#39;
+parameters:
+  archiveOnDelete: &quot;false&quot;
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-client-provisioner
+  labels:
+    app: nfs-client-provisioner
+  # replace with namespace where provisioner is deployed
+  namespace: default
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nfs-client-provisioner
+  template:
+    metadata:
+      labels:
+        app: nfs-client-provisioner
+    spec:
+      serviceAccountName: nfs-client-provisioner
+      containers:
+        - name: nfs-client-provisioner
+          image: registry.k8s.io/sig-storage/nfs-subdir-external-provisioner:v4.0.2
+          volumeMounts:
+            - name: nfs-client-root
+              mountPath: /persistentvolumes
+          env:
+            # 和上面的 StorageClass 的 provisioner 值对应
+            - name: PROVISIONER_NAME
+              value: k8s-sigs.io/nfs-subdir-external-provisioner
+            - name: NFS_SERVER
+              value: 10.3.243.101
+            - name: NFS_PATH
+              value: /ifs/kubernetes
+      volumes:
+        - name: nfs-client-root
+          nfs:
+            server: 10.3.243.101
+            path: /ifs/kubernetes
+---
+#
+# rbac.yaml 中的内容
+#
+</code></pre>
+<p>创建完成后，PVC 的 <code>spec.storageClassName</code> 只需要填上指定的 StorageClass 就可以实现动态供应了。</p>
+<h2 id="PV-的回收策略"><a href="#PV-的回收策略" class="headerlink" title="PV 的回收策略"></a>PV 的回收策略</h2><p>当存在一个 PVC 时，当时没有对应的可用组员，它会先处于 Pending 状态。当有合适的 PV 时，PVC 会自动绑定。</p>
+<p>当 PVC 绑定了一个 PV 后，当这个 PVC 被删除后，默认情况下这个 PVC 所绑定的 PV 不会被释放。</p>
+<p>每个持久卷会处于以下阶段（Phase）之一：</p>
+<ul>
+<li>Available: 卷是一个空闲资源，尚未绑定到任何申领</li>
+<li>Bound: 该卷已经绑定到某申领</li>
+<li>Released: 所绑定的申领已被删除，但是关联存储资源尚未被集群回收</li>
+<li>Failed: 卷的自动回收操作失败</li>
+</ul>
+<h3 id="保留-Retain"><a href="#保留-Retain" class="headerlink" title="保留 (Retain)"></a>保留 (Retain)</h3><p>当 PVC 被删除后仍然保留 PV，即用户需要手动回收资源，此时卷的状态为 <code>RELEASED</code>。</p>
+<pre><code class="bash">[docker@VM-12-7-opencloudos pvc]$ kubectl get pv
+NAME       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM                STORAGECLASS            VOLUMEATTRIBUTESCLASS   REASON   AGE
+my-pv10m   10m        RWO            Retain           Available                        my-storage-class-name   &lt;unset&gt;                          11m
+my-pv50m   50m        RWO            Retain           Released    default/my-pvc-40m   my-storage-class-name   &lt;unset&gt;                          10m
+</code></pre>
+<p>可以通过下面的步骤来手动回收：</p>
+<ol>
+<li>删除 PV 对象。删除 PV 对象并不会删除其对应的文件夹中的资源。</li>
+<li>根据需要手动清除 PV 对应的文件夹上的资源</li>
+<li>删除对应的关联存储资产</li>
+<li>如果需要，重新创建 PV</li>
+</ol>
+<h3 id="删除-Delete"><a href="#删除-Delete" class="headerlink" title="删除 (Delete)"></a>删除 (Delete)</h3><p>K8s 会直接将 PV 删除，同时删除对应的关联资源。</p>
+<p><strong>使用 Delete 必须要求对应的存储实现提供相关的删除插件</strong>，否则会删除失败。例如 AWS EBS、GCE PD等.</p>
+<h3 id="回收-Recycle"><a href="#回收-Recycle" class="headerlink" title="回收 (Recycle)"></a>回收 (Recycle)</h3><p>回收会直接清除 PV 对应目录上的数据(会执行 <code>rm -rf</code>)。执行完成后，该 PV 将允许重新使用。</p>
 
     </div>
     
