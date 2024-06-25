@@ -425,6 +425,73 @@ spec:
               number: 80
 ```
 
+## L4 代理传递真实IP
+
+一般情况下，在 Ingress 的外层，还会存在一个 L4 代理，如果不做任何配置，此时获取的客户端 IP 将会是 L4 代理的 IP。
+
+如果需要获取用户真实 IP，需要使用 Proxy Protocol。这里 L4 代理使用 nginx 做演示。
+
+L4 代理配置：
+
+```conf
+worker_processes  1;
+events {
+    worker_connections  1024;
+}
+# 注意这里是 stream
+stream {
+
+  upstream backend {
+    hash $remote_addr consistent;                            
+    server 10.77.0.36:443;
+    server 10.77.0.35:443;
+  }
+
+  server {
+    listen 30844 so_keepalive=on;                           
+    proxy_connect_timeout 10s;                              
+    proxy_timeout 300s;                                            
+    proxy_pass backend;
+    proxy_protocol on;  # 开启 Proxy Protocol
+  }
+
+  server {
+    listen 30843 so_keepalive=on;                              
+    proxy_connect_timeout 10s;                                 
+    proxy_timeout 300s;                                             
+    proxy_pass backend;
+    proxy_protocol on;  # 开启 Proxy Protocol
+  }
+
+}
+```
+
+此时需要同时配置 Ingress，也让它开启 Proxy Protocol。这个协议要么用，要么不用，接受者和使用者都不会去猜测你是否使用了 Proxy Protocol，如果两者的协议不一致，连接一般会被直接重置(Connection Reset).
+
+之后打开 ingress-nginx 的配置，添加下面的内容：
+
+```json
+{
+  # 设置你 L4 代理的 Ip Cdir
+	"proxy-real-ip-cidr": "10.77.0.0/24",
+  # 设置额外的 携带IP的 请求头 (命名空间/ConfigMap名称)
+	"proxy-set-headers": "ingress-nginx/proxy-protocol-custom-headers",
+  # 开启 Proxy Protocol
+	"use-proxy-protocol": "true"
+}
+```
+之后在创建一个和 `proxy-set-headers` 对应的 ConfigMap，使用下面的配置：
+
+```json
+{
+	"X-Forwarded-For": "$proxy_protocol_addr"
+}
+```
+
+这里的参数是用了 [realip_module](https://nginx.org/en/docs/http/ngx_http_realip_module.html)
+
+在业务中，直接获取 `X-Forwarded-For` 请求头就可以获取客户端真实 ip 了。
+
 ### 会话保持-Session亲和性
 
 [session-affinity](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#session-affinity)
