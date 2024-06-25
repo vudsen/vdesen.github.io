@@ -561,6 +561,58 @@ spec:
             port: 
               number: 80
 </code></pre>
+<h2 id="L4-代理传递真实IP"><a href="#L4-代理传递真实IP" class="headerlink" title="L4 代理传递真实IP"></a>L4 代理传递真实IP</h2><p>一般情况下，在 Ingress 的外层，还会存在一个 L4 代理，如果不做任何配置，此时获取的客户端 IP 将会是 L4 代理的 IP。</p>
+<p>如果需要获取用户真实 IP，需要使用 Proxy Protocol。这里 L4 代理使用 nginx 做演示。</p>
+<p>L4 代理配置：</p>
+<pre><code class="conf">worker_processes  1;
+events &#123;
+    worker_connections  1024;
+&#125;
+# 注意这里是 stream
+stream &#123;
+
+  upstream backend &#123;
+    hash $remote_addr consistent;                            
+    server 10.77.0.36:443;
+    server 10.77.0.35:443;
+  &#125;
+
+  server &#123;
+    listen 30844 so_keepalive=on;                           
+    proxy_connect_timeout 10s;                              
+    proxy_timeout 300s;                                            
+    proxy_pass backend;
+    proxy_protocol on;  # 开启 Proxy Protocol
+  &#125;
+
+  server &#123;
+    listen 30843 so_keepalive=on;                              
+    proxy_connect_timeout 10s;                                 
+    proxy_timeout 300s;                                             
+    proxy_pass backend;
+    proxy_protocol on;  # 开启 Proxy Protocol
+  &#125;
+
+&#125;
+</code></pre>
+<p>此时需要同时配置 Ingress，也让它开启 Proxy Protocol。这个协议要么用，要么不用，接受者和使用者都不会去猜测你是否使用了 Proxy Protocol，如果两者的协议不一致，连接一般会被直接重置(Connection Reset).</p>
+<p>之后打开 ingress-nginx 的配置，添加下面的内容：</p>
+<pre><code class="json">&#123;
+  # 设置你 L4 代理的 Ip Cdir
+    &quot;proxy-real-ip-cidr&quot;: &quot;10.77.0.0/24&quot;,
+  # 设置额外的 携带IP的 请求头 (命名空间/ConfigMap名称)
+    &quot;proxy-set-headers&quot;: &quot;ingress-nginx/proxy-protocol-custom-headers&quot;,
+  # 开启 Proxy Protocol
+    &quot;use-proxy-protocol&quot;: &quot;true&quot;
+&#125;
+</code></pre>
+<p>之后在创建一个和 <code>proxy-set-headers</code> 对应的 ConfigMap，使用下面的配置：</p>
+<pre><code class="json">&#123;
+    &quot;X-Forwarded-For&quot;: &quot;$proxy_protocol_addr&quot;
+&#125;
+</code></pre>
+<p>这里的参数是用了 <a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_realip_module.html">realip_module</a></p>
+<p>在业务中，直接获取 <code>X-Forwarded-For</code> 请求头就可以获取客户端真实 ip 了。</p>
 <h3 id="会话保持-Session亲和性"><a href="#会话保持-Session亲和性" class="headerlink" title="会话保持-Session亲和性"></a>会话保持-Session亲和性</h3><p><a target="_blank" rel="noopener" href="https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#session-affinity">session-affinity</a></p>
 <p>当客户端第一次访问时，ingress-nginx 会返回给浏览器一个 Cookie，之后浏览器只需要带着 Cookie 就可以保证后面的访问的 Pod 都是同一个。</p>
 <p>只需要在 yaml 中添加一个注解即可实现：</p>

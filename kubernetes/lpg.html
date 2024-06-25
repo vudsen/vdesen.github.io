@@ -1,0 +1,482 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>搭建LPG日志采集系统 | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="后面一辈子的博客都在这了！" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 7.1.1"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>搭建LPG日志采集系统</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/5/26
+        </span>
+        
+        <span class="category">
+            <a href="/2024/02/08/k8s">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                k8s
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="安装并使用-helm"><a href="#安装并使用-helm" class="headerlink" title="安装并使用 helm"></a>安装并使用 helm</h1><p>安装没什么好说的，直接照着官方文档来就行：<a target="_blank" rel="noopener" href="https://helm.sh/zh/docs/intro/install/">安装 Helm</a>。注意需要安装在主节点上，因为 Helm 会用 <code>kubectl</code></p>
+<p>推荐直接二进制版本安装：</p>
+<ol>
+<li>下载 <a target="_blank" rel="noopener" href="https://github.com/helm/helm/releases">需要的版本</a></li>
+<li>解压(<code>tar -zxvf helm-v3.0.0-linux-amd64.tar.gz</code>)</li>
+<li>在解压目录中找到helm程序，移动到需要的目录中(<code>mv linux-amd64/helm /usr/local/bin/helm</code>)</li>
+</ol>
+<p>基本使用只需要记住下面几个命令：</p>
+<pre><code class="bash"># 打印某个chart的配置文件，这个配置文件基本不能直接用，里面会有一些 helm 的脚本，但是里面一般会有注释。
+helm show values repo/chart
+
+# 安装某个 chart，一定需要注意加上后面的命名空间，不然就安装到默认的命名空间里面了！！helm安装一般不会给你创建命名空间的。
+helm install &lt;release_name&gt; &lt;repo&gt;/&lt;chart&gt; --values &lt;config_file_name&gt; -n &lt;namespace&gt;
+
+# 更新某个 release
+helm upgrade &lt;release_name&gt; &lt;repo&gt;/&lt;chart&gt; --values &lt;config_file_name&gt; -n &lt;namespace&gt;
+
+# 卸载某个 release
+helm uninstall &lt;release_name&gt; -n &lt;namespace&gt;
+
+# 显示所有 release
+heml list -A
+</code></pre>
+<h1 id="安装LPG"><a href="#安装LPG" class="headerlink" title="安装LPG"></a>安装LPG</h1><blockquote>
+<p>安装前需要集群中存在可用的默认 StorageClass</p>
+</blockquote>
+<h2 id="安装-Loki"><a href="#安装-Loki" class="headerlink" title="安装 Loki"></a>安装 Loki</h2><p>Loki 是日志的存储和检索系统，是核心的组件，因此需要先安装 Loki。官方推荐 Loki 使用 helm 安装。</p>
+<p>有两种安装方案：</p>
+<ul>
+<li>可伸缩部署</li>
+<li>单机部署</li>
+</ul>
+<p>默认是 <em>可伸缩部署</em>，个人也推荐直接用这个，因为 loki 占用很低，最后一整套下来可能也就 1G 左右的内存占用(我这里是 4 个节点)。</p>
+<p>按照下面的步骤安装：</p>
+<pre><code class="bash"># 这里需要自己设代理，或者找镜像，我是设的代理。。。没有找到镜像
+helm repo add grafana https://grafana.github.io/helm-charts
+
+# 更新
+helm repo update
+</code></pre>
+<p>然后创建配置文件，loki 的文档十分拉胯…有很多坑。</p>
+<pre><code class="yaml"># loki-values.yaml
+minio:
+  enabled: true
+loki:
+  storage:
+    # 这里代表用一个本地的存储支持
+    type: s3
+  schemaConfig:
+    configs:
+      # from 表示这个时间之后的日志使用这个配置进行存储.
+      - from: 2024-05-22
+        object_store: s3
+        store: tsdb
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
+
+# 分布式配置，read、backend 和 write 至少 3 个，每个服务基本只占用 100 MB 左右
+read:
+  replicas: 3
+  extraEnv:
+    - name: TZ
+      value: &quot;CST-8&quot;
+
+backend:
+  replicas: 3
+  extraEnv:
+    - name: TZ
+      value: &quot;CST-8&quot;
+
+write:
+  replicas: 3
+  extraEnv:
+    - name: TZ
+      value: &quot;CST-8&quot;
+
+# 这个内存配置一定要改，默认为 8G
+chunksCache:
+  allocatedMemory: 2048
+  extraEnv:
+    - name: TZ
+      value: &quot;CST-8&quot;
+</code></pre>
+<p>之后使用 helm 安装即可。</p>
+<h2 id="安装-Grafana"><a href="#安装-Grafana" class="headerlink" title="安装 Grafana"></a>安装 Grafana</h2><p>配置文件：</p>
+<pre><code class="yaml"># grafana-values.yaml
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - dashboards.oneaccess.com
+  path: /grafana
+  pathType: Prefix
+
+
+grafana.ini:
+  server:
+    root_url: https://dashboards.oneaccess.com/grafana
+    serve_from_sub_path: true
+
+persistence:
+  enabled: true
+  size: 5Gi
+</code></pre>
+<p>因为是一个控制台，没什么好说的，直接 helm 安装即可。</p>
+<h2 id="安装-Promtail"><a href="#安装-Promtail" class="headerlink" title="安装 Promtail"></a>安装 Promtail</h2><p>这个东西推荐直接 yaml 安装，不建议使用 helm，因为它的配置会频繁变动，并且官方也建议直接使用 yaml 安装。</p>
+<p>进入官方文档复制 yaml 并应用：<a target="_blank" rel="noopener" href="https://grafana.com/docs/loki/latest/send-data/promtail/installation/#install-as-kubernetes-daemonset-recommended">install-as-kubernetes-daemonset-recommended</a></p>
+<h1 id="配置日志采集"><a href="#配置日志采集" class="headerlink" title="配置日志采集"></a>配置日志采集</h1><h2 id="配置租户并添加数据源"><a href="#配置租户并添加数据源" class="headerlink" title="配置租户并添加数据源"></a>配置租户并添加数据源</h2><p>管理员登录 grafana，如果忘记密码，可以进入容器执行如下命令：</p>
+<pre><code class="sh">grafana-cli admin reset-admin-password &lt;new_password&gt;
+</code></pre>
+<p>登录后进入设置切换为中文。然后回到首页，点击左侧：管理 -&gt; 概况 -&gt; 组织。</p>
+<p>在这里，一个组织就是一个租户，在组织的左边有一个 ID，这个 ID 要记住，默认的是 1。</p>
+<p>之后点击左侧：连接 -&gt; 添加新连接 -&gt; 搜索 loki.</p>
+<p>进去之后进行配置，url 一栏用服务名访问，例如我的是：<code>loki-gateway.loki.svc.cluster.local</code>.</p>
+<p>默认没有认证，<strong>但是需要在请求头中添加请求头 <code>X-Scope-OrgID</code>，值为组织的 ID</strong>，这一步掉了会直接报错，并且还要自己去看容器日志，很麻烦。</p>
+<p>配置完后添加，这一步完成。</p>
+<h2 id="配置-promtail"><a href="#配置-promtail" class="headerlink" title="配置 promtail"></a>配置 promtail</h2><p>日志采集主要由 Promtail 实现，它的文档写的不是很好(<del>也有可能是我英语不行没看懂…</del>)，所以这里我用我实际用到的需求举例：</p>
+<ol>
+<li>收集集群节点上路径为 <code>/var/log/&lt;tenantry&gt;/&lt;project_name&gt;/&lt;service_name&gt;/&lt;pod_name&gt;/*.log</code> 中的所有日志。</li>
+<li><code>&lt;project_name&gt;</code> 代表项目名称，<code>&lt;service_name&gt;</code> 代表服务名称，为了防止冲突，额外添加了 <code>&lt;pod_name&gt;</code>。</li>
+<li>进入一个 <code>&lt;project_name&gt;</code>，下面有多个 <code>&lt;serivce_name&gt;</code>，要求能够准确获取时间、日志级别和日志内容。</li>
+<li><code>&lt;tenantry&gt;</code> 为租户名称，不强求与 id 相同.</li>
+</ol>
+<p>相信这个需求是绝大部分项目都可以用到的一个模板。这里我就分享一下我的配置文件，打开安装 Promtail 的命名空间，修改它的 ConfigMap：</p>
+<pre><code class="yaml">data:
+  promtail.yaml: |
+    server:
+      http_listen_port: 9080
+      grpc_listen_port: 0
+
+    clients:
+    - url: http://loki-gateway/loki/api/v1/push
+      tenant_id: 2
+
+    positions:
+      filename: /tmp/positions.yaml
+
+    target_config:
+      sync_period: 10s
+
+    # 这里是重要的配置
+    scrape_configs:
+      - job_name: read_xxx_log
+        static_configs:
+          - targets:
+              - localhost
+            labels:
+              __path__: /var/log/xxx/**/*-info.log
+        pipeline_stages:
+          - regex:
+              expression: &quot;/var/log/xxx/(?P&lt;project_name&gt;[\\w-]+)/[\\w-]+/(?P&lt;service_name&gt;[\\w-]+)-info.log&quot;
+              source: &quot;filename&quot;
+          - labels:
+              project_name: 
+              service_name: 
+          - multiline:
+              firstline: &quot;^ ?\\[20&quot;
+              max_lines: 200
+          - regex:
+              expression: &quot;\\[(?P&lt;time&gt;\\d&#123;4&#125;-\\d&#123;2&#125;-\\d&#123;2&#125; \\d&#123;2&#125;:\\d&#123;2&#125;:\\d&#123;2&#125;\\.\\d&#123;3&#125;)\\]\\[(?P&lt;level&gt;\\w+) \\]&quot;
+          - timestamp:
+              source: time
+              format: &quot;2006-01-02 15:04:05.999&quot;
+              location: &quot;Asia/Shanghai&quot;
+          - labeldrop:
+              - filename
+</code></pre>
+<p>首先在 <code>clients[0].tenant_id</code> 中，我们配置了租户 Id，这里的租户 Id 是一个默认 Id，如果后面不显式配置则会使用这个值。</p>
+<p>在真正来看日志收集的配置前，先理解一个概念：<strong>每次日志收集都只收集一条，是一条，不是一行，然后一条日志中拥有各种标签，标签用于日志的查询和过滤</strong>。</p>
+<p>如果我们想要收集日志，首先得去告诉 protmail 去哪里收集，这里我使用了 <code>static_configs</code>，表示使用本机文件上的静态文件:</p>
+<pre><code class="yaml">static_configs:
+  - targets:
+      - localhost
+    labels:
+      __path__: /var/log/xxx/**/*-info.log
+</code></pre>
+<p>更多可用内容可以在文档中找: <a target="_blank" rel="noopener" href="https://grafana.com/docs/loki/latest/send-data/promtail/configuration/#scrape_configs">scrape_configs</a></p>
+<blockquote>
+<p>这里开始文档就非常恶心了，它将日志的位置，即从哪里收集，和其它很多配置，例如日志内容处理，这些配置都被放在了一个同级下面，实际上如果这些配置如果能够分类就会更舒服，例如日志收集方式和日志内容处理分为两个类别，这样理解起来会很好，并且找起来也更方便…</p>
+</blockquote>
+<p>这一步完成后，我们就依次来完成我们的需求。</p>
+<h3 id="提取标签"><a href="#提取标签" class="headerlink" title="提取标签"></a>提取标签</h3><p>在前面的需求中，要求能够提取出项目名和服务名，而这些信息一般存在于文件路径中，所以使用 regx 来进行提取：</p>
+<pre><code class="yaml">regex:
+  expression: &quot;/var/log/xxx/(?P&lt;project_name&gt;[\\w-]+)/[\\w-]+/(?P&lt;service_name&gt;[\\w-]+)-info.log&quot;
+  source: &quot;filename&quot;
+</code></pre>
+<p>这里的 source 可以填入任意的标签名称，至于有哪些标签可用，可以去已经采集后的日志中去看…</p>
+<p>这里的 <code>expression</code> 提取标签需要用到正则表达式的命名分组，具体就不多说了。</p>
+<p>在正则表达式提取到后，需要用 <code>labels</code> 将其发送给 loki：</p>
+<pre><code class="yaml">labels:
+  project_name: 
+  service_name: 
+</code></pre>
+<h3 id="处理错误日志"><a href="#处理错误日志" class="headerlink" title="处理错误日志"></a>处理错误日志</h3><p>正常情况下，当服务报错时，服务会打印出很多行的错误调用栈，而 protmail 默认会将一行认作一条日志，但实际上，我们希望单条错误和调用栈一起作为一条日志。</p>
+<p>这时候就需要使用 <code>multline</code> 来指定每条日志的开头了：</p>
+<pre><code class="yaml">multiline:
+  firstline: &quot;^ ?\\[20&quot;
+  max_lines: 200
+</code></pre>
+<p>这里需要提供一个正则表达式，当某一行匹配时，就将其作为一条新的日志，如果不匹配，则链接到前一条日志，直到匹配到下一条新的日志。</p>
+<p>注意下面的 <code>max_lines</code>，代表一条日志最长有多长，如果你的日志调用栈行数超过了这个值，则<strong>日志会被截断，即使它的开头不符合要求，这意味着你可能丢失日志级别或时间等其它重要信息</strong>。默认值为 <code>128</code>。</p>
+<h3 id="提取日志级别和时间"><a href="#提取日志级别和时间" class="headerlink" title="提取日志级别和时间"></a>提取日志级别和时间</h3><p>默认情况下，日志的时间是日志发送到 loki 并成功保存的时间，而日志级别会用特殊的方法去猜测(疑似是扫描 ERROR 关键词)。</p>
+<p>对于这俩个，我们只需要用 <code>regx</code> 提取出 <code>level</code> 和 <code>time</code> 即可：</p>
+<pre><code class="yaml">regex:
+  expression: &quot;\\[(?P&lt;time&gt;\\d&#123;4&#125;-\\d&#123;2&#125;-\\d&#123;2&#125; \\d&#123;2&#125;:\\d&#123;2&#125;:\\d&#123;2&#125;\\.\\d&#123;3&#125;)\\]\\[(?P&lt;level&gt;\\w+) \\]&quot;
+</code></pre>
+<p>这里我是 Java 程序，我的日志一般是这样的：</p>
+<pre><code class="log">[2024-06-24 14:51:10.254][INFO ] [http-nio-8083-exec-1] [xxx.xxx.Hello#world:123] - hello world 
+</code></pre>
+<p>对于时间，这里还有一个坑，那就是时区，默认是 UTC+0，我一开始尝试改容器的时区，但是发现没有用，后面发现可以直接用现成的配置：</p>
+<pre><code class="yaml">timestamp:
+  source: time
+  format: &quot;2006-01-02 15:04:05.999&quot;
+  location: &quot;Asia/Shanghai&quot;
+</code></pre>
+<p>这里的 <code>format</code> 是 <code>GoLang</code> 的格式化模板，这个时间似乎是 <code>GoLang</code> 的诞生时间.</p>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;<a target="_blank" rel="noopener" href="https://github.com/IceOfSummer">IceOfSummer</a>
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/IceOfSummer/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>
