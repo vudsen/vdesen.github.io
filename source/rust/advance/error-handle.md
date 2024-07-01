@@ -240,10 +240,188 @@ pub trait Error: Debug + Display {
 }
 ```
 
-虽然 `Result` 中并没有强制要求 `Err` 的参数实现 `Error` 特征，但是对于一个错误来说，实现 `Error` 特征可以统一接口，为错误类型提供了一个标准化的接口，使得不同的错误类型可以以一致的方式被处理和操作。
+虽然 `Result` 中**并没有强制要求** `Err` 的参数实现 `Error` 特征，但是对于一个错误来说，实现 `Error` 特征可以统一接口，为错误类型提供了一个标准化的接口，使得不同的错误类型可以以一致的方式被处理和操作。
 
 要想实现 `Error` 特征，则必须实现 `Debug` 和 `Display` 特征。
 
 `Error::source()` 方法一般是可选的，如果不实现，默认返回 `None`，这个方法一般用于返回内部错误，例如这个错误可能是由多个其它错误，或者某个子错误造成的，则可以通过该方法获取更原始的错误信息，进而方便问题的定位。
 
+
+## 归一化
+
+在实际项目中，一个函数可能会返回多种错误类型，但是正常情况下只能够指定一种：
+
+```rust
+use std::fs::read_to_string;
+
+fn main() -> Result<(), std::io::Error> {
+  let html = render()?;
+  println!("{}", html);
+  Ok(())
+}
+
+fn render() -> Result<String, std::io::Error> {
+  let file = std::env::var("MARKDOWN")?;
+  let source = read_to_string(file)?;
+  Ok(source)
+}
+```
+
+编译报错：
+
+```log
+error[E0277]: `?` couldn't convert the error to `std::io::Error`
+  --> src\main.rs:10:41
+   |
+9  | fn render() -> Result<String, std::io::Error> {
+   |                ------------------------------ expected `std::io::Error` because of this
+10 |     let file = std::env::var("MARKDOWN")?;
+   |                                         ^ the trait `From<VarError>` is not implemented for `std::io::Error`
+   |
+```
+
+上面的代码会报错，原因在于 `render` 函数中的两个 `?` 返回的实际上是不同的错误：`env::var()` 返回的是 `std::env::VarError`，而 `read_to_string` 返回的是 `std::io::Error`。
+
+为了满足 `render` 函数的签名，就需要将 `env::VarError` 和 `io::Error` 归一化为同一种错误类型。
+
+### Box<dyn Error>
+
+正常情况下，所有的错误类型都应该实现 `Error` 特征，此时我们就可以直接使用特征对象来处理所有的错误：
+
+```rust
+use std::fs::read_to_string;
+use std::error::Error;
+fn main() -> Result<(), Box<dyn Error>> {
+  let html = render()?;
+  println!("{}", html);
+  Ok(())
+}
+
+fn render() -> Result<String, Box<dyn Error>> {
+  let file = std::env::var("MARKDOWN")?;
+  let source = read_to_string(file)?;
+  Ok(source)
+}
+```
+
+但是一旦 `Result<T, E>` 中的 `E` 没有实现 `Error` 特征，这个方法就不管用了。
+
+### 自定义错误类型
+
+自定义错误类型麻烦归麻烦，但是它非常灵活，因此也不具有上面的类似限制:
+
+```rust
+use std::fs::read_to_string;
+
+fn main() -> Result<(), MyError> {
+  let html = render()?;
+  println!("{}", html);
+  Ok(())
+}
+
+fn render() -> Result<String, MyError> {
+  let file = std::env::var("MARKDOWN")?;
+  let source = read_to_string(file)?;
+  Ok(source)
+}
+
+#[derive(Debug)]
+enum MyError {
+  EnvironmentVariableNotFound,
+  IOError(std::io::Error),
+}
+
+impl From<std::env::VarError> for MyError {
+  fn from(_: std::env::VarError) -> Self {
+    Self::EnvironmentVariableNotFound
+  }
+}
+
+impl From<std::io::Error> for MyError {
+  fn from(value: std::io::Error) -> Self {
+    Self::IOError(value)
+  }
+}
+
+impl std::error::Error for MyError {}
+
+impl std::fmt::Display for MyError {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    match self {
+      MyError::EnvironmentVariableNotFound => write!(f, "Environment variable not found"),
+      MyError::IOError(err) => write!(f, "IO Error: {}", err.to_string()),
+    }
+  }
+}
+```
+
+上面代码中有一行值得注意：`impl std::error::Error for MyError {}` ，只有为自定义错误类型实现 `Error` 特征后，才能转换成相应的特征对象。
+
+## 简化错误处理
+
+### thiserror
+
+自定义错误类型很灵活，但是它太啰嗦了，每次都需要编写一堆代码。
+
+好在使用 [thiserror](https://github.com/dtolnay/thiserror) 可以帮助我们简化错误的声明：
+
+```rust
+use std::fs::read_to_string;
+
+fn main() -> Result<(), MyError> {
+  let html = render()?;
+  println!("{}", html);
+  Ok(())
+}
+
+fn render() -> Result<String, MyError> {
+  let file = std::env::var("MARKDOWN")?;
+  let source = read_to_string(file)?;
+  Ok(source)
+}
+
+#[derive(thiserror::Error, Debug)]
+enum MyError {
+  #[error("Environment variable not found")]
+  EnvironmentVariableNotFound(#[from] std::env::VarError),
+  #[error(transparent)]
+  IOError(#[from] std::io::Error),
+}
+```
+
+`#[error]` 用于定于 `Display` 中具体的打印信息，常用格式如下：
+
+- `#[error("{var}")]` ⟶ `write!("{}", self.var)`
+- `#[error("{0}")]` ⟶ `write!("{}", self.0)`
+- `#[error("{var:?}")]` ⟶ `write!("{:?}", self.var)`
+- `#[error("{0:?}")]` ⟶ `write!("{:?}", self.0)`
+
+`#[error(transparent)]` 则是直接使用源错误的 `Display` 方法。
+
+更多用法可以在 `Github` 仓库页面查看。
+
+### anyhow
+
+
+[anyhow](https://github.com/dtolnay/anyhow) 在你并不关心函数错误的返回类型时很管用。
+
+例如开发一款应用时，在业务逻辑中有些错误可能并不想直接处理，而是直接抛出去给上层，交给统一的错误处理器来处理。
+
+```rust
+use std::fs::read_to_string;
+
+use anyhow::Result;
+
+fn main() -> Result<()> {
+    let html = render()?;
+    println!("{}", html);
+    Ok(())
+}
+
+fn render() -> Result<String> {
+    let file = std::env::var("MARKDOWN")?;
+    let source = read_to_string(file)?;
+    Ok(source)
+}
+```
 

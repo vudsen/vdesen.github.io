@@ -1,5 +1,5 @@
 ---
-title: 存储
+title: 存储与资源
 date: 2024-05-28 21:58:12
 categories: 
   data:
@@ -318,3 +318,55 @@ K8s 会直接将 PV 删除，同时删除对应的关联资源。
 ### 回收 (Recycle)
 
 回收会直接清除 PV 对应目录上的数据(会执行 `rm -rf`)。执行完成后，该 PV 将允许重新使用。
+
+# 资源限制
+
+## ResourceQuota
+
+[ResourceQuota](https://kubernetes.io/zh-cn/docs/concepts/policy/resource-quotas/)
+
+> kubectl explain ResourceQuota
+
+资源配额，通过 `ResourceQuota` 对象来定义，对每个命名空间的资源消耗总量提供限制。它可以限制命名空间中某种类型对象的总数目上限，也可以限制命名空间中 Pod 可以使用的计算资源总上限。
+
+- 如果名称空间的计算资源 (如 `cpu` 和 `memory`) 的配额被启用，则用户必须为这些资源设定请求值 (request) 和约束值 (limit)，否则配额系统将拒绝 Pod 的创建。可以使用 `LimitRanger` 准入控制器来为没有设置计算资源需求的 Pod 设置默认值。
+
+- 如果资源创建或者更新违反了配额约束，那么该请求就会报错 (HTTP 403 FORBIDDEN)，并在消息中给出有可能违反的约束。
+
+### 计算资源配额
+
+| 资源名称             | 描述                                |
+|------------------|-----------------------------------|
+| limits.cpu       | 所有非终止状态的Pod，其 CPU 限额总量不能超过该值      |
+| limits.memory    | 所有非终止状态的Pod，其内存限额总量不能超过该值         |
+| requests.cpu     | 所有非终止状态的Pod，其 CPU 需求总量不能超过该值      |
+| request.memory   | 所有非终止状态的Pod，其内存需求总量不能超过该值         |
+| hugepages-<size> | 对于所有非终止状态的Pod，针对指定尺寸的巨页请求总数不能超过该值 |
+
+### 存储资源配额
+
+| 资源名称                                                                    | 描述                                |
+|-------------------------------------------------------------------------|-----------------------------------|
+| requests.storage                                                        | 所有PVC，存储资源的需求总量不能超过该值             |
+| persistentvolumeclaims                                                  | 在该命名空间中所允许的 PVC 总量                |
+| <storage-class-name>.storageclass.storage.k8s.io/requests.storage       | 限制对应的storageClass所能拥有的 PVC 总量     |
+| <storage-class-name>.storageclass.storage.k8s.io/persistentvolumeclaims | 限制对应的storageClass所能拥有的 PVC 数量     |
+
+### 对象数量配额
+
+可以通过下面的写法来限制 Kubernetes API 中一种特定资源类型的总数：
+
+- count/<resource>.<group>：用于非核心（core）组的资源
+- count/<resource>：用于核心组的资源
+
+常用的一些资源：
+- count/persistentvolumeclaims
+- count/services
+- count/secrets
+- count/configmaps
+- count/replicationcontrollers
+- count/deployments.apps
+- count/replicasets.apps
+- count/statefulsets.apps
+- count/jobs.batch
+- count/cronjobs.batch
