@@ -33,3 +33,6 @@ categories: Rust
 - [多线程并发编程](/rust/advance/thread)
 - [多线程并发编程 Part2](/rust/advance/thread2)
 - [全局变量](/rust/advance/global-variable)
+- [错误处理](/rust/advance/error-handle)
+- [unsafe编程](/rust/advance/unsafe)
+- [宏](/rust/advance/macro)
