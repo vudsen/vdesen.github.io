@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>自动引用绑定 | IceOfSummerの博客</title>
+        <title>async/await 异步编程 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="后面一辈子的博客都在这了！" />
         <meta name="keywords" content="" />
@@ -167,14 +167,14 @@
 
                 <div class="article">
     <div>
-        <h1>自动引用绑定</h1>
+        <h1>async/await 异步编程</h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2024/6/6
+            2024/7/1
         </span>
         
         <span class="category">
@@ -191,24 +191,85 @@
     
     <toc-component></toc-component>
     <div class="content" v-pre id="main-content">
-        <h1 id="自动引用绑定"><a href="#自动引用绑定" class="headerlink" title="自动引用绑定"></a>自动引用绑定</h1><h2 id="自动解引用"><a href="#自动解引用" class="headerlink" title="自动解引用"></a>自动解引用</h2><p>来看下面的代码：</p>
-<pre><code class="rust">#[derive(Debug)]
-enum CustomError &#123;
-    ParseError(ParseIntError),
-    ReadError(IoError),
-&#125;
-
-impl Error for CustomError &#123;
-    fn source(&amp;self) -&gt; Option&lt;&amp;(dyn Error + &#39;static)&gt; &#123;
-        match *self &#123;
-            CustomError::ParseError(ref e) =&gt; Some(e),
-            CustomError::ReadError(ref e) =&gt; Some(e),
-        &#125;
-    &#125;
-&#125;
-
-// 省略了无关代码
+        <h1 id="async-await-简单入门"><a href="#async-await-简单入门" class="headerlink" title="async&#x2F;.await 简单入门"></a>async&#x2F;.await 简单入门</h1><p><code>async/.await</code> 是 Rust 内置的语言特性，可以让我们用同步的方式去编写异步的代码。</p>
+<p>通过 <code>async</code> 标记的语法块会被转换成实现了 <code>Future</code> 特征的状态机。 与同步调用阻塞当前线程不同，当 <code>Future</code> 执行并遇到阻塞时，它会让出当前线程的控制权，这样其它的 <code>Future</code>就可以在该线程中运行，这种方式完全不会导致当前线程的阻塞。</p>
+<p>导入下面的包：</p>
+<pre><code class="toml">[dependencies]
+futures = &quot;0.3.30&quot;
 </code></pre>
+<h2 id="使用-async"><a href="#使用-async" class="headerlink" title="使用 async"></a>使用 async</h2><p>首先，使用 async fn 语法来创建一个异步函数:</p>
+<pre><code class="rust">async fn do_something() &#123;
+    println!(&quot;go go go !&quot;);
+&#125;
+</code></pre>
+<p>需要注意，**异步函数的返回值是一个 <code>Future</code>**，若直接调用该函数，不会输出任何结果，因为 <code>Future</code> 还未被执行：</p>
+<pre><code class="rust">fn main() &#123;
+      do_something();
+&#125;
+</code></pre>
+<p>运行后，<code>go go go</code> 并没有打印，同时编译器给予一个提示：<code>warning: unused implementer of Future that must be used</code>，告诉我们 <code>Future</code> 未被使用，那么到底该如何使用？答案是使用一个执行器(<code>executor</code>):</p>
+<pre><code class="rust">// `block_on`会阻塞当前线程直到指定的`Future`执行完成，这种阻塞当前线程以等待任务完成的方式较为简单、粗暴，
+// 好在其它运行时的执行器(executor)会提供更加复杂的行为，例如将多个`future`调度到同一个线程上执行。
+use futures::executor::block_on;
+
+async fn hello_world() &#123;
+    println!(&quot;hello, world!&quot;);
+&#125;
+
+fn main() &#123;
+    let future = hello_world(); // 返回一个Future, 因此不会打印任何输出
+    block_on(future); // 执行`Future`并等待其运行完成，此时&quot;hello, world!&quot;会被打印输出
+&#125;
+</code></pre>
+<h2 id="使用-await"><a href="#使用-await" class="headerlink" title="使用.await"></a>使用.await</h2><p>当在异步函数中调用异步函数时，如果需要等待调用的异步函数执行完成，可以直接使用 <code>.await</code> 来进行等待：</p>
+<pre><code class="rust">use futures::executor::block_on;
+
+async fn hello_world() &#123;
+    hello_cat().await;
+    println!(&quot;hello, world!&quot;);
+&#125;
+
+async fn hello_cat() &#123;
+    println!(&quot;hello, kitty!&quot;);
+&#125;
+fn main() &#123;
+    let future = hello_world();
+    block_on(future);
+&#125;
+</code></pre>
+<p>输出：</p>
+<pre><code class="log">hello, kitty!
+hello, world!
+</code></pre>
+<p>但是如果不加 <code>.await</code>:</p>
+<pre><code class="rust">use futures::executor::block_on;
+
+async fn hello_world() &#123;
+    // 移出 .await
+    hello_cat();
+    println!(&quot;hello, world!&quot;);
+&#125;
+
+async fn hello_cat() &#123;
+    println!(&quot;hello, kitty!&quot;);
+&#125;
+fn main() &#123;
+    let future = hello_world();
+    block_on(future);
+&#125;
+</code></pre>
+<p>此时编译器会给出警告:</p>
+<pre><code class="log">warning: unused implementer of `futures::Future` that must be used
+ --&gt; src/main.rs:6:5
+  |
+6 |     hello_cat();
+  |     ^^^^^^^^^^^^
+= note: futures do nothing unless you `.await` or poll them
+...
+hello, world!
+</code></pre>
+<p><code>hello_cat</code> 方法并没有被执行，编译器也提示需要加上 <code>.await</code>。</p>
+<p>总之，在 <code>async fn</code> 函数中使用 <code>.await</code> 可以等待另一个异步调用的完成。但是与 <code>block_on</code> 不同，<code>.await</code> 并不会阻塞当前的线程，而是异步的等待 <code>Future A</code> 的完成，在等待的过程中，该线程还可以继续执行其它的 <code>Future B</code>，最终实现了并发处理的效果。</p>
 
     </div>
     

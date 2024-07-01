@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>存储 | IceOfSummerの博客</title>
+        <title>存储与资源 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="后面一辈子的博客都在这了！" />
         <meta name="keywords" content="" />
@@ -167,7 +167,7 @@
 
                 <div class="article">
     <div>
-        <h1>存储</h1>
+        <h1>存储与资源</h1>
     </div>
     <div class="info">
         <span class="date">
@@ -461,6 +461,87 @@ my-pv50m   50m        RWO            Retain           Released    default/my-pvc
 <h3 id="删除-Delete"><a href="#删除-Delete" class="headerlink" title="删除 (Delete)"></a>删除 (Delete)</h3><p>K8s 会直接将 PV 删除，同时删除对应的关联资源。</p>
 <p><strong>使用 Delete 必须要求对应的存储实现提供相关的删除插件</strong>，否则会删除失败。例如 AWS EBS、GCE PD等.</p>
 <h3 id="回收-Recycle"><a href="#回收-Recycle" class="headerlink" title="回收 (Recycle)"></a>回收 (Recycle)</h3><p>回收会直接清除 PV 对应目录上的数据(会执行 <code>rm -rf</code>)。执行完成后，该 PV 将允许重新使用。</p>
+<h1 id="资源限制"><a href="#资源限制" class="headerlink" title="资源限制"></a>资源限制</h1><h2 id="ResourceQuota"><a href="#ResourceQuota" class="headerlink" title="ResourceQuota"></a>ResourceQuota</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/concepts/policy/resource-quotas/">ResourceQuota</a></p>
+<blockquote>
+<p>kubectl explain ResourceQuota</p>
+</blockquote>
+<p>资源配额，通过 <code>ResourceQuota</code> 对象来定义，对每个命名空间的资源消耗总量提供限制。它可以限制命名空间中某种类型对象的总数目上限，也可以限制命名空间中 Pod 可以使用的计算资源总上限。</p>
+<ul>
+<li><p>如果名称空间的计算资源 (如 <code>cpu</code> 和 <code>memory</code>) 的配额被启用，则用户必须为这些资源设定请求值 (request) 和约束值 (limit)，否则配额系统将拒绝 Pod 的创建。可以使用 <code>LimitRanger</code> 准入控制器来为没有设置计算资源需求的 Pod 设置默认值。</p>
+</li>
+<li><p>如果资源创建或者更新违反了配额约束，那么该请求就会报错 (HTTP 403 FORBIDDEN)，并在消息中给出有可能违反的约束。</p>
+</li>
+</ul>
+<h3 id="计算资源配额"><a href="#计算资源配额" class="headerlink" title="计算资源配额"></a>计算资源配额</h3><table>
+<thead>
+<tr>
+<th>资源名称</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>limits.cpu</td>
+<td>所有非终止状态的Pod，其 CPU 限额总量不能超过该值</td>
+</tr>
+<tr>
+<td>limits.memory</td>
+<td>所有非终止状态的Pod，其内存限额总量不能超过该值</td>
+</tr>
+<tr>
+<td>requests.cpu</td>
+<td>所有非终止状态的Pod，其 CPU 需求总量不能超过该值</td>
+</tr>
+<tr>
+<td>request.memory</td>
+<td>所有非终止状态的Pod，其内存需求总量不能超过该值</td>
+</tr>
+<tr>
+<td>hugepages-<size></td>
+<td>对于所有非终止状态的Pod，针对指定尺寸的巨页请求总数不能超过该值</td>
+</tr>
+</tbody></table>
+<h3 id="存储资源配额"><a href="#存储资源配额" class="headerlink" title="存储资源配额"></a>存储资源配额</h3><table>
+<thead>
+<tr>
+<th>资源名称</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>requests.storage</td>
+<td>所有PVC，存储资源的需求总量不能超过该值</td>
+</tr>
+<tr>
+<td>persistentvolumeclaims</td>
+<td>在该命名空间中所允许的 PVC 总量</td>
+</tr>
+<tr>
+<td><storage-class-name>.storageclass.storage.k8s.io&#x2F;requests.storage</td>
+<td>限制对应的storageClass所能拥有的 PVC 总量</td>
+</tr>
+<tr>
+<td><storage-class-name>.storageclass.storage.k8s.io&#x2F;persistentvolumeclaims</td>
+<td>限制对应的storageClass所能拥有的 PVC 数量</td>
+</tr>
+</tbody></table>
+<h3 id="对象数量配额"><a href="#对象数量配额" class="headerlink" title="对象数量配额"></a>对象数量配额</h3><p>可以通过下面的写法来限制 Kubernetes API 中一种特定资源类型的总数：</p>
+<ul>
+<li>count&#x2F;<resource>.<group>：用于非核心（core）组的资源</li>
+<li>count&#x2F;<resource>：用于核心组的资源</li>
+</ul>
+<p>常用的一些资源：</p>
+<ul>
+<li>count&#x2F;persistentvolumeclaims</li>
+<li>count&#x2F;services</li>
+<li>count&#x2F;secrets</li>
+<li>count&#x2F;configmaps</li>
+<li>count&#x2F;replicationcontrollers</li>
+<li>count&#x2F;deployments.apps</li>
+<li>count&#x2F;replicasets.apps</li>
+<li>count&#x2F;statefulsets.apps</li>
+<li>count&#x2F;jobs.batch</li>
+<li>count&#x2F;cronjobs.batch</li>
+</ul>
 
     </div>
     

@@ -1,0 +1,476 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Unsafe Rust | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="后面一辈子的博客都在这了！" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 7.2.0"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>Unsafe Rust</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/6/8
+        </span>
+        
+        <span class="category">
+            <a href="/2023/12/04/rust/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                Rust
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="五种使用场景"><a href="#五种使用场景" class="headerlink" title="五种使用场景"></a>五种使用场景</h1><p><code>unsafe</code> 可以提供 5 种在常规代码中无法实现的特性：</p>
+<ul>
+<li>解引用裸指针</li>
+<li>调用一个 <code>unsafe</code> 或外部的函数</li>
+<li>访问或修改一个可变的静态变量</li>
+<li>实现一个 <code>unsafe</code> 特征</li>
+<li>访问 <code>union</code> 中的字段</li>
+</ul>
+<h2 id="解引用裸指针"><a href="#解引用裸指针" class="headerlink" title="解引用裸指针"></a>解引用裸指针</h2><p>裸指针(raw pointer，又称原生指针) 在功能上跟引用类似，同时它也需要显式地注明可变性。但是又和引用有所不同，裸指针长这样: <code>*const T</code> 和 <code>*mut T</code>，它们分别代表了不可变和可变。</p>
+<p>在裸指针 <code>*const T</code> 中，这里的 <code>*</code> 只是类型名称的一部分，并没有解引用的含义。</p>
+<p>裸指针与引用和智能指针不同的是：</p>
+<ul>
+<li>可以绕过 Rust 的借用规则，可以同时拥有一个数据的可变、不可变指针，甚至还能拥有多个可变的指针</li>
+<li>并不能保证指向合法的内存</li>
+<li>可以是 null</li>
+<li>没有实现任何自动的回收 (drop)</li>
+</ul>
+<h3 id="基于引用创建裸指针"><a href="#基于引用创建裸指针" class="headerlink" title="基于引用创建裸指针"></a>基于引用创建裸指针</h3><p>下面的代码基于值的引用同时创建了可变和不可变的裸指针：</p>
+<pre><code class="rust">let mut num = 5;
+
+let r1 = &amp;num as *const i32;
+let r2 = &amp;mut num as *mut i32;
+</code></pre>
+<p><strong>创建裸指针是安全的行为，而解引用裸指针才是不安全的行为</strong>:</p>
+<pre><code class="rust">fn main() &#123;
+    let mut num = 5;
+
+    let r1 = &amp;num as *const i32;
+
+    unsafe &#123;
+        println!(&quot;r1 is: &#123;&#125;&quot;, *r1);
+    &#125;
+&#125;
+</code></pre>
+<h3 id="基于内存地址创建裸指针"><a href="#基于内存地址创建裸指针" class="headerlink" title="基于内存地址创建裸指针"></a>基于内存地址创建裸指针</h3><p>基于现有的引用来创建裸指针是安全的，但是直接基于内存地址创建就不安全了：</p>
+<pre><code class="rust">let address = 0x012345_usize;
+let r = address as *const i32;
+</code></pre>
+<p>这里基于一个内存地址来创建裸指针，这种行为是相当危险的。试图使用任意的内存地址往往是一种未定义的行为(undefined behavior)，因为该内存地址有可能存在值，也有可能没有，就算有值，也大概率不是你需要的值。</p>
+<p>实际上也并不会有这种写法，一般的写法都应该是先取址，然后再使用，而不是凭空捏造一个地址：</p>
+<pre><code class="rust">use std::&#123;slice::from_raw_parts, str::from_utf8_unchecked&#125;;
+
+// 获取字符串的内存地址和长度
+fn get_memory_location() -&gt; (usize, usize) &#123;
+  let string = &quot;Hello World!&quot;;
+  let pointer = string.as_ptr() as usize;
+  let length = string.len();
+  (pointer, length)
+&#125;
+
+// 在指定的内存地址读取字符串
+fn get_str_at_location(pointer: usize, length: usize) -&gt; &amp;&#39;static str &#123;
+  unsafe &#123; from_utf8_unchecked(from_raw_parts(pointer as *const u8, length)) &#125;
+&#125;
+
+fn main() &#123;
+  let (pointer, length) = get_memory_location();
+  let message = get_str_at_location(pointer, length);
+  println!(
+    &quot;The &#123;&#125; bytes at 0x&#123;:X&#125; stored: &#123;&#125;&quot;,
+    length, pointer, message
+  );
+&#125;
+</code></pre>
+<h3 id="使用-解引用"><a href="#使用-解引用" class="headerlink" title="使用 * 解引用"></a>使用 * 解引用</h3><pre><code class="rust">let a = 1;
+let b: *const i32 = &amp;a as *const i32;
+let c: *const i32 = &amp;a;
+unsafe &#123;
+    println!(&quot;&#123;&#125;&quot;, *c);
+&#125;
+</code></pre>
+<p>使用 <code>*</code> 可以对裸指针进行解引用，由于该指针的内存安全性并没有任何保证，因此需要使用 unsafe 来包裹解引用的逻辑。</p>
+<h3 id="基于智能指针创建裸指针"><a href="#基于智能指针创建裸指针" class="headerlink" title="基于智能指针创建裸指针"></a>基于智能指针创建裸指针</h3><p>还有一种创建裸指针的方式，那就是基于智能指针来创建：</p>
+<pre><code class="rust">let a: Box&lt;i32&gt; = Box::new(10);
+// 需要先解引用a
+let b: *const i32 = &amp;*a;
+// 使用 into_raw 来创建
+let c: *const i32 = Box::into_raw(a);
+</code></pre>
+<h2 id="调用-unsafe-函数或方法"><a href="#调用-unsafe-函数或方法" class="headerlink" title="调用 unsafe 函数或方法"></a>调用 unsafe 函数或方法</h2><p><code>unsafe</code> 函数从外表上来看跟普通函数并无区别，唯一的区别就是它需要使用 <code>unsafe fn</code> 来进行定义。这种定义方式是为了告诉调用者：当调用此函数时，你需要注意它的相关需求，因为 Rust 无法担保调用者在使用该函数时能满足它所需的一切需求。</p>
+<pre><code class="rust">unsafe fn dangerous() &#123;&#125;
+fn main() &#123;
+    dangerous();
+&#125;
+</code></pre>
+<p>上面的代码将会报错：</p>
+<pre><code class="log">error[E0133]: call to unsafe function is unsafe and requires unsafe function or block
+ --&gt; src/main.rs:3:5
+  |
+3 |     dangerous();
+  |     ^^^^^^^^^^^ call to unsafe function
+</code></pre>
+<p>在加上 <code>unsafe</code> 后，才可调用：</p>
+<pre><code class="rust">unsafe &#123;
+    dangerous();
+&#125;
+</code></pre>
+<p><strong>使用 unsafe 声明的函数时，一定要看看相关的文档，确定自己没有遗漏什么</strong>。</p>
+<p>此外在 <code>unsafe</code> 函数体中使用 <code>unsafe</code> 语句块是多余的行为。</p>
+<h2 id="用安全抽象包裹-unsafe-代码"><a href="#用安全抽象包裹-unsafe-代码" class="headerlink" title="用安全抽象包裹 unsafe 代码"></a>用安全抽象包裹 unsafe 代码</h2><p>一个函数包含了 <code>unsafe</code> 代码不代表我们需要将整个函数都定义为 <code>unsafe</code> fn。事实上，在标准库中有大量的安全函数，它们内部都包含了 unsafe 代码块。</p>
+<p>例如在某些场景下，需要将一个数字分成两个切片，且每一个切片都要求是可变的。类似需求在安全 Rust 中是很难实现的，因为要对同一个数组做两个可变借用：</p>
+<pre><code class="rust">fn split_at_mut(slice: &amp;mut [i32], mid: usize) -&gt; (&amp;mut [i32], &amp;mut [i32]) &#123;
+    let len = slice.len();
+
+    assert!(mid &lt;= len);
+
+    (&amp;mut slice[..mid], &amp;mut slice[mid..])
+&#125;
+
+fn main() &#123;
+    let mut v = vec![1, 2, 3, 4, 5, 6];
+
+    let r = &amp;mut v[..];
+
+    let (a, b) = split_at_mut(r, 3);
+
+    assert_eq!(a, &amp;mut [1, 2, 3]);
+    assert_eq!(b, &amp;mut [4, 5, 6]);
+&#125;
+</code></pre>
+<p>在 <code>split_at_mut</code> 企图对 <code>slice</code> 进行两次可变借用，因此会直接报错：</p>
+<pre><code class="log">error[E0499]: cannot borrow `*slice` as mutable more than once at a time
+ --&gt; src\main.rs:6:30
+  |
+1 | fn split_at_mut(slice: &amp;mut [i32], mid: usize) -&gt; (&amp;mut [i32], &amp;mut [i32]) &#123;
+  |                        - let&#39;s call the lifetime of this reference `&#39;1`
+...
+6 |     (&amp;mut slice[..mid], &amp;mut slice[mid..])
+  |     -------------------------^^^^^--------
+  |     |     |                  |
+  |     |     |                  second mutable borrow occurs here
+  |     |     first mutable borrow occurs here
+  |     returning this value requires that `*slice` is borrowed for `&#39;1`
+</code></pre>
+<p>对于 Rust 的借用检查器来说，它无法理解我们是分别借用了同一个切片的两个不同部分，但事实上，这种行为是没任何问题的，毕竟两个借用没有任何重叠之处。</p>
+<p>所以只能绕开编译器，使用 <code>unsafe</code> 来实现了:</p>
+<pre><code class="rust">use std::slice;
+
+fn split_at_mut(slice: &amp;mut [i32], mid: usize) -&gt; (&amp;mut [i32], &amp;mut [i32]) &#123;
+    let len = slice.len();
+    let ptr = slice.as_mut_ptr();
+
+    assert!(mid &lt;= len);
+
+    unsafe &#123;
+        (
+            slice::from_raw_parts_mut(ptr, mid),
+            slice::from_raw_parts_mut(ptr.add(mid), len - mid),
+        )
+    &#125;
+&#125;
+
+fn main() &#123;
+    let mut v = vec![1, 2, 3, 4, 5, 6];
+
+    let r = &amp;mut v[..];
+
+    let (a, b) = split_at_mut(r, 3);
+
+    assert_eq!(a, &amp;mut [1, 2, 3]);
+    assert_eq!(b, &amp;mut [4, 5, 6]);
+&#125;
+</code></pre>
+<p>上面这段代码：</p>
+<ul>
+<li><code>as_mut_ptr</code> 会返回指向 <code>slice</code> 首地址的裸指针 <code>*mut i32</code>.</li>
+<li><code>slice::from_raw_parts_mut</code> 函数通过指针和长度来创建一个新的切片，简单来说，该切片的初始地址是 <code>ptr</code>，长度为 <code>mid</code>.</li>
+<li><code>ptr.add(mid)</code> 可以获取第二个切片的初始地址，由于切片中的元素是 <code>i32</code> 类型，每个元素都占用了 <code>4</code> 个字节的内存大小，因此我们不能简单的用 <code>ptr + mid</code> 来作为初始地址，而应该使用 <code>ptr + 4 * mid</code>，但是这种使用方式并不安全，因此 <code>.add</code> 方法是最佳选择</li>
+</ul>
+<p>为了保证 <code>ptr.add(mid)</code>，在代码的前面添加了 <code>assert!(mid &lt;= len)</code> 以防止指针越界。</p>
+<p>所以这个函数是非常安全的，无需将其声明为 <code>unsafe fn</code>.</p>
+<h2 id="FFI"><a href="#FFI" class="headerlink" title="FFI"></a>FFI</h2><p><code>FFI</code>（Foreign Function Interface）可以用来与其它语言进行交互。下面的例子演示了如何调用 C 标准库中的 <code>abs</code> 函数：</p>
+<pre><code class="rust">extern &quot;C&quot; &#123;
+    fn abs(input: i32) -&gt; i32;
+&#125;
+
+fn main() &#123;
+    unsafe &#123;
+        println!(&quot;Absolute value of -3 according to C: &#123;&#125;&quot;, abs(-3));
+    &#125;
+&#125;
+</code></pre>
+<p>C 语言的代码定义在了 <code>extern</code> 代码块中， 而 <code>extern</code> 必须使用 <code>unsafe</code> 才能进行进行调用，原因在于其它语言的代码并不会强制执行 Rust 的规则，因此 Rust 无法对这些代码进行检查，最终还是要靠开发者自己来保证代码的正确性和程序的安全性。</p>
+<h3 id="ABI"><a href="#ABI" class="headerlink" title="ABI"></a>ABI</h3><p>在 <code>extern &quot;C&quot;</code> 代码块中，我们列出了想要调用的外部函数的签名。其中 <code>&quot;C&quot;</code> 定义了外部函数所使用的应用二进制接口 <code>ABI</code> (Application Binary Interface)：<code>ABI</code> 定义了如何在汇编层面来调用该函数。在所有 <code>ABI</code> 中，C 语言的是最常见的。</p>
+<h3 id="在其它语言中调用-Rust-函数"><a href="#在其它语言中调用-Rust-函数" class="headerlink" title="在其它语言中调用 Rust 函数"></a>在其它语言中调用 Rust 函数</h3><p>可以使用 <code>extern</code> 来创建一个接口，其它语言可以通过该接口来调用相关的 Rust 函数。但是此处的语法与之前有所不同，之前用的是语句块，而这里是在函数定义时加上 <code>extern</code> 关键字，当然，别忘了指定相应的 ABI：</p>
+<pre><code class="rust">#[no_mangle]
+pub extern &quot;C&quot; fn call_from_c() &#123;
+    println!(&quot;Just called a Rust function from C!&quot;);
+&#125;
+</code></pre>
+<p>上面的代码可以让 <code>call_from_c</code> 函数被 <code>C</code> 语言的代码调用，当然，前提是将其编译成一个共享库，然后链接到 C 语言中。</p>
+<p><code>#[no_mangle]</code> 用于告诉 Rust 编译器：不要乱改函数的名称。<code>Mangling</code> 的定义是：当 Rust 因为编译需要去修改函数的名称，例如为了让名称包含更多的信息，这样其它的编译部分就能从该名称获取相应的信息，这种修改会导致函数名变得相当不可读。因此，为了让 Rust 函数能顺利被其它语言调用，必须要禁止掉该功能。</p>
+<h2 id="实现-unsafe-特征"><a href="#实现-unsafe-特征" class="headerlink" title="实现 unsafe 特征"></a>实现 unsafe 特征</h2><p>之所以会有 <code>unsafe</code> 的特征，是因为该特征至少有一个方法包含有编译器无法验证的内容。<code>unsafe</code> 特征的声明很简单：</p>
+<pre><code class="rust">unsafe trait Foo &#123;
+    // 方法列表
+&#125;
+
+unsafe impl Foo for i32 &#123;
+    // 实现相应的方法
+&#125;
+
+fn main() &#123;&#125;
+</code></pre>
+<p>通过 unsafe impl 的使用，我们告诉编译器：相应的正确性由我们自己来保证。</p>
+<h2 id="访问-union-中的字段"><a href="#访问-union-中的字段" class="headerlink" title="访问 union 中的字段"></a>访问 union 中的字段</h2><p><code>union</code> 主要用于跟 C 代码进行交互。</p>
+<p>访问 union 的字段是不安全的，因为 Rust 无法保证当前存储在 union 实例中的数据类型:</p>
+<pre><code class="rust">#[repr(C)]
+union MyUnion &#123;
+    f1: u32,
+    f2: f32,
+&#125;
+</code></pre>
+<p><strong>一个联合体的长度等于其内部长度最大的成员的长度，并且它们都共享着同一段内存。</strong></p>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;<a target="_blank" rel="noopener" href="https://github.com/IceOfSummer">IceOfSummer</a>
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/IceOfSummer/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>
