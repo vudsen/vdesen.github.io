@@ -50,6 +50,68 @@ nohup $JAVA_HOME/bin/java -jar jenkins-2.452.2.war $JENKINS_OPTS &
 
 ## 创建服务账号与 K8s 集成
 
+创建服务账号：
+
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dev-ops-account
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    role: ci-cd
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: dev-ops-role
+rules:
+  - apiGroups:
+      - "apps"
+    resources:
+      - "deployment"
+    verbs:
+      - "get"
+      - "list"
+      - "update"
+      - "patch"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dev-ops-role-bind
+  namespace: {{ .Release.Namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: dev-ops-account
+roleRef:
+  kind: Role
+  name: dev-ops-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dev-ops-token
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    kubernetes.io/service-account.name: dev-ops-account
+type: kubernetes.io/service-account-token
+```
+
+获取 token:
+
+```sh
+kubectl get secret dev-ops-token -n {{ .Release.Namespace }} -o jsonpath='{.data.token}' | base64 --decode
+```
+
+调用 Api：[Deployment API](https://kubernetes.io/zh-cn/docs/reference/kubernetes-api/workload-resources/deployment-v1/)
+
+认证方式是`Bearer Token`, 需要添加一个 `Authorization` 请求头，格式为: `Bearer <token>`.
+
+推荐使用 `PATCH` 来更新资源，可用的格式可以在这里看 [更新现有资源](https://kubernetes.io/zh-cn/docs/reference/using-api/api-concepts/#patch-and-apply)
 
 
 # 常用插件
