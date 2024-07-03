@@ -215,7 +215,60 @@ nohup $JAVA_HOME/bin/java -jar jenkins-2.452.2.war $JENKINS_OPTS &amp;
 <li>升级 jenkins，重启</li>
 <li>将之前的 <code>config.xml</code> 恢复，重启</li>
 </ol>
-<h1 id="K8s-集成"><a href="#K8s-集成" class="headerlink" title="K8s 集成"></a>K8s 集成</h1><h2 id="创建服务账号与-K8s-集成"><a href="#创建服务账号与-K8s-集成" class="headerlink" title="创建服务账号与 K8s 集成"></a>创建服务账号与 K8s 集成</h2><h1 id="常用插件"><a href="#常用插件" class="headerlink" title="常用插件"></a>常用插件</h1><h2 id="响应式单选-多选插件"><a href="#响应式单选-多选插件" class="headerlink" title="响应式单选&#x2F;多选插件"></a>响应式单选&#x2F;多选插件</h2><p><a target="_blank" rel="noopener" href="https://plugins.jenkins.io/uno-choice/">Active Choices</a></p>
+<h1 id="K8s-集成"><a href="#K8s-集成" class="headerlink" title="K8s 集成"></a>K8s 集成</h1><h2 id="创建服务账号与-K8s-集成"><a href="#创建服务账号与-K8s-集成" class="headerlink" title="创建服务账号与 K8s 集成"></a>创建服务账号与 K8s 集成</h2><p>创建服务账号：</p>
+<pre><code class="yaml">apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dev-ops-account
+  namespace: &#123;&#123; .Release.Namespace &#125;&#125;
+  annotations:
+    role: ci-cd
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: &#123;&#123; .Release.Namespace &#125;&#125;
+  name: dev-ops-role
+rules:
+  - apiGroups:
+      - &quot;apps&quot;
+    resources:
+      - &quot;deployment&quot;
+    verbs:
+      - &quot;get&quot;
+      - &quot;list&quot;
+      - &quot;update&quot;
+      - &quot;patch&quot;
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dev-ops-role-bind
+  namespace: &#123;&#123; .Release.Namespace &#125;&#125;
+subjects:
+  - kind: ServiceAccount
+    name: dev-ops-account
+roleRef:
+  kind: Role
+  name: dev-ops-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dev-ops-token
+  namespace: &#123;&#123; .Release.Namespace &#125;&#125;
+  annotations:
+    kubernetes.io/service-account.name: dev-ops-account
+type: kubernetes.io/service-account-token
+</code></pre>
+<p>获取 token:</p>
+<pre><code class="sh">kubectl get secret dev-ops-token -n &#123;&#123; .Release.Namespace &#125;&#125; -o jsonpath=&#39;&#123;.data.token&#125;&#39; | base64 --decode
+</code></pre>
+<p>调用 Api：<a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/reference/kubernetes-api/workload-resources/deployment-v1/">Deployment API</a></p>
+<p>认证方式是<code>Bearer Token</code>, 需要添加一个 <code>Authorization</code> 请求头，格式为: <code>Bearer &lt;token&gt;</code>.</p>
+<p>推荐使用 <code>PATCH</code> 来更新资源，可用的格式可以在这里看 <a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/reference/using-api/api-concepts/#patch-and-apply">更新现有资源</a></p>
+<h1 id="常用插件"><a href="#常用插件" class="headerlink" title="常用插件"></a>常用插件</h1><h2 id="响应式单选-多选插件"><a href="#响应式单选-多选插件" class="headerlink" title="响应式单选&#x2F;多选插件"></a>响应式单选&#x2F;多选插件</h2><p><a target="_blank" rel="noopener" href="https://plugins.jenkins.io/uno-choice/">Active Choices</a></p>
 <p>这个插件可以提供单选&#x2F;多选的输入表单，并且它还可以提供根据之前的选项，限制下一个表单展示的内容。</p>
 <p>例如第一个单选框是 <code>水果/牛奶</code>：</p>
 <ul>

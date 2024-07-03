@@ -1,0 +1,560 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Webpack 迁移至 Vite | IceOfSummerの博客</title>
+        <meta name="author" content="IceOfSummer" />
+        <meta name="description" content="后面一辈子的博客都在这了！" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="https://selfb.asia/static/particlex/static/fonts.min.css" />
+<script>
+  const mixins = {};
+  const h = (arg1, arg2, arg3) => {
+    if (arg2.attrs) {
+      Object.assign(arg2, arg2.attrs)
+      Reflect.deleteProperty(arg2, 'attrs')
+    }
+    if (arg2.on) {
+      Object.keys(arg2.on).forEach(key => {
+        const head = key.charAt(0).toUpperCase()
+        arg2['on' + head  + key.substring(1)] = arg2.on[key]
+      })
+      Reflect.deleteProperty(arg2, 'on')
+    }
+    return Vue.h(arg1, arg2, arg3)
+  }
+</script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+  <script src="/js/lib/toc.js"></script>
+
+
+
+  <script src="/js/lib/lazy-load-support.js"></script>
+
+
+    <meta name="generator" content="Hexo 7.2.0"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存&ensp;浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+            </transition>
+            <transition name="into">
+            <div id="main" v-show="!loading">
+                <nav id="menu" ref="menu">
+    <div class="desktop-menu">
+        <a class="title" href="/">
+            <span>ICEOFSUMMERの博客</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="curtain" v-show="showMenu" @click="showMenu = !showMenu"></div>
+        <div class="title" @click="showMenu = !showMenu">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;ICEOFSUMMERの博客</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="showMenu">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+
+                <div class="article">
+    <div>
+        <h1>Webpack 迁移至 Vite</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/7/1
+        </span>
+        
+        <span class="category">
+            <a href="/categories/web/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                web
+            </a>
+        </span>
+        
+        
+    </div>
+    
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="已有环境"><a href="#已有环境" class="headerlink" title="已有环境"></a>已有环境</h1><p>目前是有一套 webpack 的 vue2 环境，打生产包需要 2 ~ 3 分钟左右，开发启动需要 1 分钟左右。</p>
+<p>迁移后，打生产包仅需 1 分钟，开发启动 10 秒左右。</p>
+<p><strong>注意，由于 vite v5 版本需要 node18 或者 node20+，所以一般只能升级到 v4，等稳定后再升 v5</strong>：<a target="_blank" rel="noopener" href="https://cn.vitejs.dev/guide/migration">从 v4 迁移</a></p>
+<p>vite v4 版本只需要 node14 就可以了，我自己目前的环境是 node12，可以直接升级，不会有很多坑。</p>
+<h1 id="准备迁移"><a href="#准备迁移" class="headerlink" title="准备迁移"></a>准备迁移</h1><h2 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h2><p>安装下面的依赖：</p>
+<pre><code class="sh">npm install @vitejs/plugin-vue2 vite vite-plugin-html -D
+</code></pre>
+<h2 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h2><p>在项目根目录创建 <code>vite-config</code> 目录，然后依次创建下面的文件：</p>
+<pre><code class="typescript">// config.ts
+import &#123; UserConfig &#125; from &#39;vite&#39;
+import vue from &#39;@vitejs/plugin-vue2&#39;
+import &#123; createHtmlPlugin &#125; from &#39;vite-plugin-html&#39;
+import &#123; resolve &#125; from &#39;path&#39;
+
+export const env = &#123;
+  // 页面 context path
+  base: process.env.NODE_ENV === &#39;production&#39; ? &#39;/app&#39; : &#39;&#39;
+&#125;
+
+
+const config: UserConfig = &#123;
+  plugins: [
+    vue(),
+    createHtmlPlugin(&#123;
+      entry: &#39;src/main.js&#39;,
+      template: &#39;index.html&#39;,
+      inject: &#123;
+        data: &#123;
+          base: env.base
+        &#125;
+      &#125;
+    &#125;)
+  ],
+  publicDir: &#39;static&#39;,
+  resolve: &#123;
+    alias: &#123;
+      &#39;@&#39;: resolve(__dirname, &#39;../src&#39;),
+      &#39;~@&#39;: resolve(__dirname, &#39;../src&#39;)
+    &#125;,
+    extensions: [&#39;.mjs&#39;, &#39;.js&#39;, &#39;.ts&#39;, &#39;.vue&#39;]
+  &#125;
+&#125;
+
+export default config
+</code></pre>
+<pre><code class="typescript">// dev.config.js
+import &#123; defineConfig &#125; from &#39;vite&#39;
+import baseConfig, &#123; env &#125; from &#39;./config&#39;
+
+const PROXY_TARGET = &#39;https://abc.com&#39;
+
+export default defineConfig(&#123;
+  ...baseConfig,
+  base: env.base,
+  define: &#123;
+    &#39;process.env&#39;: &#123;
+      NODE_ENV: &#39;development&#39;,
+      BASE_API: &#39;/app-api&#39;
+    &#125;
+  &#125;,
+  server: &#123;
+    port: 1002,
+    proxy: &#123;
+      &#39;/app-api&#39;: &#123;
+        target: PROXY_TARGET,
+        changeOrigin: true,
+        secure: false,
+        headers: &#123;
+          host: new URL(PROXY_TARGET).host,
+          Referer: `$&#123;PROXY_TARGET&#125;/app-api/`,
+          Origin: PROXY_TARGET
+        &#125;
+      &#125;
+    &#125;
+  &#125;,
+&#125;)
+</code></pre>
+<pre><code class="typescript">// prod.config.ts
+import &#123; defineConfig &#125; from &#39;vite&#39;
+import baseConfig, &#123; env &#125; from &#39;./config&#39;
+
+export default defineConfig(&#123;
+  ...baseConfig,
+  base: env.base,
+  define: &#123;
+    &#39;process.env&#39;: &#123;
+      NODE_ENV: &#39;production&#39;,
+      BASE_API: &#39;/app-api&#39;
+    &#125;
+  &#125;,
+  esbuild: &#123;
+    drop: [&#39;debugger&#39;]
+  &#125;,
+  build: &#123;
+    outDir: &quot;app&quot;,
+    assetsDir: &#39;static&#39;,
+    cssCodeSplit: true,
+    emptyOutDir: true,
+  &#125;
+&#125;)
+</code></pre>
+<p>不用多说，既然都来搞 vite 升级，肯定都能一眼看懂。</p>
+<p>之后修改 pakcage.json 的启动配置：</p>
+<pre><code class="json">&#123;
+
+    // snip
+
+    &quot;scripts&quot;: &#123;
+        &quot;dev&quot;: &quot;vite --config vite-config/dev.config.ts&quot;,
+        &quot;start&quot;: &quot;npm run dev&quot;,
+        &quot;build&quot;: &quot;vite --config vite-config/prod.config.ts build&quot;,
+        &quot;lint&quot;: &quot;eslint --fix --ext .js --ext .vue src/&quot;
+    &#125;,
+
+    // snip
+
+&#125;
+</code></pre>
+<h2 id="配置入口文件"><a href="#配置入口文件" class="headerlink" title="配置入口文件"></a>配置入口文件</h2><p>主要是修改 vue 创建的方式：</p>
+<pre><code class="javascript">new Vue(&#123;
+  router,
+  store,
+  i18n,
+  render: h =&gt; h(App)
+&#125;).$mount(&#39;#app&#39;)
+</code></pre>
+<p>然后修改我们的入口 html 文件：</p>
+<pre><code class="html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+  &lt;title&gt;App&lt;/title&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+  &lt;meta name=&quot;renderer&quot; content=&quot;webkit&quot;&gt;
+  &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;ie=edge,chrome=1&quot;&gt;
+  &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;/css/reset.css&quot;&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+&lt;div id=&quot;app&quot;&gt;&lt;/div&gt;
+&lt;script&gt;
+  // 可以注入属性.
+  window.base = &#39;&lt;%- base %&gt;&#39;
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>至此理论上就可以直接启动了，启动后就可以根据编译的报错一个一个改了，后面就讲一下我碰到的坑。</p>
+<h2 id="迁移碰到的坑"><a href="#迁移碰到的坑" class="headerlink" title="迁移碰到的坑"></a>迁移碰到的坑</h2><h3 id="静态资源获取"><a href="#静态资源获取" class="headerlink" title="静态资源获取"></a>静态资源获取</h3><p>首先 vite 专门有个静态资源目录，如果你用的是我上面的配置，那么静态资源目录就在项目根目录下的 <code>static</code> 目录中。</p>
+<p>假设有这样一个文件 <code>static/img/hello.png</code>，如果想要使用，直接使用根路径引用即可：</p>
+<pre><code class="html">&lt;img src=&quot;/img/hello.png&quot;&gt;
+</code></pre>
+<p>而不是：</p>
+<pre><code class="html">&lt;img src=&quot;/static/img/hello.png&quot;&gt;
+&lt;img src=&quot;&lt;context path&gt;/static/img/hello.png&quot;&gt;
+&lt;img src=&quot;&lt;context path&gt;/img/hello.png&quot;&gt;
+</code></pre>
+<p>上面几种写法均为错误写法!</p>
+<p>对于第一种和第二种，不需要加上静态资源目录的名称，对于第三种，不需要加上 <code>&lt;context path&gt;</code>，<strong>在打生产包时，如果你在配置文件中配置了 <code>base</code> 属性，vite 会自动给你加上！</strong></p>
+<p>此外下面的写法会让 vite 的自动添加路径失效：</p>
+<pre><code>&lt;div style=&quot;background-image: url(&#39;/img/hello.png&#39;)&quot;&gt;&lt;/div&gt;
+</code></pre>
+<p>这里直接将文件路径写在了 style 中，<strong>如果在生产模式下配置了 base，就会导致生产模式无法读取到图片，对于这种写法必须要以 <code>css</code> 的形式写，不能用内联样式！</strong></p>
+<h3 id="‘require’-is-not-defined"><a href="#‘require’-is-not-defined" class="headerlink" title="‘require’ is not defined"></a>‘require’ is not defined</h3><p>这里 webpack 有两种用途：</p>
+<ul>
+<li>导入 nodejs 模块</li>
+<li>使用 <code>require.context</code> 动态导入模块或文件</li>
+</ul>
+<p>对于前者，<strong>我建议赶快把 nodejs 模块全都换掉，别想着适配了</strong>，一般这种情况经常会出现在一些加密算法的库里，直接找到一个适合前端的库替换就行了。</p>
+<p>而对于后者，就比较麻烦了…</p>
+<hr>
+<p>我的项目里是这样的一个操作：</p>
+<pre><code class="js">const requireAll = requireContext =&gt; requireContext.keys().map(requireContext)
+const req = require.context(&#39;./svg&#39;, false, /\.svg$/)
+requireAll(req)
+</code></pre>
+<p>上面的代码，会将 <code>svg</code> 目录下的所有文件注册为一个组件，然后放在页面上，然后使用 svg 的 use 来引用：</p>
+<pre><code class="html">&lt;svg&gt;
+    &lt;use :xlink:href=&quot;iconName&quot;&gt;&lt;/use&gt;
+&lt;/svg&gt;
+</code></pre>
+<p>这里建议直接改造，将图片直接封装成组件使用：</p>
+<pre><code class="js">import &#123; defineAsyncComponent &#125; from &#39;vue&#39;
+
+const components = &#123;&#125;
+&#123;
+  const files = import.meta.glob(&#39;./svg/*.svg&#39;, &#123;
+    query: &#39;component&#39;
+  &#125;)
+
+  for (const filesKey in files) &#123;
+    // remove prefix &#39;./svg/&#39; and suffix &#39;.svg&#39;
+    const key = filesKey.substring(6, filesKey.length - 4)
+    components[key] = defineAsyncComponent(files[filesKey])
+  &#125;
+&#125;
+
+const getIcon = (name) =&gt; &#123;
+  const entity = components[name]
+  if (!entity) &#123;
+    console.warn(&#39;Icon not found: &#39; + name)
+  &#125;
+  return entity
+&#125;
+
+export default getIcon
+</code></pre>
+<p>这里很容易理解，就是 <code>getIcon</code> 方法只需要传入文件的名称就会返回一个异步组件，然后在外部直接使用就可以了。</p>
+<p>然后另外一个问题就来了，<code>defineAsyncComponent</code> 是 vue3 的 API (如果报错了，请把你的 vue2 升级到 2 的最后一个版本)，那么我使用也得使用 vue3 的写法 (至少我是没找到怎么用 vue2 的写法来渲染这个组件的…)：</p>
+<pre><code class="vue">&lt;template&gt;
+  &lt;div
+    :class=&quot;svgClass&quot;
+    aria-hidden=&quot;true&quot;
+  &gt;
+    &lt;Icon
+      width=&quot;100%&quot;
+      height=&quot;100%&quot;
+    /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+import getIcon from &#39;./index&#39;
+
+const props = defineProps(&#123;
+  iconClass: &#123;
+    type: String,
+    required: true
+  &#125;,
+  className: &#123;
+    type: String,
+    default: undefined
+  &#125;
+&#125;)
+
+const Icon = getIcon(props.iconClass)
+const svgClass = props.className ? &#39;svg-icon &#39; + props.className : &#39;svg-icon&#39;
+&lt;/script&gt;
+</code></pre>
+<h3 id="vue3-写法-eslint-报错"><a href="#vue3-写法-eslint-报错" class="headerlink" title="vue3 写法 eslint 报错"></a>vue3 写法 eslint 报错</h3><p>如果直接用 vue3 setup 写法，eslint 可能会报错，但是仍然能够通过编译并使用，这里也需要一起升级一下 eslint。</p>
+<p>安装&#x2F;更新依赖：</p>
+<pre><code class="sh">npm i eslint@^8 eslint-plugin-vue@^9 vue-eslint-parser@^9 -D
+</code></pre>
+<p>修改 eslint 配置：</p>
+<pre><code class="js">module.exports = &#123;
+  root: true,
+  parser: &#39;vue-eslint-parser&#39;,
+  parserOptions: &#123;
+    sourceType: &#39;module&#39;
+  &#125;,
+  env: &#123;
+    browser: true,
+    node: true,
+    es6: true
+  &#125;,
+  extends: [&#39;eslint:recommended&#39;, &#39;plugin:vue/recommended&#39;],
+  rules: &#123;
+    // snip
+  &#125;
+&#125;
+</code></pre>
+<p>主要是注意 parser 那个配置，别的根据自己的需求修改。</p>
+<h3 id="以-base64-导入文件"><a href="#以-base64-导入文件" class="headerlink" title="以 base64 导入文件"></a>以 base64 导入文件</h3><p>虽然是个很奇葩的需求，但是还是写一下。这里要求以 base64 格式导入 <code>src</code> (非静态资源目录)下的某个文件，默认情况下 vite 肯定是做不到的，这里要求我们自己定义插件：</p>
+<pre><code class="ts">// base64Loader.ts
+import type &#123; Plugin &#125; from &#39;rollup&#39;
+import * as fs from &#39;fs&#39;
+
+const base64Loader: Plugin = &#123;
+  name: &#39;base64-loader&#39;,
+  transform(_: any, id: string) &#123;
+    const [path, query] = id.split(&#39;?&#39;)
+    if (query !== &#39;base64&#39;) return null
+
+    const data = fs.readFileSync(path)
+    const base64 = data.toString(&#39;base64&#39;)
+
+    return `export default &#39;$&#123;base64&#125;&#39;;`
+  &#125;
+&#125;
+
+export default base64Loader
+</code></pre>
+<p>这段代码的作用是，如果在导入一个模块时加上了 <code>?base</code>，则会以 base 格式进行导入。</p>
+<p>然后在 vite 配置文件中配置：</p>
+<pre><code class="ts">// vite.config.ts
+import base64Loader from &#39;./base64Loader&#39;
+
+const config: UserConfig = &#123;
+  plugins: [
+
+    // snip
+
+    base64Loader
+  ]
+  // snip
+&#125;
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
+    
+</div>
+
+                <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 IceOfSummerの博客
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;<a target="_blank" rel="noopener" href="https://github.com/IceOfSummer">IceOfSummer</a>
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/IceOfSummer/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+            </div>
+            </transition>
+            
+            <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+            </transition>
+            
+        </div>
+        <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
+        
+    </body>
+</html>
