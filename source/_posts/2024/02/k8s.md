@@ -29,3 +29,7 @@ categories: "k8s"
 - [常用属性](/kubernetes/properties)
 - [LPG 日志采集](/kubernetes/lpg)
 - [Jenkins集成](/kubernetes/jenkins)
+
+# 博客
+
+- [安装 K3s](/kubernetes/blog/k3s-install)
