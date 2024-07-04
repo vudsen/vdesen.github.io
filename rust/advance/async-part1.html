@@ -270,7 +270,189 @@ hello, world!
 </code></pre>
 <p><code>hello_cat</code> 方法并没有被执行，编译器也提示需要加上 <code>.await</code>。</p>
 <p>总之，在 <code>async fn</code> 函数中使用 <code>.await</code> 可以等待另一个异步调用的完成。但是与 <code>block_on</code> 不同，<code>.await</code> 并不会阻塞当前的线程，而是异步的等待 <code>Future A</code> 的完成，在等待的过程中，该线程还可以继续执行其它的 <code>Future B</code>，最终实现了并发处理的效果。</p>
+<h1 id="Future-执行器与任务调度"><a href="#Future-执行器与任务调度" class="headerlink" title="Future 执行器与任务调度"></a>Future 执行器与任务调度</h1><h2 id="Future-特征"><a href="#Future-特征" class="headerlink" title="Future 特征"></a>Future 特征</h2><p><code>Future</code> 特征是 Rust 异步编程的核心，毕竟异步函数是异步编程的核心，而 <code>Future</code> 恰恰是异步函数的返回值和被执行的关键。</p>
+<p>首先，来给出 <code>Future</code> 的定义：它是一个能产出值的异步计算(虽然该值可能为空，例如 <code>()</code> )。来看看一个简化版的 Future 特征:</p>
+<pre><code class="rust">trait SimpleFuture &#123;
+    type Output;
+    fn poll(&amp;mut self, wake: fn()) -&gt; Poll&lt;Self::Output&gt;;
+&#125;
 
+enum Poll&lt;T&gt; &#123;
+    Ready(T),
+    Pending,
+&#125;
+</code></pre>
+<p>在上一章中，我们提到过 <code>Future</code> 需要被执行器 <code>poll</code> (轮询)后才能运行，通过调用该方法，可以推进 Future 的进一步执行，直到被切走为止。</p>
+<p>若在当前 <code>poll</code> 中， <code>Future</code> 可以被完成，则会返回 <code>Poll::Ready(result)</code> ，反之则返回 <code>Poll::Pending</code>， 并且安排一个 <code>wake</code> 函数：当未来 <code>Future</code> 准备好进一步执行时， 该函数会被调用，然后管理该 <code>Future</code> 的执行器(例如上一章节中的 <code>block_on</code> 函数)会再次调用 <code>poll</code> 方法，此时 <code>Future</code> 就可以继续执行了。</p>
+<p>如果没有 <code>wake</code> 方法，那执行器无法知道某个 <code>Future</code> 是否可以继续被执行，除非执行器定期的轮询每一个 <code>Future</code>，确认它是否能被执行，但这种作法效率较低。而有了 <code>wake</code>，<code>Future</code> 就可以主动通知执行器，然后执行器就可以精确的执行该 <code>Future</code>。 这种“事件通知 -&gt; 执行”的方式要远比定期对所有 <code>Future</code> 进行一次全遍历来的高效。</p>
+<p>用一个例子来说明下。考虑一个需要从 socket 读取数据的场景：如果有数据，可以直接读取数据并返回 <code>Poll::Ready(data)</code>， <code>但如果没有数据，Future</code> 会被阻塞且不会再继续执行，此时它会注册一个 <code>wake</code> 函数，当 <code>socket</code> 数据准备好时，该函数将被调用以通知执行器：我们的 <code>Future</code> 已经准备好了，可以继续执行。</p>
+<p>下面的 <code>SocketRead</code> 结构体就是一个 <code>Future</code>:</p>
+<pre><code class="rust">pub struct SocketRead&lt;&#39;a&gt; &#123;
+    socket: &amp;&#39;a Socket,
+&#125;
+
+impl SimpleFuture for SocketRead&lt;&#39;_&gt; &#123;
+    type Output = Vec&lt;u8&gt;;
+
+    fn poll(&amp;mut self, wake: fn()) -&gt; Poll&lt;Self::Output&gt; &#123;
+        if self.socket.has_data_to_read() &#123;
+            // socket有数据，写入buffer中并返回
+            Poll::Ready(self.socket.read_buf())
+        &#125; else &#123;
+            // socket中还没数据
+            //
+            // 注册一个`wake`函数，当数据可用时，该函数会被调用，
+            // 然后当前Future的执行器会再次调用`poll`方法，此时就可以读取到数据
+            self.socket.set_readable_callback(wake);
+            Poll::Pending
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>这种 <code>Future</code> 模型允许将多个异步操作组合在一起，同时还无需任何内存分配。不仅仅如此，如果你需要同时运行多个 <code>Future</code> 或链式调用多个 <code>Future</code> ，也可以通过无内存分配的状态机实现，例如：</p>
+<pre><code class="rust">trait SimpleFuture &#123;
+    type Output;
+    fn poll(&amp;mut self, wake: fn()) -&gt; Poll&lt;Self::Output&gt;;
+&#125;
+
+enum Poll&lt;T&gt; &#123;
+    Ready(T),
+    Pending,
+&#125;
+
+/// 一个SimpleFuture，它会并发地运行两个Future直到它们完成
+///
+/// 之所以可以并发，是因为两个Future的轮询可以交替进行，一个阻塞，另一个就可以立刻执行，反之亦然
+pub struct Join&lt;FutureA, FutureB&gt; &#123;
+    // 结构体的每个字段都包含一个Future，可以运行直到完成.
+    // 等到Future完成后，字段会被设置为 `None`. 这样Future完成后，就不会再被轮询
+    a: Option&lt;FutureA&gt;,
+    b: Option&lt;FutureB&gt;,
+&#125;
+
+impl&lt;FutureA, FutureB&gt; SimpleFuture for Join&lt;FutureA, FutureB&gt;
+where
+    FutureA: SimpleFuture&lt;Output = ()&gt;,
+    FutureB: SimpleFuture&lt;Output = ()&gt;,
+&#123;
+    type Output = ();
+    fn poll(&amp;mut self, wake: fn()) -&gt; Poll&lt;Self::Output&gt; &#123;
+        // 尝试去完成一个 Future `a`
+        if let Some(a) = &amp;mut self.a &#123;
+            if let Poll::Ready(()) = a.poll(wake) &#123;
+                self.a.take();
+            &#125;
+        &#125;
+
+        // 尝试去完成一个 Future `b`
+        if let Some(b) = &amp;mut self.b &#123;
+            if let Poll::Ready(()) = b.poll(wake) &#123;
+                self.b.take();
+            &#125;
+        &#125;
+
+        if self.a.is_none() &amp;&amp; self.b.is_none() &#123;
+            // 两个 Future都已完成 - 我们可以成功地返回了
+            Poll::Ready(())
+        &#125; else &#123;
+            // 至少还有一个 Future 没有完成任务，因此返回 `Poll::Pending`.
+            // 当该 Future 再次准备好时，通过调用`wake()`函数来继续执行
+            Poll::Pending
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>这些例子展示了在不需要内存对象分配以及深层嵌套回调的情况下，该如何使用 Future 特征去表达异步控制流。 在了解了基础的控制流后，我们再来看看真实的 Future 特征有何不同之处:</p>
+<pre><code class="rust">trait Future &#123;
+    type Output;
+    fn poll(
+        // 首先值得注意的地方是，`self`的类型从`&amp;mut self`变成了`Pin&lt;&amp;mut Self&gt;`:
+        self: Pin&lt;&amp;mut Self&gt;,
+        // 其次将`wake: fn()` 修改为 `cx: &amp;mut Context&lt;&#39;_&gt;`:
+        cx: &amp;mut Context&lt;&#39;_&gt;,
+    ) -&gt; Poll&lt;Self::Output&gt;;
+&#125;
+</code></pre>
+<p>首先这里多了一个 <code>Pin</code> ，现在你只需要知道使用它可以创建一个无法被移动的 <code>Future</code> ，因为无法被移动，所以它将具有固定的内存地址，意味着我们可以存储它的指针(如果内存地址可能会变动，那存储指针地址将毫无意义！)，也意味着可以实现一个自引用数据结构: <code>struct MyFut &#123; a: i32, ptr_to_a: *const i32 &#125;</code>。 而对于 <code>async/await</code> 来说，<code>Pin</code> 是不可或缺的关键特性。</p>
+<p>其次，从 <code>wake: fn()</code> 变成了 <code>&amp;mut Context&lt;&#39;_&gt;</code> 。意味着 wake 函数可以携带数据了，<code>Context</code> 类型也会通过提供一个 <code>Waker</code> 类型的值，就可以用来唤醒特定的的任务。</p>
+<h2 id="使用-Waker-来唤醒任务"><a href="#使用-Waker-来唤醒任务" class="headerlink" title="使用 Waker 来唤醒任务"></a>使用 Waker 来唤醒任务</h2><p>对于 <code>Future</code> 来说，第一次被 <code>poll</code> 时无法完成任务是很正常的。但它需要确保在未来一旦准备好时，可以通知执行器再次对其进行 <code>poll</code> 进而继续往下执行，该通知就是通过 <code>Waker</code> 类型完成的。</p>
+<p><code>Waker</code> 提供了一个 <code>wake()</code> 方法可以用于告诉执行器：相关的任务可以被唤醒了，此时执行器就可以对相应的 <code>Future</code> 再次进行 <code>poll</code> 操作。</p>
+<h3 id="构建一个定时器"><a href="#构建一个定时器" class="headerlink" title="构建一个定时器"></a>构建一个定时器</h3><p>下面一起来实现一个简单的定时器 <code>Future</code> 。为了让例子尽量简单，当计时器创建时，我们会启动一个线程接着让该线程进入睡眠，等睡眠结束后再通知给 <code>Future</code>。</p>
+<p>由于新建线程在睡眠结束后会需要将状态同步给定时器 <code>Future</code>，由于是多线程环境，所以需要使用 <code>Arc&lt;Mutex&lt;T&gt;&gt;</code> 来作为一个共享状态，用于在新线程和 <code>Future</code> 定时器间共享。</p>
+<pre><code class="rust">use std::&#123;
+    future::Future,
+    pin::Pin,
+    sync::&#123;Arc, Mutex&#125;,
+    task::&#123;Context, Poll, Waker&#125;,
+    thread,
+    time::Duration,
+&#125;;
+
+
+/// 在Future和等待的线程间共享状态
+struct SharedState &#123;
+    /// 定时(睡眠)是否结束
+    completed: bool,
+
+    /// 当睡眠结束后，线程可以用`waker`通知`TimerFuture`来唤醒任务
+    waker: Option&lt;Waker&gt;,
+&#125;
+
+pub struct TimerFuture &#123;
+    shared_state: Arc&lt;Mutex&lt;SharedState&gt;&gt;,
+&#125;
+
+
+impl Future for TimerFuture &#123;
+    type Output = ();
+    fn poll(self: Pin&lt;&amp;mut Self&gt;, cx: &amp;mut Context&lt;&#39;_&gt;) -&gt; Poll&lt;Self::Output&gt; &#123;
+        // 通过检查共享状态，来确定定时器是否已经完成
+        let mut shared_state = self.shared_state.lock().unwrap();
+        if shared_state.completed &#123;
+            Poll::Ready(())
+        &#125; else &#123;
+            // 设置`waker`，这样新线程在睡眠(计时)结束后可以唤醒当前的任务，接着再次对`Future`进行`poll`操作,
+            //
+            // 下面的`clone`每次被`poll`时都会发生一次，实际上，应该是只`clone`一次更加合理。
+            // 选择每次都`clone`的原因是： `TimerFuture`可以在执行器的不同任务间移动，如果只克隆一次，
+            // 那么获取到的`waker`可能已经被篡改并指向了其它任务，最终导致执行器运行了错误的任务
+            shared_state.waker = Some(cx.waker().clone());
+            Poll::Pending
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>代码很简单，只要新线程设置了 <code>shared_state.completed = true</code> ，那任务就能顺利结束。如果没有设置，会为当前的任务克隆一份 <code>Waker</code> ，这样新线程就可以使用它来唤醒当前的任务。</p>
+<p>最后，再来创建一个 API 用于构建定时器和启动计时线程:</p>
+<pre><code class="rust">impl TimerFuture &#123;
+    /// 创建一个新的`TimerFuture`，在指定的时间结束后，该`Future`可以完成
+    pub fn new(duration: Duration) -&gt; Self &#123;
+        let shared_state = Arc::new(Mutex::new(SharedState &#123;
+            completed: false,
+            waker: None,
+        &#125;));
+
+        // 创建新线程
+        let thread_shared_state = shared_state.clone();
+        thread::spawn(move || &#123;
+            // 睡眠指定时间实现计时功能
+            thread::sleep(duration);
+            let mut shared_state = thread_shared_state.lock().unwrap();
+            // 通知执行器定时器已经完成，可以继续`poll`对应的`Future`了
+            shared_state.completed = true;
+            if let Some(waker) = shared_state.waker.take() &#123;
+                waker.wake()
+            &#125;
+        &#125;);
+
+        TimerFuture &#123; shared_state &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>至此，一个简单的定时器 Future 就已创建成功，我们需要创建一个执行器，才能让程序动起来。</p>
+<h2 id="执行器-Executor"><a href="#执行器-Executor" class="headerlink" title="执行器 Executor"></a>执行器 Executor</h2><p>Rust 的 <code>Future</code> 是惰性的，其中一个推动它的方式就是在 <code>async</code> 函数中使用 <code>.await</code> 来调用另一个 <code>async</code> 函数，但是这个只能解决 <code>async</code> 内部的问题，在最外层的 async 函数，则需要执行器 <code>executor</code> 来进行推动了。</p>
+<p>执行器会管理一批 <code>Future</code> (最外层的 <code>async</code> 函数)，然后通过不停地 <code>poll</code> 推动它们直到完成。 最开始，执行器会先 <code>poll</code> 一次 <code>Future</code> ，后面就不会主动去 <code>poll</code> 了，而是等待 <code>Future</code> 通过调用 <code>wake</code> 函数来通知它可以继续，它才会继续去 <code>poll</code> 。这种 <code>wake</code> 通知然后 <code>poll</code> 的方式会不断重复，直到 <code>Future</code> 完成。</p>
+<h3 id="构建执行器"><a href="#构建执行器" class="headerlink" title="构建执行器"></a>构建执行器</h3>
     </div>
     
     
