@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <title>Categories: rust-doc | IceOfSummerの博客</title>
+        <title>高可用集群 P2 | IceOfSummerの博客</title>
         <meta name="author" content="IceOfSummer" />
         <meta name="description" content="后面一辈子的博客都在这了！" />
         <meta name="keywords" content="" />
@@ -42,6 +42,10 @@
 
 
 <script src="/js/lib/preview.js"></script>
+
+
+
+
 
 
 
@@ -161,90 +165,20 @@
     </div>
 </nav>
 
-                <div id="archives">
-    
-    <div class="categories-tags">
-        
-        
-        <span>
-            <a href="/categories/SpringCloud/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                SpringCloud
-            </a>
+                <div class="article">
+    <div>
+        <h1>高可用集群 P2</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/7/18
         </span>
         
-        
-        
-        <span>
-            <a href="/categories/Java%E9%9D%A2%E8%AF%95/" style="background: #ff7d73">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                Java面试
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/categories/%E7%BA%BF%E4%B8%8A%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/" style="background: #ffa2c4">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                线上问题排查
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/categories/Docker/" style="background: #ffa2c4">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                Docker
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%81%E7%A7%BB/" style="background: #03a9f4">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                数据库迁移
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/categories/Rust/" style="background: #ff7d73">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                Rust
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/categories/%E5%89%8D%E7%AB%AF/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                前端
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/categories/k8s/" style="background: #ffa2c4">
+        <span class="category">
+            <a href="/2024/02/08/k8s">
                 <span class="icon">
                     <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
@@ -253,54 +187,105 @@
         </span>
         
         
-        
-        <span>
-            <a href="/categories/rust-doc/" style="background: linear-gradient(120deg, #9abbf7 0%, #ffbbf4 100%)">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                rust-doc
-            </a>
-        </span>
-        
-        
-        
-        
-        
-        <span>
-            <a href="/categories/web/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-bookmark fa-fw"></i>
-                </span>
-                web
-            </a>
-        </span>
-        
-        
     </div>
     
-    <div class="timeline">
-        <div class="timeline-tail"></div>
-        <div class="timeline-content">
-            <div class="item-time">2024/7/12</div>
-            <a href="/2024/07/12/rust-doc/">
-                <h3>Rust 文档汉化</h3>
-            </a>
-            <div class="info">
-                
-                <span class="category">
-                    <a href="/categories/rust-doc/">
-                        <span class="icon">
-                            <i class="fa-solid fa-bookmark fa-fw"></i>
-                        </span>
-                        rust-doc
-                    </a>
-                </span>
-                
-                
-            </div>
-        </div>
+    <toc-component></toc-component>
+    <div class="content" v-pre id="main-content">
+        <h1 id="TLS-与引导启动原理"><a href="#TLS-与引导启动原理" class="headerlink" title="TLS 与引导启动原理"></a>TLS 与引导启动原理</h1><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/">TLS 启动引导</a></p>
+<p>在 K8s 中，为了简化证书的生成，kubelet 可以主动请求 api-server 来为自己颁发证书。</p>
+<blockquote>
+<p>官网讲的比我更详细，建议跟着官网走，这里仅供参考。</p>
+</blockquote>
+<h3 id="配置-kube-apiserver"><a href="#配置-kube-apiserver" class="headerlink" title="配置 kube-apiserver"></a>配置 kube-apiserver</h3><h3 id="配置令牌认证文件"><a href="#配置令牌认证文件" class="headerlink" title="配置令牌认证文件"></a>配置令牌认证文件</h3><p>需要生成一个令牌，令牌可以为任意数据，但推荐使用下面的命令生成：</p>
+<pre><code class="sh">head -c 16 /dev/urandom | od -An -t x | tr -d &#39; &#39;
+</code></pre>
+<p>上面的命令会生成类似于 <code>cdbe50bd844b6952cd197899bac486d9</code> 的令牌，之后组装成令牌文件：</p>
+<pre><code class="text">cdbe50bd844b6952cd197899bac486d9,kubelet-bootstrap,10001,&quot;system:bootstrappers&quot;
+</code></pre>
+<blockquote>
+<p>具体格式为：令牌，用户名，用户UID，用户组(多个使用双引号括起来)</p>
+</blockquote>
+<p>之后修改 kube-apiserver 参数，添加 <code>--token-auth-file=FILENAME</code> 标志，然后重启：</p>
+<pre><code class="sh">systemctl daemon-reload &amp;&amp; systemctl restart kube-apiserver &amp;&amp; systemctl status kube-apiserver
+</code></pre>
+<h3 id="给授权用户组"><a href="#给授权用户组" class="headerlink" title="给授权用户组"></a>给授权用户组</h3><p>配置好 kubectl 命令的认证文件后(<code>~/.kube/config</code>，可以直接复制 <code>/etc/kubernetes/admin.conf</code>)，应用下面的 yaml：</p>
+<pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: create-csrs-for-bootstrapping
+subjects:
+- kind: Group
+  name: system:bootstrappers
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: system:node-bootstrapper
+  apiGroup: rbac.authorization.k8s.io
+</code></pre>
+<p>即使没有任何节点，这个文件也是可以直接应用的。</p>
+<h2 id="配置-kube-controller-manager"><a href="#配置-kube-controller-manager" class="headerlink" title="配置 kube-controller-manager"></a>配置 kube-controller-manager</h2><p>由于签发证书是 <code>kube-controller-manager</code> 实现的，所以必须保证启动时配置了合法的 <code>--cluster-signing-cert-file</code> 和 <code>--cluster-signing-key-file</code>。</p>
+<p>应用下面的 yaml，第一个是允许新节点自动生成新的证书：</p>
+<pre><code class="yaml"># 批复 &quot;system:bootstrappers&quot; 组的所有 CSR
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: auto-approve-csrs-for-group
+subjects:
+- kind: Group
+  name: system:bootstrappers
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: system:certificates.k8s.io:certificatesigningrequests:nodeclient
+  apiGroup: rbac.authorization.k8s.io
+</code></pre>
+<p>这个是允许节点对证书进行续期：</p>
+<pre><code class="yaml"># 批复 &quot;system:nodes&quot; 组的 CSR 续约请求
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: auto-approve-renewals-for-nodes
+subjects:
+- kind: Group
+  name: system:nodes
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: system:certificates.k8s.io:certificatesigningrequests:selfnodeclient
+  apiGroup: rbac.authorization.k8s.io
+</code></pre>
+<h2 id="kubelet-配置"><a href="#kubelet-配置" class="headerlink" title="kubelet 配置"></a>kubelet 配置</h2><p>在执行前需要节点中准备签发 apiserver 证书的 CA 证书：</p>
+<pre><code class="sh">ssh k8s-node-1 &quot;mkdir -p /etc/kubernetes/pki&quot;
+scp /etc/kubernetes/pki/ca.crt root@k8s-node-1:/etc/kubernetes/pki/ca.crt
+</code></pre>
+<p>创建一个 <code>kubelet context</code>：</p>
+<pre><code class="sh">kube=/etc/kubernetes/bootstrap-kubeconfig
+KUBECONFIG=$kube kubectl config set-context default-auth@kubernetes --cluster=kubernetes --user=default-auth
+
+# 注意 server 配负载均衡地址
+KUBECONFIG=$kube kubectl config set-cluster kubernetes \
+    --certificate-authority=/etc/kubernetes/pki/ca.crt \
+    --embed-certs=true \
+    --server=https://192.168.1.34:6443 
+
+KUBECONFIG=$kube kubectl config set-credentials default-auth \
+    --cluster=kubernetes \
+    --token=cdbe50bd844b6952cd197899bac486d9,kubelet-bootstrap,10001,&quot;system:bootstrappers&quot; 
+
+KUBECONFIG=$kube kubectl config use-context default-auth@kubernetes
+</code></pre>
+
     </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
     
 </div>
 
@@ -333,6 +318,29 @@
             
         </div>
         <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo="IceOfSummer/iceofsummer.github.io"
+    data-repo-id="R_kgDOJFU7OQ"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+    data-mapping="title"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="zh-CN"
+    crossorigin
+    async
+></script>
+
+
+
+
+
         
     </body>
 </html>

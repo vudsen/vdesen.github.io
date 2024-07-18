@@ -187,124 +187,6 @@
             
 
 <div class="post post-partial-show">
-    <a href="/2023/11/13/user-permissions/">
-        <h2 class="post-title">Linux用户权限管理</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2023/11/13
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <p>最近突然碰到有关用户授权的问题了，发现自己真的是一点都不会，所有写篇博客记一下常见指令以及碰到过的坑。</p>
-<h1 id="1-常用指令"><a href="#1-常用指令" class="headerlink" title="1. 常用指令"></a>1. 常用指令</h1><h2 id="1-1-用户"><a href="#1-1-用户" class="headerlink" title="1.1 用户"></a>1.1 用户</h2><ul>
-<li>新增用户：<code>useradd [username]</code></li>
-<li>设置用户密码：<code>passwd [username]</code></li>
-<li>删除用户：<code>userdel [username]</code></li>
-<li>将用户添加到用户组(a为追加)：<code>usermod -aG [groupname] [username]</code></li>
-</ul>
-<h2 id="1-2-用户组"><a href="#1-2-用户组" class="headerlink" title="1.2 用户组"></a>1.2 用户组</h2><ul>
-<li>新建用户组：<code>groupadd [groupname]</code></li>
-</ul>
-<h2 id="1-3-授权"><a href="#1-3-授权" class="headerlink" title="1.3 授权"></a>1.3 授权</h2><h3 id="1-3-1-chown"><a href="#1-3-1-chown" class="headerlink" title="1.3.1 chown"></a>1.3.1 chown</h3><p>chown用于修改文件&#x2F;文件夹的所属权以及其所属的用户组。</p>
-<h4 id="修改文件-文件夹所属用户"><a href="#修改文件-文件夹所属用户" class="headerlink" title="修改文件&#x2F;文件夹所属用户"></a>修改文件&#x2F;文件夹所属用户</h4><pre><code class="shell">chown [username] [directory/file]
-# 递归授权
-chown -R [username] [directory]
-</code></pre>
-<h4 id="修改文件-文件夹所属用户组"><a href="#修改文件-文件夹所属用户组" class="headerlink" title="修改文件&#x2F;文件夹所属用户组"></a>修改文件&#x2F;文件夹所属用户组</h4><pre><code class="shell">chown :[usergroup] [directory/file]
-# 递归授权
-chown -R :[usergroup] [directory]
-</code></pre>
-<h4 id="修改文件-文件夹所属用户和用户组"><a href="#修改文件-文件夹所属用户和用户组" class="headerlink" title="修改文件&#x2F;文件夹所属用户和用户组"></a>修改文件&#x2F;文件夹所属用户和用户组</h4><pre><code class="shell">chown [username]:[usergroup] [directory/file]
-# 递归授权
-chown -R [username]:[usergroup] [directory]
-</code></pre>
-<h3 id="1-3-2-chmod"><a href="#1-3-2-chmod" class="headerlink" title="1.3.2 chmod"></a>1.3.2 chmod</h3><p>chmod用于细化对所有者，用户组，以及其它用户的相关权限。</p>
-<p>一共用三种类型的用户，它们的名字以及符号为：</p>
-<ul>
-<li>所有者：u </li>
-<li>用户组：g </li>
-<li>其它：o</li>
-</ul>
-<p>例如使用<code>ll</code>输出的信息：</p>
-<pre><code class="shell">drwx--x--x 2 username groupname83 11月 13 15:28 folder
-</code></pre>
-<p>第一部分开头的字符表示的是文件的类型：</p>
-<ul>
-<li>文件夹：d</li>
-<li>文件： - (一个横杠，不管是可执行文件还是普通文件)</li>
-</ul>
-<p>后面连续9个字符，每3个为一组，分别表示用户所有者、用户组、其它用户的权限。<br>例如上面的例子：</p>
-<ul>
-<li>所有者：可读(r)、可写(w)、可执行(x)</li>
-<li>用户组：可执行(x)</li>
-<li>其它：可执行(x)</li>
-</ul>
-<h4 id="修改用户权限"><a href="#修改用户权限" class="headerlink" title="修改用户权限"></a>修改用户权限</h4><p>例如要给用户组(u)添加读和写的权限：</p>
-<pre><code class="shell">chmod g+rw [directory/file]
-chmod -R g+rw [directory]
-</code></pre>
-<p>移除权限：</p>
-<pre><code class="shell">chmod g-rw [directory/file]
-</code></pre>
-<p>很简单，也就是中间有个加减符号，其实还有个等号，这个就类似于替换了，会覆盖掉之前的权限。</p>
-<p>另外，给所有用户授权用a就行了：</p>
-<pre><code class="shell">chmod a+rw [directory/file]
-</code></pre>
-<p>其实也可以用数字替代rwx，但是这样有点不便于记忆。。</p>
-<h1 id="2-应用"><a href="#2-应用" class="headerlink" title="2. 应用"></a>2. 应用</h1><h2 id="2-1-文件夹授权了却打不开"><a href="#2-1-文件夹授权了却打不开" class="headerlink" title="2.1 文件夹授权了却打不开?"></a>2.1 文件夹授权了却打不开?</h2><p>提问：是不是只要某个用户有一个文件夹的读权限，就能打开文件夹了？</p>
-<p>大部分可能都会是这样认为的，这也确实比较符合我们的认知，都能读了，还不能打开文件夹？</p>
-<p>那么实际呢？我们来试一下。</p>
-<p>我们用测试用户(testuser)来进行测试：</p>
-<pre><code class="shell">[testuser@localhost opt]# ll
-drwx---r--  2 root   root         36 11月 13 16:44 backup
-</code></pre>
-<p>这里我们可以看到，testuser拥有backup文件夹的读权限，尝试进入一下：</p>
-<pre><code class="shell">[testuser@localhost opt]$ cd backup
-bash: cd: backup: 权限不够
-</code></pre>
-<p>发现权限是不够的…</p>
-<p>这里也不卖关子了，这里其实是需要<strong>执行权限</strong>才能进入文件夹，这里也是比较容易忽略的一点。</p>
-<h2 id="2-2-可执行文件授权了却打不开"><a href="#2-2-可执行文件授权了却打不开" class="headerlink" title="2.2 可执行文件授权了却打不开?"></a>2.2 可执行文件授权了却打不开?</h2><p>提问：是不是某个用户只要有一个文件的可执行权限，就可以直接执行文件了？</p>
-<p>这里就不卖关子了，答案是不一定。</p>
-<p>同样这也是一个非常容易被忽略的问题，以为只要给了可执行权限就能执行了。</p>
-<p>来演示一下反例：</p>
-<pre><code class="shell">drwx------  2 bim   root         36 11月 13 16:44 backup
-</code></pre>
-<p>这里我们的backup文件夹里面放有可执行文件，但是这个文件夹没有对外授权。</p>
-<pre><code class="shell">[root@localhost backup]# ll
-总用量 23796
--rwx-----x 1 bim root 12691576 11月 13 16:44 mysql
-[root@localhost backup]# pwd
-/opt/backup
-</code></pre>
-<p>在里面的可执行文件mysql，对其它人拥有可执行权限，我们来切换用户试一下：</p>
-<pre><code class="shell">[root@localhost backup]# su testuser
-[testuser@localhost backup]$ /opt/backup/mysql
-bash: /opt/backup/mysql: 权限不够
-</code></pre>
-<p>可以发现权限不够，即使你拥有可执行权限。</p>
-<p>解决方法在前面也说了，只需要给可执行文件的父目录，也就是这里的backup目录授权可执行就行了，这里就不多演示了。</p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/2023/11/13/user-permissions/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post post-partial-show">
     <a href="/2023/11/10/process-bug/">
         <h2 class="post-title">记一次Runtime.exec遇到的坑</h2>
     </a>
@@ -845,6 +727,144 @@ Caused by: java.io.IOException: ObjectIdentifier() -- data isn&#39;t an object I
         
     </div>
     <a href="/2023/08/30/tomcat-custom-https/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post post-partial-show">
+    <a href="/2023/05/04/svn/">
+        <h2 class="post-title">svn</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/5/4
+        </span>
+        
+        
+    </div>
+    <div class="description">
+        <div class="content" v-pre>
+            
+            <h1 id="1-下载安装"><a href="#1-下载安装" class="headerlink" title="1. 下载安装"></a>1. 下载安装</h1><p><a target="_blank" rel="noopener" href="https://www.tortoisesvn.net/downloads.zh.html">下载 · TortoiseSVN</a></p>
+<p>直接下载安装包即可，下载完成后不需要配置环境变量之类的，SVN也不需要你去命令行里去敲哪些什么指令，它自己有很丰富的图形客户端，这点是比GIT好一点点的。</p>
+<p>直接对着任意地方右键，如果出现<code>TortoiseSVN</code>的选项，就说明安装成功了（对着桌面按是没有的，需要进随便一个文件夹）。</p>
+<h1 id="2-创建仓库"><a href="#2-创建仓库" class="headerlink" title="2. 创建仓库"></a>2. 创建仓库</h1><p>SVN不支持离线操作，也就是说你想要创建一个仓库，你必须先去服务器支棱一个起来，这里我们直接用码云（<a target="_blank" rel="noopener" href="https://gitee.com/">工作台 - Gitee.com</a>）就好了。</p>
+<p>随便创建一个项目，点击管理 -&gt; 功能设置 -&gt; 启用SVN访问。</p>
+<p>之后克隆项目，记得要选SVN的协议：</p>
+<p><img lazy="https://selfb.asia/public/svn/2023-4-4-f7e03d78-69bd-4d0e-99dd-7f795e9bb813.webp" alt="克隆地址"></p>
+<p>之后进入任意文件夹，鼠标右键，点击<code>Checkout</code>，之后会弹出来这个：</p>
+<p><img lazy="https://selfb.asia/public/svn/2023-4-4-4c484952-5b77-4b8f-a1e0-d608c149731d.webp" alt="Checkout"></p>
+<p>第一个表单就是我们的仓库地址，第二个就是我们要将项目拉到的地方，第三<code>Checkout Depth</code>就是你克隆的深度，你可以选择全部复制（Fully recursive），也可以选择部分，一般配合下面的<code>Choose items</code>按钮使用。</p>
+<p>Omit externals表示忽略外部设备，目前不是很清楚有什么用。</p>
+<p>最后一个框（Revision）就是版本信息选择了，你可以直接选择最新分支（HEAD revision），也可以通过<code>Show log</code>选择历史分支来进行克隆。</p>
+<p>选好后点击OK进行克隆。</p>
+<h1 id="3-提交修改"><a href="#3-提交修改" class="headerlink" title="3. 提交修改"></a>3. 提交修改</h1><p>我们在本地进行任意修改，修改完后在任意子目录或者根目录鼠标右键，在<code>TortoiseSVN</code>选项下找到<code>Commit</code>选项，点开会出现这个：</p>
+<p><img lazy="https://selfb.asia/public/svn/2023-4-4-f6b3b8a9-a01e-4918-8f6d-5febeaba9268.webp" alt="Commit"></p>
+<p>最上面的<code>Message</code>就是提交信息，没有什么好说的。</p>
+<p>下面那个框就是选择你需要提交的文件。</p>
+<p><font color=red><strong>注意：SVN的Commit会直接提交到服务器，它不是跟Git一样本地提交！！！千万不要乱提交。</strong></font></p>
+<p>下面有个按钮，分别的作用是：</p>
+<ul>
+<li>Show unversioned files：显示被排除的文件（不受版本控制的文件）</li>
+</ul>
+<p>其它的暂时用不上，我们选好后，直接提交，然后再去码云上看，就可以看到提交结果了。</p>
+<h1 id="4-解决冲突"><a href="#4-解决冲突" class="headerlink" title="4. 解决冲突"></a>4. 解决冲突</h1><p>这里我们先在码云上修改一下，然后也在本地修改同样的文件，然后在本地提交：</p>
+<p><img lazy="https://selfb.asia/public/svn/2023-4-4-be381ad9-6523-406d-9d22-494a2fc9dc81.webp" alt="Commit failed"></p>
+<p>提交失败了，可以发现它让我们去更新：</p>
+<pre><code class="text">You have to update your working copy first
+</code></pre>
+<p>那我们就更新，直接项目目录下右键，点击<code>Update</code>，结果又报错了：</p>
+<p><img lazy="https://selfb.asia/public/svn/2023-4-4-f69a5b86-d6c6-42d8-a8e4-ba19423d7380.webp" alt="Update failed"></p>
+<p>可以发现是因为出现了文件冲突，和Git一样，我们需要先解决冲突后再提交。</p>
+<p>这里是我本地的文件内容：</p>
+<pre><code class="text">hello world
+hello world
+hello world
+hello world
+
+12312
+312
+3
+12
+3
+12
+3
+12
+3
+hello world
+</code></pre>
+<p>这是服务器的：</p>
+<pre><code class="text">hello world
+
+12312
+312
+3
+12
+3
+12
+3
+12
+3
+12312
+312
+3
+12
+3
+12
+3
+12
+3
+123312312
+</code></pre>
+<p>这是发生冲突后的文件：</p>
+<pre><code class="text">hello world
+hello world
+hello world
+hello world
+
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; .mine
+hello world
+
+
+
+
+
+||||||| .r3
+12312
+312
+3
+12
+3
+12
+3
+12
+3=======
+12312
+312
+3
+12
+3
+12
+3
+12
+3
+123312312&gt;&gt;&gt;&gt;&gt;&gt;&gt; .r4
+</code></pre>
+<p>这特么谁看得懂，别急，还记得之前我说过SVN有丰富的图形客户端吗？这里就还真有解决冲突用的玩意：</p>
+<p><img lazy="https://selfb.asia/public/svn/2023-4-4-bd001ea3-fca1-4b2d-9950-64f0e52cc430.webp" alt="Edit conflicts"></p>
+<p>打开后就非常直观了，这里就不放图了，修改完后点击左上角的<code>Save</code>保存，这时它会问你冲突是否已经解决完毕了，如果选择解决完了（Mark as resolved），就可以直接提交了。当然如果又冲突了，就又需要重复上述过程。</p>
+<h1 id="5-代码暂存"><a href="#5-代码暂存" class="headerlink" title="5. 代码暂存"></a>5. 代码暂存</h1><p>待补坑。</p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        
+    </div>
+    <a href="/2023/05/04/svn/" class="go-post">阅读全文</a>
 </div>
 
 
