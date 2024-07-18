@@ -345,3 +345,480 @@ Rust 的 `Future` 是惰性的，其中一个推动它的方式就是在 `async`
 执行器会管理一批 `Future` (最外层的 `async` 函数)，然后通过不停地 `poll` 推动它们直到完成。 最开始，执行器会先 `poll` 一次 `Future` ，后面就不会主动去 `poll` 了，而是等待 `Future` 通过调用 `wake` 函数来通知它可以继续，它才会继续去 `poll` 。这种 `wake` 通知然后 `poll` 的方式会不断重复，直到 `Future` 完成。
 
 ### 构建执行器
+
+编辑`Cargo.toml`，导入依赖：
+
+```toml
+[dependencies]
+futures = "0.3"
+```
+
+现在在 `src/main.rs` 中来创建程序的主体内容，开始之前，先引入所需的包：
+
+```rust
+use {
+    futures::{
+        future::{BoxFuture, FutureExt},
+        task::{waker_ref, ArcWake},
+    },
+    std::{
+        future::Future,
+        sync::mpsc::{sync_channel, Receiver, SyncSender},
+        sync::{Arc, Mutex},
+        task::{Context, Poll},
+        time::Duration,
+    },
+    // 引入之前实现的定时器模块
+    timer_future::TimerFuture,
+};
+```
+
+执行器需要从一个消息通道(`channel`)中拉取事件，然后运行它们。当一个任务准备好后（可以继续执行），它会将自己放入消息通道中，然后等待执行器 `poll`：
+
+```rust
+/// 任务执行器，负责从通道中接收任务然后执行
+struct Executor {
+    ready_queue: Receiver<Arc<Task>>,
+}
+
+/// `Spawner`负责创建新的`Future`然后将它发送到任务通道中
+#[derive(Clone)]
+struct Spawner {
+    task_sender: SyncSender<Arc<Task>>,
+}
+
+/// 一个Future，它可以调度自己(将自己放入任务通道中)，然后等待执行器去`poll`
+struct Task {
+    /// 进行中的Future，在未来的某个时间点会被完成
+    ///
+    /// 按理来说`Mutex`在这里是多余的，因为我们只有一个线程来执行任务。但是由于
+    /// Rust并不聪明，它无法知道`Future`只会在一个线程内被修改，并不会被跨线程修改。因此
+    /// 我们需要使用`Mutex`来满足这个笨笨的编译器对线程安全的执着。
+    ///
+    /// 如果是生产级的执行器实现，不会使用`Mutex`，因为会带来性能上的开销，取而代之的是使用`UnsafeCell`
+    future: Mutex<Option<BoxFuture<'static, ()>>>,
+
+    /// 可以将该任务自身放回到任务通道中，等待执行器的poll
+    task_sender: SyncSender<Arc<Task>>,
+}
+
+fn new_executor_and_spawner() -> (Executor, Spawner) {
+    // 任务通道允许的最大缓冲数(任务队列的最大长度)
+    // 当前的实现仅仅是为了简单，在实际的执行中，并不会这么使用
+    const MAX_QUEUED_TASKS: usize = 10_000;
+    let (task_sender, ready_queue) = sync_channel(MAX_QUEUED_TASKS);
+    (Executor { ready_queue }, Spawner { task_sender })
+}
+```
+
+下面再来添加一个方法用于生成 `Future` , 然后将它放入任务通道中:
+
+```rust
+impl Spawner {
+    fn spawn(&self, future: impl Future<Output = ()> + 'static + Send) {
+        let future = future.boxed();
+        let task = Arc::new(Task {
+            future: Mutex::new(Some(future)),
+            task_sender: self.task_sender.clone(),
+        });
+        self.task_sender.send(task).expect("任务队列已满");
+    }
+}
+```
+
+在执行器 `poll` 一个 Future 之前，首先需要调用 wake 方法进行唤醒，然后再由 Waker 负责调度该任务并将其放入任务通道中。创建 Waker 的最简单的方式就是实现 ArcWake 特征，先来为我们的任务实现 ArcWake 特征，这样它们就能被转变成 Waker 然后被唤醒:
+
+```rust
+impl ArcWake for Task {
+    fn wake_by_ref(arc_self: &Arc<Self>) {
+        // 通过发送任务到任务管道的方式来实现`wake`，这样`wake`后，任务就能被执行器`poll`
+        let cloned = arc_self.clone();
+        arc_self
+            .task_sender
+            .send(cloned)
+            .expect("任务队列已满");
+    }
+}
+```
+
+当任务实现了 `ArcWake` 特征后，它就变成了 `Waker` ，在调用 `wake()` 对其唤醒后会将任务复制一份所有权(`Arc`)，然后将其发送到任务通道中。最后我们的执行器将从通道中获取任务，然后进行 `poll` 执行：
+
+```rust
+impl Executor {
+    fn run(&self) {
+        while let Ok(task) = self.ready_queue.recv() {
+            // 获取一个future，若它还没有完成(仍然是Some，不是None)，则对它进行一次poll并尝试完成它
+            let mut future_slot = task.future.lock().unwrap();
+            if let Some(mut future) = future_slot.take() {
+                // 基于任务自身创建一个 `LocalWaker`
+                let waker = waker_ref(&task);
+                let context = &mut Context::from_waker(&*waker);
+                // `BoxFuture<T>`是`Pin<Box<dyn Future<Output = T> + Send + 'static>>`的类型别名
+                // 通过调用`as_mut`方法，可以将上面的类型转换成`Pin<&mut dyn Future + Send + 'static>`
+                if future.as_mut().poll(context).is_pending() {
+                    // Future还没执行完，因此将它放回任务中，等待下次被poll
+                    *future_slot = Some(future);
+                }
+            }
+        }
+    }
+}
+```
+
+恭喜！我们终于拥有了自己的执行器，下面再来写一段代码使用该执行器去运行之前的定时器 `Future`：
+
+```rust
+fn main() {
+    let (executor, spawner) = new_executor_and_spawner();
+
+    // 生成一个任务
+    spawner.spawn(async {
+        println!("howdy!");
+        // 创建定时器Future，并等待它完成
+        TimerFuture::new(Duration::new(2, 0)).await;
+        println!("done!");
+    });
+
+    // drop掉任务，这样执行器就知道任务已经完成，不会再有新的任务进来
+    drop(spawner);
+
+    // 运行执行器直到任务队列为空
+    // 任务运行后，会先打印`howdy!`, 暂停2秒，接着打印 `done!`
+    executor.run();
+}
+```
+
+# Pin 和 Unpin
+
+在 Rust 中，所有的类型可以分为两类:
+
+- **类型的值可以在内存中安全地被移动**，例如数值、字符串、布尔值、结构体、枚举，总之你能想到的几乎所有类型都可以落入到此范畴内
+- **自引用类型**，大魔王来了，大家快跑，在之前章节我们已经见识过它的厉害
+
+下面就是一个自引用类型：
+
+```rust
+struct SelfRef {
+    value: String,
+    pointer_to_value: *mut String,
+}
+```
+
+在上面的结构体中，`pointer_to_value` 是一个裸指针，指向第一个字段 `value` 持有的字符串 `String`。现在考虑一个情况， 若 `String` 被移动了怎么办？
+
+此时一个致命的问题就出现了：新的字符串的内存地址变了，而 `pointer_to_value` 依然指向之前的地址，一个重大 bug 就出现了！
+
+在这里，`Pin` 闪亮登场，它可以防止一个类型在内存中被移动。
+
+## 为何需要 Pin
+
+其实 `Pin` 还有一个小伙伴 `UnPin` ，与前者相反，后者表示类型可以在内存中安全地移动。在深入之前，我们先来回忆下 `async` / `.await` 是如何工作的：
+
+```rust
+let fut_one = /* ... */; // Future 1
+let fut_two = /* ... */; // Future 2
+async move {
+    fut_one.await;
+    fut_two.await;
+}
+```
+
+在底层，`async` 会创建一个实现了 `Future` 的匿名类型，并提供了一个 `poll` 方法：
+
+```rust
+// `async { ... }`语句块创建的 `Future` 类型
+struct AsyncFuture {
+    fut_one: FutOne,
+    fut_two: FutTwo,
+    state: State,
+}
+
+// `async` 语句块可能处于的状态
+enum State {
+    AwaitingFutOne,
+    AwaitingFutTwo,
+    Done,
+}
+
+impl Future for AsyncFuture {
+    type Output = ();
+
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
+        loop {
+            match self.state {
+                State::AwaitingFutOne => match self.fut_one.poll(..) {
+                    Poll::Ready(()) => self.state = State::AwaitingFutTwo,
+                    Poll::Pending => return Poll::Pending,
+                }
+                State::AwaitingFutTwo => match self.fut_two.poll(..) {
+                    Poll::Ready(()) => self.state = State::Done,
+                    Poll::Pending => return Poll::Pending,
+                }
+                State::Done => return Poll::Ready(()),
+            }
+        }
+    }
+}
+```
+
+当 `poll` 第一次被调用时，它会去查询 `fut_one` 的状态，若 `fut_one` 无法完成，则 poll 方法会返回。未来对 `poll` 的调用将从上一次调用结束的地方开始。该过程会一直持续，直到 `Future` 完成为止。
+
+然而，如果我们的 `async` 语句块中使用了引用类型，会发生什么？例如下面例子：
+
+```rust
+async {
+    let mut x = [0; 128];
+    let read_into_buf_fut = read_into_buf(&mut x);
+    read_into_buf_fut.await;
+    println!("{:?}", x);
+}
+```
+
+这段代码会编译成下面的形式：
+
+```rust
+struct ReadIntoBuf<'a> {
+    buf: &'a mut [u8], // 指向下面的`x`字段
+}
+
+struct AsyncFuture {
+    x: [u8; 128],
+    read_into_buf_fut: ReadIntoBuf<'what_lifetime?>,
+}
+```
+
+这里，`ReadIntoBuf` 拥有一个引用字段，指向了结构体的另一个字段 `x` ，一旦 `AsyncFuture` 被移动，那 `x` 的地址也将随之变化，此时对 `x` 的引用就变成了不合法的，也就是 `read_into_buf_fut.buf` 会变为不合法的。
+
+若能将 `Future` 在内存中固定到一个位置，就可以避免这种问题的发生，也就可以安全的创建上面这种引用类型。
+
+## Unpin
+
+事实上，绝大多数类型都不在意是否被移动(开篇提到的第一种类型)，因此它们都自动实现了 `Unpin` 特征。
+
+`Pin` 不按套路出牌，它是一个结构体：
+
+```rust
+pub struct Pin<P> {
+    pointer: P,
+}
+```
+
+它包裹一个指针，并且能确保该指针指向的数据不会被移动，例如 `Pin<&mut T>` , `Pin<&T>` , `Pin<Box<T>>` ，都能确保 `T` 不会被移动。
+
+而 `Unpin` 才是一个特征，它表明一个类型可以随意被移动，但是可以被 `Pin` 住的值实现的特征是 `!Unpin`，`!Unpin` 说明类型没有实现 `Unpin` 特征，那自然就可以被 `Pin` 了。
+
+对实现了 `Unpin` 特征的类型使用 `Pin`，不会产生任何效果，该值一样可以被移动。
+
+## 深入理解 Pin
+
+对于上面的问题，我们可以简单的归结为如何在 `Rust` 中处理自引用类型(果然，只要是难点，都和自引用脱离不了关系)，下面用一个稍微简单点的例子来理解下 `Pin` :
+
+```rust
+#[derive(Debug)]
+struct Test {
+    a: String,
+    b: *const String,
+}
+
+impl Test {
+    fn new(txt: &str) -> Self {
+        Test {
+            a: String::from(txt),
+            b: std::ptr::null(),
+        }
+    }
+
+    fn init(&mut self) {
+        let self_ref: *const String = &self.a;
+        self.b = self_ref;
+    }
+
+    fn a(&self) -> &str {
+        &self.a
+    }
+
+    fn b(&self) -> &String {
+        assert!(!self.b.is_null(), "Test::b called without Test::init being called first");
+        unsafe { &*(self.b) }
+    }
+}
+```
+
+Test 提供了方法用于获取字段 `a` 和 `b` 的值的引用。这里 `b` 是 `a` 的一个引用，但是我们并没有使用引用类型而是用了裸指针，原因是：`Rust` 的借用规则不允许我们这样用，因为不符合生命周期的要求。 此时的 `Test` 就是一个自引用结构体。
+
+如果不移动任何值，那么上面的例子将没有任何问题，例如:
+
+```rust
+fn main() {
+    let mut test1 = Test::new("test1");
+    test1.init();
+    let mut test2 = Test::new("test2");
+    test2.init();
+
+    println!("a: {}, b: {}", test1.a(), test1.b());
+    println!("a: {}, b: {}", test2.a(), test2.b());
+
+}
+```
+
+输出非常正常：
+
+```log
+a: test1, b: test1
+a: test2, b: test2
+```
+
+既然移动数据会导致指针不合法，那我们就移动下数据试试，将 test1 和 test2 进行下交换：
+
+```rust
+fn main() {
+    let mut test1 = Test::new("test1");
+    test1.init();
+    let mut test2 = Test::new("test2");
+    test2.init();
+
+    println!("a: {}, b: {}", test1.a(), test1.b());
+    std::mem::swap(&mut test1, &mut test2);
+    println!("a: {}, b: {}", test2.a(), test2.b());
+
+}
+```
+
+实际运行后，却产生了下面的输出:
+
+```log
+a: test1, b: test1
+a: test1, b: test2
+```
+
+原因是 test2.b 指针依然指向了旧的地址，而该地址对应的值现在在 test1 里，最终会打印出意料之外的值。
+
+可以借助下图理解：
+
+![swap](https://selfb.asia/images/2024/07/v2-eaeb33da283dc1063b862d2307821976_1440w.webp)
+
+## Pin 在实践中的运用
+
+[std::pin](https://doc.rust-lang.org/std/pin/index.html)
+
+当一个值被移动的时候，通常是将一个值的所有字节复制到另外一个内存地址去，但在 rust 中，唯一的区别就是移动时会带走所有权。所以使用地址来引用一个值是非常不稳定的，编译器被允许在不运行一段代码来提醒某个值被移动的情况下，将一个值移动到一个新的内存地址去，尽管编译器不会在没有显示声明移动的情况下来移动某一个值，但是一个值可能存在多种情况来导致它被移动：
+
+```rust
+#![allow(unused)]
+fn main() {
+    #[derive(Default)]
+    struct AddrTracker(Option<usize>);
+    
+    impl AddrTracker {
+        // If we haven't checked the addr of self yet, store the current
+        // address. If we have, confirm that the current address is the same
+        // as it was last time, or else panic.
+        fn check_for_move(&mut self) {
+            let current_addr = self as *mut Self as usize;
+            match self.0 {
+                None => self.0 = Some(current_addr),
+                Some(prev_addr) => assert_eq!(prev_addr, current_addr),
+            }
+        }
+    }
+    
+    // Create a tracker and store the initial address
+    let mut tracker = AddrTracker::default();
+    tracker.check_for_move();
+    
+    // Here we shadow the variable. This carries a semantic move, and may therefore also
+    // come with a mechanical memory *move*
+    let mut tracker = tracker;
+    
+    // May panic!
+    tracker.check_for_move();
+}
+```
+
+即使是一次简单的所有权转移，也会导致内存地址被移动。即使是使用了 `Box<T>` 和 `&mut T`，它里面的值也同样可以被编译器随时移动。
+
+---
+
+`Pin` 做了什么？`Pin` 实际上并没有真正从底层实现内存地址的固定，它只是才编译器层面对开发者进行限制，如果你使用 `unsafe`，你仍然可以将值的内存地址进行修改：
+
+
+
+
+### 将值固定到栈上
+
+
+
+回到之前的例子，我们可以用 `Pin` 来解决指针指向的数据被移动的问题:
+
+```rust
+use std::pin::Pin;
+use std::marker::PhantomPinned;
+
+#[derive(Debug)]
+struct Test {
+    a: String,
+    b: *const String,
+    _marker: PhantomPinned,
+}
+
+
+impl Test {
+    fn new(txt: &str) -> Self {
+        Test {
+            a: String::from(txt),
+            b: std::ptr::null(),
+            _marker: PhantomPinned, // 这个标记可以让我们的类型自动实现特征`!Unpin`
+        }
+    }
+
+    fn init(self: Pin<&mut Self>) {
+        let self_ptr: *const String = &self.a;
+        let this = unsafe { self.get_unchecked_mut() };
+        this.b = self_ptr;
+    }
+
+    fn a(self: Pin<&Self>) -> &str {
+        &self.get_ref().a
+    }
+
+    fn b(self: Pin<&Self>) -> &String {
+        assert!(!self.b.is_null(), "Test::b called without Test::init being called first");
+        unsafe { &*(self.b) }
+    }
+}
+```
+
+上面代码中，我们使用了一个标记类型 `PhantomPinned` 将自定义结构体 `Test` 变成了 `!Unpin` (编译器会自动帮我们实现)，因此该结构体无法再被移动。
+
+一旦类型实现了 `!Unpin` ，那将它的值固定到栈(`stack`)上就是不安全的行为，因此在代码中我们使用了 `unsafe` 语句块来进行处理，你也可以使用 `pin_utils` 来避免 `unsafe` 的使用。
+
+此时，再去尝试移动被固定的值，就会导致编译错误：
+
+```rust
+pub fn main() {
+    // 此时的`test1`可以被安全的移动
+    let mut test1 = Test::new("test1");
+    // 新的`test1`由于使用了`Pin`，因此无法再被移动，这里的声明会将之前的`test1`遮蔽掉(shadow)
+    let mut test1 = unsafe { Pin::new_unchecked(&mut test1) };
+    Test::init(test1.as_mut());
+
+    let mut test2 = Test::new("test2");
+    let mut test2 = unsafe { Pin::new_unchecked(&mut test2) };
+    Test::init(test2.as_mut());
+
+    println!("a: {}, b: {}", Test::a(test1.as_ref()), Test::b(test1.as_ref()));
+    std::mem::swap(test1.get_mut(), test2.get_mut());
+    println!("a: {}, b: {}", Test::a(test2.as_ref()), Test::b(test2.as_ref()));
+}
+```
+
+在编译期就完成了，因此没有额外的性能开销：
+
+```log
+error[E0277]: `PhantomPinned` cannot be unpinned
+   --> src/main.rs:47:43
+    |
+47  |     std::mem::swap(test1.get_mut(), test2.get_mut());
+    |                                           ^^^^^^^ within `Test`, the trait `Unpin` is not implemented for `PhantomPinned`
+```
+

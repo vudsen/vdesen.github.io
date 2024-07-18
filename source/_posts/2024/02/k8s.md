@@ -18,7 +18,8 @@ categories: "k8s"
 - [网络](/kubernetes/network)
 - [存储](/kubernetes/storage)
 - ~~[Kubesphere基础](/kubernetes/kubesphere)~~
-
+- [高可用集群](/kubernetes/high-available)
+- [高可用集群 p2](/kubernetes/high-available-p2)
 
 # 其它
 
