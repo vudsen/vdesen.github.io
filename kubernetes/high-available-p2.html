@@ -196,7 +196,7 @@
 <blockquote>
 <p>官网讲的比我更详细，建议跟着官网走，这里仅供参考。</p>
 </blockquote>
-<h3 id="配置-kube-apiserver"><a href="#配置-kube-apiserver" class="headerlink" title="配置 kube-apiserver"></a>配置 kube-apiserver</h3><h3 id="配置令牌认证文件"><a href="#配置令牌认证文件" class="headerlink" title="配置令牌认证文件"></a>配置令牌认证文件</h3><p>需要生成一个令牌，令牌可以为任意数据，但推荐使用下面的命令生成：</p>
+<h2 id="配置-kube-apiserver"><a href="#配置-kube-apiserver" class="headerlink" title="配置 kube-apiserver"></a>配置 kube-apiserver</h2><h3 id="配置令牌认证文件"><a href="#配置令牌认证文件" class="headerlink" title="配置令牌认证文件"></a>配置令牌认证文件</h3><p>需要生成一个令牌，令牌可以为任意数据，但推荐使用下面的命令生成：</p>
 <pre><code class="sh">head -c 16 /dev/urandom | od -An -t x | tr -d &#39; &#39;
 </code></pre>
 <p>上面的命令会生成类似于 <code>cdbe50bd844b6952cd197899bac486d9</code> 的令牌，之后组装成令牌文件：</p>
@@ -254,8 +254,9 @@ roleRef:
   name: system:certificates.k8s.io:certificatesigningrequests:selfnodeclient
   apiGroup: rbac.authorization.k8s.io
 </code></pre>
-<h2 id="kubelet-配置"><a href="#kubelet-配置" class="headerlink" title="kubelet 配置"></a>kubelet 配置</h2><p>在执行前需要节点中准备签发 apiserver 证书的 CA 证书：</p>
-<pre><code class="sh">ssh k8s-node-1 &quot;mkdir -p /etc/kubernetes/pki&quot;
+<h2 id="kubelet-配置"><a href="#kubelet-配置" class="headerlink" title="kubelet 配置"></a>kubelet 配置</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/reference/command-line-tools-reference/kubelet/">kubelet</a></p>
+<p>在执行前需要节点中准备签发 apiserver 证书的 CA 证书：</p>
+<pre><code class="sh">ssh k8s-node-1 &quot;mkdir -p /etc/kubernetes/pki; mkdir -p /etc/kubernetes/manifests&quot;
 scp /etc/kubernetes/pki/ca.crt root@k8s-node-1:/etc/kubernetes/pki/ca.crt
 </code></pre>
 <p>创建一个 <code>kubelet context</code>：</p>
@@ -270,10 +271,180 @@ KUBECONFIG=$kube kubectl config set-cluster kubernetes \
 
 KUBECONFIG=$kube kubectl config set-credentials default-auth \
     --cluster=kubernetes \
-    --token=cdbe50bd844b6952cd197899bac486d9,kubelet-bootstrap,10001,&quot;system:bootstrappers&quot; 
+    --token=cdbe50bd844b6952cd197899bac486d9
 
 KUBECONFIG=$kube kubectl config use-context default-auth@kubernetes
 </code></pre>
+<p>在启动 kubelet 前，要准备好 containerd 的配置，因为默认这个东西是禁用 cri 的：</p>
+<pre><code class="sh">containerd config default &gt; /etc/containerd/config.toml
+</code></pre>
+<p>然后修改 <code>sandbox_image</code> 为 <code>registry.cn-hangzhou.aliyuncs.com/google_containers/pause:&lt;your_version&gt;</code>。</p>
+<p>创建 kubelet 配置文件(<code>/etc/kubernetes/kubelet-conf.yaml</code>)：</p>
+<pre><code class="yaml"># clusterDNS 为 service 网络的第 10 个 ip 值，如 10.96.0.10
+cat &lt;&lt; EOF &gt; /etc/kubernetes/kubelet-conf.yaml
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+address: 0.0.0.0
+port: 10250
+readOnlyPort: 10255
+serializeImagePulls: false
+authentication:
+  anonymous:
+    enabled: false
+  webhook:
+    cacheTTL: 2m0s
+    enabled: true
+  x509:
+    clientCAFile: /etc/kubernetes/pki/ca.crt
+authorization:
+  mode: Webhook
+  webhook:
+    cacheAuthorizedTTL: 5m0s
+    cacheUnauthorizedTTL: 30s
+cgroupDriver: systemd
+clusterDNS:
+  - 10.96.0.0
+clusterDomain: cluster.local
+staticPodPath: /etc/kubernetes/manifests
+EOF
+</code></pre>
+<p>所有的配置文档可以在这里找到：<a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/reference/config-api/kubelet-config.v1beta1/#kubelet-config-k8s-io-v1beta1-KubeletConfiguration">KubeletConfiguration</a>。</p>
+<p>创建 kubelet 服务并启动：</p>
+<pre><code class="sh">cat &lt;&lt; EOF &gt; /usr/lib/systemd/system/kubelet.service
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=
+After=containerd.service
+Requires=containerd.server
+
+[Service]
+ExecStart=/usr/local/bin/kubelet  \\
+  --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubeconfig \\
+  --kubeconfig=/etc/kubernetes/kubeconfig \\
+  --config=/etc/kubernetes/kubelet-conf.yaml
+
+Restart=on-failure
+RestartSec=10s
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload &amp;&amp; systemctl enable --now kubelet
+
+systemctl status kubelet
+</code></pre>
+<p><code>--kubeconfig</code> 所指向的文件并不需要存在，只需要它是一个合法的路径即可，这个文件会被自动生成。</p>
+<p>所有节点执行完成后，就可以看到节点状态了：</p>
+<pre><code class="sh">[root@k8s-master-1 kubernetes]# kubectl get nodes
+NAME           STATUS     ROLES    AGE     VERSION
+k8s-master-1   NotReady   &lt;none&gt;   92s     v1.29.6
+k8s-master-2   NotReady   &lt;none&gt;   3m18s   v1.29.6
+k8s-master-3   NotReady   &lt;none&gt;   2m28s   v1.29.6
+k8s-node-1     NotReady   &lt;none&gt;   46m     v1.29.6
+k8s-node-2     NotReady   &lt;none&gt;   7m8s    v1.29.6
+k8s-node-3     NotReady   &lt;none&gt;   4m31s   v1.29.6
+</code></pre>
+<h1 id="kube-proxy-启动"><a href="#kube-proxy-启动" class="headerlink" title="kube-proxy 启动"></a>kube-proxy 启动</h1><h2 id="生成-kube-proxy-conf"><a href="#生成-kube-proxy-conf" class="headerlink" title="生成 kube-proxy.conf"></a>生成 kube-proxy.conf</h2><p>在主节点执行：</p>
+<pre><code class="bash"># 创建 kube-proxy 的服务账号
+kubectl -n kube-system create serviceaccount kube-proxy
+
+# 创建角色绑定
+kubectl create clusterrolebinding system:kube-proxy \
+  --clusterrole system:node-proxier \
+  --serviceaccount kube-system:kube-proxy
+
+# 创建长效 API 令牌
+kubectl apply -f - &lt;&lt;EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kube-proxy-secret
+  namespace: kube-system
+  annotations:
+    kubernetes.io/service-account.name: kube-proxy
+type: kubernetes.io/service-account-token
+EOF
+
+# 导出为变量，方便后续使用
+JWT_TOKEN=$(kubectl get -n kube-system secret/kube-proxy-secret --output=jsonpath=&#39;&#123;.data.token&#125;&#39; | base64 --decode)
+KUBECONFIG=/etc/kubernetes/kube-proxy.conf
+
+# 创建配置文件
+kubectl config set-context kube-proxy@kubernetes \
+  --cluster=kubernetes \
+  --user=kube-proxy \
+  --kubeconfig=$KUBECONFIG
+
+kubectl config set-cluster kubernetes \
+  --certificate-authority=/etc/kubernetes/pki/ca.crt \
+  --embed-certs=true \
+  --server=https://192.168.1.34:6443 \
+  --kubeconfig=$KUBECONFIG
+
+kubectl config set-credentials kube-proxy \
+  --token=$JWT_TOKEN \
+  --kubeconfig=$KUBECONFIG
+
+kubectl config use-context kube-proxy@kubernetes --kubeconfig=$KUBECONFIG
+</code></pre>
+<p>创建配置文件(<a target="_blank" rel="noopener" href="https://kubernetes.io/zh-cn/docs/reference/config-api/kube-proxy-config.v1alpha1/">kube-proxy 配置 (v1alpha1) 资源类型</a>)：</p>
+<pre><code class="yaml">cat &lt;&lt; EOF &gt; /etc/kubernetes/kube-proxy.yaml
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: ipvs
+bindAddress: 0.0.0.0
+oomScoreAdj: -999
+
+clientConnection:
+  contentType: application/vnd.kubernetes.protobuf
+  kubeconfig: /etc/kubernetes/kube-proxy.conf
+clusterCIDR: 196.16.0.0/16 # Pod cidr
+configSyncPeriod: 15m0s
+conntrack:
+  min: 131072
+  tcpEstablishedTimeout: 30m0s
+  tcpCloseWaitTimeout: 2m0s
+ipvs:
+  syncPeriod: 30s
+  scheduler: rr
+  minSyncPeriod: 5s
+EOF
+</code></pre>
+<p>创建完后，将 <code>/etc/kubernetes/kube-proxy.conf</code> 和 <code>/etc/kubernetes/kube-proxy.yaml</code> 发送给所有节点。</p>
+<h2 id="创建服务"><a href="#创建服务" class="headerlink" title="创建服务"></a>创建服务</h2><p>创建服务： </p>
+<pre><code class="bash">cat &lt;&lt; EOF &gt; /usr/lib/systemd/system/kube-proxy.service
+[Unit]
+Description=Kubernetes Kube Proxy
+Documentation=https://kubernetes.io/zh-cn/docs/reference/command-line-tools-reference/kube-proxy/
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/kube-proxy \
+  --config=/etc/kubernetes/kube-proxy.yaml \
+  --master=https://192.168.1.34:6443 \
+  --v=2
+
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload &amp;&amp; systemctl enable --now kube-proxy
+
+systemctl status kube-proxy
+</code></pre>
+<p>如果现在使用 <code>kubectl describe</code> 来查看节点，可以发现：</p>
+<pre><code class="log">Conditions:
+  Type             Status  LastHeartbeatTime                 LastTransitionTime                Reason                       Message
+  ----             ------  -----------------                 ------------------                ------                       -------
+  MemoryPressure   False   Tue, 23 Jul 2024 00:01:28 +0800   Fri, 19 Jul 2024 23:34:16 +0800   KubeletHasSufficientMemory   kubelet has sufficient memory available
+  DiskPressure     False   Tue, 23 Jul 2024 00:01:28 +0800   Fri, 19 Jul 2024 23:34:16 +0800   KubeletHasNoDiskPressure     kubelet has no disk pressure
+  PIDPressure      False   Tue, 23 Jul 2024 00:01:28 +0800   Fri, 19 Jul 2024 23:34:16 +0800   KubeletHasSufficientPID      kubelet has sufficient PID available
+  Ready            False   Tue, 23 Jul 2024 00:01:28 +0800   Fri, 19 Jul 2024 23:34:16 +0800   KubeletNotReady              container runtime network not ready: NetworkReady=false reason:NetworkPluginNo
+</code></pre>
+<p>至此集群已经搭建完毕，下一步则是安装网络插件。</p>
 
     </div>
     
