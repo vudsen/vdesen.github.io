@@ -683,6 +683,7 @@ rm -rf kubernetes
     "192.168.1.28",
     "192.168.1.29",
     "192.168.1.34",
+    "10.96.0.1",
     "kubernetes",
     "kubernetes.default",
     "kubernetes.default.svc",
@@ -705,7 +706,7 @@ rm -rf kubernetes
 }
 ```
 
-其中 `192.168.1.34` 为负载均衡的地址。
+其中 `192.168.1.34` 为负载均衡的地址，`10.96.0.1` 为 K8s 内部 apiserver 的负载均衡地址，**一定要加，不然后面网络组件安装不了**，如果换了服务的 cidr，则将后面两位换成 `0.1` 即可。
 
 生成证书：
 
@@ -727,7 +728,7 @@ mv apiserver.pem apiserver.crt
   },
    "names": [
     {
-      "O": "kubeadm:cluster-admins"
+      "O": "system:masters"
     }
   ]
 }
@@ -1075,6 +1076,7 @@ ExecStart=/usr/local/bin/kube-controller-manager \\
   --controllers=*,bootstrap-signer-controller,token-cleaner-controller \\
   --allocate-node-cidrs=true \\
   --cluster-cidr=196.16.0.0/16 \\
+  --master=https://192.168.1.34:6443 \\
   --requestheader-client-ca-file=/etc/kubernetes/pki/front-proxy-ca.crt \\
   
 
@@ -1104,6 +1106,7 @@ After=network.target
 [Service]
 ExecStart=/usr/local/bin/kube-scheduler \\
   --v=2 \\
+  --master=https://192.168.1.34:6443 \\
   --kubeconfig=/etc/kubernetes/scheduler.conf
 
 Restart=on-failure
