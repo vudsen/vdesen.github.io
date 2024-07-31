@@ -30,6 +30,49 @@ docker run -d -it --privileged=true -p 54321:54321 -v /opt/docker/kingbase-lates
 docker run --name mysql -p 3307:3306 -e MYSQL_ROOT_PASSWORD=123456 --privileged -v /home/vagrant/mysql5.7/data:/var/lib/mysql -d mysql:5.7.42
 ```
 
+进入容器修改配置文件：
+
+```sh
+cat <<EOF > /etc/mysql/my.cnf 
+[client]
+default-character-set=utf8mb4
+ 
+[mysql]
+default-character-set=utf8mb4
+ 
+[mysqld]
+init_connect='SET collation_connection = utf8mb4_unicode_ci'
+init_connect='SET NAMES utf8mb4'
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+skip-character-set-client-handshake
+
+lower_case_table_names = 1
+EOF
+```
+
+执行下面的sql：
+
+```sql
+set character_set_connection=utf8mb4;
+/*数据库的编码*/
+set character_set_database=utf8mb4;
+/*结果集的编码*/
+set character_set_results=utf8mb4;
+/*数据库服务器的编码*/
+set character_set_server=utf8mb4;
+
+set character_set_system=utf8mb4;
+
+set collation_connection=utf8mb4;
+
+set collation_database=utf8mb4;
+
+set collation_server=utf8mb4;
+
+show variables like '%character%';
+```
+
 # opengauss5.0.0
 ```shell
 docker run --hostname=fcdea04e2440 --env=GS_PASSWORD=P@ssw0rd --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --env=EXEC_GOSU=gosu-amd64 --env=GOSU_VERSION=1.12 --env=PGDATA=/var/lib/opengauss/data --volume=/var/lib/opengauss/data:/var/lib/opengauss/data --privileged --workdir=/ -p 5432:5432 --restart=no --label='CREATE_DATE=2022-10' --label='GAUSS_SERVER=openGauss-5.0.0' --label='MAIL=heguofeng@huawei.com' --runtime=runc -d opengauss/opengauss:5.0.0
@@ -51,4 +94,10 @@ docker run -d --name oracle-db -p 1521:1521 --privileged -e ORACLE_PWD=123456 -e
 
 ```shell
 docker run -d --name redis --net host --privileged=true -v /data/redis/share/redis-node-1:/data redis --requirepass 123456 --appendonly yes --port 6381
+```
+
+# nginx
+
+```sh
+docker run --name nginx -v /host/path/nginx.conf:/etc/nginx/nginx.conf:ro -d nginx:stable-perl
 ```
