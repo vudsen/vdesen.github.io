@@ -411,6 +411,43 @@ fi
 </ul>
 <h1 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h1><pre><code class="shell">docker run --name mysql -p 3307:3306 -e MYSQL_ROOT_PASSWORD=123456 --privileged -v /home/vagrant/mysql5.7/data:/var/lib/mysql -d mysql:5.7.42
 </code></pre>
+<p>进入容器修改配置文件：</p>
+<pre><code class="sh">cat &lt;&lt;EOF &gt; /etc/mysql/my.cnf 
+[client]
+default-character-set=utf8mb4
+ 
+[mysql]
+default-character-set=utf8mb4
+ 
+[mysqld]
+init_connect=&#39;SET collation_connection = utf8mb4_unicode_ci&#39;
+init_connect=&#39;SET NAMES utf8mb4&#39;
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+skip-character-set-client-handshake
+
+lower_case_table_names = 1
+EOF
+</code></pre>
+<p>执行下面的sql：</p>
+<pre><code class="sql">set character_set_connection=utf8mb4;
+/*数据库的编码*/
+set character_set_database=utf8mb4;
+/*结果集的编码*/
+set character_set_results=utf8mb4;
+/*数据库服务器的编码*/
+set character_set_server=utf8mb4;
+
+set character_set_system=utf8mb4;
+
+set collation_connection=utf8mb4;
+
+set collation_database=utf8mb4;
+
+set collation_server=utf8mb4;
+
+show variables like &#39;%character%&#39;;
+</code></pre>
 <h1 id="opengauss5-0-0"><a href="#opengauss5-0-0" class="headerlink" title="opengauss5.0.0"></a>opengauss5.0.0</h1><pre><code class="shell">docker run --hostname=fcdea04e2440 --env=GS_PASSWORD=P@ssw0rd --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --env=EXEC_GOSU=gosu-amd64 --env=GOSU_VERSION=1.12 --env=PGDATA=/var/lib/opengauss/data --volume=/var/lib/opengauss/data:/var/lib/opengauss/data --privileged --workdir=/ -p 5432:5432 --restart=no --label=&#39;CREATE_DATE=2022-10&#39; --label=&#39;GAUSS_SERVER=openGauss-5.0.0&#39; --label=&#39;MAIL=heguofeng@huawei.com&#39; --runtime=runc -d opengauss/opengauss:5.0.0
 </code></pre>
 <h1 id="opengauss2-1-0"><a href="#opengauss2-1-0" class="headerlink" title="opengauss2.1.0"></a>opengauss2.1.0</h1><pre><code class="shell">docker run --name opengauss2.1.0 --privileged=true -d -e GS_PASSWORD=P@ssw0rd -u root -p 5432:5432 enmotech/opengauss:2.1.0
@@ -419,6 +456,8 @@ fi
 </code></pre>
 <p><a target="_blank" rel="noopener" href="https://container-registry.oracle.com/ords/f?p=113:4:13054629146525:::4:P4_REPOSITORY,AI_REPOSITORY,AI_REPOSITORY_NAME,P4_REPOSITORY_NAME,P4_EULA_ID,P4_BUSINESS_AREA_ID:1863,1863,Oracle%20Database%20Free,Oracle%20Database%20Free,1,0&cs=3AJX-e6QGdNtweUNwoM_S6Bx1QBnHxTQChj06uKkm5-wObbTXatpBsvWpkNOZlJJdiGb7W-BEXdATDDaCQn1gOw">文档</a></p>
 <h1 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h1><pre><code class="shell">docker run -d --name redis --net host --privileged=true -v /data/redis/share/redis-node-1:/data redis --requirepass 123456 --appendonly yes --port 6381
+</code></pre>
+<h1 id="nginx"><a href="#nginx" class="headerlink" title="nginx"></a>nginx</h1><pre><code class="sh">docker run --name nginx -v /host/path/nginx.conf:/etc/nginx/nginx.conf:ro -d nginx:stable-perl
 </code></pre>
 
             
