@@ -119,7 +119,7 @@ I am dropped without value!
 | 不拥有所有权                            | 拥有值的所有权                 |
 | 不阻止值被释放(drop)                     | 所有权计数归零，才能 drop         |
 | 引用的值存在返回 Some，不存在返回 None          | 引用的值必定存在                |
-| 通过 upgrade 取到 Option<Rc<T>>，然后再取值 | 通过 Deref 自动解引用，取值无需任何操作 |
+| 通过 upgrade 取到 `Option<Rc<T>>`，然后再取值 | 通过 Deref 自动解引用，取值无需任何操作 |
 
 
 `Weak` 使用方式简单总结下：对于父子引用关系，可以让父节点通过 `Rc` 来引用子节点，然后让子节点通过 Weak 来引用父节点。
