@@ -2,8 +2,14 @@
 title: async/await 异步编程
 date: 2024-07-01 22:56:28
 categories:
-  data:
-    - { name: "Rust", path: "/2023/12/04/rust/" }
+  - Rust
+seo:
+  title: async/await 异步编程 | Rust
+  description: 使用 async/await 进行异步编程
+  keywords: 
+    - rust
+    - async
+    - await
 ---
 
 
@@ -822,3 +828,149 @@ error[E0277]: `PhantomPinned` cannot be unpinned
     |                                           ^^^^^^^ within `Test`, the trait `Unpin` is not implemented for `PhantomPinned`
 ```
 
+### 将值固定到堆上
+
+将一个 !Unpin 类型的值固定到堆上，会给予该值一个稳定的内存地址，它指向的堆中的值在 Pin 后是无法被移动的。而且与固定在栈上不同，我们知道堆上的值在整个生命周期内都会被稳稳地固定住。
+
+```rust
+use std::pin::Pin;
+use std::marker::PhantomPinned;
+
+#[derive(Debug)]
+struct Test {
+    a: String,
+    b: *const String,
+    _marker: PhantomPinned,
+}
+
+impl Test {
+    fn new(txt: &str) -> Pin<Box<Self>> {
+        let t = Test {
+            a: String::from(txt),
+            b: std::ptr::null(),
+            _marker: PhantomPinned,
+        };
+        let mut boxed = Box::pin(t);
+        let self_ptr: *const String = &boxed.as_ref().a;
+        unsafe { boxed.as_mut().get_unchecked_mut().b = self_ptr };
+
+        boxed
+    }
+
+    fn a(self: Pin<&Self>) -> &str {
+        &self.get_ref().a
+    }
+
+    fn b(self: Pin<&Self>) -> &String {
+        unsafe { &*(self.b) }
+    }
+}
+
+pub fn main() {
+    let test1 = Test::new("test1");
+    let test2 = Test::new("test2");
+
+    println!("a: {}, b: {}",test1.as_ref().a(), test1.as_ref().b());
+    println!("a: {}, b: {}",test2.as_ref().a(), test2.as_ref().b());
+}
+```
+
+# async/await 和 Stream 流处理
+
+`async/.await` 是 Rust 语法的一部分，它在遇到阻塞操作时( 例如 `IO` )会让出当前线程的所有权而不是阻塞当前线程，这样就允许当前线程继续去执行其它代码，最终实现并发。
+
+有两种方式可以使用 `async： async fn` 用于声明函数，`async { ... }` 用于声明语句块，它们会返回一个实现 `Future` 特征的值:
+
+```rust
+// `foo()`返回一个`Future<Output = u8>`,
+// 当调用`foo().await`时，该`Future`将被运行，当调用结束后我们将获取到一个`u8`值
+async fn foo() -> u8 { 5 }
+
+fn bar() -> impl Future<Output = u8> {
+    // 下面的`async`语句块返回`Future<Output = u8>`
+    async {
+        let x: u8 = foo().await;
+        x + 5
+    }
+}
+```
+
+`async` 是懒惰的，直到被执行器 `poll` 或者 `.await` 后才会开始运行，其中后者是最常用的运行 `Future` 的方法。 当 `.await` 被调用时，它会尝试运行 `Future` 直到完成，但是若该 `Future` 进入阻塞，那就会让出当前线程的控制权。当 `Future` 后面准备再一次被运行时(例如从 `socket` 中读取到了数据)，执行器会得到通知，并再次运行该 `Future` ，如此循环，直到完成。
+
+
+## async 的生命周期
+
+`async fn` 函数如果拥有引用类型的参数，那它返回的 `Future` 的生命周期就会被这些参数的生命周期所限制:
+
+```rust
+async fn foo(x: &u8) -> u8 { *x }
+
+// 上面的函数跟下面的函数是等价的:
+fn foo_expanded<'a>(x: &'a u8) -> impl Future<Output = u8> + 'a {
+    async move { *x }
+}
+```
+
+意味着 `async fn` 函数返回的 `Future` 必须满足以下条件: 当 `x` 依然有效时， 该 `Future` 就必须继续等待( `.await` ), 也就是说 `x` 必须比 `Future` 活得更久。
+
+在一般情况下，在函数调用后就立即 `.await` 不会存在任何问题，例如 `foo(&x).await`。但是，若 `Future` 被先存起来或发送到另一个任务或者线程，就可能存在问题了:
+
+```rust
+use std::future::Future;
+fn bad() -> impl Future<Output = u8> {
+    let x = 5;
+    borrow_x(&x) // ERROR: `x` does not live long enough
+}
+
+async fn borrow_x(x: &u8) -> u8 { *x }
+```
+
+以上代码会报错，因为 `x` 的生命周期只到 `bad` 函数的结尾。 但是 `Future` 显然会活得更久：
+
+```log
+error[E0597]: `x` does not live long enough
+ --> src/main.rs:4:14
+  |
+4 |     borrow_x(&x) // ERROR: `x` does not live long enough
+  |     ---------^^-
+  |     |        |
+  |     |        borrowed value does not live long enough
+  |     argument requires that `x` is borrowed for `'static`
+5 | }
+  | - `x` dropped here while still borrowed
+```
+
+其中一个常用的解决方法就是将具有引用参数的 `async fn` 函数转变成一个具有 `'static` 生命周期的 `Future` 。 以上解决方法可以通过将参数和对 `async fn` 的调用放在同一个 `async` 语句块来实现:
+
+```rust
+use std::future::Future;
+
+async fn borrow_x(x: &u8) -> u8 { *x }
+
+fn good() -> impl Future<Output = u8> {
+    async {
+        let x = 5;
+        borrow_x(&x).await
+    }
+}
+```
+
+如上所示，通过将参数移动到 async 语句块内， 我们将它的生命周期扩展到 'static， 并跟返回的 Future 保持了一致。
+
+> 这是原文里这么写的，但是个人感觉生命周期并没有被扩展到 'static，只是 x 的生命周期会在异步块内保持有效，确保了借用在引用结束之前有效。
+
+## 当.await 遇见多线程执行器
+
+需要注意的是，当使用多线程 `Future` 执行器( `executor` )时， `Future` 可能会在线程间被移动，因此 `async` 语句块中的变量必须要能在线程间传递。 至于 `Future` 会在线程间移动的原因是：它内部的任何 `.await` 都可能导致它被切换到一个新线程上去执行。
+
+由于需要在多线程环境使用，意味着 `Rc`、 `RefCell` 、没有实现 `Send` 的所有权类型、没有实现 `Sync` 的引用类型，它们都是不安全的，因此无法被使用。
+
+> 需要注意！实际上它们还是有可能被使用的，只要在 .await 调用期间，它们没有在作用域范围内。
+
+类似的原因，在 `.await` 时使用普通的锁也不安全，例如 `Mutex` 。原因是，它可能会导致线程池被锁：当一个任务获取锁 `A` 后，若它将线程的控制权还给执行器，然后执行器又调度运行另一个任务，该任务也去尝试获取了锁 `A` ，结果当前线程会直接卡死，最终陷入死锁中。
+
+因此，为了避免这种情况的发生，我们需要使用 `futures` 包下的锁 `futures::lock` 来替代 `Mutex` 完成任务。
+
+## Stream 流处理
+
+`Stream` 特征类似于 `Future` 特征，但是前者在完成前可以生成多个值，这种行为跟标准库中的 `Iterator` 特征倒是颇为相似。

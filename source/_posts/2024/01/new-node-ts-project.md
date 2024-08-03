@@ -1,7 +1,14 @@
 ---
 title: 从0创建一个nodejs + Typescript项目
 date: 2024-01-19 22:28:48
-tags:
+seo:
+  description: 使用 node18 或者 node20 创建一个 webpack + Typescript 项目，集成 eslint 和 ts-jest，支持 WebStorm 打断点测试。
+  keywords: 
+    - nodejs
+    - webpack
+    - typescript
+    - eslint
+    - ts-jest
 ---
 
 
