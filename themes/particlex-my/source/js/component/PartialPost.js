@@ -1,1 +1,0 @@
-(()=>{const t=Vue.defineComponent({name:"PartialPost",props:{content:String},setup(t){let n,e;return t.content.length>=300?(n=t.content.substring(0,MAX_TOC_LEN),e=!0):(n=t.content,e=!1),()=>h("div",{directives:[{name:"html",value:n}]})}});mixins.particalPost={components:{PartialPost:t}}})();
