@@ -6,6 +6,56 @@ categories: "python"
 
 因为自己偶尔才会用用 Python 写写脚本，但是每次想写的时候就要查半天的语法...所以在这里记录一下 Python 基础的快速入门的一些东西。
 
+# 高级
+
+## 虚拟环境
+
+[创建虚拟环境](https://docs.python.org/zh-cn/3/tutorial/venv.html#creating-virtual-environments).
+
+```shell
+python -m venv <project_name>/.venv
+source <project_name>/.venv/bin/activate
+```
+
+> 如果你去官网看的话这里是直接将虚拟环境创建在了项目目录中，也就是直接调用了 `python -m venv <project_name>`，这样也可以，
+> 但是会导致项目根目录会多出很多虚拟环境的配置文件，并且这些文件都是不会进版本控制的，所以在这里创建一个子文件夹 `.venv` 来管理会更好！
+
+运行完后命令左边会出现`<env_name>`：
+
+```shell
+(my_env) [root@192.168.0.1 my_env]# 
+```
+
+在这种状况下，所有 Python 环境均与外界隔离，包括 `pip` 的版本。
+
+### 退出虚拟环境
+
+使用下面的指令退出虚拟环境：
+
+```shell
+deactivate
+```
+
+### 分发虚拟环境
+
+由于 `.venv` 目录一般不会进入版本控制系统，所以如果想要想生产，则需要所有需要的依赖。
+
+使用下面的指令导出/导入依赖：
+
+```bash
+# 导出
+pip freeze >requirements.txt
+# 导入
+pip install -r requirements.txt
+```
+
+---
+
+更新 `pip`：
+
+```python
+python3 -m pip install --upgrade pip
+```
 
 # 类型定义
 

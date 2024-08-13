@@ -34,3 +34,4 @@ categories: "k8s"
 # 博客
 
 - [安装 K3s](/kubernetes/blog/k3s-install)
+- [使用 Python 调用 etcd 接口](/kubernetes/blog/python-invoke)
