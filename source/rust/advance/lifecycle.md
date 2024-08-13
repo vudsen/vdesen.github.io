@@ -304,7 +304,7 @@ fn fn_elision(x: &i32) -> &i32 {..}
 >    assert_eq!(*closure_slision(&45), 45);
 >    // Passed !
 > }
-
+> 
 > fn fun<T, F: Fn(&T) -> &T>(f: F) -> F {
 >    f
 > }
