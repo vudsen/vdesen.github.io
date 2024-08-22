@@ -69,12 +69,12 @@ ansible run play.yaml -i inventory.yaml
 ├── env
 ├── inventory
 └── project
-    └── roles
-        └── my_role
-            ├── handlers
-            ├── tasks
-            ├── templates
-            └── vars
+    └── roles
+        └── my_role
+            ├── handlers
+            ├── tasks
+            ├── templates
+            └── vars
 ```
 
 
