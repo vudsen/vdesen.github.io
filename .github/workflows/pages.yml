@@ -43,6 +43,25 @@ jobs:
     - name: Build
       env:
         NEXT_PUBLIC_CND_PUBLIC_PATH_BASE_URL: 'https://selfb.asia/static/particlex/static'
+        NEXT_PUBLIC_COMMENT_CONTAINER_IDENTIFIER: '.giscus'
+        NEXT_PUBLIC_COMMENT_SCRIPT_INJECT: |
+          <script src="https://giscus.app/client.js"
+            data-repo="IceOfSummer/iceofsummer.github.io"
+            data-repo-id="R_kgDOJFU7OQ"
+            data-category="Announcements"
+            data-category-id="DIC_kwDOJFU7Oc4CUyC7"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="bottom"
+            data-theme="preferred_color_scheme"
+            data-lang="zh-CN"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+          </script>
+        
       run: 'export BLOG_PATH=${GITHUB_WORKSPACE}/datasource && cd nextjs-particlex-theme && npm run build'
 
     - name: Upload GitHub Pages artifact
