@@ -35,3 +35,4 @@ categories: "k8s"
 
 - [安装 K3s](/kubernetes/blog/k3s-install)
 - [使用 Python 调用 etcd 接口](/kubernetes/blog/python-invoke)
+- [Argo Workflow入门](/kubernetes/blog/argo-workflow)

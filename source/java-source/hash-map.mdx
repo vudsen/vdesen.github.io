@@ -1,0 +1,509 @@
+---
+title: HashMap源码
+date: 2023-03-07 23:22:15
+categories:
+  - Java源码
+seo:
+  description: Java HashMap源码解析
+---
+
+HashMap在jdk8前是由数组+链表实现的，也就是数据结构上非常经典的实现操作：
+
+假如元素的的哈希值为`hash`，数组长度为`len`，那么该元素应该放在`hash % len`处
+
+- 若该位置没有元素，则直接放进去
+- 若该位置有元素，则直接将该元素放到链表后(如果该元素不是链表则要新建一个链表)
+
+在 jdk8 中，若链表过长，则会将链表转换为红黑树(本篇不讲红黑树原理，因为我也不会2333，只需要知道是一个平衡树即可，搜索效率一般为`log(n)`。
+
+接下来我将根据自己的理解，一步一步阅读 `HashMap` 源码(我使用的是 java11，与 java8 应该不会有太大差距)。
+
+# 构造器
+
+HashMap有四个构造器：
+
+```java
+public HashMap(int initialCapacity, float loadFactor) {
+  if (initialCapacity < 0)
+      throw new IllegalArgumentException("Illegal initial capacity: " +
+                                          initialCapacity);
+  if (initialCapacity > MAXIMUM_CAPACITY)
+      initialCapacity = MAXIMUM_CAPACITY;
+  if (loadFactor <= 0 || Float.isNaN(loadFactor))
+      throw new IllegalArgumentException("Illegal load factor: " +
+                                          loadFactor);
+  this.loadFactor = loadFactor;
+  this.threshold = tableSizeFor(initialCapacity);
+}
+
+public HashMap(int initialCapacity) {
+  this(initialCapacity, DEFAULT_LOAD_FACTOR);
+}
+
+public HashMap() {
+  this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
+}
+
+public HashMap(Map<? extends K, ? extends V> m) {
+  this.loadFactor = DEFAULT_LOAD_FACTOR;
+  putMapEntries(m, false);
+}
+```
+
+可以发现其中出现了两个属性：`loadFactor(负载因子)`和`threshold(扩容阈值)`
+
+首先需要知道这样一个关系：`threshold = loadFactor * capacity`
+
+其中`capacity`为整个Hash表数组长度，当`size(插入到HashMap中元素的个数) > threshold`时，就会对 `HashMap` 进行扩容。
+
+可以发现，除了第四个构造器，其它3个其实都没有对哈希表进行初始化，只是设置了扩容阈值和负载因子而已。
+
+## tableSizeFor
+
+第一个构造器中，在给 `threshold` 赋值前，还调用了 `tableSizeFor` 方法：
+
+```java
+// java11
+static final int tableSizeFor(int cap) {
+  int n = -1 >>> Integer.numberOfLeadingZeros(cap - 1);
+  return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+}
+
+// java8
+static final int tableSizeFor(int cap) {
+  int n = cap - 1;
+  //移位运算
+  n |= n >>> 1;
+  n |= n >>> 2;
+  n |= n >>> 4;
+  n |= n >>> 8;
+  n |= n >>> 16;
+  return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+}
+```
+
+这个方法的主要目的在于返回一个最小的数，该数需满足大于等于 `cap`，同时还是 `2` 的幂。
+
+基本原理如下：
+
+1. 对于一个数，我们只看它的最高位 (先忽略减一)，假设最高位为 `i`
+2. 将其右移一位取并，此时第 `i` 和 `i - 1` 位必定为 `1`
+3. 再右移两位区别，此时 `i`, `i - 1`, `i - 2` 和 `i - 3` 位必定为 `1`
+4. 右移四位，同上
+5. ...
+6. 最后得到的一个数，其 `0` 到 `i` 位全部为 `1`，此时再加一，得到的数就只有 `i + 1` 位是 `1` 了，此时就满足我们最小的需求了。
+
+但是为了防止 `cap` 本身就是 `2` 的幂，需要要把它减一后再计算。例如 `1000`，如果直接通过上面的方式计算，得到的结果就是 `10000`，并不满足最小的要求，实际上 `1000` 已经满足这个要求了，而减一后 `0111`，在计算后就可以正常得到 `1000`，并且对正常的(非 `2` 的幂的数)没有任何影响。
+
+> [!IMPORTANT]
+> 为什么要二次幂呢？这里需要了解一个小知识：
+>
+> 假设`k`为 `2` 的幂，那么对于任意一个数(非负) `m`，有：`m & (k - 1) = m % k`
+>
+> 其实也不难理解，比如`10101(21)`对`1000(8)`取余，结果为5，很明显，对于`1000`左边(包括)所有的位，它都能够整除，因为都是2的幂，而对于右边不难整除，所以就一定是余数了，减一个1变成`0111`，再取并，就可以得到右边的余数了。
+
+
+
+在Java11中，主要通过 `Integer.numberOfLeadingZeros` 获取最高位1的左边有几个0。
+
+```java
+public static int numberOfLeadingZeros(int i) {
+  // HD, Count leading 0's
+  if (i <= 0)
+      return i == 0 ? 32 : 0;
+  int n = 31;
+  // 这里使用了二分搜索
+  if (i >= 1 << 16) { n -= 16; i >>>= 16; }
+  if (i >= 1 <<  8) { n -=  8; i >>>=  8; }
+  if (i >= 1 <<  4) { n -=  4; i >>>=  4; }
+  if (i >= 1 <<  2) { n -=  2; i >>>=  2; }
+  return n - (i >>> 1);
+}
+```
+
+然后再对`-1`进行无符号位移得到结果：
+
+```java
+int n = -1 >>> Integer.numberOfLeadingZeros(cap - 1);
+return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+```
+
+这里 `-1` 的二进制所有位全为 1 (`000...001`, 取反`111...1110`，加一 `111...1111`)，直接无符号向右位移后再加一就可以获取到对应的容量。
+
+
+# put
+
+`put`其实是调用了内部的`putVal`方法：
+
+```java
+public V put(K key, V value) {
+  return putVal(hash(key), key, value, false, true);
+}
+```
+
+## hash
+
+这里的 `hash` 还有点不一样：
+
+```java
+static final int hash(Object key) {
+  int h;
+  return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+}
+```
+
+可以发现这里将高 16 位和低 16 位异或后返回了出去。还记得之前我们说过，将 `hash` 值直接和数组长度减一取并就可以获得余数了吗？
+所以这里不难想到，如果哈希表不是很大，即小于 65536(2^16)，那么高 16 位基本上不会被用到。所以会导致两个哈希值，可能只有高位不同，**但由于低位相同从而导致了哈希碰撞**。
+
+所以这里高位合并到低位中也参与到哈希计算，可以一定程度上减少哈希碰撞的概率。
+
+
+## putVal
+
+
+```java
+/**
+ * Implements Map.put and related methods.
+ *
+ * @param hash hash for key
+ * @param key the key
+ * @param value the value to put. 
+ * @param onlyIfAbsent if true, don't change existing value(如果为ture，当插入相同的key时不会进行替换)
+ * @param evict if false, the table is in creation mode(如果为false，表示哈希表为创建模式)
+ * @return previous value, or null if none
+ */
+final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+          boolean evict) {
+  Node<K, V>[] tab;
+  Node<K, V> p;
+  int n, i;
+  // 在这里将哈希表赋值给tab
+  if ((tab = table) == null || (n = tab.length) == 0)
+    // 到这里表示hash表没有初始化，在这里进行扩容
+    n = (tab = resize()).length;
+  if ((p = tab[i = (n - 1) & hash]) == null)
+    // 当前位置没有节点，直接插入
+    tab[i] = newNode(hash, key, value, null);
+  else {
+    // 到这里说明当前位置有节点，p就是那个节点
+    // 这里的 e 代表：若有相同的 key，则用变量 e 暂时保存下来，再根据 onlyIfAbsent 参数考虑是否替换
+    Node<K, V> e;
+    K k;
+    if (p.hash == hash &&
+        ((k = p.key) == key || (key != null && key.equals(k))))
+      // 相同的key，考虑是否替换
+      e = p;
+    else if (p instanceof TreeNode)
+      // p是一个树的根节点，把新节点插入到树里，该方法会返回之前的旧值，如果没有则返回null
+      e = ((TreeNode<K, V>) p).putTreeVal(this, tab, hash, key, value);
+    else {
+      // p 是链表头部，遍历到尾部后进行插入
+      for (int binCount = 0; ; ++binCount) {
+        if ((e = p.next) == null) {
+          p.next = newNode(hash, key, value, null);
+          // **如果链表节点数量超过TREEIFY_THRESHOLD，则将链表进行树化，默认值为8**
+          if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+            treeifyBin(tab, hash);
+          break;
+        }
+        if (e.hash == hash &&
+            ((k = e.key) == key || (key != null && key.equals(k))))
+          // 同理，出现相同的key，考虑进行替换, 此时 e 就是相同的 key
+          break;
+        p = e;
+      }
+    }
+    // 判断是否有旧值
+    if (e != null) { // existing mapping for key
+      V oldValue = e.value;
+      if (!onlyIfAbsent || oldValue == null)
+        // 进行替换
+        e.value = value;
+      afterNodeAccess(e);
+      return oldValue;
+    }
+  }
+  ++modCount;
+  // 在这里判断总节点数是否超过阈值，若超过则进行扩容
+  if (++size > threshold)
+    resize();
+  afterNodeInsertion(evict);
+  return null;
+}
+```
+
+## resize
+
+### 懒加载
+
+由于 `HashMap` 的哈希表是懒加载的，只有在插入元素时才会创建，而相关的创建逻辑正式放在了 `resize` 中。
+
+由于 `HashMap` 有三种构造器：
+
+- 空参构造器：仅初始化 `loadFactor`.
+- 带容量和负载因子的构造器：`loadFactor` 和 `threshold` 都初始化.
+- 传入另外一个 `Map` 初始化：`loadFactor` 和 `threshold` 都初始化.
+
+可见在初始化时有两种情况，即 `threshold` 有值和没有显式赋值，所以在初始化时也要对其进行相关判断。
+
+```java
+final Node<K, V>[] resize() {
+  // 首先保存好旧哈希表
+  Node<K, V>[] oldTab = table;
+  // 旧的容量
+  int oldCap = (oldTab == null) ? 0 : oldTab.length;
+  // 旧的阈值
+  int oldThr = threshold;
+  // 新的容量和阈值
+  int newCap, newThr = 0;
+  // 如果旧容量大于0，说明已经初始化过了
+  if (oldCap > 0) {
+    // 如果超过容量最大值，则不再进行扩容，即将扩容阈值设置为Int最大值
+    if (oldCap >= MAXIMUM_CAPACITY) {
+      threshold = Integer.MAX_VALUE;
+      return oldTab;
+    }
+    // 这里将容量乘 2
+    else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY &&
+        oldCap >= DEFAULT_INITIAL_CAPACITY)
+      // 因为容量每次都是直接乘 2，所以阈值每次也可以直接乘 2，就不用做浮点数运算了
+      newThr = oldThr << 1; // double threshold
+  }
+  // 因为之前判断过oldCap是否大于0，所以后面的分支 oldCap 一定等于0，因此后面的判断都是去初始化哈希表的
+  else if (oldThr > 0) // initial capacity was placed in threshold
+    // `loadFactor` 和 `threshold` 都初始化了，但是是第一次放元素
+    newCap = oldThr;
+  else {               // zero initial threshold signifies using defaults
+    // 旧阈值为0，使用了空参构造器，并且还没有初始化
+    newCap = DEFAULT_INITIAL_CAPACITY;
+    newThr = (int) (DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
+  }
+  if (newThr == 0) {
+    // 设置扩容阈值， 这里可能和上面 newThr = oldThr << 1 有点冲突
+    // 我想上面那一段可能性能会更高，这里这一句专门用于初始化用的
+    float ft = (float) newCap * loadFactor;
+    // 防止超出上限
+    newThr = (newCap < MAXIMUM_CAPACITY && ft < (float) MAXIMUM_CAPACITY ?
+        (int) ft : Integer.MAX_VALUE);
+  }
+  threshold = newThr;
+
+  // snip.
+
+}
+```
+
+这里写的很抽象，大致理解就行了。。
+
+### 扩容
+
+```java
+final Node<K, V>[] resize() {
+
+  // Snip, the code is above.
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  Node<K, V>[] newTab = (Node<K, V>[]) new Node[newCap];
+  table = newTab;
+  if (oldTab != null) {
+    // 在这里重新计算hash，并将节点放到新的哈希表中
+    for (int j = 0; j < oldCap; ++j) {
+      Node<K, V> e;
+      if ((e = oldTab[j]) != null) {
+        oldTab[j] = null;
+        if (e.next == null)
+          // 当前节点只有一个元素，则直接将其移动
+          newTab[e.hash & (newCap - 1)] = e;
+        else if (e instanceof TreeNode)
+          // 当前节点为树节点，则重新建树
+          ((TreeNode<K, V>) e).split(this, newTab, j, oldCap);
+        else { // preserve order
+          // 链表扩容
+        }
+      }
+    }
+  }
+  return newTab;
+}
+```
+
+`resize` 的基本原理就是重新拿每个元素的哈希值和 `newCap - 1` 取并后获得新的索引值，然后将元素移动过去。在上面的代码中，实际的操作是直接覆盖的，那么为什么这里不怕新索引中已经有值了呢？
+
+这里其实不难发现，由于数组容量每次是乘 2 的，再结合上之前的知识，不难得出每次 `resize`，每个哈希值新的索引只有两张变化：
+
+- 不变
+- 最高位左侧新增一个 `1`，也就是索引值加上 `oldCap`
+
+所以这里每个位置是不会发生冲突的，因为你要么不变，要么和别人一样一起加上 `oldCap`，原本不冲突的，加上相同的数也一样不冲突。
+
+
+#### 链表 rehash
+
+```java
+Node<K, V>[] newTab = (Node<K, V>[]) new Node[newCap];
+for (int j = 0; j < oldCap; ++j) {
+
+  // snip...
+
+  // 因为扩容只是将capacity左移了一位，因此对于一个节点及其子节点，它们最多分散到两个位置
+  // 这里lo代表低位，hi代表高位
+  // 低位表示位置没变的元素，高位代表变了的
+  Node<K, V> loHead = null, loTail = null;
+  Node<K, V> hiHead = null, hiTail = null;
+  Node<K, V> next;
+  do {
+    next = e.next;
+    if ((e.hash & oldCap) == 0) {
+      // 到这里说明这个节点在哈希表的位置没有变，这里为什么是用哈希值和旧容量相并判断的呢？
+      // 因为在前面说过了，造成位置变化的唯一原因是capacity左移了一位，而我们取索引是通过hash & (capacity - 1)来获得的
+      // 所以只要在旧hash的最高位1的位置，oldCap这一位也是1，说明扩容后索引一定发生了变化
+      // 例如旧长度为10000(16)，最高位1在第五个，对于1011010(hex)，由于它的第五位也是1，说明新hash肯定会发生变化
+      // 新长度为100000(32)，减一后为011111(31)，后4位我们不用管，只用管第五位，和hash取并后会产生新索引。
+      if (loTail == null)
+        loHead = e;
+      else
+        loTail.next = e;
+      loTail = e;
+    } else {
+      if (hiTail == null)
+        hiHead = e;
+      else
+        hiTail.next = e;
+      hiTail = e;
+    }
+  } while ((e = next) != null);
+  // 插入链表
+  if (loTail != null) {
+    loTail.next = null;
+    newTab[j] = loHead;
+  }
+  if (hiTail != null) {
+    hiTail.next = null;
+    newTab[j + oldCap] = hiHead;
+  }
+
+}
+
+// snip...
+
+```
+
+在 java7 中, 链表的插入采用的是头插法, 在多线程环境下会产生死锁, 在java8后, 采用了尾插法, 有效的解决了死链的问题。下面是java7的实现:
+
+```java
+void transfer(Entry[] newTable) {
+    Entry[] src = table;
+    int newCapacity = newTable.length;
+    for (int j = 0; j < src.length; j++) {
+        Entry<K,V> e = src[j];
+        if (e != null) {
+            src[j] = null;
+            do {
+                Entry<K,V> next = e.next;
+                int i = indexFor(e.hash, newCapacity);
+                e.next = newTable[i];
+                newTable[i] = e;
+                e = next;
+            } while (e != null);
+        }
+    }
+}
+```
+
+死锁流程如下：
+
+<PintoraDiagram code={`
+gantt
+  title 甘特图(分号左边代表旧表，右边为新表)
+  section Thread-A
+  A->B->C;null : t-a, 2024-09-13, 2024-09-14
+  C;B->A(更新): t-c, after t-a, 1d
+  C;A->B->A(未更新) : t-f, after t-c, 2d
+  section Thread-B
+  A->B->C;null : t-b, 2024-09-13, 2024-09-14
+  A->B->C;B->A(未更新) : t-d, after t-a, 1d
+  B->C;A->B->A(更新，造成循环依赖) : t-e, after t-d, 2d
+`}/>
+
+
+#### 树 rehash
+
+在树的 rehash 中需要考虑一个问题, 就是 rehash 后的两个索引中的节点是该用树形结构、链表或者直接是单独的节点？这里就要引出另外三个参数了：
+
+- `UNTREEIFY_THRESHOLD`: 常量, 值为 6. 当哈希表某一位置上的节点数量小于等于该值时, 树将会退化成链表.
+- `TREEIFY_THRESHOLD`: 常量, 值为 8, 当哈希表某一位置上的节点数量大于等于该值时, 链表将会被替换为树.
+- `MIN_TREEIFY_CAPACITY`: 常量, 值为 64, 当链表想要进化成树时, 如果哈希表长度小于该值, 则直接进行扩容操作, 而不是树化。
+
+具体代码如下：
+
+```java
+final void split(HashMap<K,V> map, Node<K,V>[] tab, int index, int bit) {
+  TreeNode<K,V> b = this;
+  // Relink into lo and hi lists, preserving order
+  TreeNode<K,V> loHead = null, loTail = null;
+  TreeNode<K,V> hiHead = null, hiTail = null;
+  int lc = 0, hc = 0;
+  for (TreeNode<K,V> e = b, next; e != null; e = next) {
+    // 和之前一样，仍然使用尾插法，只不过多了统计链表长度这俩变量
+    next = (TreeNode<K,V>)e.next;
+    e.next = null;
+    if ((e.hash & bit) == 0) {
+      if ((e.prev = loTail) == null)
+          loHead = e;
+      else
+          loTail.next = e;
+      loTail = e;
+      ++lc;
+    }
+    else {
+      if ((e.prev = hiTail) == null)
+          hiHead = e;
+      else
+          hiTail.next = e;
+      hiTail = e;
+      ++hc;
+    }
+  }
+
+  // 检查是否需要树化或者退化成链表
+  if (loHead != null) {
+    if (lc <= UNTREEIFY_THRESHOLD)
+      tab[index] = loHead.untreeify(map);
+    else {
+      tab[index] = loHead;
+      if (hiHead != null) // (else is already treeified)
+          loHead.treeify(tab);
+    }
+  }
+  if (hiHead != null) {
+    if (hc <= UNTREEIFY_THRESHOLD)
+      tab[index + bit] = hiHead.untreeify(map);
+    else {
+      tab[index + bit] = hiHead;
+      if (loHead != null)
+          hiHead.treeify(tab);
+    }
+  }
+}
+```
+
+这里树直接使用 `next` 来进行遍历，而不是使用 `left` 或者 `right` 来进行递归遍历，这里 `next` 的值并不遵守插入顺序。
+
+如果需要观察扩散时树的 rehash, 可以使用下面的代码进行测试:
+
+```java
+HashMap<Integer, String> map = new HashMap<>(64, 1);
+
+int base = 0b00000000_00000000_00000001_00000001;
+int add = 0b00000000_00000000_00000001_00000000;
+for (int i = 1; i <= 65; i++) {
+  if (i == 65) {
+    // add breakpoint here.
+    System.out.print("");
+  }
+  System.out.print((base + add) + " -> ");
+  map.put(base + add, "1");
+  base += add;
+}
+```
+
