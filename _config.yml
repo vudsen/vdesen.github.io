@@ -3,7 +3,7 @@
 ## Source: https://github.com/hexojs/hexo/
 
 theme_config:
-  loading: https://selfb.asia/static/particlex/images/loading.gif
+  loading: https://selfb.asia/static/particlex/images/loading.gif 
   background: 
     - https://selfb.asia/public/2023-2-6-8d14e464-2200-4e54-af81-0d9f25f55b3e.webp
     - https://selfb.asia/public/2023-2-0-66a241f4-eca3-45f3-b590-05aeed688f60.webp   
