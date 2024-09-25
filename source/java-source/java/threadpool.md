@@ -9,11 +9,13 @@ tags:
     - { name: 'Java', path: "/2023/03/05/java-source#Java"}
 ---
 
+> [!NOTE]
 > 本篇基于Java11
 
 # 1. 构造器
 
 线程池的构造器很多，我们直接看参数最多的那一个：
+
 
 ```java
 public ThreadPoolExecutor(int corePoolSize,
@@ -39,12 +41,11 @@ public ThreadPoolExecutor(int corePoolSize,
 }
 ```
 
-- `corePoolSize`：线程池保存在线程池中的最低线程数，即使空闲也要保存这么多
+- `corePoolSize`：线程池保存在线程池中的核心线程数，当线程数量超过该值后，将会回收多余的线程.
 - `maximumPoolSize`：线程池最大的线程数
 - `keepAliveTime`：当线程数大于`corePoolSize`时，多余的线程多久后被清除
 - `unit`：`keepAliveTime`的时间单位
 - `workQueue`：保存任务的工作队列
-
 - `threadFactory`：要创建新线程时使用的工厂类
 - `handler`：当任务由于超出线程池容量而被阻拦时将会执行此拦截器
 
