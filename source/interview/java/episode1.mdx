@@ -1,0 +1,71 @@
+---
+title: Java 面试题记录 Part 1
+date: 2024-09-27 14:30:51
+categories:
+  - Java 面试
+seo:
+  description: 总结了牛客上常见的面试题
+---
+
+# Spring MVC处理请求的过程
+
+https://cloud.tencent.com/developer/article/1649425
+
+# HashTable、HashMap和TreeMap的区别
+
+- `HashTable`: 使用哈希表 + 链表实现，并且使用了大量 `synchronized` 关键字来确保线程安全，性能差，一般使用 `ConcurrentHashMap` 作为上位替代。
+
+- `HashMap`: 使用哈希表 + 链表/红黑树实现，当哈希表某一位置节点数量大于等于 8 时，将会把链表转换成树，当节点数量小于等于 6 时，链表将退化成树，不是线程安全的。
+
+- `TreeMap`: 只用了纯红黑树，没有使用哈希表，遍历时使用中序遍历即可按照 `key` 的顺序遍历所有元素。
+
+
+# ConcurrentHashMap 怎么提高并发性能的
+
+
+`HashMap` 的 `threshold` 被替换为了 `sizeCtl`，高 16 位代表当前哈希表容量的一个"版本号"，低 `16位 - 1` 表示当前正在进行扩容的线程数。
+
+# synchronized 和 ReentrantLock 的区别
+
+- `ReentrantLock` 是一个类，`synchronized` 是一个关键字。
+- `ReentrantLock` 更灵活，可以尝试抢锁，或在指定的时间内没有抢到锁就放弃抢锁，`synchronized` 只能一直阻塞，直到抢到锁。
+- `ReentrantLock` 是基于 AQS 实现的自旋锁，是代码层面上的实现，`synchronized` 是操作系统层面的互斥锁。
+- `ReentrantLock` 支持公平锁，`synchronized`不支持。
+
+# synchronized 锁升级的过程
+
+[难搞的偏向锁终于被 Java 移除了](https://juejin.cn/post/7046921350065160206)
+[synchroized 与锁升级](/java-source/java/synchronized)
+
+# 数据库设计三大范式
+
+[数据库三大范式是什么？(3NF详解)](https://blog.csdn.net/ddzzz_/article/details/119277573)
+
+- 第一范式(原子性): 表中字段的数据，不可以再拆分。
+- 第二范式: 在满足1NF的前提下, 表中不存在部分依赖，非主键列要完全依赖于主键。(主要是说在联合主键的情况下，非主键列不能只依赖于主键的一部分)
+  - 例如有联合主键 `学号-课程`, 在表中存在 `课程名称` 字段直接依赖于 `课程` 字段的值，此时不满足第二范式，应该考虑将课程字段抽离。
+- 第三范式: 在满足2NF的前提下, 不存在传递依赖。(A -> B, B -> C, A->C)
+  - 例如有非主键字段 `课程ID`, `课程名称`，此时 `课程名称` 依赖非主键值 `课程ID`，违反了第三范式。
+
+第三范式对比第二范式的区别在于，第二范式是只用了部分的主键，第三范式是借助了非主键列进行依赖传递。
+
+# MySQL如何分析和优化慢SQL
+
+分析([数据库优化（一）Mysql慢查询的定位和分析](https://zhuanlan.zhihu.com/p/164897114))：
+
+- 开启慢SQL定位
+- 查看SQL执行计划
+
+优化([MySQL 慢 SQL & 优化方案](https://www.cnblogs.com/juno3550/p/14887672.html#label4.4))：
+
+- SQL 优化
+  - 使用连接查询代替子查询
+  - 只要一行数据时使用 `LIMIT 1`
+  - 多表关联查询时，小表在前，大表在后
+  - 使用 `where` 时, 优先将可以过滤最多数据的条件写在最左边
+  - 使用 `GROUP BY` 时可以使用 `ORDER BY NULL` 来禁止排序
+- 表结构优化(拆表，设置合理的主键)
+- 架构优化(使用 Redis、消息队列等减小数据库压力)
+- 事务和锁优化(乐观锁，减少事务持续时间)
+- 硬件优化
+

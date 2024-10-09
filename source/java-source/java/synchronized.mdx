@@ -1,0 +1,168 @@
+---
+title: synchroized 与锁升级
+date: 2024-09-27 15:35:25
+categories:
+  - Java源码
+seo:
+  description: synchroized 与锁升级
+---
+
+> [!IMPORTANT]
+> 基于[难搞的偏向锁终于被 Java 移除了](https://juejin.cn/post/7046921350065160206)做的一些**总结(这里不会对基础内容进行过多解释)**。
+
+# 偏向锁
+
+```java
+  // 睡眠 5s
+Thread.sleep(5000);
+Object o = new Object();
+System.out.println("未进入同步块，MarkWord 为：");
+System.out.println(ClassLayout.parseInstance(o).toPrintable());
+synchronized (o){
+  System.out.println(("进入同步块，MarkWord 为："));
+  System.out.println(ClassLayout.parseInstance(o).toPrintable());
+}
+
+Thread t2 = new Thread(() -> {
+  synchronized (o) {
+    System.out.println("新线程获取锁，MarkWord为：");
+    System.out.println(ClassLayout.parseInstance(o).toPrintable());
+  }
+});
+
+t2.start();
+t2.join();
+System.out.println("主线程再次查看锁对象，MarkWord为：");
+System.out.println(ClassLayout.parseInstance(o).toPrintable());
+
+synchronized (o){
+  System.out.println(("主线程再次进入同步块，MarkWord 为："));
+  System.out.println(ClassLayout.parseInstance(o).toPrintable());
+}
+System.out.println("====");
+System.out.println(ClassLayout.parseInstance(o).toPrintable());
+```
+
+运行上面的代码，可以发现锁的变化状态：
+
+1. 初始状态：`0x0000000000000005`(`0b101`)，无锁可偏向，线程 ID 为 0。
+2. 进入同步块: `0x0000000003585805`(`0b11010110000101100000000101`)，已偏向，线程 ID 为 `0x000000000000d616`。
+3. 新线程获取锁: `0x000000002ba7f550`(`0b101011101001111111010101010000`)，轻量级锁。
+4. 主线程再次查看锁对象: `0x0000000000000001`(`0b001`)，无锁不可偏向。
+5. 主线程再次进入同步块: `0x00000000033af7b0`(`0b11001110101111011110110000`)，轻量级锁。
+6. 主线程退出同步块: `0x0000000000000001`(`0b001`)，无锁不可偏向。
+
+可以发现锁在无锁可偏向下，只要被竞争一次后，后续再抢锁就会直接换成轻量锁。
+
+## 批量重偏向
+
+当锁由于竞争变为无锁不可偏向后，又被同一个线程多次持有，此时锁将会重新偏向为对应的线程。
+
+以 `Class` 为单位，为每个 `Class` 维护一个偏向锁撤销计数器，每一次该 `Class` 的对象发生偏向撤销操作时，该计数器 `+1`, 当这个值达到重偏向阈值(默认20)时, 就进行批量重偏向:
+
+- 将该 Class 所有正在当锁使用的，被持有的实例，将其 `epoch` 字段改为新值。
+- 目前没有被当锁使用的对象，`epoch` 保持不变。
+
+当线程再次抢锁时，发现 `epoch` 变化了，
+
+
+测试代码：
+
+```java
+import org.openjdk.jol.info.ClassLayout;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.LockSupport;
+
+public class JavaObjectDemo {
+
+
+    static Thread A;
+    static Thread B;
+    static Thread C;
+    static int loopFlag = 40;
+
+    public static void main(String[] args) {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        final List<User> list = new ArrayList<>();
+        A = new Thread(() -> {
+            for (int i = 0; i < loopFlag; i++) {
+                User a = new User();
+                list.add(a);
+                System.out.printf("A 加锁前第 %d 次" + ClassLayout.parseInstance(a).toPrintable(), i+1);
+                synchronized (a) {
+                    System.out.printf("A 加锁中第 %d 次"+ ClassLayout.parseInstance(a).toPrintable(), i+1);
+                }
+                System.out.printf("A 加锁结束第 %d 次"+ ClassLayout.parseInstance(a).toPrintable(), i+1);
+            }
+            System.out.print("============线程A 都是偏向锁=============");
+            //防止竞争 执行完后叫醒 线程B
+            LockSupport.unpark(B);
+        });
+        B = new Thread(() -> {
+            //防止竞争 先睡眠线程B
+            LockSupport.park();
+            for (int i = 0; i < loopFlag; i++) {
+                User a = list.get(i);
+                //因为从list当中拿出都是偏向线程A
+                System.out.printf("B 加锁前第 %d 次" + ClassLayout.parseInstance(a).toPrintable(), i+1);
+                if (i == 20) {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                synchronized (a) {
+                    //40次撤销偏向锁偏向线程A；然后升级轻量级锁指向线程B线程栈当中的锁记录
+                    //后面的发送批量偏向线程B
+                    System.out.printf("B 加锁中第 %d 次" + ClassLayout.parseInstance(a).toPrintable(), i+1);
+                }
+                //因为前19次是轻量级锁，释放之后为无锁不可偏向
+                //但是第20次是偏向锁 偏向线程B 释放之后依然是偏向线程B
+                System.out.printf("B 加锁结束第 %d 次" + ClassLayout.parseInstance(a).toPrintable(), i+1);
+            }
+            System.out.printf("B 新产生的对象" + ClassLayout.parseInstance(new  User()).toPrintable());
+            //防止竞争 执行完后叫醒 线程C
+            LockSupport.unpark(C);
+        });
+
+        C = new Thread(() -> {
+            //防止竞争 先睡眠线程C
+            LockSupport.park();
+            try {
+                // 将这一段关闭，可以看到批量撤销。打开时可以看到C从第20个锁开始又进行了一次批量重偏向，epoch变为了2
+                Thread.sleep(27000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            for (int i = 0; i < loopFlag; i++) {
+                User a = list.get(i);
+                System.out.printf("C 加锁前第 %d 次" + ClassLayout.parseInstance(a).toPrintable(), i+1);
+                // 偏向撤销次数已达到批量撤销阈值40，则执行批量撤销流程
+                synchronized (a) {
+                    System.out.printf("C 加锁中第 %d 次" + ClassLayout.parseInstance(a).toPrintable(), i+1);
+                }
+                System.out.printf("C 加锁结束第 %d 次" + ClassLayout.parseInstance(a).toPrintable(), i+1);
+            }
+            System.out.printf("C 新产生的对象" + ClassLayout.parseInstance(new  User()).toPrintable());
+        });
+
+        A.start();
+        B.start();
+        C.start();
+    }
+
+
+}
+
+class User {}
+```
+
+需要注意打印出来可能会说 `epoch` 为 0, 实际用它的 16 进制值转换一下就可以发现 `epoch` 是变动了的。
