@@ -63,7 +63,8 @@ author: IceOfSummer
 authorHome: https://github.com/IceOfSummer
 language: zh-CN
 timezone: Asia/Shanghai
-
+metadata:
+  msvalidate.01: 11E11221498D58F667445CD298681979
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
 url: http://example.com
