@@ -48,6 +48,19 @@ B树和B+树的区别：
 
 [聊聊MVCC和Next-key Locks - 掘金 (juejin.cn)](https://juejin.cn/post/6844903842505555981)
 
+[细聊 MySQL undo log、redo log、binlog 有什么用？](https://www.cnblogs.com/xiaolincoding/p/16396502.html)
+
+## redolog
+
+重做日志，用于 mysql 的崩溃恢复。在每次事务提交前，MySQL 都会将事务造成的修改记录成一小段数据，并将一小段输入写入缓冲流中，最后根据特定的策略决定什么时候将缓冲流写入到硬盘中。
+
+`redolog` 在保存时，是以日志文件组的形式保存的，一个文件组中有多个文件，每个文件组合起来，构成一个类似环状链表的结构。在日志文件组中，分别由 `wirte pos` 和 `checkpoint` 保存相应的位置信息。`wirte pos` 主要保存当前 `redolog` 写到了哪里。`checkpoint` 则保存当前 `redolog` 执行到了哪里。
+
+当`write pos` 追上 `checkpoint` 时，也就是 `redolog` 写满时，MySQL 会被阻塞，此时会停下来将 `Buffer Pool` 中的脏页刷新到磁盘中，然后标记 `redo log` 哪些记录可以被擦除，接着对旧的 `redo log` 记录进行擦除，等擦除完旧记录腾出了空间，`checkpoint` 就会往后移动，然后 MySQL 恢复正常运行，继续执行新的更新操作。
+
+> [!NOTE]
+> 所以，一次 checkpoint 的过程就是脏页刷新到磁盘中变成干净页，然后标记 redo log 哪些记录可以被覆盖的过程。
+
 # 5. MySql当前读和快照度
 
 [mysql快照读原理实现 - 掘金 (juejin.cn)](https://juejin.cn/post/7055073479866974238)
