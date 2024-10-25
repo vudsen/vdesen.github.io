@@ -3,15 +3,13 @@ title: Ansible 快速入门
 date: 2024-08-06 11:28:17
 tags: ansible
 seo:
-  description: Ansible 学习博客。
+  description: Ansible 快速入门，用例子快速入门。从简到难。
   keywords: 
    - ansible
    - 'ansible 入门'
    - 'ansible quick start'
 ---
 
-
-> 本篇实际并不是入门，需要你稍微掌握一些基础知识后才看的懂，很多基础的没有讲。
 
 # 安装
 
@@ -31,8 +29,6 @@ python3 -m pip install ansible-core
 
 # 基础概念
 
-> 因为主要是靠 Python 代码执行，所以这里基础没有讲很多。
-
 ansible 中有下面几种常用的特殊名词：
 
 - [Inventory](https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html): "物品栏"(不知道该怎么翻译...)，包含了一组或多组远程服务器
@@ -40,20 +36,30 @@ ansible 中有下面几种常用的特殊名词：
 - Task: 任务，通常同来定义一个操作.
 - Role: 与 `Play` 类似，但是在声明时不需要指定 `Inventory`，所以一般不会直接写 `Play`，而是直接使用 `Role` 来编写，方便多次复用。
 
-除此之外，在 Task 中有下面这些关键词也比较常用：
+可以这样理解: 一个 `Play` 代表已经编辑好的一部电影。通过指定好角色(`Inventory`)和剧情(`Task`)，构成一部电影(`Play`)。
 
-- [Ansible（十九）-- ansible 中的任务控制（四）--block、rescue、always块](https://blog.csdn.net/chitung_hsu/article/details/105579880)
+所以通常一个 `Play` 文件包含了 `Inventory` 和 `Task`。由于 `Inventory` 在这里直接写死了，一般会直接使用 `Role` 来代替 `Play`，在实际运行的时候指定对应的 `Inventory`。
 
-## 基础指令
+## 创建 Inventory
 
+创建一个 Inventory(`inventory.ini`)：
 
-```shell
-# Ping all inventory
-ansible -m ping all -i inventory.yaml
-
-# Run a play
-ansible run play.yaml -i inventory.yaml
+```ini
+[myhosts]
+192.0.2.50
+192.0.2.51
+192.0.2.52
 ```
+
+测试连接：
+
+```sh
+# verify
+ansible-inventory -i inventory.ini --list
+# ping
+ansible myhosts -m ping -i inventory.ini
+```
+
 
 # 使用 ansible
 

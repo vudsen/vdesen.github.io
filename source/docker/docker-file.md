@@ -137,6 +137,33 @@ CMD /bin/bash
 docker build -t [镜像名]:[TAG] .
 ```
 
+## 1.4 镜像中添加字体库
+
+需要首先安装 `fontconfig`，下载所有依赖：
+
+- [freetype-2.11.0-1.rpm](https://selfb.asia/static/linux/freetype-2.11.0-1.rpm)
+- [fontconfig-2.13.94-1.rpm](https://selfb.asia/static/linux/fontconfig-2.13.94-1.rpm)
+- [harfbuzz-2.8.2-1.oe2203.x86_64.rpm](https://selfb.asia/static/linux/harfbuzz-2.8.2-1.oe2203.x86_64.rpm)
+- [graphite2-1.3.14-5.oe2203.x86_64.rpm](https://selfb.asia/static/linux/graphite2-1.3.14-5.oe2203.x86_64.rpm)
+
+
+```sh
+rpm -Uvh --force --nodeps freetype-2.11.0-1.rpm && \
+rpm -Uvh --force --nodeps fontconfig-2.13.94-1.rpm && \
+rpm -Uvh --force --nodeps iputils-20210722-4.rpm && \
+rpm -Uvh --force --nodeps harfbuzz-2.8.2-1.oe2203.x86_64.rpm && \
+rpm -Uvh --force --nodeps graphite2-1.3.14-5.oe2203.x86_64.rpm && \
+```
+
+之后下载字体库：[dejavu-fonts-2.37-1.oe2203.noarch.rpm](https://selfb.asia/static/linux/dejavu-fonts-2.37-1.oe2203.noarch.rpm)
+
+然后安装：
+
+```sh
+rpm -Uvh --force --nodeps dejavu-fonts-2.37-1.oe2203.noarch.rpm
+```
+
+
 # 2. 虚悬镜像
 
 如果在build的时候没有指定镜像名和TAG，在build后出来的镜像名和TAG都会为<none>

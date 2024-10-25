@@ -1,0 +1,429 @@
+---
+title: 没有了 Spring 你还会用 Mybatis 吗? Mybatis-Spring 资源管理详解。
+date: 2023-03-07 23:22:15
+categories:
+  - Java源码
+seo:
+  description: 当 Mybatis 离开了 Spring，你还会用吗？本篇将带你了解 Mybatis-Spring 底层源码，帮助你了解 Spring 是如何管理 Mybatis 资源的。
+---
+
+> [!IMPORTANT]
+> 本文基于 spring-jdbc-6.1.13、mybatis-spring-boot-starter-3.0.3
+>
+> 本文主要是一些总结性的结论，不会大量展示源码，建议自己打断点边跟边看或者后面回顾的时候看。
+
+# 开头废话
+
+首先来一个非常现实的问题，当 Mybatis 离开了 Spring，你还会用吗？
+
+首先我们来看一下没有 Spring 该怎么用：
+
+```java
+DataSource dataSource = BlogDataSourceFactory.getBlogDataSource();
+TransactionFactory transactionFactory = new JdbcTransactionFactory();
+Environment environment = new Environment("development", transactionFactory, dataSource);
+Configuration configuration = new Configuration(environment);
+configuration.addMapper(BlogMapper.class);
+
+SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
+
+try (SqlSession session = sqlSessionFactory.openSession(true)) {
+    BlogMapper blogMapper = session.getMapper(BlogMapper.class);
+
+    blogMapper.doSth();
+
+    // ...
+}
+```
+
+
+有没有发现这里很违背我们的"常识"？在 `Spring` 中，我们都是直接注入 `Mapper` 然后直接就开始用了。而在这里，我们还需要自己开 `SqlSession` 来获取 `Mapper`。
+
+---
+
+接下来，本文将带你详细了解 `Spring` 是如何管理 `Mybatis` 资源的。
+
+
+
+
+# Mybatis-Spring 原理
+
+在 `Mybatis` 文档的 [作用域（Scope）和生命周期](https://mybatis.net.cn/getting-started.html#a.E4.BD.9C.E7.94.A8.E5.9F.9F.EF.BC.88Scope.EF.BC.89.E5.92.8C.E7.94.9F.E5.91.BD.E5.91.A8.E6.9C.9F) 中提到: `每个线程都应该有它自己的 SqlSession 实例。每次收到 HTTP 请求，就可以打开一个 SqlSession，返回一个响应后，就关闭它`。
+
+那么 `Spring` (实际是 Mybatis-Spring)是在哪里给 `Mapper` 绑定 `SqlSession` 的呢？
+
+![MapperProxy](https://5j9g3t.site/images/2024/10/MapperProxy2.webp)
+
+通过上图可以发现，`SqlSessionTemplate` 里面的 `sqlSessionProxy` 又是一个代理，并且用的是自己的内部类 `org.mybatis.spring.SqlSessionTemplate.SqlSessionInterceptor`。在这个代理类中，我们就**可以找到相关懒加载的代码了**。
+
+在继续看前，需要了解一个非常重要的类：`TransactionSynchronizationManager`:
+
+```java
+public abstract class TransactionSynchronizationManager {
+
+	private static final ThreadLocal<Map<Object, Object>> resources =
+			new NamedThreadLocal<>("Transactional resources");
+
+	private static final ThreadLocal<Set<TransactionSynchronization>> synchronizations =
+			new NamedThreadLocal<>("Transaction synchronizations");
+
+	private static final ThreadLocal<String> currentTransactionName =
+			new NamedThreadLocal<>("Current transaction name");
+
+	private static final ThreadLocal<Boolean> currentTransactionReadOnly =
+			new NamedThreadLocal<>("Current transaction read-only status");
+
+	private static final ThreadLocal<Integer> currentTransactionIsolationLevel =
+			new NamedThreadLocal<>("Current transaction isolation level");
+
+	private static final ThreadLocal<Boolean> actualTransactionActive =
+			new NamedThreadLocal<>("Actual transaction active");
+
+  // snip
+
+}
+```
+
+- `resources`: 保存当前线程的数据库连接，便于后续事务获取
+- `synchronizations`: 保存事务同步的回调，例如 `beforeCommit`、`afterCompletion` 等
+- `currentTransactionName`：保存事务的名称
+- `currentTransactionReadOnly`：标识当前事务是否只读
+- `currentTransactionIsolationLevel`: 当前事务隔离级别
+- `actualTransactionActive`: 当前线程是否真的开启了事务
+
+例如调用 `org.springframework.transaction.support.TransactionSynchronizationManager#isActualTransactionActive` 就可以判断当前线程是否开启了事务。
+
+# SqlSession 的创建与 ThreadLocal 的绑定
+
+在第一次尝试获取 `SqlSession` 时，就会尝试绑定相关的 `ThreadLocal`。
+
+`org.mybatis.spring.SqlSessionTemplate.SqlSessionInterceptor#invoke` -> `org.mybatis.spring.SqlSessionUtils#getSqlSession` -> `org.mybatis.spring.SqlSessionUtils#registerSessionHolder`(部分无关紧要的代码被省略):
+
+```java
+private static void registerSessionHolder(SqlSessionFactory sessionFactory, ExecutorType executorType,
+      PersistenceExceptionTranslator exceptionTranslator, SqlSession session) {
+  SqlSessionHolder holder;
+  // 判断是否需要开启事务.
+  if (TransactionSynchronizationManager.isSynchronizationActive()) {
+    Environment environment = sessionFactory.getConfiguration().getEnvironment();
+
+    if (environment.getTransactionFactory() instanceof SpringManagedTransactionFactory) {
+      LOGGER.debug(() -> "Registering transaction synchronization for SqlSession [" + session + "]");
+
+      holder = new SqlSessionHolder(session, executorType, exceptionTranslator);
+      // 绑定 resources 到 ThreadLocal
+      TransactionSynchronizationManager.bindResource(sessionFactory, holder);
+      // 绑定 synchronizations
+      TransactionSynchronizationManager
+          .registerSynchronization(new SqlSessionSynchronization(holder, sessionFactory));
+      // 标识当前事务已经绑定了 synchronizations
+      holder.setSynchronizedWithTransaction(true);
+      // 引用计数加一
+      holder.requested();
+    } else {
+
+      // 判断当前是不是使用 SpringManagedTransactionFactory 来管理事务，如果不是则直接报错
+
+    }
+  } else {
+    // 啥都不做
+  }
+
+}
+```
+
+至此，事务就成功开启了。后面的 `Mapper` 想要获取 `SqlSession` 就可以直接复用了:
+
+```java
+// org.mybatis.spring.SqlSessionUtils#getSqlSession
+public static SqlSession getSqlSession(SqlSessionFactory sessionFactory, ExecutorType executorType,
+    PersistenceExceptionTranslator exceptionTranslator) {
+
+  notNull(sessionFactory, NO_SQL_SESSION_FACTORY_SPECIFIED);
+  notNull(executorType, NO_EXECUTOR_TYPE_SPECIFIED);
+
+  // 获取绑定的资源
+  SqlSessionHolder holder = (SqlSessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+  // 获取对应的 SqlSession，并将引用计数加一
+  SqlSession session = sessionHolder(executorType, holder);
+  if (session != null) {
+    return session;
+  }
+
+  // 线程还没有绑定，创建新的并判断是否需要绑定，也就是我们上面看到的代码
+  LOGGER.debug(() -> "Creating a new SqlSession");
+  session = sessionFactory.openSession(executorType);
+
+  registerSessionHolder(sessionFactory, executorType, exceptionTranslator, session);
+
+  return session;
+}
+```
+
+# SqlSession 的释放
+
+在自动提交的情况下，`SqlSession` 用完就会被释放，在 `org.mybatis.spring.SqlSessionTemplate.SqlSessionInterceptor#invoke` 中的 `finally` 代码块就可以看到，最后调用了 `org.mybatis.spring.SqlSessionUtils#closeSqlSession` 来释放 `SqlSession`:
+
+```java
+public static void closeSqlSession(SqlSession session, SqlSessionFactory sessionFactory) {
+  notNull(session, NO_SQL_SESSION_SPECIFIED);
+  notNull(sessionFactory, NO_SQL_SESSION_FACTORY_SPECIFIED);
+
+  SqlSessionHolder holder = (SqlSessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+  if ((holder != null) && (holder.getSqlSession() == session)) {
+    LOGGER.debug(() -> "Releasing transactional SqlSession [" + session + "]");
+    // 引用计数减一
+    holder.released();
+  } else {
+    LOGGER.debug(() -> "Closing non transactional SqlSession [" + session + "]");
+    // 自动提交，直接关闭
+    session.close();
+  }
+}
+```
+
+可以发现在开启事务的情况下，这里仅仅是将引用计数减一，那么真正的关闭在哪呢？
+
+其实也不难猜到，我们在哪个方法上的 `@Transactional`，这个方法结束后肯定就会去关闭 `SqlSession`。这里是通过动态代理实现的，具体的类为：`org.springframework.transaction.interceptor.TransactionAspectSupport`，直接从 `invokeWithinTransaction` 开始看就可以了。
+
+可以在里面找到 `commitTransactionAfterReturning` 这个方法，很显然，这个方法就是用来提交并关闭连接的:
+
+```java
+protected void commitTransactionAfterReturning(@Nullable TransactionInfo txInfo) {
+  if (txInfo != null && txInfo.getTransactionStatus() != null) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Completing transaction for [" + txInfo.getJoinpointIdentification() + "]");
+    }
+    txInfo.getTransactionManager().commit(txInfo.getTransactionStatus());
+  }
+}
+```
+
+可以发现，如果没有开启事务，则不会做任何事。否则将会获取 `TransactionManager` 然后调用 `commit` 方法。
+
+点进去继续追 `org.springframework.transaction.support.AbstractPlatformTransactionManager#commit` -> `org.springframework.transaction.support.AbstractPlatformTransactionManager#processCommit`(这里方法很长，只保留部分代码):
+
+```java
+private void processCommit(DefaultTransactionStatus status) throws TransactionException {
+  try {
+    boolean beforeCompletionInvoked = false;
+    boolean commitListenerInvoked = false;
+
+    try {
+      boolean unexpectedRollback = false;
+      prepareForCommit(status);
+      triggerBeforeCommit(status);
+      triggerBeforeCompletion(status);
+      beforeCompletionInvoked = true;
+
+      if (status.hasSavepoint()) {
+        // snip
+      }
+      else if (status.isNewTransaction()) {
+        if (status.isDebug()) {
+          logger.debug("Initiating transaction commit");
+        }
+        unexpectedRollback = status.isGlobalRollbackOnly();
+        this.transactionExecutionListeners.forEach(listener -> listener.beforeCommit(status));
+        commitListenerInvoked = true;
+        doCommit(status);
+      }
+      else if (isFailEarlyOnGlobalRollbackOnly()) {
+        unexpectedRollback = status.isGlobalRollbackOnly();
+      }
+
+      // Throw UnexpectedRollbackException if we have a global rollback-only
+      // marker but still didn't get a corresponding exception from commit.
+      if (unexpectedRollback) {
+        throw new UnexpectedRollbackException(
+            "Transaction silently rolled back because it has been marked as rollback-only");
+      }
+    }
+    catch (UnexpectedRollbackException ex) {
+      // snip
+    }
+    catch (TransactionException ex) {
+      // snip
+    }
+    catch (RuntimeException | Error ex) {
+      // snip
+    }
+
+    // Trigger afterCommit callbacks, with an exception thrown there
+    // propagated to callers but the transaction still considered as committed.
+    try {
+      triggerAfterCommit(status);
+    }
+    finally {
+      triggerAfterCompletion(status, TransactionSynchronization.STATUS_COMMITTED);
+      if (commitListenerInvoked) {
+        this.transactionExecutionListeners.forEach(listener -> listener.afterCommit(status, null));
+      }
+    }
+
+  }
+  finally {
+    cleanupAfterCompletion(status);
+  }
+}
+```
+
+正常情况下(没有异常、事务正常提交)，主要是这样的流程(`TransactionManager` 的实现类默认是 `JdbcTransactionManager`)：
+
+1. `prepareForCommit`: 在提交前进行一些准备工作。
+2. `triggerBeforeCommit`: 调用同步器(`TransactionSynchronization`)的 `beforeCommit` 方法
+3. `triggerBeforeCompletion`: 调用同步器(`TransactionSynchronization`)的 `beforeCompletion` 方法
+4. `doCommit`: 获取到 `Connection` 并提交
+5. `triggerAfterCommit`: 调用同步器(`TransactionSynchronization`)的 `afterCommit` 方法
+6. `triggerAfterCompletion`: 调用同步器(`TransactionSynchronization`)的 `afterCompletion` 方法
+7. `cleanupAfterCompletion`: 清除绑定的 `ThreadLocal`，恢复 `Connection` 的状态等(设置自动提交、隔离级别等)，如果有被挂起的事务，则恢复对应的事务。
+
+## 事务提交了两次?
+
+在之前我们可以看到，默认的同步器是 `SqlSessionSynchronization`。而在 `org.mybatis.spring.SqlSessionUtils.SqlSessionSynchronization#beforeCommit` 中我们可以发现，这里又调用了 `SqlSession` 的 `commit` 方法，所以这个事务一共提交了两次 !?
+
+![beforeCommit](https://5j9g3t.site/images/2024/10/beforeCommit.webp)
+
+没错，第一次看到这里我确实被迷惑住了。但是其实上面的注释已经说的很清楚了，吃了不懂英语的坑😢。
+
+这段大致意思如下：
+
+> `Connection` 的 *提交* 或者 *回滚* 将会被 `ConnectionSynchronization` 或 `DataSourceTransactionManager` 处理。
+>
+> 但是，请清理 `SqlSession` / `Executor` ，包括 *批处理* 操作，以确保它们实际被执行过。
+>
+> `SpringManagedTransaction` 不会真的在 jdbc 连接的层面上 *提交* 。
+
+
+还是不太诗人话，简单来说就是你在同步器里只需要确保刷新 `SqlSession`、 `Executor` 和批处理操作就行了，提交的事情不用你管。
+
+那么实际是怎么样的呢，在继续前我们需要再回到没有 Spring 的 mybatis。
+
+### TransactionFactory
+
+还记得前面我们不使用 Spring 来配置 mybatis 的时候吗？我们需要手动配置一个 `TransactionFactory`，在文档中直接使用了 `JdbcTransactionFactory`，我们来看看它的实现。
+
+既然是工厂类，就只需要关注它返回的类型了，这里它返回的是 `JdbcTransaction`，我们接着看。
+
+这里主要关注它的 `commit` 方法：
+
+```java
+@Override
+public void commit() throws SQLException {
+  if (connection != null && !connection.getAutoCommit()) {
+    if (log.isDebugEnabled()) {
+      log.debug("Committing JDBC Connection [" + connection + "]");
+    }
+    connection.commit();
+  }
+}
+```
+
+可以发现它的 `commit` 方法是真的直接调用 jdbc 连接提交了。还记得我们之前翻译的吗，在 Spring 里面：SpringManagedTransaction` 不会真的在 jdbc 连接的层面上 *提交* 。
+
+我们来看 Spring 实现里的 `commit`:
+
+```java
+@Override
+public void commit() throws SQLException {
+  if (this.connection != null && !this.isConnectionTransactional && !this.autoCommit) {
+    LOGGER.debug(() -> "Committing JDBC Connection [" + this.connection + "]");
+    this.connection.commit();
+  }
+}
+```
+
+可以发现它加了一个最关键的判断：`!this.isConnectionTransactional`。那么可以说明，如果当前开启了事务，那么调用 `SqlSession#commit` 就不会真正的提交。
+
+> [!NOTE]
+> 这里省略了部分上下文。`SqlSession#commit` 会调用 `Executor#commit`(`org.apache.ibatis.executor.BaseExecutor#commit`)，最终会调用 `org.apache.ibatis.transaction.Transaction#commit`
+
+
+所以在这里调用 `SqlSession` 的 `commit`，只是为了清除缓存而已，并没有真正提交的意思。
+
+
+
+# 事务的创建
+
+在 Spring 中可以设置事务的传播级别(`TransactionDefinition`)：
+
+- `PROPAGATION_REQUIRED`(默认): 如果当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务。
+- `PROPAGATION_REQUIRES_NEW`: 创建一个新的事务，如果当前存在事务，则把当前事务挂起。
+- `PROPAGATION_NESTED`：创建一个子事务，如果子事务回滚，对应的父事务也会回滚(如果有)。
+- `PROPAGATION_MANDATORY`：如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常。
+- `PROPAGATION_SUPPORTS`: 如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行。
+- `PROPAGATION_NOT_SUPPORTED`: 以非事务方式运行，如果当前存在事务，则把当前事务挂起。
+- `PROPAGATION_NEVER`: 以非事务方式运行，如果当前存在事务，则抛出异常。
+
+那么事务在创建时，是如何根据不同的传播级别来创建事务的呢？
+
+---
+
+在 `org.springframework.transaction.interceptor.TransactionAspectSupport#createTransactionIfNecessary` -> `org.springframework.transaction.support.AbstractPlatformTransactionManager#getTransaction` 就可以找到相关开启事务的代码。
+
+这里代码很长，但不管怎么样，**最终都是返回一个 `TransactionStatus`**，默认的实现是 `org.springframework.transaction.support.DefaultTransactionStatus`:
+
+```java
+public class DefaultTransactionStatus extends AbstractTransactionStatus {
+
+	@Nullable
+	private final String transactionName;
+
+	@Nullable
+	private final Object transaction;
+
+	private final boolean newTransaction;
+
+	private final boolean newSynchronization;
+
+	private final boolean nested;
+
+	private final boolean readOnly;
+
+	private final boolean debug;
+
+	@Nullable
+	private final Object suspendedResources;
+
+  // snip
+
+}
+```
+
+这些字段的意思分别是：
+
+- `transactionName`: 事务的名称，一般是被代理的方法全限定名称，例如 `foo.bar.TestService.doService`。
+- `transaction`: 保存了 `org.springframework.transaction.support.AbstractPlatformTransactionManager#doGetTransaction` 的返回值，默认类型为 `org.springframework.jdbc.datasource.DataSourceTransactionManager.DataSourceTransactionObject`。
+- `newTransaction`: 是不是一个新的事务。例如多个 `Transactional` 方法嵌套，第一个开启事务的方法该值为 `true`，其它的均为 `false`。
+- `newSynchronization`: 当前事务是否创建了一个新的事务同步器。
+- `nested`: 是否嵌套(子事务)。
+- `readOnly`: 是否只读。
+- `debug`: 用于 debug。
+- `suspendedResources`: 被挂起的资源，例如在 `PROPAGATION_REQUIRES_NEW` 的传播级别下，会创建一个新的事务，旧的事务将会在这里被挂起。
+
+
+
+## transactionSynchronization
+
+关于 `newSynchronization` 这个属性，一开始可能还挺懵逼的。如果不想管太多，只需要记住该值为 `true` 时，后面的事务获取 `SqlSession` 时才会创建相关同步器。
+
+> [!NOTE]
+> 当该值为 `true` 时 `org.springframework.transaction.support.AbstractPlatformTransactionManager#prepareSynchronization` 将会绑定相关线程变量，后面线程在获取 `SqlSession` 时，`org.mybatis.spring.SqlSessionUtils#registerSessionHolder` 会判断当前是否激活同步器，然后再去绑定相关资源。
+
+那么这个值具体有什么用呢？这里就不得不再回到我们前面的传播级别了。例如 `PROPAGATION_NOT_SUPPORTED` 级别，它会挂起已有的事务，并且以非事务的状态继续执行，所以这里很明显就不需要绑定同步器。
+
+<div className="text-error">但是，实际上 Spring 默认会给所有类型的传播级别创建同步器。</div>
+
+`newSynchronization` 的值由 `org.springframework.transaction.support.AbstractPlatformTransactionManager#transactionSynchronization` 的值决定，而这个值默认为 `SYNCHRONIZATION_ALWAYS`。也就是永远都会创建同步器，即使没有开启事务。
+
+一共有三个可用的值：
+
+- `SYNCHRONIZATION_ALWAYS`(默认): 永远创建同步器，即使没有事务。
+- `SYNCHRONIZATION_ON_ACTUAL_TRANSACTION`：仅在有事务的情况下创建。
+- `SYNCHRONIZATION_NEVER`：永远不创建。
+
+> [!IMPORTANT]
+> TODO: 待填坑
+>
+> - 挂起的资源恢复
+> - 不使用 Spring 自己封装 Mybatis
