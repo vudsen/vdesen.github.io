@@ -105,7 +105,7 @@ I am dropped without value!
 
 下面一张图很好的展示了这种引用循环关系：
 
-![循环引用](https://selfb.asia/images/2024/05/v2-2dbfc981f05019bf70bf81c93f956c35_1440w.webp)
+![循环引用](https://5j9g3t.site/images/2024/05/v2-2dbfc981f05019bf70bf81c93f956c35_1440w.webp)
 
 ## Weak
 

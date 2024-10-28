@@ -111,7 +111,7 @@ pub fn hello_rust() {
 }
 ```
 
-![rust-doc](https://selfb.asia/images/2024/03/PixPin_2024-03-28_17-37-46.webp)
+![rust-doc](https://5j9g3t.site/images/2024/03/PixPin_2024-03-28_17-37-46.webp)
 
 除了 `#example` 外，还有一些常用的，你可以在项目中酌情使用：
 - Panics：函数可能会出现的异常状况，这样调用函数的人就可以提前规避
@@ -215,7 +215,7 @@ pub fn try_div(a: i32, b: i32) -> Result<i32, String> {
 ```
 
 用户在文档中只能看到相关的输入，无法看到其它的细节：
-![input-only!](https://selfb.asia/images/2024/03/v2-d1b98f5e70b7f8c8fb9aecce325dba0e_1440w.webp)
+![input-only!](https://5j9g3t.site/images/2024/03/v2-d1b98f5e70b7f8c8fb9aecce325dba0e_1440w.webp)
 
 # 代码跳转
 

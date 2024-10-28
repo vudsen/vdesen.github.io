@@ -24,7 +24,7 @@ let world = &s[6..11];
 
 对于一个切片，它并没有实际地去拷贝集合中的东西：
 
-![slice](https://selfb.asia/blog/v2-69da917741b2c610732d8526a9cc86f5_1440w.jpg)
+![slice](https://5j9g3t.site/blog/v2-69da917741b2c610732d8526a9cc86f5_1440w.jpg)
 
 如果想从某个位置到结尾或者开头，可以这样写：
 
@@ -466,7 +466,7 @@ struct File {
 }
 ```
 在内存中的结构为：
-![File内存结构](https://selfb.asia/blog/v2-8cc4ed8cd06d60f974d06ca2199b8df5_1440w.png)
+![File内存结构](https://5j9g3t.site/blog/v2-8cc4ed8cd06d60f974d06ca2199b8df5_1440w.png)
 
 从图中可以清晰地看出 File 结构体两个字段 name 和 data 分别拥有底层两个 [u8] 数组的所有权，通过 ptr 指针指向底层数组的内存地址，这里你可以把 ptr 指针理解为 Rust 中的引用类型。
 

@@ -217,7 +217,7 @@ subsets:
 
 > Ingress目前已停止更新。新的功能正在集成至[网关 API](https://kubernetes.io/zh-cn/docs/concepts/services-networking/gateway/) 中。
 
-![架构图](https://selfb.asia/images/2024/04/k8s-ingress.webp)
+![架构图](https://5j9g3t.site/images/2024/04/k8s-ingress.webp)
 
 
 ## 安装 Ingress Nginx
@@ -546,7 +546,7 @@ Pod 之间互通，是通过如下三个标识符的组合来辨识的：
 2. 被允许的名称空间
 3. IP组块（例外：与Pod运行所在的节点的通信总是被允许的，无论Pod或节点的IP地址）
 
-![Pod网络策略](https://selfb.asia/images/2024/05/QQ%E6%88%AA%E5%9B%BE20240521225315.webp)
+![Pod网络策略](https://5j9g3t.site/images/2024/05/QQ%E6%88%AA%E5%9B%BE20240521225315.webp)
 
 默认情况下，Pod网络都是非隔离的（non-isolated），可以接受来自任何请求方的网络请求。如果一个 `NetworkPolicy` 的标签选择器选中了某个 `Pod`，则该 `Pod` 将变成隔离的（isolated），并将拒绝任何不被 `NetworkPolicy`许可的网络连接。
 

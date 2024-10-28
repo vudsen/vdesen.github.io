@@ -72,7 +72,7 @@ kubectl create deployment my-dep --image=tomcat:8.5.68 --replicas=3
 
 由 Deployment 创建的 Pod，在被手动删除后会自动重新创建一个新的 Pod。
 
-![k8s工作负载](https://selfb.asia/images/2024/02/k8s-workload.webp)
+![k8s工作负载](https://5j9g3t.site/images/2024/02/k8s-workload.webp)
 
 ## 扩缩容
 
@@ -118,7 +118,7 @@ kubectl rollout undo deployment/my-dep --to-revision=2
 
 将一组 Pods 公开为网络服务的抽象方法。客户端只需要访问 Service，就能够访问到各个 Pod 上的服务。
 
-![k8s-svc](https://selfb.asia/images/2024/02/k8s-svc.webp)
+![k8s-svc](https://5j9g3t.site/images/2024/02/k8s-svc.webp)
 
 ## ClusterIP
 
@@ -187,7 +187,7 @@ spec:
 
 Ingress 翻译为'入口'，意思为 k8s 希望使用 Ingress 来作为我们的服务统一网关入口来为外网服务。
 
-![ingress](https://selfb.asia/images/2024/02/ingress.webp)
+![ingress](https://5j9g3t.site/images/2024/02/ingress.webp)
 
 ## 安装Ingress-Nginx
 

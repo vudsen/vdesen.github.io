@@ -17,7 +17,7 @@ categories:
 VMWare -> 编辑 -> 虚拟网络编辑器。
 
 先点右下角的管理员授权，然后选中VMnet8，点击NAT设置：
-![配置](https://selfb.asia/images/2024/02/PixPin_2024-02-11_17-00-49.webp)
+![配置](https://5j9g3t.site/images/2024/02/PixPin_2024-02-11_17-00-49.webp)
 
 记住里面的网关IP，其实就是外面的子网IP，但是最后一个IP位的值必须是2。
        
@@ -27,7 +27,7 @@ VMWare -> 编辑 -> 虚拟网络编辑器。
 
 开机后，编辑`/etc/sysconfig/network-scripts/ifcfg-ens33`文件
 
-![ifcfg-ens33](https://selfb.asia/images/2024/02/PixPin_2024-02-11_17-12-06.webp)
+![ifcfg-ens33](https://5j9g3t.site/images/2024/02/PixPin_2024-02-11_17-12-06.webp)
 
 记得把上面的`BOOTPROTO`从`dhcp`改为`static`。
 
@@ -52,7 +52,7 @@ net.ipv4.ip_forward = 1
 
 # 基础架构图
 
-![架构图](https://selfb.asia/images/2024/02/components-of-kubernetes.svg)
+![架构图](https://5j9g3t.site/images/2024/02/components-of-kubernetes.svg)
 
 - API server: 秘书部
 - Cloud controller Manager：外联部

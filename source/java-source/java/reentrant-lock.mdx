@@ -25,11 +25,11 @@ seo:
 
 # 概要
 
-![类继承图](https://selfb.asia/public/java-source/2023-2-3-12046ac9-cd7f-4b31-9c43-6f398f6a86a3.webp)
+![类继承图](https://5j9g3t.site/public/java-source/2023-2-3-12046ac9-cd7f-4b31-9c43-6f398f6a86a3.webp)
 
 对于`ReentrantLock`，你需要知道它里面有一个<span className="text-error">等待队列，也就是 AQS </span>(`AbstractQueuedSynchronizer`)，<span className="text-error">这个队列只有“头部的节点”才有资格抢到锁！但这并不代表其它节点对应的线程不会被唤醒，这些线程只是没有抢锁的资格，在获取资格前抢锁永远失败。在这里需要注意：**没有资格抢锁 != 没有机会被唤醒**。</span>
 
-![AQS示例](https://selfb.asia/images/2024/09/AQS2.webp)
+![AQS示例](https://5j9g3t.site/images/2024/09/AQS2.webp)
 
 例如上图，是 AQS 的一个简单示例。`state` 表示队列状态，如果该值非 0，则表示锁已经被其它线程占用。这里 `Node0` 目前已经是抢到锁的状态，其余节点都处于等待(挂起)状态。
 

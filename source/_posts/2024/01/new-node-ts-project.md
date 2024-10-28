@@ -222,7 +222,7 @@ module.exports = {
 
 谢天谢地，Webstorm是真的很聪明(牛逼)，我们只需要简单配置几下就可以直接在 ts 上打断点运行了。
 
-![run configuration](https://selfb.asia/blog/20240119235935.png)
+![run configuration](https://5j9g3t.site/blog/20240119235935.png)
 
 配完后，直接在ts文件上断点就可以停住。
 

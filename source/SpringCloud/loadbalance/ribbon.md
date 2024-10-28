@@ -64,7 +64,7 @@ public class ApplicationConextConfig {
 
 负载均衡算法主要由`AbstractLoadBalancerRule`子类实现：
 
-![impl](https://selfb.asia/public/SpringCloud/2023-2-0-d06ac3b8-44b8-479d-8ab6-de9bad94c485.png)
+![impl](https://5j9g3t.site/public/SpringCloud/2023-2-0-d06ac3b8-44b8-479d-8ab6-de9bad94c485.png)
 
 - <font color="skyblue">RoundRobinRule</font>: 轮询
 - <font color="skyblue">RandomRule</font>: 随机

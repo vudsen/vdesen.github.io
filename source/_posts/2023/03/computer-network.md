@@ -8,7 +8,7 @@ tags:
 
 ## 1.1 IPv4
 
-![IP报文格式](https://selfb.asia/public/post/2023-2-4-7b4a02b9-5e93-4d3e-80e8-ec67eda52d2a.webp)
+![IP报文格式](https://5j9g3t.site/public/post/2023-2-4-7b4a02b9-5e93-4d3e-80e8-ec67eda52d2a.webp)
 
 - 版本：IPv4为4，IPv6即为6
 - 首部长度：<font color=red>单位为4字节</font>，因此头部最长为15个4字节，即60字节
@@ -34,7 +34,7 @@ tags:
 
 ## 1.2 IPv6
 
-![IPv6](https://selfb.asia/public/post/2023-2-4-48265f3c-796f-4a2e-a261-b4f4ed0cd38f.webp)
+![IPv6](https://5j9g3t.site/public/post/2023-2-4-48265f3c-796f-4a2e-a261-b4f4ed0cd38f.webp)
 
 - 版本：IPv6肯定就是6了
 

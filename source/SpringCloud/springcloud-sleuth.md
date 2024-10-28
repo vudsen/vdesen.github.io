@@ -16,7 +16,7 @@ https://search.maven.org/remote_content?g=io.zipkin&a=zipkin-server&v=LATEST&c=e
 
 在Sleuth中，每条请求链路，都有一个唯一的TraceId、Span标识，每个Span通过parent id关联起来。
 
-![链路图](https://selfb.asia/public/SpringCloud/2023-2-6-3f34fa6b-ab82-43ea-b82d-207cbe47ded2.webp)
+![链路图](https://5j9g3t.site/public/SpringCloud/2023-2-6-3f34fa6b-ab82-43ea-b82d-207cbe47ded2.webp)
 
 # 简单使用
 

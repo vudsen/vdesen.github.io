@@ -59,7 +59,7 @@ typedef struct dict {
 } dict;
 ```
 
-![总览](https://selfb.asia/public/post/2023-2-3-0c4958ca-7128-481d-807c-0c95384937ec.webp)
+![总览](https://5j9g3t.site/public/post/2023-2-3-0c4958ca-7128-481d-807c-0c95384937ec.webp)
 
 
 
@@ -463,7 +463,7 @@ zset有两种实现：
 
 [Redis 跳跃表skiplist(深入理解,面试再也不用怕)_redis skiplist_妖四灵.Shuen的博客-CSDN博客](https://blog.csdn.net/wangxuelei036/article/details/106272680)
 
-![跳表](https://selfb.asia/public/interview/2023-2-4-70e28030-df93-4d4d-9043-9e3afd7b975b.webp)
+![跳表](https://5j9g3t.site/public/interview/2023-2-4-70e28030-df93-4d4d-9043-9e3afd7b975b.webp)
 
 - header：指向跳跃表的表头节点
 - tail：指向跳跃表的表尾节点

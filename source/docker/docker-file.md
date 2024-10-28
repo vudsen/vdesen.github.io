@@ -141,10 +141,10 @@ docker build -t [镜像名]:[TAG] .
 
 需要首先安装 `fontconfig`，下载所有依赖：
 
-- [freetype-2.11.0-1.rpm](https://selfb.asia/static/linux/freetype-2.11.0-1.rpm)
-- [fontconfig-2.13.94-1.rpm](https://selfb.asia/static/linux/fontconfig-2.13.94-1.rpm)
-- [harfbuzz-2.8.2-1.oe2203.x86_64.rpm](https://selfb.asia/static/linux/harfbuzz-2.8.2-1.oe2203.x86_64.rpm)
-- [graphite2-1.3.14-5.oe2203.x86_64.rpm](https://selfb.asia/static/linux/graphite2-1.3.14-5.oe2203.x86_64.rpm)
+- [freetype-2.11.0-1.rpm](https://5j9g3t.site/static/linux/freetype-2.11.0-1.rpm)
+- [fontconfig-2.13.94-1.rpm](https://5j9g3t.site/static/linux/fontconfig-2.13.94-1.rpm)
+- [harfbuzz-2.8.2-1.oe2203.x86_64.rpm](https://5j9g3t.site/static/linux/harfbuzz-2.8.2-1.oe2203.x86_64.rpm)
+- [graphite2-1.3.14-5.oe2203.x86_64.rpm](https://5j9g3t.site/static/linux/graphite2-1.3.14-5.oe2203.x86_64.rpm)
 
 
 ```sh
@@ -155,7 +155,7 @@ rpm -Uvh --force --nodeps harfbuzz-2.8.2-1.oe2203.x86_64.rpm && \
 rpm -Uvh --force --nodeps graphite2-1.3.14-5.oe2203.x86_64.rpm && \
 ```
 
-之后下载字体库：[dejavu-fonts-2.37-1.oe2203.noarch.rpm](https://selfb.asia/static/linux/dejavu-fonts-2.37-1.oe2203.noarch.rpm)
+之后下载字体库：[dejavu-fonts-2.37-1.oe2203.noarch.rpm](https://5j9g3t.site/static/linux/dejavu-fonts-2.37-1.oe2203.noarch.rpm)
 
 然后安装：
 

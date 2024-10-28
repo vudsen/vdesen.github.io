@@ -85,7 +85,7 @@ JVM从整体分为**三部分**：类加载子系统、运行时数据区以及�
 
 运行时数据区包括**五部分**：方法区、堆、虚拟机栈、PC寄存器以及本地方法栈
 
-![JVM结构](https://selfb.asia/public/interview/2023-2-2-4fa15602-b784-43b9-9f62-0dc3b7d5b6e7.webp)
+![JVM结构](https://5j9g3t.site/public/interview/2023-2-2-4fa15602-b784-43b9-9f62-0dc3b7d5b6e7.webp)
 
 # 4. 堆在垃圾回收的场景下分哪几部分？每部分如何进行GC？
 
@@ -99,7 +99,7 @@ JVM从整体分为**三部分**：类加载子系统、运行时数据区以及�
 
 新生代又分为伊甸园区、幸存者0区和幸存者1区，默认占比为8:1:1，可以通过`-XX:SurvivorRatio`进行调整。
 
-![heap](https://selfb.asia/public/interview/2023-2-2-704f791a-01ef-4274-924a-b16a105818cf.webp)
+![heap](https://5j9g3t.site/public/interview/2023-2-2-704f791a-01ef-4274-924a-b16a105818cf.webp)
 
 关于第二问，年轻态的GC称为Young GC(下面简称YGC)或者Minor GC，触发条件如下：
 
@@ -115,7 +115,7 @@ JVM从整体分为**三部分**：类加载子系统、运行时数据区以及�
 - 如果在垃圾回收后仍然无法在Eden区给对象分配内存，那么对象会直接升级到老年代，如果老年代空间也不足，并且通过Full GC也不足，则会抛出OOM异常
 - 由Eden区、from区向to区复制时，对象大小大于To Space可用内存，则把该对象转存到老年代，且老年代的可用内存小于该对象大小
 
-![YGC](https://selfb.asia/public/interview/2023-2-2-0c39b9fd-3ca3-4f3e-9f8c-77bd9b7f5b00.webp)
+![YGC](https://5j9g3t.site/public/interview/2023-2-2-0c39b9fd-3ca3-4f3e-9f8c-77bd9b7f5b00.webp)
 
 # 5. 用过ES吗？请说一下倒排索引
 

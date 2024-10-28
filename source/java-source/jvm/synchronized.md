@@ -19,7 +19,7 @@ tags:
 
 这里就分别讲一下这四种锁。
 
-![对象内存布局]( https://selfb.asia/public/java-source/2023-2-2-de291360-1965-4703-9a79-4d02de57fb6e.webp)
+![对象内存布局]( https://5j9g3t.site/public/java-source/2023-2-2-de291360-1965-4703-9a79-4d02de57fb6e.webp)
 
 # 1.四种锁
 

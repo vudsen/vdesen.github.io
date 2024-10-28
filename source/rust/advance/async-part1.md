@@ -701,7 +701,7 @@ a: test1, b: test2
 
 可以借助下图理解：
 
-![swap](https://selfb.asia/images/2024/07/v2-eaeb33da283dc1063b862d2307821976_1440w.webp)
+![swap](https://5j9g3t.site/images/2024/07/v2-eaeb33da283dc1063b862d2307821976_1440w.webp)
 
 ## Pin 在实践中的运用
 

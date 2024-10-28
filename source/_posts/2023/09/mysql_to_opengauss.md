@@ -79,7 +79,7 @@ SELECT id AS userId FROM user
 ```
 上面这个SQL很简单，就是查用户id，然后起个别名叫`userId`，乍一看好像没什么，下面我放个图，大家来找不同：
 
-![找不同](https://selfb.asia/public/2023-9/Snipaste_2023-09-26_10-45-53.webp)
+![找不同](https://5j9g3t.site/public/2023-9/Snipaste_2023-09-26_10-45-53.webp)
 
 发现了吗？仔细看一下userId，有没有发现查出来全部变成小写了？
 
@@ -103,11 +103,11 @@ SELECT COUNT(*) FROM userId
 
 高斯的结果：
 
-![gs-count](https://selfb.asia/public/2023-9/gs-count.webp)
+![gs-count](https://5j9g3t.site/public/2023-9/gs-count.webp)
 
 mysql的结果：
 
-![mysql-count](https://selfb.asia/public/2023-9/mysql-count.webp)
+![mysql-count](https://5j9g3t.site/public/2023-9/mysql-count.webp)
 
 相信一眼就能看出来，mysql拿需要用`COUNT(*)`，而高斯则需要用`count`拿。
 
