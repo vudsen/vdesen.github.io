@@ -66,6 +66,8 @@ jobs:
 
     - name: Generate sitemap
       uses: nextjs-particlex-theme/generate-sitemap@master
+      env:
+        NODE_OPTIONS: "--enable-source-maps"
       with:
         source-path: 'datasource'
         output-path: 'nextjs-particlex-theme/out'
