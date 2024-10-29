@@ -64,6 +64,12 @@ jobs:
         
       run: 'export BLOG_PATH=${GITHUB_WORKSPACE}/datasource && cd nextjs-particlex-theme && npm run build'
 
+    - name: Generate sitemap
+      uses: nextjs-particlex-theme/sitemap-generate@master
+      with:
+        source-path: 'datasource'
+        base-path: 'https://iceofsummer.github.io/'
+
     - name: Upload GitHub Pages artifact
       uses: actions/upload-pages-artifact@v3
       with:
