@@ -422,6 +422,35 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 - `SYNCHRONIZATION_ON_ACTUAL_TRANSACTION`：仅在有事务的情况下创建。
 - `SYNCHRONIZATION_NEVER`：永远不创建。
 
+# 事务的挂起
+
+在 Spring 是可以嵌套事务的，例如我们使用 `REQUIRES_NEW` 的传播级别，就能够在已有事务的前提下开启一个完全隔离的新事务。那么旧的事务在这里会怎么处理呢？
+
+眼见的大伙已经可以看到了，在 `org.springframework.transaction.support.AbstractPlatformTransactionManager#getTransaction` 中，有一个判断是否已经存在事务的代码：
+
+```java
+@Override
+public final TransactionStatus getTransaction(@Nullable TransactionDefinition definition)
+    throws TransactionException {
+
+  // snip
+
+  if (isExistingTransaction(transaction)) {
+    // Existing transaction found -> check propagation behavior to find out how to behave.
+    return handleExistingTransaction(def, transaction, debugEnabled);
+  }
+
+  // snip
+
+}
+```
+
+具体的代码就不细看了，大致流程如下：
+
+- 调用同步器的 `suspend` 方法(`org.springframework.transaction.support.AbstractPlatformTransactionManager#suspend`)。
+- 清除旧事务绑定的相关线程变量(`org.springframework.transaction.support.AbstractPlatformTransactionManager#suspend`)。
+- 根据传播级别创建 `TransactionStatus`，并将 `suspendedResources` 设置为上个事务(`org.springframework.transaction.support.AbstractPlatformTransactionManager#startTransaction`)。
+
 > [!IMPORTANT]
 > TODO: 待填坑
 >

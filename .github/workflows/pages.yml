@@ -71,6 +71,7 @@ jobs:
       with:
         source-path: 'datasource'
         output-path: 'nextjs-particlex-theme/out'
+        pages-path: 'source'
         web-base-path: 'https://iceofsummer.github.io/'
 
     - name: Upload GitHub Pages artifact
