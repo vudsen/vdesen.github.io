@@ -320,7 +320,6 @@ public void commit() throws SQLException {
 ```
 
 可以发现它的 `commit` 方法是真的直接调用 jdbc 连接提交了。还记得我们之前翻译的吗，在 Spring 里面：SpringManagedTransaction` 不会真的在 jdbc 连接的层面上 *提交* 。
-
 我们来看 Spring 实现里的 `commit`:
 
 ```java
@@ -422,7 +421,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 - `SYNCHRONIZATION_ON_ACTUAL_TRANSACTION`：仅在有事务的情况下创建。
 - `SYNCHRONIZATION_NEVER`：永远不创建。
 
-# 事务的挂起
+# 事务的挂起和恢复
 
 在 Spring 是可以嵌套事务的，例如我们使用 `REQUIRES_NEW` 的传播级别，就能够在已有事务的前提下开启一个完全隔离的新事务。那么旧的事务在这里会怎么处理呢？
 
@@ -447,12 +446,67 @@ public final TransactionStatus getTransaction(@Nullable TransactionDefinition de
 
 具体的代码就不细看了，大致流程如下：
 
-- 调用同步器的 `suspend` 方法(`org.springframework.transaction.support.AbstractPlatformTransactionManager#suspend`)。
-- 清除旧事务绑定的相关线程变量(`org.springframework.transaction.support.AbstractPlatformTransactionManager#suspend`)。
-- 根据传播级别创建 `TransactionStatus`，并将 `suspendedResources` 设置为上个事务(`org.springframework.transaction.support.AbstractPlatformTransactionManager#startTransaction`)。
+1. 调用同步器的 `suspend` 方法(`org.springframework.transaction.support.AbstractPlatformTransactionManager#suspend`)。
+2. 清除旧事务绑定的相关线程变量(`org.springframework.transaction.support.AbstractPlatformTransactionManager#suspend`)。
+3. 将旧事务保存(`SuspendedResourcesHolder`)，开启新的事务，并将新事务 `status#suspendedResources` 设置为旧的 `Holder`。
 
-> [!IMPORTANT]
-> TODO: 待填坑
->
-> - 挂起的资源恢复
-> - 不使用 Spring 自己封装 Mybatis
+
+---
+
+事务恢复的代码在 `org.springframework.transaction.support.AbstractPlatformTransactionManager#cleanupAfterCompletion` 里面的最后一段，它会调用 `resume` 方法来恢复事务:
+
+```java
+protected final void resume(@Nullable Object transaction, @Nullable SuspendedResourcesHolder resourcesHolder)
+    throws TransactionException {
+
+  if (resourcesHolder != null) {
+    Object suspendedResources = resourcesHolder.suspendedResources;
+    if (suspendedResources != null) {
+      doResume(transaction, suspendedResources);
+    }
+    List<TransactionSynchronization> suspendedSynchronizations = resourcesHolder.suspendedSynchronizations;
+    if (suspendedSynchronizations != null) {
+      TransactionSynchronizationManager.setActualTransactionActive(resourcesHolder.wasActive);
+      TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(resourcesHolder.isolationLevel);
+      TransactionSynchronizationManager.setCurrentTransactionReadOnly(resourcesHolder.readOnly);
+      TransactionSynchronizationManager.setCurrentTransactionName(resourcesHolder.name);
+      doResumeSynchronization(suspendedSynchronizations);
+    }
+  }
+}
+```
+
+代码很简单，其实就是调用同步器的 `resume`, 然后再重新绑定相关的线程变量。
+
+
+# 手动开启事务
+
+
+下面就直接贴代码了:
+
+```java
+@Component
+class Test {
+
+  @Autowired
+  private PlatformTransactionManager txManager;
+
+
+  public void test() {
+    DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+    def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+    TransactionStatus status = txManager.getTransaction(def);
+
+    try {
+
+      // ...
+
+      txManager.commit(status);
+    } catch (Exception e) {
+      txManager.rollback(status);
+    }
+  }
+
+}
+```
+

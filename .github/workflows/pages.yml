@@ -43,7 +43,7 @@ jobs:
 
     - name: Build
       env:
-        NEXT_PUBLIC_CND_PUBLIC_PATH_BASE_URL: 'https://selfb.asia/static/particlex/static'
+        NEXT_PUBLIC_CND_PUBLIC_PATH_BASE_URL: 'https://5j9g3t.site/static/particlex/static'
         NEXT_PUBLIC_COMMENT_CONTAINER_IDENTIFIER: '.giscus'
         NEXT_PUBLIC_COMMENT_SCRIPT_INJECT: |
           <script src="https://giscus.app/client.js"
