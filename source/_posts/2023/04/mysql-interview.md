@@ -52,7 +52,7 @@ B树和B+树的区别：
 
 ## redolog
 
-重做日志，用于 mysql 的崩溃恢复。在每次事务提交前，MySQL 都会将事务造成的修改记录成一小段数据，并将一小段输入写入缓冲流中，最后根据特定的策略决定什么时候将缓冲流写入到硬盘中。
+redolog 记录的是物理日志。重做日志，用于 mysql 的崩溃恢复。在每次事务提交前，MySQL 都会将事务造成的修改记录成一小段数据，并将一小段输入写入缓冲流中，最后根据特定的策略决定什么时候将缓冲流写入到硬盘中。
 
 `redolog` 在保存时，是以日志文件组的形式保存的，一个文件组中有多个文件，每个文件组合起来，构成一个类似环状链表的结构。在日志文件组中，分别由 `wirte pos` 和 `checkpoint` 保存相应的位置信息。`wirte pos` 主要保存当前 `redolog` 写到了哪里。`checkpoint` 则保存当前 `redolog` 执行到了哪里。
 
@@ -60,6 +60,25 @@ B树和B+树的区别：
 
 > [!NOTE]
 > 所以，一次 checkpoint 的过程就是脏页刷新到磁盘中变成干净页，然后标记 redo log 哪些记录可以被覆盖的过程。
+
+
+除了 redolog 满了，下面的情况也会触发 redolog 清理：
+
+- 内存中的脏页百分比超过 `innodb_max_dirty_pages_pct`(默认为 75) 时
+- 内存中的脏页百分比超过 `innodb_max_dirty_pages_pct_lwm`(默认为 0)时，为 0 时为保持脏页百分比在 `innodb_max_dirty_pages_pct`，当大于 0 时，脏页百分比超过该值后就会开始清理，当超过 `innodb_max_dirty_pages_pct` 时，就会用更快地速度清理。
+
+## binlog
+
+binlog 存储的是逻辑日志，它会记录 mysql 每次执行的 sql 语句。主要用于 mysql 节点之间的数据同步。binlog 会在事务执行过程中写入binlog cache中，并在事务提交后(发送 commit 命令后)刷新到操作系统的缓存中，之后根据不同的策略决定是否立即刷新操作系统的缓存。
+
+### 两阶段提交
+
+为了防止 binlog 和 redolog 数据不一致(redolog 刷盘了，binlog没刷)，binlog在提交时使用了两阶段提交。其实就是将 redo log 的写入拆成了两个步骤：prepare 和 commit，中间再穿插写入binlog，具体如下：
+
+`prepare` 阶段(事务提交前)：将 `XID`（内部 `XA` 事务的 `ID`） 写入到 redo log，同时将 redo log 对应的事务状态设置为 prepare，然后将 redo log 刷新到硬盘；
+
+commit 阶段：把 `XID` 写入到 binlog，然后将 binlog 刷新到磁盘，接着调用引擎的提交事务接口，将 redo log 状态设置为 commit（将事务设置为 commit 状态后，刷入到磁盘 redo log 文件，所以 commit 状态也是会刷盘的）；
+
 
 # 5. MySql当前读和快照度
 
