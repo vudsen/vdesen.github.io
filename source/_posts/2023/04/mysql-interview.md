@@ -79,6 +79,21 @@ binlog 存储的是逻辑日志，它会记录 mysql 每次执行的 sql 语句�
 
 commit 阶段：把 `XID` 写入到 binlog，然后将 binlog 刷新到磁盘，接着调用引擎的提交事务接口，将 redo log 状态设置为 commit（将事务设置为 commit 状态后，刷入到磁盘 redo log 文件，所以 commit 状态也是会刷盘的）；
 
+### binlog 可以用于崩溃恢复吗
+
+不可以，redolog 可以用于崩溃恢复的必要条件是**它拥有 write pos 和 checkpoint 这两个标识**，可以记录当前数据哪一段还没有被写入到硬盘中。而 binlog 没有这样的标识，只通过 binlog 无法得知某条数据是否已经写进了硬盘。
+
+### binlog 可以干嘛
+
+[The Binary Log](https://dev.mysql.com/doc/refman/5.7/en/binary-log.html)
+
+在文档中提到，binlog 可以：
+
+- 为主从同步数据
+- [时间点恢复](https://dev.mysql.com/doc/refman/5.7/en/point-in-time-recovery.html)
+
+这里主要是第二点，具体可以看文档操作：[Point-in-Time Recovery Using Binary Log](https://dev.mysql.com/doc/refman/5.7/en/point-in-time-recovery-binlog.html)。这个功能主要用于支持在数据库整个备份后，通过 binlog 实现增量备份，从而避免直接备份整个数据库。
+
 
 # 5. MySql当前读和快照度
 

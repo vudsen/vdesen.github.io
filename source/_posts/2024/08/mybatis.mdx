@@ -48,13 +48,92 @@ try (SqlSession session = sqlSessionFactory.openSession(true)) {
 
 # Mybatis-Spring 原理
 
-在 `Mybatis` 文档的 [作用域（Scope）和生命周期](https://mybatis.net.cn/getting-started.html#a.E4.BD.9C.E7.94.A8.E5.9F.9F.EF.BC.88Scope.EF.BC.89.E5.92.8C.E7.94.9F.E5.91.BD.E5.91.A8.E6.9C.9F) 中提到: `每个线程都应该有它自己的 SqlSession 实例。每次收到 HTTP 请求，就可以打开一个 SqlSession，返回一个响应后，就关闭它`。
+在 `Mybatis` 文档的 [作用域（Scope）和生命周期](https://mybatis.net.cn/getting-started.html#a.E4.BD.9C.E7.94.A8.E5.9F.9F.EF.BC.88Scope.EF.BC.89.E5.92.8C.E7.94.9F.E5.91.BD.E5.91.A8.E6.9C.9F) 中提到: `每个线程都应该有它自己的 SqlSession 实例。每次收到 HTTP 请求，就可以打开一个 SqlSession，返回一个响应后，就关闭它`。所以 `SqlSession` 是**不能在多线程复用的**, 而 `Mapper` 是由 `SqlSession` 创建的，也是不能复用的。
 
-那么 `Spring` (实际是 Mybatis-Spring)是在哪里给 `Mapper` 绑定 `SqlSession` 的呢？
+那么在 `Spring` (实际是 Mybatis-Spring)为什么可以直接复用呢？我们先来打个断点看一下我们的 `Mapper` 类:
 
 ![MapperProxy](https://5j9g3t.site/images/2024/10/MapperProxy2.webp)
 
-通过上图可以发现，`SqlSessionTemplate` 里面的 `sqlSessionProxy` 又是一个代理，并且用的是自己的内部类 `org.mybatis.spring.SqlSessionTemplate.SqlSessionInterceptor`。在这个代理类中，我们就**可以找到相关懒加载的代码了**。
+通过上图可以发现，`Mapper` 中的用的 `SqlSession` 是 `SqlSessionTemplate`，而它的内部又代理了另外一个 `SqlSession`，这里就可以肯定它用了 *代理模式*，我们来看一下它的代理是怎么处理的:
+
+```java
+private class SqlSessionInterceptor implements InvocationHandler {
+  @Override
+  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    // 获取 sqlSession
+    SqlSession sqlSession = getSqlSession(SqlSessionTemplate.this.sqlSessionFactory,
+        SqlSessionTemplate.this.executorType, SqlSessionTemplate.this.exceptionTranslator);
+    try {
+      // 调用**真正的** SqlSession 的方法
+      Object result = method.invoke(sqlSession, args);
+      // 判断是否开启了事务
+      if (!isSqlSessionTransactional(sqlSession, SqlSessionTemplate.this.sqlSessionFactory)) {
+        // force commit even on non-dirty sessions because some databases require
+        // a commit/rollback before calling close()
+        // 没开，就直接提交
+        sqlSession.commit(true);
+      }
+      return result;
+    } catch (Throwable t) {
+      Throwable unwrapped = unwrapThrowable(t);
+      if (SqlSessionTemplate.this.exceptionTranslator != null && unwrapped instanceof PersistenceException) {
+        // release the connection to avoid a deadlock if the translator is no loaded. See issue #22
+        closeSqlSession(sqlSession, SqlSessionTemplate.this.sqlSessionFactory);
+        sqlSession = null;
+        Throwable translated = SqlSessionTemplate.this.exceptionTranslator
+            .translateExceptionIfPossible((PersistenceException) unwrapped);
+        if (translated != null) {
+          unwrapped = translated;
+        }
+      }
+      throw unwrapped;
+    } finally {
+      // 关闭
+      if (sqlSession != null) {
+        closeSqlSession(sqlSession, SqlSessionTemplate.this.sqlSessionFactory);
+      }
+    }
+  }
+}
+```
+
+这里方法第一行 `getSqlSession`，这里就不进去看了，这个方法的作用是创建一个真正的 `SqlSession`，并且如果开启了事务，就把这个 `SqlSession` 绑定到线程变量里面。
+
+---
+
+好!这里就很清楚了：我 `Mapper` 用的 `SqlSession` 是一个假的(代理类) `SqlSession`，里面没有任何真正的数据库连接，当你真的去执行数据库操作需要创建连接的时候，我就给你创建一个。你要是开了事务，我还会给你把连接绑定到线程变量里面，你要是下次又要获取连接，我就直接从线程变量里面拿；要是没开事务，用完我就给你自动提交并且关了。
+
+那么绑到线程变量里面的事务又由谁来关闭呢？这里最合适的做法就是：事务在哪里开启，你就在哪里关闭。
+
+什么意思？例如我们一般就是在服务类中调用 `Mapper`，当方法上加上 `@Transactional` 注解就可以开启事务了。OK! 你要是用了这个注解，我就在执行方法前，也往线程变量里面写一个标识，表示我开启了一个事务。后面在假的 `SqlSession` 里面，我去查这个线程变量标识来判断你开了事务没有。同理，我在这里可以往线程变量里面绑，我也可以在方法结束后获取创建的连接，然后直接在这里关闭。
+
+总结一下就是：
+
+1. 用动态代理增强入口类(一般是服务类)，如果方法有 `@Transactional`, 就往线程变量里面写一个标识，这里我们叫 `T`。写完标识后，正常调用入口方法。
+2. 当入口类中的方法调用 `Mapper` 里面的方法时，里面的假 `SqlSession` 会判断线程变量有没有标识 `T`，如果有，返回之前在线程变量中缓存的、真正的 `SqlSession`，这里我们叫 `S`，如果 `S` 中没有数据，就创建一个新的连接并且保存到 `S` 中。如果没有标识 `T`，即没有开启事务，就创建一个新的数据库连接，并且在用完后关闭。
+3. 当入口类中的方法返回后，检查线程变量 `S` 是否有值，如果有，就将其提交并关闭。
+
+
+<span className="text-error">现在你已经知道 Mybatis-Spring 的基础原理了，现在你可以</span>：
+
+1. 手搓一个简单的实现：[手搓一个简单的 Mybatis-Spring](#手搓一个简单的 Mybatis-Spring)
+2. 自己去研究源码
+3. 继续看这篇文章后面枯燥的部分
+
+
+如果你选择自己看源码，这里给你两个入口：
+
+1. 第一个就是上面提到的 `SqlSessionTemplate`
+2. 第二个就是 `org.springframework.transaction.interceptor.TransactionAspectSupport`，这个类就是我们前面提到的"入口类"的动态代理。
+
+> [!IMPORTANT]
+> 再次声明，源码强烈推荐自己打断点看，**本文后面的东西大部分只提供总结性的内容**！。
+> 到目前为止，我真的很少见到有人能把枯燥的源码详解写的很有意思的，因为这种很难避免贴上大部分源码上去，所以我强烈推荐自己打断点，
+> 然后写下自己的总结方便未来复习！所以我这篇文章后半部分就全是我的总结。
+>
+> *没错，我是个标题党，标题写了 详解 就是为了把你骗进来...*
+
+---
 
 在继续看前，需要了解一个非常重要的类：`TransactionSynchronizationManager`:
 
@@ -84,6 +163,8 @@ public abstract class TransactionSynchronizationManager {
 }
 ```
 
+这个类就是用于管理我们线程变量的绑定的：
+
 - `resources`: 保存当前线程的数据库连接，便于后续事务获取
 - `synchronizations`: 保存事务同步的回调，例如 `beforeCommit`、`afterCompletion` 等
 - `currentTransactionName`：保存事务的名称
@@ -93,7 +174,7 @@ public abstract class TransactionSynchronizationManager {
 
 例如调用 `org.springframework.transaction.support.TransactionSynchronizationManager#isActualTransactionActive` 就可以判断当前线程是否开启了事务。
 
-# SqlSession 的创建与 ThreadLocal 的绑定
+# SqlSession 的懒创建与 ThreadLocal 的绑定
 
 在第一次尝试获取 `SqlSession` 时，就会尝试绑定相关的 `ThreadLocal`。
 
@@ -510,3 +591,52 @@ class Test {
 }
 ```
 
+# 非 Spring 环境指定 Mapper 位置
+
+在非 Spring 环境中用 mybatis 一定会碰到这个问题：怎么修改 Mapper 的路径?
+
+在 Spring 中可以通过下面的配置实现：
+
+```yaml
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+```
+
+但是很遗憾，Mybatis 本身是没有提供任何配置项来修改 xml 存放位置的。也就是说默认情况下，你只能把 XML 和 *接口* 放到一个文件夹里面。
+
+---
+
+这里我们来看一下 Spring 是怎么做到自定义 `mapper` 位置的(`org.mybatis.spring.SqlSessionFactoryBean#buildSqlSessionFactory`)：
+
+
+```java
+Configuration targetConfiguration;
+
+// ...
+
+for (Resource mapperLocation : this.mapperLocations) {
+
+    // ...
+
+    XMLMapperBuilder xmlMapperBuilder = new XMLMapperBuilder(mapperLocation.getInputStream(),
+                    targetConfiguration, mapperLocation.toString(), targetConfiguration.getSqlFragments());
+
+    xmlMapperBuilder.parse();
+}
+```
+
+这里只需要获取到 xml 的输入流，就可以自定义解析 Mapper了。
+
+
+# 手搓一个简单的 Mybatis-Spring
+
+由于我之前想开发一个 IDEA 插件，需要用到 sqlite, 所以上了 Mybatis 并且顺便照着 Mybatis-Spring 封装了一遍。虽然插件我已经弃坑了，但是这份代码封装的还是没有问题的。
+
+最终封装的效果是：支持声明式主键，但是不支持传播级别等其它高级特性。
+
+直接看代码(kotlin 写的，但没有用很高级的特性，不会的话也能看懂)：[Github](https://github.com/IceOfSummer/Private-Remark/tree/master/src/main/java/io/github/iceofsummer/privateremark/mapper)
+
+推荐从下面的类开始看：
+
+- [SqlSessionTemplate](https://github.com/IceOfSummer/Private-Remark/blob/master/src/main/java/io/github/iceofsummer/privateremark/mapper/common/SqlSessionTemplate.kt): 初始化和缓存 SqlSession。
+- [ServiceEnhanceInvocationHandler](https://github.com/IceOfSummer/Private-Remark/blob/master/src/main/java/io/github/iceofsummer/privateremark/svc/factory/ServiceEnhanceInvocationHandler.kt): 增强服务类，负责事务的开启和结束。
