@@ -134,61 +134,24 @@ MVCC(Multiversion Concurrency Control)多版本并发控制。
 
 首先在在MVCC下，每个表都会多出几个隐藏的列，分别为隐藏主键(row_id)、事务id(trx_id)、回滚指针(roll_pointer)。
 
-MVCC还有两个重要的组成：undo log(回滚日志)、ReadView。
+MVCC还有两个重要的组成：undo log(回滚日志)、[ReadView]((https://github.com/mysql/mysql-server/blob/61a3a1d8ef15512396b4c2af46e922a19bf2b174/storage/innobase/include/read0types.h#L48))。
 
-更详细的就不说了，因为上面的链接里面都有，主要是下面这四个关系：
+ReadView 主要有下面几个字段:
 
-（1）当【版本链中记录的 trx_id 等于当前事务id（trx_id = creator_trx_id）】时，说明版本链中的这个版本是当前事务修改的，所以该快照记录对当前事务可见。
+| 字段名称             | 说明                                                              |   |
+|------------------|-----------------------------------------------------------------|---|
+| m_low_limit_id   | "高水位线"，读操作不应该读取事务 id 大于等于该值的任何记录                                |   |
+| m_up_limit_id    | "低水位线"，读操作可以直接读取小于该值的任何记录                                       |   |
+| m_creator_trx_id | 创建该 ReadView 的事务 id                                             |   |
+| m_ids            | 当 ReadView 创建时，所有正在运行的事务id                                      |   |
+| m_low_limit_no   | 事务不需要查看事务 id 小于该值的 undolog。小于该值的undolog如果不再被其它 ReadView需要，可以被清除 |   |
 
-（2）当【版本链中记录的 trx_id 小于活跃事务的最小id（trx_id < min_trx_id）】时，说明版本链中的这条记录已经提交了，所以该快照记录对当前事务可见。
 
-（3）当【版本链中记录的 trx_id 大于下一个要分配的事务id（trx_id > max_trx_id）】时，该快照记录对当前事务不可见。
+还需要注意的一点是：
 
-（4）当【版本链中记录的 trx_id 大于等于最小活跃事务id】且【版本链中记录的trx_id小于下一个要分配的事务id】（min_trx_id<= trx_id < max_trx_id）时，如果版本链中记录的 trx_id 在活跃事务id列表 m_ids 中，说明生成 ReadView 时，修改记录的事务还没提交，所以该快照记录对当前事务不可见；否则该快照记录对当前事务可见。
+- 在 ReadCommitted 隔离级别下，每次查询都会创建新的 ReadView
+- 在 RepeatableRead 隔离级别下，仅第一次查询会创建 ReadView，后续查询全部复用第一次创建的
 
-## 6.1 RepeatableRead是怎么实现的
-
-我们都知道，RepeatableRead相比ReadCommited能够避免不可重复读的问题(实际也能够避免幻读，是通过加间隙锁实现的)。
-
-首先我们来看ReadCommitted，使用mysql执行如下指令(假如我们叫它事务A)
-
-```sql
-set session transaction isolation level read committed;
-begin;
-update test set xid = 2 where id = 1;
-# 等一会再提交
-commit;
-```
-
-然后再开一个mysql执行如下指令(假如我们叫它事务B)：
-
-```sql
-set session transaction isolation level read committed;
-begin;
-select * from test where id = 1;
-# 提交上面那个指令后再执行下面这条
-select * from test where id = 1;
-```
-
-这里就不放图了，大家都知道第二次读取会不一样。
-
-这回我们再将隔离级别设置为RepeatableRead，并同样执行上面的指令。
-
-这次执行后，<font color=red>发现两次查询的结果都是一样的</font>，而且在事务A执行更新后且没有提交时，B再去读，<font color=red>并没有发生阻塞，因为在修改数据的时候会加排它锁，在读的时候要么是当前读要么是快照读，</font>如果是当前读，那么读操作会堵塞，说明在B这里是快照读，是创建了ReadView的，通过ReadView有效地避免了不可重复读。
-
-我们再用同样的方式去验证ReadCommited级别的读，发现同样是快照读，那么凭什么RepeatableRead不会读到新值，而ReadCommited会呢？
-
-这里我画了一个流程图方便理解：
-
-![流程图](https://5j9g3t.site/public/interview/2023-2-1-7f41e3a0-6d4e-42e8-b44e-d85eecdbd465.webp)
-
-~~图画的可能不太好，不过应该能看懂~~
-
-网上大部分人讲的都是以ReadCommited级别为例子的，即m_ids里的事务提交后可读，但其实在RepeatableRead隔离级别下是读不了的，只能走undo_log进行回滚。
-
----
-
-<font color=red>这里可能有点错误，在ReadCommited下可以读已经提交的事务，所以如果trx_id大于等于mid_id，只需要判断对应的事务是否已经提交(或者trx_id指向自己)就能读</font>
 
 # 7. RepeatableRead真的不能避免幻读吗?
 
