@@ -22,7 +22,7 @@ mkdir /data/mysql/mysql20002
 mkdir /data/mysql/mysql20003
 ```
 
-`mysql20001` 是两个主服务器，`mysql20002` 和 `mysql20003` 是从服务器。
+`mysql20001` 是主数据库，`mysql20002` 和 `mysql20003` 是从数据库。
 
 修改主节点配置文件(`/data/mysql/my1.cnf`):
 
@@ -47,6 +47,11 @@ log-slave-updates = true
 
 server-id = 1
 
+# 不备份系统库
+binlog_ignore_db=information_schema
+binlog_ignore_db=performance_schema
+binlog_ignore_db=mysql
+binlog_ignore_db=sys
 ```
 
 修改从节点配置(`/data/mysql/my2.cnf`)：
@@ -70,14 +75,10 @@ relay-log = relay-log-bin
 relay-log-index = slave-relay-bin.index 
 
 server-id = 2
-
-# 不备份系统库
-binlog_ignore_db=information_schema
-binlog_ignore_db=performance_schema
-binlog_ignore_db=mysql
-binlog_ignore_db=sys
 ```
 
+> [!IMPORTANT]
+> 记住配置另外一个从库的时候需要修改 server-id
 
 最后修改目录权限：
 
@@ -112,7 +113,7 @@ mysqld: Can't create directory '/var/lib/mysql/' (Errcode: 17 - File exists)
 uid=27(mysql) gid=27(mysql) groups=27(mysql)
 ```
 
-同样的方式启动另外两台从节点，记住配置文件不要搞错了。
+同样的方式启动另外两台从节点。
 
 ## 从节点加入集群
 
@@ -121,11 +122,9 @@ uid=27(mysql) gid=27(mysql) groups=27(mysql)
 ```sql
 grant replication slave on *.* to 'myslave'@'172.17.0.%' identified by '123456';
 flush privileges;
-
-show master status;
 ```
 
-注意这里的 `ip` 地址，容器默认情况下是桥接模式，容器的 `ip` 不是宿主机的 `ip`，具体 ip 网段可以用下面的命令看：
+<span className="text-error">注意这里的 `ip` 地址，容器默认情况下是桥接模式，容器的 `ip` 不是宿主机的 `ip`</span>，具体 ip 网段可以用下面的命令看：
 
 ```shell
 docker inspect mysql20002 | grep Networks -A 16
@@ -135,12 +134,20 @@ docker inspect mysql20002 | grep Networks -A 16
 
 ---
 
+查看主节点状态:
+
+```sql
+# 主库执行
+show master status;
+```
 
 ![主节点状态](https://5j9g3t.site/images/2024/12/mysql-master-status.webp)
 
-这里需要记住上面的 `File` 和 `Position`，完成后在从节点中加入集群：
+
+这里需要记住上面的 `File` 和 `Position`，之后在从节点中执行下面的 sql 来加入集群：
 
 ```sql
+# 从库执行
 change master to master_host ='10.77.0.38',
     master_port = 20001,
     master_user ='myslave',
@@ -174,7 +181,7 @@ RESET SLAVE;
 
 ## 测试从节点
 
-在主节点执行下面的 sql:
+在主库执行下面的 sql:
 
 ```sql
 create database slave_test;
@@ -220,9 +227,9 @@ drwxr-x--- 2 root root     8192 Dec  5 00:28 sys
 -rw-r----- 1 root root     2560 Dec  5 00:28 xtrabackup_logfile
 ```
 
-可以发现几乎是和 mysql 数据目录一样的结构。之后我们将备份的内容复制到第二个从节点的数据目录中(`/data/mysql/mysql20003`)，这里需要注意权限问题，复制过来后需要把权限给 mysql 用户。
+可以发现几乎是和 mysql 数据目录一样的结构。之后我们将备份的内容复制到第二个从节点的数据目录中(`/data/mysql/mysql20003`)。这里需要注意权限问题，复制过来后需要把权限给 mysql 用户。
 
-启动从库：
+启动从库(和之前相同的命令)：
 
 ```shell
 ID=3
@@ -257,6 +264,7 @@ encrypted = N
 这里可以看到 `binlog_pos` 的值，表示当前 binlog 读到了哪里，我们根据这个值来加入主节点：
 
 ```sql
+# 从库执行
 change master to master_host ='10.77.0.38',
     master_port = 20001,
     master_user ='myslave',
@@ -264,9 +272,11 @@ change master to master_host ='10.77.0.38',
     master_log_file ='mysql-bin.000006',
     master_log_pos =154;
 
-show slave status;
 start slave;
+show slave status;
 ```
+
+最终等待 SLAVE_IO 和 SALVE_SQL 都变成 YES, 从库就加入成功了。
 
 ---
 
