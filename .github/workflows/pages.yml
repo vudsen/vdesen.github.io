@@ -17,7 +17,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: IceOfSummer/nextjs-particlex-theme
-        ref: refactor/export
+        ref: master
         path: nextjs-particlex-theme
 
     - name: Use Node.js 20
