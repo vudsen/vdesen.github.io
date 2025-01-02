@@ -134,7 +134,7 @@ MVCC(Multiversion Concurrency Control)多版本并发控制。
 
 首先在在MVCC下，每个表都会多出几个隐藏的列，分别为隐藏主键(row_id)、事务id(trx_id)、回滚指针(roll_pointer)。
 
-MVCC还有两个重要的组成：undo log(回滚日志)、[ReadView]((https://github.com/mysql/mysql-server/blob/61a3a1d8ef15512396b4c2af46e922a19bf2b174/storage/innobase/include/read0types.h#L48))。
+MVCC还有两个重要的组成：undo log(回滚日志)、[ReadView](https://github.com/mysql/mysql-server/blob/61a3a1d8ef15512396b4c2af46e922a19bf2b174/storage/innobase/include/read0types.h#L48)。
 
 ReadView 主要有下面几个字段:
 
@@ -147,10 +147,24 @@ ReadView 主要有下面几个字段:
 | m_low_limit_no   | 事务不需要查看事务 id 小于该值的 undolog。小于该值的undolog如果不再被其它 ReadView需要，可以被清除 |   |
 
 
+详细的生成规则：
+
+- `m_low_limit_id`: 下一次生成的事务 id
+- `m_up_limit_id`: 当前还没有提交的、最小的事务 id
+- `m_low_limit_no`: 所有持久化完毕的、最大的事务 id (小于该 id 的事务已经全部持久化完成)
+
+
 还需要注意的一点是：
 
 - 在 ReadCommitted 隔离级别下，每次查询都会创建新的 ReadView
-- 在 RepeatableRead 隔离级别下，仅第一次查询会创建 ReadView，后续查询全部复用第一次创建的
+- 在 RepeatableRead 隔离级别下，仅第一次查询会创建 ReadView，后续查询全部复用第一次创建的，这样就解决了幻读的问题 (虽然 RepeatableRead 在定义时没有解决幻读，但是在 mysql 的实现中，它就是解决了幻读的，相当于一个是接口，一个是实现)。
+
+---
+
+其它引用:
+
+- [判断可见性的源码](https://github.com/mysql/mysql-server/blob/61a3a1d8ef15512396b4c2af46e922a19bf2b174/storage/innobase/include/read0types.h#L163-L183)
+- [代码实现 read0read.cc](https://github.com/mysql/mysql-server/blob/61a3a1d8ef15512396b4c2af46e922a19bf2b174/storage/innobase/read/read0read.cc)
 
 
 # 7. RepeatableRead真的不能避免幻读吗?

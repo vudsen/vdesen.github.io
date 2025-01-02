@@ -346,23 +346,29 @@ sds sdscatlen(sds s, const void *t, size_t len) {
 
 ## 4.2 Hash
 
-Hash类型有两种实现方式：
-
-- ziplist 编码的哈希对象使用压缩列表作为底层实现
-- hashtable 编码的哈希对象使用字典作为底层实现
-
 [Redis之Hash数据结构底层原理_redis hash原理_不要迷恋发哥的博客-CSDN博客](https://blog.csdn.net/chongfa2008/article/details/119537064)
+
+### 4.2.2 hashtable
+
+hashtable就和Redis最外层的字典是差不多的。
+
+## 4.3 List
+
+对于List同样也有两种编码：
+
+- ziplist：压缩列表
+- linkedlist：双向链表
+
+满足如下条件时，压缩列表会被转换为双向链表：
+
+- 试图往列表新添加一个字符串值，且这个字符串的长度超过 server.list_max_ziplist_value （默认值为 64 ）
+- ziplist 包含的节点超过 server.list_max_ziplist_entries （默认值为 512 ）
+
+[Redis列表list 底层原理 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/102422311)
 
 ### 4.2.1 ziplist
 
-`ziplist`的运作方式<font color=red>类似</font>于一个队列，当有一对键值时，先将值入队，再将键入队。
-
-这种设计完全不符合哈希表的设计，所以只会在数据量较少时使用。
-
-当发生如下情况时，`ziplist`会被转换为真正的哈希表(字典)：
-
-- 当hash中的数据项的数目超过512的时候，也就是ziplist数据项超过1024的时候
-- 当hash中插入的任意一个value的长度超过了64的时候
+`ziplist`的运作方式<font color=red>类似</font>于一个队列:
 
 ```text
 area        |<---- ziplist header ---->|<----------- entries ------------->|<-end->|
@@ -402,23 +408,6 @@ address                                |                          |        |
 
 我们可以发现`ziplist`不能从头开始遍历，因为每个节点的长度都是不一样的，在遍历的时候需要根据zltail的值<font color=red>从尾部开始向前遍历</font>。
 
-### 4.2.2 hashtable
-
-hashtable就和Redis最外层的字典是差不多的了。
-
-## 4.3 List
-
-对于List同样也有两种编码：
-
-- ziplist：压缩列表
-- linkedlist：双向链表
-
-满足如下条件时，压缩列表会被转换为双向链表：
-
-- 试图往列表新添加一个字符串值，且这个字符串的长度超过 server.list_max_ziplist_value （默认值为 64 ）
-- ziplist 包含的节点超过 server.list_max_ziplist_entries （默认值为 512 ）
-
-[Redis列表list 底层原理 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/102422311)
 
 ## 4.4 Set
 
@@ -712,6 +701,8 @@ Redis支持三种集群方案：
 2. 需要额外的资源来启动sentinel进程，实现相对复杂一点，同时slave节点作为备份节点不提供服务
 
 ## 7.3 Cluster模式
+
+[深度图解 Redis Cluster原理](https://www.cnblogs.com/detectiveHLH/p/14154665.html)
 
 Cluster采用无中心结构,它的特点如下：
 
