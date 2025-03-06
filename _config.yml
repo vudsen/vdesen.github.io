@@ -2,7 +2,7 @@
 ## Docs: https://hexo.io/docs/configuration.html
 ## Source: https://github.com/hexojs/hexo/  
 
-theme_config:
+theme_config: 
   loading: https://5j9g3t.site/static/particlex/images/loading.gif 
   background: 
     - https://5j9g3t.site/public/2023-2-6-8d14e464-2200-4e54-af81-0d9f25f55b3e.webp
