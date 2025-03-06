@@ -16,7 +16,7 @@ jobs:
     - name: Checkout Main Repository 
       uses: actions/checkout@v4
       with:
-        repository: IceOfSummer/nextjs-particlex-theme
+        repository: nextjs-particlex-theme/particlex
         ref: master
         path: nextjs-particlex-theme
 
@@ -73,7 +73,7 @@ jobs:
         source-path: 'datasource'
         output-path: 'nextjs-particlex-theme/out'
         pages-path: 'source'
-        web-base-path: 'https://iceofsummer.github.io/'
+        web-base-path: 'https://vdesen.github.io/'
 
     - name: Upload GitHub Pages artifact
       uses: actions/upload-pages-artifact@v3
