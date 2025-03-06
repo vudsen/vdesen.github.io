@@ -12,7 +12,7 @@ theme_config:
     - https://5j9g3t.site/images/2024/01/wallhaven-jxl31y_2560x1440.webp
 
   avatar: https://5j9g3t.site/images/2024/02/avator.webp
-  menu:
+  menu: 
     Home:
         name: house
         theme: solid
